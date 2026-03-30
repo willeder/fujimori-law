@@ -1,6 +1,22 @@
-import { RouterProvider } from 'react-router-dom'
-//import { router } from './app/router'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { CaseProvider } from './store/CaseStore'
+import { CaseListPage, CaseDetailPage } from './pages'
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <CaseListPage />,
+  },
+  {
+    path: '/cases/:id',
+    element: <CaseDetailPage />,
+  },
+])
 
 export default function App() {
-  return <RouterProvider router={router} />
+  return (
+    <CaseProvider>
+      <RouterProvider router={router} />
+    </CaseProvider>
+  )
 }

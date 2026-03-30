@@ -71,3 +71,11 @@ export default defineConfig([
   },
 ])
 ```
+
+## Deploying to Vercel（モノレポ時）
+
+1. Vercel でリポジトリをインポートし、**Root Directory** を `client-mock` に設定する。
+2. **Build Command**: `npm run build`（既定のままで可） / **Output Directory**: `dist`
+3. `vercel.json` の `rewrites` により、React Router のパス（例: `/cases/1`）を直接開いても `index.html` にフォールバックする。
+
+`npm run build` がローカルで通ることを事前に確認すること。

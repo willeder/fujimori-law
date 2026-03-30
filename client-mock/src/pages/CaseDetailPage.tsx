@@ -1,0 +1,358 @@
+import { useParams, useNavigate, Link } from 'react-router-dom'
+import {
+  useCase,
+  useCreditorsByCaseId,
+  usePaymentsByCaseId,
+  useCaseDispatch,
+} from '../store/CaseStore'
+import {
+  SectionCard,
+  EditableField,
+  StatusBadge,
+  Tabs,
+} from '../components'
+import { CreditorTab } from './CreditorTab'
+import { PaymentTable } from './PaymentTable'
+import type { Case } from '../types'
+
+export function CaseDetailPage() {
+  const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+  const caseData = useCase(Number(id))
+  const creditors = useCreditorsByCaseId(Number(id))
+  const payments = usePaymentsByCaseId(Number(id))
+  const dispatch = useCaseDispatch()
+
+  if (!caseData) {
+    return (
+      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-slate-500 mb-4">案件が見つかりません</p>
+          <button
+            onClick={() => navigate('/')}
+            className="text-blue-500 hover:text-blue-600"
+          >
+            一覧に戻る
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  const updateCase = (updates: Partial<Case>) => {
+    dispatch({
+      type: 'UPDATE_CASE',
+      payload: { ...caseData, ...updates },
+    })
+  }
+
+  const updateClientBasicInfo = (
+    field: keyof Case['clientBasicInfo'],
+    value: string
+  ) => {
+    updateCase({
+      clientBasicInfo: {
+        ...caseData.clientBasicInfo,
+        [field]: value || null,
+      },
+    })
+  }
+
+  const updateSettlementInfo = (
+    field: keyof Case['settlementInfo'],
+    value: string
+  ) => {
+    updateCase({
+      settlementInfo: {
+        ...caseData.settlementInfo,
+        [field]: value || null,
+      },
+    })
+  }
+
+  const updatePaymentInfo = (
+    field: keyof Case['paymentInfo'],
+    value: string
+  ) => {
+    const numericFields = [
+      'firstPaymentAmount',
+      'basePaymentAmount',
+      'cumulativePaymentAmount',
+    ]
+    updateCase({
+      paymentInfo: {
+        ...caseData.paymentInfo,
+        [field]: numericFields.includes(field) ? Number(value) || null : value || null,
+      },
+    })
+  }
+
+  // 和解済み社数を計算
+  const settledCount = creditors.filter((c) =>
+    ['和解済', '弁済中', '完済'].includes(c.status)
+  ).length
+  const totalCreditors = creditors.length
+
+  // タブコンテンツ
+  const tabs = [
+    {
+      id: 'all',
+      label: 'すべて合算',
+      content: (
+        <CreditorTab
+          caseId={caseData.id}
+          creditors={creditors}
+          view="summary"
+        />
+      ),
+    },
+    ...creditors.map((c) => ({
+      id: String(c.id),
+      label: c.creditorName,
+      badge: c.status === '和解済' ? '済' : undefined,
+      content: (
+        <CreditorTab
+          caseId={caseData.id}
+          creditors={[c]}
+          view="detail"
+        />
+      ),
+    })),
+  ]
+
+  return (
+    <div className="min-h-screen bg-slate-100">
+      {/* Header */}
+      <header className="bg-white border-b border-slate-200 px-6 py-4">
+        <div className="flex items-center gap-4">
+          <Link
+            to="/"
+            className="text-slate-400 hover:text-slate-600"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </Link>
+          <div className="flex-1">
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl font-bold text-slate-800">
+                {caseData.clientBasicInfo.name}
+              </h1>
+              <StatusBadge status={caseData.settlementInfo.status} size="md" />
+              <StatusBadge status={caseData.appointmentInfo.acceptanceRank} size="md" />
+            </div>
+            <div className="text-sm text-slate-500 mt-1">
+              案件ID: {caseData.id} | 受任日: {caseData.appointmentInfo.acceptanceDate} |
+              担当: {caseData.appointmentInfo.judicialScrivener}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Content */}
+      <div className="p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Summary */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* 和解サマリ（最優先） */}
+            <SectionCard title="和解進捗" color="green">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-600">和解済み</span>
+                  <span className="text-2xl font-bold text-green-600">
+                    {settledCount}/{totalCreditors}
+                    <span className="text-sm font-normal text-slate-400 ml-1">社</span>
+                  </span>
+                </div>
+                <div className="w-full bg-slate-200 rounded-full h-2">
+                  <div
+                    className="bg-green-500 h-2 rounded-full transition-all"
+                    style={{
+                      width: `${totalCreditors > 0 ? (settledCount / totalCreditors) * 100 : 0}%`,
+                    }}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4 pt-2">
+                  <EditableField
+                    label="ステータス"
+                    value={caseData.settlementInfo.status}
+                    onChange={(v) => updateSettlementInfo('status', v)}
+                    type="select"
+                    options={[
+                      { value: '資格者面談待ち', label: '資格者面談待ち' },
+                      { value: '和解交渉中', label: '和解交渉中' },
+                      { value: '全和解済_支払中', label: '全和解済_支払中' },
+                      { value: 'キャンセル', label: 'キャンセル' },
+                    ]}
+                  />
+                  <EditableField
+                    label="和解提案予定日"
+                    value={caseData.settlementInfo.proposalDate}
+                    onChange={(v) => updateSettlementInfo('proposalDate', v)}
+                    type="date"
+                  />
+                </div>
+              </div>
+            </SectionCard>
+
+            {/* 入金サマリ */}
+            <SectionCard title="入金状況" color="blue">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-600">累計入金額</span>
+                  <span className="text-xl font-bold text-blue-600">
+                    {caseData.paymentInfo.cumulativePaymentAmount?.toLocaleString()}
+                    <span className="text-sm font-normal text-slate-400 ml-1">円</span>
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-500">予定額</span>
+                  <span>
+                    {caseData.paymentInfo.cumulativePlannedPayment?.toLocaleString()}円
+                  </span>
+                </div>
+                <hr className="border-slate-100" />
+                <EditableField
+                  label="次回入金日"
+                  value={caseData.paymentInfo.nextPaymentDate}
+                  onChange={(v) => updatePaymentInfo('nextPaymentDate', v)}
+                  type="date"
+                />
+                <EditableField
+                  label="基本入金額"
+                  value={caseData.paymentInfo.basePaymentAmount}
+                  onChange={(v) => updatePaymentInfo('basePaymentAmount', v)}
+                  type="number"
+                  suffix="円"
+                />
+              </div>
+            </SectionCard>
+
+            {/* 依頼者基本情報（折りたたみ） */}
+            <SectionCard
+              title="依頼者基本情報"
+              color="slate"
+              collapsible
+              defaultOpen={false}
+            >
+              <div className="grid grid-cols-2 gap-4">
+                <EditableField
+                  label="氏名"
+                  value={caseData.clientBasicInfo.name}
+                  onChange={(v) => updateClientBasicInfo('name', v)}
+                />
+                <EditableField
+                  label="フリガナ"
+                  value={caseData.clientBasicInfo.furigana}
+                  onChange={(v) => updateClientBasicInfo('furigana', v)}
+                />
+                <EditableField
+                  label="電話番号"
+                  value={caseData.clientBasicInfo.phone}
+                  onChange={(v) => updateClientBasicInfo('phone', v)}
+                />
+                <EditableField
+                  label="メールアドレス"
+                  value={caseData.clientBasicInfo.email}
+                  onChange={(v) => updateClientBasicInfo('email', v)}
+                />
+                <EditableField
+                  label="都道府県"
+                  value={caseData.clientBasicInfo.prefecture}
+                  onChange={(v) => updateClientBasicInfo('prefecture', v)}
+                />
+                <EditableField
+                  label="年齢"
+                  value={caseData.clientBasicInfo.age}
+                  onChange={(v) => updateClientBasicInfo('age', v)}
+                  type="number"
+                  suffix="歳"
+                />
+                <EditableField
+                  label="性別"
+                  value={caseData.clientBasicInfo.gender}
+                  onChange={(v) => updateClientBasicInfo('gender', v)}
+                  type="select"
+                  options={[
+                    { value: '男', label: '男' },
+                    { value: '女', label: '女' },
+                  ]}
+                />
+                <EditableField
+                  label="婚姻状況"
+                  value={caseData.clientBasicInfo.maritalStatus}
+                  onChange={(v) => updateClientBasicInfo('maritalStatus', v)}
+                  type="select"
+                  options={[
+                    { value: '既婚', label: '既婚' },
+                    { value: '未婚', label: '未婚' },
+                    { value: '離婚', label: '離婚' },
+                  ]}
+                />
+                <EditableField
+                  label="居住形態"
+                  value={caseData.clientBasicInfo.residenceType}
+                  onChange={(v) => updateClientBasicInfo('residenceType', v)}
+                />
+                <EditableField
+                  label="月収（手取り）"
+                  value={caseData.clientBasicInfo.monthlyIncome}
+                  onChange={(v) => updateClientBasicInfo('monthlyIncome', v)}
+                  type="number"
+                  suffix="円"
+                />
+              </div>
+            </SectionCard>
+
+            {/* 債務情報 */}
+            <SectionCard title="債務情報" color="amber" collapsible defaultOpen={false}>
+              <div className="grid grid-cols-2 gap-4">
+                <EditableField
+                  label="債権社数"
+                  value={caseData.debtInfo.creditorCount}
+                  onChange={() => {}}
+                  disabled
+                  suffix="社"
+                />
+                <EditableField
+                  label="申告債務額"
+                  value={caseData.debtInfo.declaredDebtAmount}
+                  onChange={() => {}}
+                  disabled
+                  suffix="円"
+                />
+                <EditableField
+                  label="債務額総額"
+                  value={caseData.debtInfo.totalDebtAmount}
+                  onChange={() => {}}
+                  disabled
+                  suffix="円"
+                />
+                <EditableField
+                  label="依頼前返済額"
+                  value={caseData.debtInfo.preRequestPayment}
+                  onChange={() => {}}
+                  disabled
+                  suffix="円"
+                />
+              </div>
+            </SectionCard>
+          </div>
+
+          {/* Right Column - 和解・入金 */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* 和解対象債権（タブ） */}
+            <SectionCard title="和解対象債権" color="green">
+              <Tabs tabs={tabs} defaultTab="all" />
+            </SectionCard>
+
+            {/* 入金予定履歴 */}
+            <SectionCard title="入金予定履歴" color="blue">
+              <PaymentTable caseId={caseData.id} payments={payments} />
+            </SectionCard>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
