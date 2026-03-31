@@ -20,3 +20,6 @@ export { CreditorDetail } from './CreditorDetail'
 // サマリ
 export { SettlementSummary } from './SettlementSummary'
 export { PaymentSummary } from './PaymentSummary'
+
+// ファイル管理
+export { SettlementFiles } from './SettlementFiles'

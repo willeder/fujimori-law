@@ -13,6 +13,7 @@ import {
 } from '../components'
 import { CreditorTab } from './CreditorTab'
 import { PaymentTable } from './PaymentTable'
+import { SettlementFiles } from '../components/case/SettlementFiles'
 import type { Case } from '../types'
 
 export function CaseDetailPage() {
@@ -349,6 +350,11 @@ export function CaseDetailPage() {
             {/* 入金予定履歴 */}
             <SectionCard title="入金予定履歴" color="blue">
               <PaymentTable caseId={caseData.id} payments={payments} />
+            </SectionCard>
+
+            {/* 和解ファイル */}
+            <SectionCard title="和解ファイル" color="slate">
+              <SettlementFiles caseId={caseData.id} />
             </SectionCard>
           </div>
         </div>
