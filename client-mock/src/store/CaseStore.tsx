@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import {
   createContext,
   useContext,
@@ -110,35 +111,15 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   )
 }
 
-// Hooks
-export function useCaseState() {
+export function useCaseStateContext() {
   const context = useContext(CaseStateContext)
-  if (!context) {
-    throw new Error('useCaseState must be used within CaseProvider')
-  }
+  if (!context) throw new Error('useCaseState must be used within CaseProvider')
   return context
 }
 
-export function useCaseDispatch() {
+export function useCaseDispatchContext() {
   const context = useContext(CaseDispatchContext)
-  if (!context) {
+  if (!context)
     throw new Error('useCaseDispatch must be used within CaseProvider')
-  }
   return context
-}
-
-// Selector hooks
-export function useCase(id: number) {
-  const { cases } = useCaseState()
-  return cases.find((c) => c.id === id)
-}
-
-export function useCreditorsByCaseId(caseId: number) {
-  const { creditors } = useCaseState()
-  return creditors.filter((c) => c.caseId === caseId)
-}
-
-export function usePaymentsByCaseId(caseId: number) {
-  const { paymentRecords } = useCaseState()
-  return paymentRecords.filter((p) => p.caseId === caseId)
 }

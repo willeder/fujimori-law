@@ -26,10 +26,6 @@ export function EditableField({
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(null)
 
   useEffect(() => {
-    setEditValue(String(value ?? ''))
-  }, [value])
-
-  useEffect(() => {
     if (isEditing && inputRef.current) {
       inputRef.current.focus()
     }
@@ -77,7 +73,10 @@ export function EditableField({
         <label className="block text-xs font-medium text-slate-500">{label}</label>
         <div
           className="text-sm text-slate-700 cursor-pointer hover:bg-blue-50 px-2 py-1 -mx-2 rounded transition-colors group"
-          onClick={() => setIsEditing(true)}
+          onClick={() => {
+            setEditValue(String(value ?? ''))
+            setIsEditing(true)
+          }}
         >
           {formattedDisplay}
           {suffix && <span className="text-slate-400 ml-1">{suffix}</span>}

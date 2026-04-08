@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useCaseState } from '../store/CaseStore'
+import { useCaseState } from '../store/useCaseStore'
 import { DataTable, type Column, StatusBadge } from '../components'
 import type { Case } from '../types'
 
@@ -142,12 +142,29 @@ export function CaseListPage() {
       {/* Header */}
       <header className="bg-white border-b border-slate-200 px-6 py-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-slate-800">
-            受任案件管理
-            <span className="text-sm font-normal text-slate-500 ml-2">
-              グローウェル
-            </span>
-          </h1>
+          <div className="flex items-center gap-4">
+            <h1 className="text-xl font-bold text-slate-800">
+              受任案件管理
+              <span className="text-sm font-normal text-slate-500 ml-2">
+                司法書士法人 第一法務事務所
+              </span>
+            </h1>
+            <nav className="hidden md:flex items-center gap-2">
+              <button
+                onClick={() => navigate('/payment-management')}
+                className="text-sm text-slate-600 hover:text-slate-900"
+              >
+                入金管理一覧
+              </button>
+              <span className="text-slate-300">|</span>
+              <button
+                onClick={() => navigate('/settlement-results')}
+                className="text-sm text-slate-600 hover:text-slate-900"
+              >
+                和解実績一覧
+              </button>
+            </nav>
+          </div>
           <div className="text-sm text-slate-500">
             {cases.length}件の案件
           </div>

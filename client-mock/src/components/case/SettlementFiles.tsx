@@ -74,7 +74,7 @@ interface SettlementFilesProps {
   caseId?: number
 }
 
-export function SettlementFiles({ caseId: _caseId }: SettlementFilesProps) {
+export function SettlementFiles({ caseId }: SettlementFilesProps) {
   const [files, setFiles] = useState<UploadedFile[]>(MOCK_FILES)
   const [selectedCategory, setSelectedCategory] = useState<FileCategory>(
     'マイナンバーカード（表）'
@@ -155,6 +155,9 @@ export function SettlementFiles({ caseId: _caseId }: SettlementFilesProps) {
 
   return (
     <div className="space-y-4">
+      {caseId != null && (
+        <div className="text-xs text-slate-500">案件ID: {caseId}</div>
+      )}
       {/* マイナンバーカード表裏未揃い警告 */}
       {mnCardIncomplete && (
         <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-700">
@@ -191,7 +194,7 @@ export function SettlementFiles({ caseId: _caseId }: SettlementFilesProps) {
           ファイルをここにドラッグ＆ドロップ
         </p>
         <p className="text-xs text-slate-400 mb-4">
-          対応形式：JPG・PNG・PDF　最大ファイルサイズ：20MB
+          対応形式：JPG・PNG・PDF 最大ファイルサイズ：20MB
         </p>
 
         {/* カテゴリ選択 */}

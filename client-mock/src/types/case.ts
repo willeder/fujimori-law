@@ -1,6 +1,6 @@
 /**
  * 受任案件管理システム - 型定義
- * 参照: docs/spec/モックアプリ開発仕様_グローウェル.md（あれば）
+ * 参照: docs/spec/モックアプリ開発仕様_司法書士法人第一法務事務所.md（あれば）
  */
 
 /** 依頼者基本情報 */
@@ -8,6 +8,7 @@ export interface ClientBasicInfo {
   name: string | null
   furigana: string | null
   phone: string | null
+  lineUrl?: string | null // LINE@ URL
   email: string | null
   prefecture: string | null
   address: string | null
@@ -96,6 +97,10 @@ export interface CaseMetadata {
   updatedAt: string | null
   createdBy: string | null
   updatedBy: string | null
+  externalId?: string | null // ID（kintone等の外部ID想定）
+  listCategory?: string | null // リスト区分
+  listRegisteredDate?: string | null // リスト登録日
+  acceptanceDocs?: string | null // 受任資料（リンク/ファイル名のメモ）
 }
 
 /** 案件（統合データ） */
@@ -137,8 +142,12 @@ export interface Creditor {
   customerCode: string | null // 顧客コード
   contractDate: string | null // 調査票_契約日
   settlementProposalDate: string | null // 和解提案日
+  responseStatus?: string | null // 回答状況
   settlementDate: string | null // 和解日
-  settlementAmount: number | null // 和解金額
+  settlementAmount: number | null // 和解金額（= 和解）
+  settlementDebtAmount?: number | null // 和解時債務金額
+  settlementContentComment?: string | null // 和解内容コメント
+  creditorDocuments?: string | null // 債権者資料（リンク/ファイル名のメモ）
   paymentStartMonth: string | null // 支払開始月
   paymentDay: number | null // 支払日
   paymentCount: number | null // 支払回数

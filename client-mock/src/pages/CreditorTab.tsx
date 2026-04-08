@@ -1,4 +1,4 @@
-import { useCaseDispatch } from '../store/CaseStore'
+import { useCaseDispatch } from '../store/useCaseStore'
 import { EditableField, StatusBadge, DataTable, type Column } from '../components'
 import type { Creditor } from '../types'
 
@@ -8,7 +8,7 @@ interface CreditorTabProps {
   view: 'summary' | 'detail'
 }
 
-export function CreditorTab({ caseId: _caseId, creditors, view }: CreditorTabProps) {
+export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
   const dispatch = useCaseDispatch()
 
   const updateCreditor = (creditor: Creditor, updates: Partial<Creditor>) => {
@@ -109,6 +109,7 @@ export function CreditorTab({ caseId: _caseId, creditors, view }: CreditorTabPro
 
     return (
       <div className="space-y-4">
+        <div className="text-xs text-slate-500">案件ID: {caseId}</div>
         {/* 合計サマリ */}
         <div className="grid grid-cols-4 gap-4 p-4 bg-slate-50 rounded-lg">
           <div>
@@ -361,6 +362,17 @@ export function CreditorTab({ caseId: _caseId, creditors, view }: CreditorTabPro
           </div>
         </>
       )}
+
+      {/* ④ 債権者資料（リンク/ファイル名のメモ） */}
+      <hr className="border-slate-200" />
+      <h4 className="font-medium text-slate-700">債権者資料</h4>
+      <EditableField
+        label="債権者資料"
+        value={creditor.creditorDocuments ?? ''}
+        onChange={(v) => updateCreditor(creditor, { creditorDocuments: v || null })}
+        type="textarea"
+        placeholder="例）債権調査票: driveリンク / 和解提案書: ファイル名 など"
+      />
     </div>
   )
 }

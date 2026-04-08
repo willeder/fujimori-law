@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useCaseDispatch } from '../store/CaseStore'
+import { useCaseDispatch } from '../store/useCaseStore'
 import { DataTable, type Column } from '../components'
 import type { PaymentRecord } from '../types'
 

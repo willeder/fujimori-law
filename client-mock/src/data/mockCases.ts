@@ -13,6 +13,7 @@ export const mockCases: Case[] = [
       name: '山◯　◯◯',
       furigana: 'ヤマサキ　ミドリ',
       phone: '090-XXXX-XXXX',
+      lineUrl: 'https://lin.ee/xxxxxxx',
       email: 'example@example.com',
       prefecture: '埼玉県',
       address: '埼玉県 ◯◯市 ◯◯町',
@@ -87,6 +88,10 @@ export const mockCases: Case[] = [
       updatedAt: '2026-03-26',
       createdBy: 'system',
       updatedBy: 'system',
+      externalId: 'G-0001',
+      listCategory: '広告LP',
+      listRegisteredDate: '2024-01-08',
+      acceptanceDocs: '',
     },
   },
   {

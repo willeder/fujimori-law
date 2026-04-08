@@ -4,7 +4,7 @@ import {
   useCreditorsByCaseId,
   usePaymentsByCaseId,
   useCaseDispatch,
-} from '../store/CaseStore'
+} from '../store/useCaseStore'
 import {
   SectionCard,
   EditableField,
@@ -88,6 +88,69 @@ export function CaseDetailPage() {
     })
   }
 
+  const updateAppointmentInfo = (
+    field: keyof Case['appointmentInfo'],
+    value: string
+  ) => {
+    updateCase({
+      appointmentInfo: {
+        ...caseData.appointmentInfo,
+        [field]: value || null,
+      },
+    })
+  }
+
+  const updateFeeInfo = (field: keyof Case['feeInfo'], value: string) => {
+    const numericFields: (keyof Case['feeInfo'])[] = [
+      'normalFee',
+      'officeFee',
+      'installmentCount',
+      'plannedPaymentFeeTotal',
+      'uncollectedFee',
+    ]
+    updateCase({
+      feeInfo: {
+        ...caseData.feeInfo,
+        [field]: numericFields.includes(field) ? Number(value) || null : value || null,
+      },
+    })
+  }
+
+  const updateMetadata = (field: keyof Case['metadata'], value: string) => {
+    updateCase({
+      metadata: {
+        ...caseData.metadata,
+        [field]: value || null,
+      },
+    })
+  }
+
+  // 入金サマリ用の計算値
+  const plannedDates = payments
+    .map((p) => p.plannedDate)
+    .filter((d): d is string => Boolean(d))
+  const finalPlannedDate =
+    plannedDates.length > 0 ? plannedDates.reduce((a, b) => (a > b ? a : b)) : null
+
+  const sumActualFee = payments.reduce((s, p) => s + (p.actualFeeAllocation ?? 0), 0)
+  const sumActualAgentFee = payments.reduce(
+    (s, p) => s + (p.actualAgentFeeAllocation ?? 0),
+    0
+  )
+  const sumActualPool = payments.reduce((s, p) => s + (p.actualPoolAllocation ?? 0), 0)
+  const sumActualRepayment = payments.reduce(
+    (s, p) => s + (p.actualRepaymentAllocation ?? 0),
+    0
+  )
+
+  const cumulativePaid = caseData.paymentInfo.cumulativePaymentAmount ?? 0
+  const cumulativePlanned = caseData.paymentInfo.cumulativePlannedPayment ?? 0
+  const remainingPlanned =
+    caseData.paymentInfo.cumulativePlannedPayment != null &&
+    caseData.paymentInfo.cumulativePaymentAmount != null
+      ? cumulativePlanned - cumulativePaid
+      : null
+
   // 和解済み社数を計算
   const settledCount = creditors.filter((c) =>
     ['和解済', '弁済中', '完済'].includes(c.status)
@@ -146,6 +209,104 @@ export function CaseDetailPage() {
               案件ID: {caseData.id} | 受任日: {caseData.appointmentInfo.acceptanceDate} |
               担当: {caseData.appointmentInfo.judicialScrivener}
             </div>
+            {/* ① 上部に基本情報を追加表示（編集可能） */}
+            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <EditableField
+                label="フリガナ"
+                value={caseData.clientBasicInfo.furigana}
+                onChange={(v) => updateClientBasicInfo('furigana', v)}
+              />
+              <EditableField
+                label="受任後ステータス"
+                value={caseData.settlementInfo.status}
+                onChange={(v) => updateSettlementInfo('status', v)}
+              />
+              <EditableField
+                label="ID"
+                value={caseData.metadata.externalId}
+                onChange={(v) => updateMetadata('externalId', v)}
+              />
+              <EditableField
+                label="要注意ランク"
+                value={caseData.clientBasicInfo.cautionRank}
+                onChange={(v) => updateClientBasicInfo('cautionRank', v)}
+                type="select"
+                options={[
+                  { value: 'A', label: 'A' },
+                  { value: 'B', label: 'B' },
+                  { value: 'C', label: 'C' },
+                ]}
+              />
+              <EditableField
+                label="リスト区分"
+                value={caseData.metadata.listCategory}
+                onChange={(v) => updateMetadata('listCategory', v)}
+              />
+              <EditableField
+                label="リスト登録日"
+                value={caseData.metadata.listRegisteredDate}
+                onChange={(v) => updateMetadata('listRegisteredDate', v)}
+                type="date"
+              />
+              <EditableField
+                label="電話番号"
+                value={caseData.clientBasicInfo.phone}
+                onChange={(v) => updateClientBasicInfo('phone', v)}
+              />
+              <EditableField
+                label="LINE@ URL"
+                value={caseData.clientBasicInfo.lineUrl}
+                onChange={(v) => updateClientBasicInfo('lineUrl', v)}
+              />
+              <EditableField
+                label="受任日"
+                value={caseData.appointmentInfo.acceptanceDate}
+                onChange={(v) => updateAppointmentInfo('acceptanceDate', v)}
+                type="date"
+              />
+              <EditableField
+                label="面談担当"
+                value={caseData.appointmentInfo.interviewStaff}
+                onChange={(v) => updateAppointmentInfo('interviewStaff', v)}
+              />
+              <EditableField
+                label="受任ランク"
+                value={caseData.appointmentInfo.acceptanceRank}
+                onChange={(v) => updateAppointmentInfo('acceptanceRank', v)}
+                type="select"
+                options={[
+                  { value: 'A', label: 'A' },
+                  { value: 'B', label: 'B' },
+                  { value: 'C', label: 'C' },
+                ]}
+              />
+              <EditableField
+                label="通常報酬"
+                value={caseData.feeInfo.normalFee}
+                onChange={(v) => updateFeeInfo('normalFee', v)}
+                type="number"
+                suffix="円"
+              />
+              <EditableField
+                label="報酬分割回数"
+                value={caseData.feeInfo.installmentCount}
+                onChange={(v) => updateFeeInfo('installmentCount', v)}
+                type="number"
+                suffix="回"
+              />
+              <EditableField
+                label="毎月入金日"
+                value={caseData.paymentInfo.monthlyPaymentDay}
+                onChange={(v) => updatePaymentInfo('monthlyPaymentDay', v)}
+              />
+              <EditableField
+                label="基本入金額"
+                value={caseData.paymentInfo.basePaymentAmount}
+                onChange={(v) => updatePaymentInfo('basePaymentAmount', v)}
+                type="number"
+                suffix="円"
+              />
+            </div>
           </div>
         </div>
       </header>
@@ -155,48 +316,7 @@ export function CaseDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Summary */}
           <div className="lg:col-span-1 space-y-6">
-            {/* 和解サマリ（最優先） */}
-            <SectionCard title="和解進捗" color="green">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-600">和解済み</span>
-                  <span className="text-2xl font-bold text-green-600">
-                    {settledCount}/{totalCreditors}
-                    <span className="text-sm font-normal text-slate-400 ml-1">社</span>
-                  </span>
-                </div>
-                <div className="w-full bg-slate-200 rounded-full h-2">
-                  <div
-                    className="bg-green-500 h-2 rounded-full transition-all"
-                    style={{
-                      width: `${totalCreditors > 0 ? (settledCount / totalCreditors) * 100 : 0}%`,
-                    }}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4 pt-2">
-                  <EditableField
-                    label="ステータス"
-                    value={caseData.settlementInfo.status}
-                    onChange={(v) => updateSettlementInfo('status', v)}
-                    type="select"
-                    options={[
-                      { value: '資格者面談待ち', label: '資格者面談待ち' },
-                      { value: '和解交渉中', label: '和解交渉中' },
-                      { value: '全和解済_支払中', label: '全和解済_支払中' },
-                      { value: 'キャンセル', label: 'キャンセル' },
-                    ]}
-                  />
-                  <EditableField
-                    label="和解提案予定日"
-                    value={caseData.settlementInfo.proposalDate}
-                    onChange={(v) => updateSettlementInfo('proposalDate', v)}
-                    type="date"
-                  />
-                </div>
-              </div>
-            </SectionCard>
-
-            {/* 入金サマリ */}
+            {/* ② 入金管理をメインにするため、入金状況サマリを最上部へ */}
             <SectionCard title="入金状況" color="blue">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -211,6 +331,62 @@ export function CaseDetailPage() {
                   <span>
                     {caseData.paymentInfo.cumulativePlannedPayment?.toLocaleString()}円
                   </span>
+                </div>
+                {/* ③ 追加サマリ */}
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-500">残入金予定額（予定-入金済）</span>
+                  <span className="font-medium">
+                    {remainingPlanned != null ? remainingPlanned.toLocaleString() : '-'}円
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-500">最終入金予定日</span>
+                  <span className="font-medium">{finalPlannedDate ?? '-'}</span>
+                </div>
+                <hr className="border-slate-100" />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="text-sm text-slate-600">
+                    報酬充当額{' '}
+                    <span className="font-medium text-slate-900">
+                      {caseData.paymentInfo.cumulativeFeeAllocation?.toLocaleString() ?? '-'}
+                    </span>
+                    <span className="text-slate-400 ml-1">円</span>
+                  </div>
+                  <div className="text-sm text-slate-600">
+                    報酬未回収額{' '}
+                    <span className="font-medium text-slate-900">
+                      {caseData.feeInfo.uncollectedFee?.toLocaleString() ?? '-'}
+                    </span>
+                    <span className="text-slate-400 ml-1">円</span>
+                  </div>
+                  <div className="text-sm text-slate-600">
+                    弁代報酬充当額{' '}
+                    <span className="font-medium text-slate-900">
+                      {sumActualAgentFee.toLocaleString()}
+                    </span>
+                    <span className="text-slate-400 ml-1">円</span>
+                  </div>
+                  <div className="text-sm text-slate-600">
+                    ﾌﾟｰﾙ充当額{' '}
+                    <span className="font-medium text-slate-900">
+                      {sumActualPool.toLocaleString()}
+                    </span>
+                    <span className="text-slate-400 ml-1">円</span>
+                  </div>
+                  <div className="text-sm text-slate-600">
+                    弁済充当額{' '}
+                    <span className="font-medium text-slate-900">
+                      {sumActualRepayment.toLocaleString()}
+                    </span>
+                    <span className="text-slate-400 ml-1">円</span>
+                  </div>
+                  <div className="text-sm text-slate-600">
+                    （参考）報酬充当（実績合計）{' '}
+                    <span className="font-medium text-slate-900">
+                      {sumActualFee.toLocaleString()}
+                    </span>
+                    <span className="text-slate-400 ml-1">円</span>
+                  </div>
                 </div>
                 <hr className="border-slate-100" />
                 <EditableField
@@ -227,6 +403,11 @@ export function CaseDetailPage() {
                   suffix="円"
                 />
               </div>
+            </SectionCard>
+
+            {/* ⑤ 入金予定履歴が長くなるため、受任資料を左カラムへ */}
+            <SectionCard title="受任資料" color="slate">
+              <SettlementFiles caseId={caseData.id} />
             </SectionCard>
 
             {/* 依頼者基本情報（折りたたみ） */}
@@ -344,17 +525,15 @@ export function CaseDetailPage() {
           <div className="lg:col-span-2 space-y-6">
             {/* 和解対象債権（タブ） */}
             <SectionCard title="和解対象債権" color="green">
+              <div className="mb-3 text-sm text-slate-600">
+                債権者数：{totalCreditors}社（うち和解済：{settledCount}社）
+              </div>
               <Tabs tabs={tabs} defaultTab="all" />
             </SectionCard>
 
             {/* 入金予定履歴 */}
             <SectionCard title="入金予定履歴" color="blue">
               <PaymentTable caseId={caseData.id} payments={payments} />
-            </SectionCard>
-
-            {/* 和解ファイル */}
-            <SectionCard title="和解ファイル" color="slate">
-              <SettlementFiles caseId={caseData.id} />
             </SectionCard>
           </div>
         </div>
