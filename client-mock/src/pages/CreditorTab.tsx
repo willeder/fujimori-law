@@ -148,7 +148,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
   if (!creditor) return null
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* ステータス */}
       <div className="flex items-center gap-4">
         <StatusBadge status={creditor.status} size="md" />

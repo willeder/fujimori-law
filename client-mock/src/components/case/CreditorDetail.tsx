@@ -14,7 +14,7 @@ export function CreditorDetail({ creditor, onChange, readonly = false }: Credito
   const isSettled = ['和解済', '弁済中', '完済'].includes(creditor.status)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* ステータス */}
       <div className="flex items-center gap-4">
         <StatusBadge status={creditor.status} size="md" />

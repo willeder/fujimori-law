@@ -29,7 +29,7 @@ export function CaseDetailPage() {
   const navigate = useNavigate()
   if (!id) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-100">
+      <div className="flex min-h-screen items-center justify-center bg-slate-200">
         <p className="text-slate-500">案件が見つかりません</p>
       </div>
     )
@@ -128,7 +128,7 @@ function CaseDetailBody({
 
   if (!caseData) {
     return (
-      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-200 flex items-center justify-center">
         <div className="text-center">
           <p className="text-slate-500 mb-4">案件が見つかりません</p>
           <button
@@ -266,7 +266,7 @@ function CaseDetailBody({
   const totalCreditors = creditors.length
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-slate-200">
       {/* Header */}
       <header className="border-b border-slate-200 bg-white px-6 py-2">
         <div className="flex items-center gap-4">
@@ -286,12 +286,8 @@ function CaseDetailBody({
               <StatusBadge status={caseData.settlementInfo.status} size="md" />
               <StatusBadge status={caseData.appointmentInfo.acceptanceRank} size="md" />
             </div>
-            <div className="mt-0.5 text-xs leading-tight text-slate-500">
-              案件ID: {caseData.id} | 受任日: {caseData.appointmentInfo.acceptanceDate} |
-              担当: {caseData.appointmentInfo.judicialScrivener}
-            </div>
             {/* ① 上部に基本情報を追加表示（編集可能・コンパクト1行） */}
-            <div className="mt-2 grid grid-cols-1 gap-x-3 gap-y-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+            <div className="mt-2 grid grid-cols-1 gap-x-2 gap-y-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
               <EditableField
                 compact
                 label="フリガナ"
@@ -408,10 +404,10 @@ function CaseDetailBody({
       </header>
 
       {/* Content */}
-      <div className="p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="p-3">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           {/* Left Column - Summary */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-1 space-y-3">
             {/* ② 入金管理をメインにするため、入金状況サマリを最上部へ */}
             <SectionCard title="入金状況" color="blue">
               <div className="space-y-3">
@@ -610,6 +606,21 @@ function CaseDetailBody({
               <Tabs
                 tabs={[
                   {
+                    id: 'payments',
+                    label: '入金予定履歴',
+                    content: (
+                      <div>
+                        <Tabs
+                          tabs={paymentTabs}
+                          defaultTab="all"
+                          activeTabId={displayCreditorScopeTabId}
+                          onActiveTabChange={setCreditorScopeTabId}
+                          density="dense"
+                        />
+                      </div>
+                    ),
+                  },
+                  {
                     id: 'settlement',
                     label: '和解対象債権',
                     content: (
@@ -622,33 +633,21 @@ function CaseDetailBody({
                           defaultTab="all"
                           activeTabId={displayCreditorScopeTabId}
                           onActiveTabChange={setCreditorScopeTabId}
-                        />
-                      </div>
-                    ),
-                  },
-                  {
-                    id: 'payments',
-                    label: '入金予定履歴',
-                    content: (
-                      <div>
-                        <Tabs
-                          tabs={paymentTabs}
-                          defaultTab="all"
-                          activeTabId={displayCreditorScopeTabId}
-                          onActiveTabChange={setCreditorScopeTabId}
+                          density="dense"
                         />
                       </div>
                     ),
                   },
                 ]}
-                defaultTab="settlement"
+                defaultTab="payments"
+                variant="split"
               />
             </SectionCard>
           </div>
         </div>
 
         {/* 依頼者 接触履歴（下部：読みやすさ優先） */}
-        <div className="mt-6">
+        <div className="mt-3">
           <SectionCard
             title="依頼者 接触履歴"
             color="slate"

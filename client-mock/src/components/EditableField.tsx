@@ -65,8 +65,8 @@ export function EditableField({
   if (disabled) {
     if (compact) {
       return (
-        <div className="flex items-center gap-2 min-h-[1.5rem] py-0">
-          <span className="w-[8.75rem] shrink-0 text-[10px] font-medium text-slate-500 leading-none truncate">
+        <div className="flex items-center gap-1.5 min-h-[1.5rem] py-0">
+          <span className="w-[6.75rem] shrink-0 text-[10px] font-medium text-slate-500 leading-none truncate">
             {label}
           </span>
           <div className="min-w-0 flex-1 text-xs text-slate-700 truncate leading-tight">
@@ -90,12 +90,12 @@ export function EditableField({
   if (!isEditing) {
     if (compact) {
       return (
-        <div className="flex items-center gap-2 min-h-[1.5rem] py-0">
-          <span className="w-[8.75rem] shrink-0 text-[10px] font-medium text-slate-500 leading-none truncate">
+        <div className="flex items-center gap-1.5 min-h-[1.5rem] py-0">
+          <span className="w-[6.75rem] shrink-0 text-[10px] font-medium text-slate-500 leading-none truncate">
             {label}
           </span>
           <div
-            className="group flex min-w-0 flex-1 cursor-pointer items-center gap-1 rounded px-1 py-0.5 -mx-1 text-xs leading-tight text-slate-700 hover:bg-blue-50/80"
+            className="group flex min-w-0 flex-1 cursor-pointer items-center gap-1 rounded px-0.5 py-0.5 -mx-0.5 text-xs leading-tight text-slate-700 hover:bg-blue-50/80"
             title={String(formattedDisplay)}
             onClick={() => {
               setEditValue(String(value ?? ''))
@@ -135,8 +135,8 @@ export function EditableField({
 
   if (compact) {
     return (
-      <div className="flex items-center gap-2 min-h-[1.75rem] py-0">
-        <span className="w-[8.75rem] shrink-0 text-[10px] font-medium text-slate-500 leading-none truncate">
+      <div className="flex items-center gap-1.5 min-h-[1.75rem] py-0">
+        <span className="w-[6.75rem] shrink-0 text-[10px] font-medium text-slate-500 leading-none truncate">
           {label}
         </span>
         <div className="flex min-w-0 flex-1 items-center gap-1">
