@@ -26,3 +26,8 @@ export function usePaymentsByCaseId(caseId: number) {
   return paymentRecords.filter((p) => p.caseId === caseId)
 }
 
+export function useContactHistoriesByCaseId(caseId: number) {
+  const { contactHistories } = useCaseState()
+  return contactHistories.filter((h) => h.caseId === caseId)
+}
+

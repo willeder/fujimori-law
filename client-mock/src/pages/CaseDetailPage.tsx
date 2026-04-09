@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import type { NavigateFunction } from 'react-router-dom'
 import {
   useCase,
+  useContactHistoriesByCaseId,
   useCreditorsByCaseId,
   usePaymentsByCaseId,
   useCaseDispatch,
@@ -14,6 +15,7 @@ import {
   Tabs,
 } from '../components'
 import { CreditorTab } from './CreditorTab'
+import { ContactHistoryTable } from './ContactHistoryTable'
 import { PaymentTable } from './PaymentTable'
 import { SettlementFiles } from '../components/case/SettlementFiles'
 import type { Case } from '../types'
@@ -44,6 +46,7 @@ function CaseDetailBody({
 }) {
   const caseData = useCase(Number(id))
   const creditors = useCreditorsByCaseId(Number(id))
+  const contactHistories = useContactHistoriesByCaseId(Number(id))
   const payments = usePaymentsByCaseId(Number(id))
   const caseLevelPayments = useMemo(
     () => payments.filter((p) => p.creditorId == null),
@@ -482,24 +485,11 @@ function CaseDetailBody({
                   </div>
                 </div>
                 <hr className="border-slate-100" />
-                <EditableField
-                  label="次回入金日"
-                  value={caseData.paymentInfo.nextPaymentDate}
-                  onChange={(v) => updatePaymentInfo('nextPaymentDate', v)}
-                  type="date"
-                />
-                <EditableField
-                  label="基本入金額"
-                  value={caseData.paymentInfo.basePaymentAmount}
-                  onChange={(v) => updatePaymentInfo('basePaymentAmount', v)}
-                  type="number"
-                  suffix="円"
-                />
               </div>
             </SectionCard>
 
             {/* ⑤ 入金予定履歴が長くなるため、受任資料を左カラムへ */}
-            <SectionCard title="受任資料" color="slate">
+            <SectionCard title="受任資料" color="slate" collapsible defaultOpen={false}>
               <SettlementFiles caseId={caseData.id} />
             </SectionCard>
 
@@ -614,34 +604,62 @@ function CaseDetailBody({
             </SectionCard>
           </div>
 
-          {/* Right Column - 和解・入金 */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* 和解対象債権（タブ） */}
-            <SectionCard title="和解対象債権" color="green">
-              <div className="mb-3 text-sm text-slate-600">
-                債権者数：{totalCreditors}社（うち和解済：{settledCount}社）
-              </div>
+          {/* Right Column - 和解・入金（カード内タブで切替） */}
+          <div className="lg:col-span-2">
+            <SectionCard title="和解・入金" color="green">
               <Tabs
-                tabs={settlementTabs}
-                defaultTab="all"
-                activeTabId={displayCreditorScopeTabId}
-                onActiveTabChange={setCreditorScopeTabId}
-              />
-            </SectionCard>
-
-            {/* 入金予定履歴（タブは和解対象債権と同期） */}
-            <SectionCard title="入金予定履歴" color="blue">
-              <p className="mb-3 text-sm text-slate-600">
-                タブの選択は「和解対象債権」と連動します（すべて合算／同一債権者）。
-              </p>
-              <Tabs
-                tabs={paymentTabs}
-                defaultTab="all"
-                activeTabId={displayCreditorScopeTabId}
-                onActiveTabChange={setCreditorScopeTabId}
+                tabs={[
+                  {
+                    id: 'settlement',
+                    label: '和解対象債権',
+                    content: (
+                      <div>
+                        <div className="mb-3 text-sm text-slate-600">
+                          債権者数：{totalCreditors}社（うち和解済：{settledCount}社）
+                        </div>
+                        <Tabs
+                          tabs={settlementTabs}
+                          defaultTab="all"
+                          activeTabId={displayCreditorScopeTabId}
+                          onActiveTabChange={setCreditorScopeTabId}
+                        />
+                      </div>
+                    ),
+                  },
+                  {
+                    id: 'payments',
+                    label: '入金予定履歴',
+                    content: (
+                      <div>
+                        <Tabs
+                          tabs={paymentTabs}
+                          defaultTab="all"
+                          activeTabId={displayCreditorScopeTabId}
+                          onActiveTabChange={setCreditorScopeTabId}
+                        />
+                      </div>
+                    ),
+                  },
+                ]}
+                defaultTab="settlement"
               />
             </SectionCard>
           </div>
+        </div>
+
+        {/* 依頼者 接触履歴（下部：読みやすさ優先） */}
+        <div className="mt-6">
+          <SectionCard
+            title="依頼者 接触履歴"
+            color="slate"
+            collapsible
+            defaultOpen={false}
+          >
+            <ContactHistoryTable
+              caseId={caseData.id}
+              histories={contactHistories.filter((h) => h.targetType === '依頼者')}
+            />
+          </SectionCard>
         </div>
       </div>
     </div>

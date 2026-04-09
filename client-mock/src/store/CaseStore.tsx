@@ -6,15 +6,17 @@ import {
   type ReactNode,
   type Dispatch,
 } from 'react'
-import type { Case, Creditor, PaymentRecord } from '../types'
+import type { Case, ContactHistory, Creditor, PaymentRecord } from '../types'
 import { mockCases } from '../data/mockCases'
 import { mockCreditors } from '../data/mockCreditors'
+import { mockContactHistories } from '../data/mockContactHistories'
 import { mockPaymentRecords } from '../data/mockPayments'
 
 // State型
 interface CaseState {
   cases: Case[]
   creditors: Creditor[]
+  contactHistories: ContactHistory[]
   paymentRecords: PaymentRecord[]
   selectedCaseId: number | null
 }
@@ -25,6 +27,9 @@ type CaseAction =
   | { type: 'UPDATE_CREDITOR'; payload: Creditor }
   | { type: 'ADD_CREDITOR'; payload: Creditor }
   | { type: 'DELETE_CREDITOR'; payload: number }
+  | { type: 'UPDATE_CONTACT_HISTORY'; payload: ContactHistory }
+  | { type: 'ADD_CONTACT_HISTORY'; payload: ContactHistory }
+  | { type: 'DELETE_CONTACT_HISTORY'; payload: number }
   | { type: 'UPDATE_PAYMENT'; payload: PaymentRecord }
   | { type: 'ADD_PAYMENT'; payload: PaymentRecord }
   | { type: 'DELETE_PAYMENT'; payload: number }
@@ -56,6 +61,25 @@ function caseReducer(state: CaseState, action: CaseAction): CaseState {
       return {
         ...state,
         creditors: state.creditors.filter((c) => c.id !== action.payload),
+      }
+    case 'UPDATE_CONTACT_HISTORY':
+      return {
+        ...state,
+        contactHistories: state.contactHistories.map((h) =>
+          h.id === action.payload.id ? action.payload : h
+        ),
+      }
+    case 'ADD_CONTACT_HISTORY':
+      return {
+        ...state,
+        contactHistories: [...state.contactHistories, action.payload],
+      }
+    case 'DELETE_CONTACT_HISTORY':
+      return {
+        ...state,
+        contactHistories: state.contactHistories.filter(
+          (h) => h.id !== action.payload
+        ),
       }
     case 'UPDATE_PAYMENT':
       return {
@@ -90,6 +114,7 @@ function caseReducer(state: CaseState, action: CaseAction): CaseState {
 const initialState: CaseState = {
   cases: mockCases,
   creditors: mockCreditors,
+  contactHistories: mockContactHistories,
   paymentRecords: mockPaymentRecords,
   selectedCaseId: null,
 }
