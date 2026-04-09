@@ -9,6 +9,8 @@ export {
   getPaymentRecordsByCaseId,
   getPendingPayments,
   getCompletedPayments,
+  buildCreditorRepaymentSchedulesForCase,
 } from './mockPayments'
+export type { BuildCreditorRepaymentOptions } from './mockPayments'
 
 export type * from '../types/case'

@@ -1,15 +1,25 @@
 import { useState } from 'react'
-import { useCaseDispatch } from '../store/useCaseStore'
+import { useCaseDispatch, usePaymentsByCaseId } from '../store/useCaseStore'
 import { DataTable, type Column } from '../components'
 import type { PaymentRecord } from '../types'
 
 interface PaymentTableProps {
   caseId: number
   payments: PaymentRecord[]
+  /** 新規「入金予定を追加」時に付与する債権者ID。省略＝案件全体行 */
+  scheduleCreditorId?: number | null
+  /** 上部の入金サマリ4枠 */
+  showAggregateSummary?: boolean
 }
 
-export function PaymentTable({ caseId, payments }: PaymentTableProps) {
+export function PaymentTable({
+  caseId,
+  payments,
+  scheduleCreditorId,
+  showAggregateSummary = true,
+}: PaymentTableProps) {
   const dispatch = useCaseDispatch()
+  const allCasePayments = usePaymentsByCaseId(caseId)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editData, setEditData] = useState<Partial<PaymentRecord>>({})
 
@@ -48,6 +58,18 @@ export function PaymentTable({ caseId, payments }: PaymentTableProps) {
   }
 
   const columns: Column<PaymentRecord>[] = [
+    {
+      key: 'creditorInstallmentIndex',
+      header: '和解回',
+      width: '52px',
+      align: 'center',
+      render: (item) =>
+        item.creditorInstallmentIndex != null ? (
+          <span className="text-slate-600">{item.creditorInstallmentIndex}</span>
+        ) : (
+          <span className="text-slate-300">-</span>
+        ),
+    },
     {
       key: 'plannedDate',
       header: '予定日',
@@ -262,34 +284,35 @@ export function PaymentTable({ caseId, payments }: PaymentTableProps) {
 
   return (
     <div className="space-y-4">
-      {/* サマリ */}
-      <div className="grid grid-cols-4 gap-4 p-4 bg-slate-50 rounded-lg">
-        <div>
-          <div className="text-xs text-slate-500">入金回数</div>
-          <div className="text-lg font-bold">
-            {paidCount}/{payments.length}
-            <span className="text-sm font-normal text-slate-400 ml-1">回</span>
+      {showAggregateSummary && (
+        <div className="grid grid-cols-2 gap-3 rounded-lg bg-slate-50 p-3 sm:grid-cols-4 sm:gap-4 sm:p-4">
+          <div>
+            <div className="text-xs text-slate-500">入金回数</div>
+            <div className="text-lg font-bold">
+              {paidCount}/{payments.length}
+              <span className="ml-1 text-sm font-normal text-slate-400">回</span>
+            </div>
+          </div>
+          <div>
+            <div className="text-xs text-slate-500">予定額合計</div>
+            <div className="text-lg font-bold">{totalPlanned.toLocaleString()}円</div>
+          </div>
+          <div>
+            <div className="text-xs text-slate-500">実入金額合計</div>
+            <div className="text-lg font-bold text-green-600">
+              {totalActual.toLocaleString()}円
+            </div>
+          </div>
+          <div>
+            <div className="text-xs text-slate-500">差額</div>
+            <div
+              className={`text-lg font-bold ${totalActual - totalPlanned >= 0 ? 'text-green-600' : 'text-red-600'}`}
+            >
+              {(totalActual - totalPlanned).toLocaleString()}円
+            </div>
           </div>
         </div>
-        <div>
-          <div className="text-xs text-slate-500">予定額合計</div>
-          <div className="text-lg font-bold">{totalPlanned.toLocaleString()}円</div>
-        </div>
-        <div>
-          <div className="text-xs text-slate-500">実入金額合計</div>
-          <div className="text-lg font-bold text-green-600">
-            {totalActual.toLocaleString()}円
-          </div>
-        </div>
-        <div>
-          <div className="text-xs text-slate-500">差額</div>
-          <div
-            className={`text-lg font-bold ${totalActual - totalPlanned >= 0 ? 'text-green-600' : 'text-red-600'}`}
-          >
-            {(totalActual - totalPlanned).toLocaleString()}円
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* テーブル */}
       <DataTable
@@ -302,13 +325,24 @@ export function PaymentTable({ caseId, payments }: PaymentTableProps) {
       {/* 新規追加ボタン */}
       <button
         onClick={() => {
-          const newId = Math.max(...payments.map((p) => p.id), 0) + 1
+          const newId =
+            Math.max(0, ...allCasePayments.map((p) => p.id)) + 1
           const lastPayment = sortedPayments[0]
+          const scopeCreditorId =
+            scheduleCreditorId === undefined ? null : scheduleCreditorId
+          const prevInstallmentMax = payments.reduce(
+            (m, p) => Math.max(m, p.creditorInstallmentIndex ?? 0),
+            0
+          )
+          const creditorInstallmentIndex =
+            scopeCreditorId != null ? prevInstallmentMax + 1 : null
           dispatch({
             type: 'ADD_PAYMENT',
             payload: {
               id: newId,
               caseId,
+              creditorId: scopeCreditorId,
+              creditorInstallmentIndex,
               plannedDate: null,
               plannedAmount: lastPayment?.plannedAmount ?? null,
               plannedFeeAllocation: lastPayment?.plannedFeeAllocation ?? null,

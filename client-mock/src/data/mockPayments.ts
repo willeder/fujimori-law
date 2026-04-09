@@ -1,9 +1,115 @@
 /**
  * モックデータ - 入金予定履歴
  * 元データ: docs/data/受任案件管理_マージ済_20260330.xlsx の入金予定履歴シート
+ *
+ * 債権者別行は mockCreditors の支払条件（開始月・支払日・回数・初回/2回目以降/最終額）から生成し、
+ * 案件全体行（creditorId なし）は依頼者→事務所の入金タイミング。カレンダーは一致しない場合がある。
  */
 
-import type { PaymentRecord } from '../types/case'
+import type { Creditor, PaymentRecord } from '../types/case'
+import { getCreditorsByCaseId } from './mockCreditors'
+
+function pad2(n: number): string {
+  return String(n).padStart(2, '0')
+}
+
+function parseYearMonth(ym: string): { y: number; m: number } {
+  const [y, m] = ym.split('-').map((x) => Number(x))
+  return { y, m }
+}
+
+function addCalendarMonths(y: number, m: number, add: number): { y: number; m: number } {
+  const idx = y * 12 + (m - 1) + add
+  return { y: Math.floor(idx / 12), m: (idx % 12) + 1 }
+}
+
+function daysInMonth(y: number, m: number): number {
+  return new Date(y, m, 0).getDate()
+}
+
+function formatYmd(y: number, m: number, day: number): string {
+  const d = Math.min(day, daysInMonth(y, m))
+  return `${y}-${pad2(m)}-${pad2(d)}`
+}
+
+/** 債権者の和解支払予定日（毎月 paymentDay）を先頭から maxRows 件 */
+function creditorRepaymentPlannedDates(c: Creditor, maxRows: number): string[] {
+  if (!c.paymentStartMonth || c.paymentDay == null || !c.paymentCount) return []
+  const { y, m } = parseYearMonth(c.paymentStartMonth)
+  const n = Math.min(maxRows, c.paymentCount)
+  const dates: string[] = []
+  for (let i = 0; i < n; i++) {
+    const { y: yy, m: mm } = addCalendarMonths(y, m, i)
+    dates.push(formatYmd(yy, mm, c.paymentDay))
+  }
+  return dates
+}
+
+/** 0 始まりの回 index に対する和解支払額（初回・最終・2回目以降） */
+function installmentRepaymentAmount(c: Creditor, indexZeroBased: number): number {
+  const n = c.paymentCount ?? 0
+  if (n <= 0) return 0
+  if (n === 1) {
+    return c.firstPaymentAmount ?? c.finalPaymentAmount ?? 0
+  }
+  if (indexZeroBased === 0) return c.firstPaymentAmount ?? 0
+  if (indexZeroBased === n - 1) {
+    return c.finalPaymentAmount ?? c.subsequentPaymentAmount ?? 0
+  }
+  return c.subsequentPaymentAmount ?? 0
+}
+
+function creditorRepaymentRowId(creditorId: number, installmentNo: number): number {
+  return 800_000 + creditorId * 500 + installmentNo
+}
+
+export interface BuildCreditorRepaymentOptions {
+  /** 債権者ごとに生成する最大行数（和解回数を上限） */
+  maxInstallmentsPerCreditor: number
+  /** 先頭から何回分を実弁済済みにするか（モック上の進捗。案件全体の入金回数と揃えやすい） */
+  paidInstallments: number
+}
+
+/**
+ * 指定案件の債権者別弁済スケジュールを、和解データ（mockCreditors）から生成する。
+ */
+export function buildCreditorRepaymentSchedulesForCase(
+  caseId: number,
+  options: BuildCreditorRepaymentOptions
+): PaymentRecord[] {
+  const creditors = getCreditorsByCaseId(caseId)
+  const out: PaymentRecord[] = []
+  for (const c of creditors) {
+    const dates = creditorRepaymentPlannedDates(c, options.maxInstallmentsPerCreditor)
+    dates.forEach((plannedDate, i) => {
+      const installmentNo = i + 1
+      const amt = installmentRepaymentAmount(c, i)
+      const paid = installmentNo <= options.paidInstallments
+      out.push({
+        id: creditorRepaymentRowId(c.id, installmentNo),
+        caseId,
+        creditorId: c.id,
+        creditorInstallmentIndex: installmentNo,
+        plannedDate,
+        plannedAmount: amt,
+        plannedFeeAllocation: null,
+        plannedAgentFeeAllocation: null,
+        plannedPoolAllocation: null,
+        plannedRepaymentAllocation: amt,
+        actualDate: paid ? plannedDate : null,
+        actualAmount: paid ? amt : null,
+        actualFeeAllocation: null,
+        actualAgentFeeAllocation: null,
+        actualPoolAllocation: null,
+        actualRepaymentAllocation: paid ? amt : null,
+        handlingFee: null,
+        repaymentCount: null,
+        cumulativePool: null,
+      })
+    })
+  }
+  return out
+}
 
 export const mockPaymentRecords: PaymentRecord[] = [
   // Case 1: 基本入金額 132,000円
@@ -319,6 +425,26 @@ export const mockPaymentRecords: PaymentRecord[] = [
     repaymentCount: null,
     cumulativePool: 4900,
   },
+  ...buildCreditorRepaymentSchedulesForCase(1, {
+    maxInstallmentsPerCreditor: 10,
+    paidInstallments: 6,
+  }),
+  ...buildCreditorRepaymentSchedulesForCase(2, {
+    maxInstallmentsPerCreditor: 10,
+    paidInstallments: 2,
+  }),
+  ...buildCreditorRepaymentSchedulesForCase(3, {
+    maxInstallmentsPerCreditor: 8,
+    paidInstallments: 2,
+  }),
+  ...buildCreditorRepaymentSchedulesForCase(5, {
+    maxInstallmentsPerCreditor: 8,
+    paidInstallments: 2,
+  }),
+  ...buildCreditorRepaymentSchedulesForCase(10, {
+    maxInstallmentsPerCreditor: 6,
+    paidInstallments: 1,
+  }),
 ]
 
 /** 案件IDで入金履歴を取得 */

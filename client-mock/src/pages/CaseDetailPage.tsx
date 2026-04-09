@@ -1,4 +1,6 @@
+import { useMemo, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
+import type { NavigateFunction } from 'react-router-dom'
 import {
   useCase,
   useCreditorsByCaseId,
@@ -15,14 +17,111 @@ import { CreditorTab } from './CreditorTab'
 import { PaymentTable } from './PaymentTable'
 import { SettlementFiles } from '../components/case/SettlementFiles'
 import type { Case } from '../types'
+import {
+  creditorTabAccentSummary,
+  creditorTabAccentForName,
+} from '../lib/creditorTabAccent'
 
 export function CaseDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  if (!id) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-100">
+        <p className="text-slate-500">案件が見つかりません</p>
+      </div>
+    )
+  }
+  return <CaseDetailBody key={id} id={id} navigate={navigate} />
+}
+
+function CaseDetailBody({
+  id,
+  navigate,
+}: {
+  id: string
+  navigate: NavigateFunction
+}) {
   const caseData = useCase(Number(id))
   const creditors = useCreditorsByCaseId(Number(id))
   const payments = usePaymentsByCaseId(Number(id))
+  const caseLevelPayments = useMemo(
+    () => payments.filter((p) => p.creditorId == null),
+    [payments]
+  )
   const dispatch = useCaseDispatch()
+
+  /** 和解対象債権と入金予定履歴で共有（同じ id・同じ並び） */
+  const [creditorScopeTabId, setCreditorScopeTabId] = useState('all')
+  const displayCreditorScopeTabId =
+    creditorScopeTabId === 'all' ||
+    creditors.some((c) => String(c.id) === creditorScopeTabId)
+      ? creditorScopeTabId
+      : 'all'
+
+  const settlementTabs = useMemo(() => {
+    if (!caseData) return []
+    return [
+      {
+        id: 'all',
+        label: 'すべて合算',
+        accent: creditorTabAccentSummary(),
+        content: (
+          <CreditorTab
+            caseId={caseData.id}
+            creditors={creditors}
+            view="summary"
+          />
+        ),
+      },
+      ...creditors.map((c) => ({
+        id: String(c.id),
+        label: c.creditorName,
+        badge: c.status === '和解済' ? '済' : undefined,
+        accent: creditorTabAccentForName(c.creditorName, c.id),
+        content: (
+          <CreditorTab
+            caseId={caseData.id}
+            creditors={[c]}
+            view="detail"
+          />
+        ),
+      })),
+    ]
+  }, [caseData, creditors])
+
+  const paymentTabs = useMemo(() => {
+    if (!caseData) return []
+    return [
+      {
+        id: 'all',
+        label: 'すべて合算',
+        accent: creditorTabAccentSummary(),
+        content: (
+          <PaymentTable
+            caseId={caseData.id}
+            payments={caseLevelPayments}
+            scheduleCreditorId={null}
+            showAggregateSummary
+          />
+        ),
+      },
+      ...creditors.map((c) => ({
+        id: String(c.id),
+        label: c.creditorName,
+        badge: c.status === '和解済' ? '済' : undefined,
+        accent: creditorTabAccentForName(c.creditorName, c.id),
+        content: (
+          <PaymentTable
+            caseId={caseData.id}
+            payments={payments.filter((p) => p.creditorId === c.id)}
+            scheduleCreditorId={c.id}
+            showAggregateSummary={false}
+          />
+        ),
+      })),
+    ]
+  }, [caseData, caseLevelPayments, creditors, payments])
 
   if (!caseData) {
     return (
@@ -125,20 +224,26 @@ export function CaseDetailPage() {
     })
   }
 
-  // 入金サマリ用の計算値
-  const plannedDates = payments
+  // 入金サマリ用の計算値（案件全体行のみ。債権者別行は二重計上しない）
+  const plannedDates = caseLevelPayments
     .map((p) => p.plannedDate)
     .filter((d): d is string => Boolean(d))
   const finalPlannedDate =
     plannedDates.length > 0 ? plannedDates.reduce((a, b) => (a > b ? a : b)) : null
 
-  const sumActualFee = payments.reduce((s, p) => s + (p.actualFeeAllocation ?? 0), 0)
-  const sumActualAgentFee = payments.reduce(
+  const sumActualFee = caseLevelPayments.reduce(
+    (s, p) => s + (p.actualFeeAllocation ?? 0),
+    0
+  )
+  const sumActualAgentFee = caseLevelPayments.reduce(
     (s, p) => s + (p.actualAgentFeeAllocation ?? 0),
     0
   )
-  const sumActualPool = payments.reduce((s, p) => s + (p.actualPoolAllocation ?? 0), 0)
-  const sumActualRepayment = payments.reduce(
+  const sumActualPool = caseLevelPayments.reduce(
+    (s, p) => s + (p.actualPoolAllocation ?? 0),
+    0
+  )
+  const sumActualRepayment = caseLevelPayments.reduce(
     (s, p) => s + (p.actualRepaymentAllocation ?? 0),
     0
   )
@@ -157,76 +262,53 @@ export function CaseDetailPage() {
   ).length
   const totalCreditors = creditors.length
 
-  // タブコンテンツ
-  const tabs = [
-    {
-      id: 'all',
-      label: 'すべて合算',
-      content: (
-        <CreditorTab
-          caseId={caseData.id}
-          creditors={creditors}
-          view="summary"
-        />
-      ),
-    },
-    ...creditors.map((c) => ({
-      id: String(c.id),
-      label: c.creditorName,
-      badge: c.status === '和解済' ? '済' : undefined,
-      content: (
-        <CreditorTab
-          caseId={caseData.id}
-          creditors={[c]}
-          view="detail"
-        />
-      ),
-    })),
-  ]
-
   return (
     <div className="min-h-screen bg-slate-100">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 px-6 py-4">
+      <header className="border-b border-slate-200 bg-white px-6 py-2">
         <div className="flex items-center gap-4">
           <Link
             to="/"
             className="text-slate-400 hover:text-slate-600"
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </Link>
-          <div className="flex-1">
-            <div className="flex items-center gap-3">
-              <h1 className="text-xl font-bold text-slate-800">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2 gap-y-1">
+              <h1 className="text-lg font-bold leading-tight text-slate-800">
                 {caseData.clientBasicInfo.name}
               </h1>
               <StatusBadge status={caseData.settlementInfo.status} size="md" />
               <StatusBadge status={caseData.appointmentInfo.acceptanceRank} size="md" />
             </div>
-            <div className="text-sm text-slate-500 mt-1">
+            <div className="mt-0.5 text-xs leading-tight text-slate-500">
               案件ID: {caseData.id} | 受任日: {caseData.appointmentInfo.acceptanceDate} |
               担当: {caseData.appointmentInfo.judicialScrivener}
             </div>
-            {/* ① 上部に基本情報を追加表示（編集可能） */}
-            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {/* ① 上部に基本情報を追加表示（編集可能・コンパクト1行） */}
+            <div className="mt-2 grid grid-cols-1 gap-x-3 gap-y-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
               <EditableField
+                compact
                 label="フリガナ"
                 value={caseData.clientBasicInfo.furigana}
                 onChange={(v) => updateClientBasicInfo('furigana', v)}
               />
               <EditableField
+                compact
                 label="受任後ステータス"
                 value={caseData.settlementInfo.status}
                 onChange={(v) => updateSettlementInfo('status', v)}
               />
               <EditableField
+                compact
                 label="ID"
                 value={caseData.metadata.externalId}
                 onChange={(v) => updateMetadata('externalId', v)}
               />
               <EditableField
+                compact
                 label="要注意ランク"
                 value={caseData.clientBasicInfo.cautionRank}
                 onChange={(v) => updateClientBasicInfo('cautionRank', v)}
@@ -238,38 +320,45 @@ export function CaseDetailPage() {
                 ]}
               />
               <EditableField
+                compact
                 label="リスト区分"
                 value={caseData.metadata.listCategory}
                 onChange={(v) => updateMetadata('listCategory', v)}
               />
               <EditableField
+                compact
                 label="リスト登録日"
                 value={caseData.metadata.listRegisteredDate}
                 onChange={(v) => updateMetadata('listRegisteredDate', v)}
                 type="date"
               />
               <EditableField
+                compact
                 label="電話番号"
                 value={caseData.clientBasicInfo.phone}
                 onChange={(v) => updateClientBasicInfo('phone', v)}
               />
               <EditableField
+                compact
                 label="LINE@ URL"
                 value={caseData.clientBasicInfo.lineUrl}
                 onChange={(v) => updateClientBasicInfo('lineUrl', v)}
               />
               <EditableField
+                compact
                 label="受任日"
                 value={caseData.appointmentInfo.acceptanceDate}
                 onChange={(v) => updateAppointmentInfo('acceptanceDate', v)}
                 type="date"
               />
               <EditableField
+                compact
                 label="面談担当"
                 value={caseData.appointmentInfo.interviewStaff}
                 onChange={(v) => updateAppointmentInfo('interviewStaff', v)}
               />
               <EditableField
+                compact
                 label="受任ランク"
                 value={caseData.appointmentInfo.acceptanceRank}
                 onChange={(v) => updateAppointmentInfo('acceptanceRank', v)}
@@ -281,6 +370,7 @@ export function CaseDetailPage() {
                 ]}
               />
               <EditableField
+                compact
                 label="通常報酬"
                 value={caseData.feeInfo.normalFee}
                 onChange={(v) => updateFeeInfo('normalFee', v)}
@@ -288,6 +378,7 @@ export function CaseDetailPage() {
                 suffix="円"
               />
               <EditableField
+                compact
                 label="報酬分割回数"
                 value={caseData.feeInfo.installmentCount}
                 onChange={(v) => updateFeeInfo('installmentCount', v)}
@@ -295,11 +386,13 @@ export function CaseDetailPage() {
                 suffix="回"
               />
               <EditableField
+                compact
                 label="毎月入金日"
                 value={caseData.paymentInfo.monthlyPaymentDay}
                 onChange={(v) => updatePaymentInfo('monthlyPaymentDay', v)}
               />
               <EditableField
+                compact
                 label="基本入金額"
                 value={caseData.paymentInfo.basePaymentAmount}
                 onChange={(v) => updatePaymentInfo('basePaymentAmount', v)}
@@ -528,12 +621,25 @@ export function CaseDetailPage() {
               <div className="mb-3 text-sm text-slate-600">
                 債権者数：{totalCreditors}社（うち和解済：{settledCount}社）
               </div>
-              <Tabs tabs={tabs} defaultTab="all" />
+              <Tabs
+                tabs={settlementTabs}
+                defaultTab="all"
+                activeTabId={displayCreditorScopeTabId}
+                onActiveTabChange={setCreditorScopeTabId}
+              />
             </SectionCard>
 
-            {/* 入金予定履歴 */}
+            {/* 入金予定履歴（タブは和解対象債権と同期） */}
             <SectionCard title="入金予定履歴" color="blue">
-              <PaymentTable caseId={caseData.id} payments={payments} />
+              <p className="mb-3 text-sm text-slate-600">
+                タブの選択は「和解対象債権」と連動します（すべて合算／同一債権者）。
+              </p>
+              <Tabs
+                tabs={paymentTabs}
+                defaultTab="all"
+                activeTabId={displayCreditorScopeTabId}
+                onActiveTabChange={setCreditorScopeTabId}
+              />
             </SectionCard>
           </div>
         </div>

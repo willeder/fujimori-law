@@ -20,7 +20,10 @@ export function PaymentManagementPage() {
       const next = c.paymentInfo.nextPaymentDate
       if (!next) return false
       const rec = paymentRecords.find(
-        (p) => p.caseId === c.id && p.plannedDate === next
+        (p) =>
+          p.caseId === c.id &&
+          p.plannedDate === next &&
+          p.creditorId == null
       )
       return !rec?.actualDate
     }

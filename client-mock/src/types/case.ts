@@ -167,6 +167,10 @@ export interface Creditor {
 export interface PaymentRecord {
   id: number
   caseId: number
+  /** 未設定・null = 案件全体の入金。数値 = 当該債権者の弁済スケジュール行 */
+  creditorId?: number | null
+  /** 債権者別行のみ。和解上の支払回次（第1回・第2回…） */
+  creditorInstallmentIndex?: number | null
   plannedDate: string | null // 入金予定日
   plannedAmount: number | null // 入金予定額
   plannedFeeAllocation: number | null // 報酬充当予定額
