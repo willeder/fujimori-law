@@ -65,8 +65,8 @@ export function EditableField({
   if (disabled) {
     if (compact) {
       return (
-        <div className="flex items-center gap-1.5 min-h-[1.5rem] py-0">
-          <span className="w-[6.75rem] shrink-0 text-[10px] font-medium text-slate-500 leading-none truncate">
+        <div className="flex items-center gap-0.5 min-h-[1.5rem] py-0">
+          <span className="w-[3.5rem] shrink-0 text-[10px] font-medium text-slate-500 leading-none truncate">
             {label}
           </span>
           <div className="min-w-0 flex-1 text-xs text-slate-700 truncate leading-tight">
@@ -90,8 +90,8 @@ export function EditableField({
   if (!isEditing) {
     if (compact) {
       return (
-        <div className="flex items-center gap-1.5 min-h-[1.5rem] py-0">
-          <span className="w-[6.75rem] shrink-0 text-[10px] font-medium text-slate-500 leading-none truncate">
+        <div className="flex items-center gap-0.5 min-h-[1.5rem] py-0">
+          <span className="w-[3.5rem] shrink-0 text-[10px] font-medium text-slate-500 leading-none truncate">
             {label}
           </span>
           <div
@@ -135,8 +135,8 @@ export function EditableField({
 
   if (compact) {
     return (
-      <div className="flex items-center gap-1.5 min-h-[1.75rem] py-0">
-        <span className="w-[6.75rem] shrink-0 text-[10px] font-medium text-slate-500 leading-none truncate">
+      <div className="flex items-center gap-0.5 min-h-[1.75rem] py-0">
+        <span className="w-[3.5rem] shrink-0 text-[10px] font-medium text-slate-500 leading-none truncate">
           {label}
         </span>
         <div className="flex min-w-0 flex-1 items-center gap-1">

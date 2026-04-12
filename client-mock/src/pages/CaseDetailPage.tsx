@@ -161,18 +161,6 @@ function CaseDetailBody({
     })
   }
 
-  const updateSettlementInfo = (
-    field: keyof Case['settlementInfo'],
-    value: string
-  ) => {
-    updateCase({
-      settlementInfo: {
-        ...caseData.settlementInfo,
-        [field]: value || null,
-      },
-    })
-  }
-
   const updatePaymentInfo = (
     field: keyof Case['paymentInfo'],
     value: string
@@ -265,65 +253,79 @@ function CaseDetailBody({
   ).length
   const totalCreditors = creditors.length
 
+  const lineUrlRaw = caseData.clientBasicInfo.lineUrl?.trim() ?? ''
+  const lineHref =
+    lineUrlRaw.length > 0
+      ? /^https?:\/\//i.test(lineUrlRaw)
+        ? lineUrlRaw
+        : `https://${lineUrlRaw}`
+      : null
+  const displayCaseId =
+    caseData.metadata.externalId != null && String(caseData.metadata.externalId).length > 0
+      ? String(caseData.metadata.externalId)
+      : String(caseData.id)
+
   return (
-    <div className="min-h-screen bg-slate-200">
-      {/* Header */}
-      <header className="border-b border-slate-200 bg-white px-6 py-2">
-        <div className="flex items-center gap-4">
+    <div className="flex min-h-screen min-h-0 flex-col bg-slate-200">
+      {/* Header（スクロール時に固定） */}
+      <header className="sticky top-0 z-40 shrink-0 border-b border-slate-200 bg-white shadow-sm">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-slate-100 px-6 py-1.5 text-xs text-slate-800">
           <Link
             to="/"
-            className="text-slate-400 hover:text-slate-600"
+            className="shrink-0 text-slate-400 hover:text-slate-600"
+            aria-label="一覧に戻る"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </Link>
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2 gap-y-1">
-              <h1 className="text-lg font-bold leading-tight text-slate-800">
-                {caseData.clientBasicInfo.name}
-              </h1>
-              <StatusBadge status={caseData.settlementInfo.status} size="md" />
-              <StatusBadge status={caseData.appointmentInfo.acceptanceRank} size="md" />
-            </div>
-            {/* ① 上部に基本情報を追加表示（編集可能・コンパクト1行） */}
-            <div className="mt-2 grid grid-cols-1 gap-x-2 gap-y-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
-              <EditableField
-                compact
-                label="フリガナ"
-                value={caseData.clientBasicInfo.furigana}
-                onChange={(v) => updateClientBasicInfo('furigana', v)}
-              />
-              <EditableField
-                compact
-                label="受任後ステータス"
-                value={caseData.settlementInfo.status}
-                onChange={(v) => updateSettlementInfo('status', v)}
-              />
-              <EditableField
-                compact
-                label="ID"
-                value={caseData.metadata.externalId}
-                onChange={(v) => updateMetadata('externalId', v)}
-              />
-              <EditableField
-                compact
-                label="要注意ランク"
-                value={caseData.clientBasicInfo.cautionRank}
-                onChange={(v) => updateClientBasicInfo('cautionRank', v)}
-                type="select"
-                options={[
-                  { value: 'A', label: 'A' },
-                  { value: 'B', label: 'B' },
-                  { value: 'C', label: 'C' },
-                ]}
-              />
-              <EditableField
-                compact
-                label="リスト区分"
-                value={caseData.metadata.listCategory}
-                onChange={(v) => updateMetadata('listCategory', v)}
-              />
+          <span className="shrink-0">
+            <span className="text-slate-500">ID</span>{' '}
+            <span className="font-medium">{displayCaseId}</span>
+          </span>
+          <span className="shrink-0">
+            <span className="text-slate-500">名前</span>{' '}
+            <span className="font-medium">{caseData.clientBasicInfo.name ?? '-'}</span>
+          </span>
+          <span className="shrink-0">
+            <span className="text-slate-500">フリガナ</span>{' '}
+            <span className="font-medium">{caseData.clientBasicInfo.furigana ?? '-'}</span>
+          </span>
+          <span className="flex shrink-0 items-center gap-1.5">
+            <span className="text-slate-500">受任後ステータス</span>
+            <StatusBadge status={caseData.settlementInfo.status} size="sm" />
+          </span>
+          <span className="shrink-0">
+            <span className="text-slate-500">電話番号</span>{' '}
+            <span className="font-medium">{caseData.clientBasicInfo.phone ?? '-'}</span>
+          </span>
+          <span className="min-w-0 shrink">
+            <span className="text-slate-500">メールアドレス</span>{' '}
+            <span className="font-medium break-all">{caseData.clientBasicInfo.email ?? '-'}</span>
+          </span>
+          <span className="shrink-0">
+            <span className="text-slate-500">要注意ランク</span>{' '}
+            <span className="font-medium">{caseData.clientBasicInfo.cautionRank ?? '-'}</span>
+          </span>
+          <div className="ml-auto shrink-0">
+            {lineHref ? (
+              <a
+                href={lineHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center rounded-md bg-[#06C755] px-2.5 py-1 text-xs font-semibold text-white shadow-sm hover:opacity-90"
+              >
+                LINE@
+              </a>
+            ) : (
+              <span className="text-slate-400">LINE@未設定</span>
+            )}
+          </div>
+        </div>
+        {/* ② リスト・受任（1行） */}
+        <div className="border-b border-slate-100 px-6 py-1.5">
+          <div className="flex flex-nowrap items-center gap-x-1 overflow-x-auto pb-0.5">
+            <div className="min-w-[4rem] shrink-0">
               <EditableField
                 compact
                 label="リスト登録日"
@@ -331,18 +333,16 @@ function CaseDetailBody({
                 onChange={(v) => updateMetadata('listRegisteredDate', v)}
                 type="date"
               />
+            </div>
+            <div className="min-w-[4rem] shrink-0">
               <EditableField
                 compact
-                label="電話番号"
-                value={caseData.clientBasicInfo.phone}
-                onChange={(v) => updateClientBasicInfo('phone', v)}
+                label="リスト区分"
+                value={caseData.metadata.listCategory}
+                onChange={(v) => updateMetadata('listCategory', v)}
               />
-              <EditableField
-                compact
-                label="LINE@ URL"
-                value={caseData.clientBasicInfo.lineUrl}
-                onChange={(v) => updateClientBasicInfo('lineUrl', v)}
-              />
+            </div>
+            <div className="min-w-[4rem] shrink-0">
               <EditableField
                 compact
                 label="受任日"
@@ -350,12 +350,16 @@ function CaseDetailBody({
                 onChange={(v) => updateAppointmentInfo('acceptanceDate', v)}
                 type="date"
               />
+            </div>
+            <div className="min-w-[4rem] shrink-0">
               <EditableField
                 compact
                 label="面談担当"
                 value={caseData.appointmentInfo.interviewStaff}
                 onChange={(v) => updateAppointmentInfo('interviewStaff', v)}
               />
+            </div>
+            <div className="min-w-[4rem] shrink-0">
               <EditableField
                 compact
                 label="受任ランク"
@@ -368,6 +372,13 @@ function CaseDetailBody({
                   { value: 'C', label: 'C' },
                 ]}
               />
+            </div>
+          </div>
+        </div>
+        {/* ③ 報酬・入金（1行） */}
+        <div className="px-6 py-1.5">
+          <div className="flex flex-nowrap items-center gap-x-1 overflow-x-auto pb-0.5">
+            <div className="min-w-[4rem] shrink-0">
               <EditableField
                 compact
                 label="通常報酬"
@@ -376,6 +387,8 @@ function CaseDetailBody({
                 type="number"
                 suffix="円"
               />
+            </div>
+            <div className="min-w-[4rem] shrink-0">
               <EditableField
                 compact
                 label="報酬分割回数"
@@ -384,12 +397,16 @@ function CaseDetailBody({
                 type="number"
                 suffix="回"
               />
+            </div>
+            <div className="min-w-[4rem] shrink-0">
               <EditableField
                 compact
                 label="毎月入金日"
                 value={caseData.paymentInfo.monthlyPaymentDay}
                 onChange={(v) => updatePaymentInfo('monthlyPaymentDay', v)}
               />
+            </div>
+            <div className="min-w-[4rem] shrink-0">
               <EditableField
                 compact
                 label="基本入金額"
@@ -403,7 +420,8 @@ function CaseDetailBody({
         </div>
       </header>
 
-      {/* Content */}
+      {/* Content（ヘッダー以外のみスクロール） */}
+      <main className="min-h-0 flex-1 overflow-y-auto">
       <div className="p-3">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           {/* Left Column - Summary */}
@@ -661,6 +679,7 @@ function CaseDetailBody({
           </SectionCard>
         </div>
       </div>
+      </main>
     </div>
   )
 }
