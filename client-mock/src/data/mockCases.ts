@@ -76,6 +76,8 @@ export const mockCases: Case[] = [
       cumulativePoolAllocation: 100704,
       cumulativeRepaymentAllocation: 840388,
       totalMinusPoolMinusRepayment: -941092,
+      vAccountBranch: null,
+      vAccountNumber: null,
     },
     reminderInfo: {
       reminderDate: null,
@@ -162,6 +164,8 @@ export const mockCases: Case[] = [
       cumulativePoolAllocation: 151715,
       cumulativeRepaymentAllocation: 950624,
       totalMinusPoolMinusRepayment: -1102339,
+      vAccountBranch: null,
+      vAccountNumber: null,
     },
     reminderInfo: {
       reminderDate: null,
@@ -244,6 +248,8 @@ export const mockCases: Case[] = [
       cumulativePoolAllocation: 52667,
       cumulativeRepaymentAllocation: 525379,
       totalMinusPoolMinusRepayment: -578046,
+      vAccountBranch: null,
+      vAccountNumber: null,
     },
     reminderInfo: {
       reminderDate: null,
@@ -326,6 +332,8 @@ export const mockCases: Case[] = [
       cumulativePoolAllocation: 17796,
       cumulativeRepaymentAllocation: 399709,
       totalMinusPoolMinusRepayment: -417505,
+      vAccountBranch: null,
+      vAccountNumber: null,
     },
     reminderInfo: {
       reminderDate: null,
@@ -408,6 +416,8 @@ export const mockCases: Case[] = [
       cumulativePoolAllocation: 32150,
       cumulativeRepaymentAllocation: 430000,
       totalMinusPoolMinusRepayment: -462150,
+      vAccountBranch: null,
+      vAccountNumber: null,
     },
     reminderInfo: {
       reminderDate: null,
@@ -490,6 +500,8 @@ export const mockCases: Case[] = [
       cumulativePoolAllocation: 245934,
       cumulativeRepaymentAllocation: 1052916,
       totalMinusPoolMinusRepayment: -1298850,
+      vAccountBranch: null,
+      vAccountNumber: null,
     },
     reminderInfo: {
       reminderDate: null,
@@ -572,6 +584,8 @@ export const mockCases: Case[] = [
       cumulativePoolAllocation: 75304,
       cumulativeRepaymentAllocation: 711655,
       totalMinusPoolMinusRepayment: -786959,
+      vAccountBranch: null,
+      vAccountNumber: null,
     },
     reminderInfo: {
       reminderDate: null,
@@ -654,6 +668,8 @@ export const mockCases: Case[] = [
       cumulativePoolAllocation: 186337,
       cumulativeRepaymentAllocation: 1358746,
       totalMinusPoolMinusRepayment: -1545083,
+      vAccountBranch: null,
+      vAccountNumber: null,
     },
     reminderInfo: {
       reminderDate: null,
@@ -736,6 +752,8 @@ export const mockCases: Case[] = [
       cumulativePoolAllocation: 146729,
       cumulativeRepaymentAllocation: 1292495,
       totalMinusPoolMinusRepayment: -1439224,
+      vAccountBranch: null,
+      vAccountNumber: null,
     },
     reminderInfo: {
       reminderDate: null,
@@ -818,6 +836,8 @@ export const mockCases: Case[] = [
       cumulativePoolAllocation: 1806,
       cumulativeRepaymentAllocation: 86084,
       totalMinusPoolMinusRepayment: -87890,
+      vAccountBranch: null,
+      vAccountNumber: null,
     },
     reminderInfo: {
       reminderDate: null,

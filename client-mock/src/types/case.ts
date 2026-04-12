@@ -81,6 +81,9 @@ export interface PaymentInfo {
   cumulativePoolAllocation: number | null // 累)プール充当額
   cumulativeRepaymentAllocation: number | null // 累)弁済充当額
   totalMinusPoolMinusRepayment: number | null // 総額-プール-累弁済
+  /** V口座（登録後は原則ロック。変更時は確認ダイアログ） */
+  vAccountBranch: string | null // V口座-支店
+  vAccountNumber: string | null // V口座-番号
 }
 
 /** リマインド情報 */

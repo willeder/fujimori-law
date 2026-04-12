@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import type { NavigateFunction } from 'react-router-dom'
 import {
@@ -23,6 +23,196 @@ import {
   creditorTabAccentSummary,
   creditorTabAccentForName,
 } from '../lib/creditorTabAccent'
+
+function formatYenPair(left: number | null, right: number | null) {
+  const l = left != null ? `${left.toLocaleString()}円` : '-'
+  const r = right != null ? `${right.toLocaleString()}円` : '-'
+  return (
+    <span className="tabular-nums">
+      {l} <span className="font-normal text-slate-400">/</span> {r}
+    </span>
+  )
+}
+
+function formatDatePair(left: string | null, right: string | null) {
+  const l = left && left.length > 0 ? left : '-'
+  const r = right && right.length > 0 ? right : '-'
+  return (
+    <span className="tabular-nums">
+      {l} <span className="font-normal text-slate-400">/</span> {r}
+    </span>
+  )
+}
+
+type VAccountFieldsProps = {
+  branch: string | null
+  number: string | null
+  onSave: (branch: string | null, number: string | null) => void
+}
+
+/** Ⅴ口座：未登録は入力→登録、登録後は参照＋変更時のみ確認付き更新 */
+function VAccountFields({ branch, number, onSave }: VAccountFieldsProps) {
+  const [editing, setEditing] = useState(false)
+  const [draftB, setDraftB] = useState(branch ?? '')
+  const [draftN, setDraftN] = useState(number ?? '')
+  const snapshotRef = useRef({ b: '', n: '' })
+
+  const savedLocked =
+    (branch ?? '').trim().length > 0 && (number ?? '').trim().length > 0
+
+  useEffect(() => {
+    if (!editing) {
+      setDraftB(branch ?? '')
+      setDraftN(number ?? '')
+    }
+  }, [branch, number, editing])
+
+  const startChange = () => {
+    snapshotRef.current = {
+      b: (branch ?? '').trim(),
+      n: (number ?? '').trim(),
+    }
+    setDraftB(branch ?? '')
+    setDraftN(number ?? '')
+    setEditing(true)
+  }
+
+  const cancelEdit = () => {
+    setDraftB(branch ?? '')
+    setDraftN(number ?? '')
+    setEditing(false)
+  }
+
+  const commit = () => {
+    const b = draftB.trim() || null
+    const n = draftN.trim() || null
+    const { b: prevB, n: prevN } = snapshotRef.current
+    const hadSaved = prevB !== '' && prevN !== ''
+    const dirty = (b ?? '') !== prevB || (n ?? '') !== prevN
+    if (hadSaved && dirty) {
+      const ok = window.confirm(
+        'V口座情報の値が変更されます。承認した内容で保存しますか？\n「キャンセル」を選ぶと、変更は破棄され元の値に戻ります。'
+      )
+      if (!ok) {
+        cancelEdit()
+        return
+      }
+    }
+    onSave(b, n)
+    setEditing(false)
+  }
+
+  const registerFirst = () => {
+    const b = draftB.trim() || null
+    const n = draftN.trim() || null
+    if (!b || !n) return
+    onSave(b, n)
+  }
+
+  const inputCls =
+    'w-full max-w-xs rounded border border-slate-200 px-2 py-1 text-sm text-slate-800 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400'
+
+  if (savedLocked && !editing) {
+    return (
+      <div className="space-y-2 border-t border-slate-100 pt-3">
+        <div className="text-xs font-medium text-slate-500">Ⅴ口座情報</div>
+        <div className="flex flex-col gap-1 text-sm text-slate-800 sm:flex-row sm:flex-wrap sm:gap-x-4">
+          <span>
+            <span className="text-slate-500">V口座-支店</span>{' '}
+            <span className="font-medium">{branch}</span>
+          </span>
+          <span>
+            <span className="text-slate-500">V口座-番号</span>{' '}
+            <span className="font-medium">{number}</span>
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={startChange}
+          className="text-xs font-medium text-blue-600 hover:text-blue-700"
+        >
+          変更
+        </button>
+      </div>
+    )
+  }
+
+  if (savedLocked && editing) {
+    return (
+      <div className="space-y-2 border-t border-slate-100 pt-3">
+        <div className="text-xs font-medium text-slate-500">Ⅴ口座情報（変更）</div>
+        <label className="block text-sm">
+          <span className="text-slate-500">V口座-支店</span>
+          <input
+            className={`${inputCls} mt-0.5 block`}
+            value={draftB}
+            onChange={(e) => setDraftB(e.target.value)}
+            autoComplete="off"
+          />
+        </label>
+        <label className="block text-sm">
+          <span className="text-slate-500">V口座-番号</span>
+          <input
+            className={`${inputCls} mt-0.5 block`}
+            value={draftN}
+            onChange={(e) => setDraftN(e.target.value)}
+            autoComplete="off"
+          />
+        </label>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={commit}
+            className="rounded bg-blue-600 px-3 py-1 text-xs font-medium text-white hover:bg-blue-700"
+          >
+            確定
+          </button>
+          <button
+            type="button"
+            onClick={cancelEdit}
+            className="rounded border border-slate-200 bg-white px-3 py-1 text-xs text-slate-700 hover:bg-slate-50"
+          >
+            キャンセル
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-2 border-t border-slate-100 pt-3">
+      <div className="text-xs font-medium text-slate-500">Ⅴ口座情報</div>
+      <label className="block text-sm">
+        <span className="text-slate-500">V口座-支店</span>
+        <input
+          className={`${inputCls} mt-0.5 block`}
+          value={draftB}
+          onChange={(e) => setDraftB(e.target.value)}
+          placeholder="未入力"
+          autoComplete="off"
+        />
+      </label>
+      <label className="block text-sm">
+        <span className="text-slate-500">V口座-番号</span>
+        <input
+          className={`${inputCls} mt-0.5 block`}
+          value={draftN}
+          onChange={(e) => setDraftN(e.target.value)}
+          placeholder="未入力"
+          autoComplete="off"
+        />
+      </label>
+      <button
+        type="button"
+        onClick={registerFirst}
+        disabled={!draftB.trim() || !draftN.trim()}
+        className="rounded bg-blue-600 px-3 py-1 text-xs font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        登録
+      </button>
+    </div>
+  )
+}
 
 export function CaseDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -52,6 +242,20 @@ function CaseDetailBody({
     () => payments.filter((p) => p.creditorId == null),
     [payments]
   )
+  const unpaidPlannedDates = useMemo(
+    () =>
+      caseLevelPayments
+        .filter((p) => Boolean(p.plannedDate) && !p.actualDate)
+        .map((p) => p.plannedDate as string)
+        .sort(),
+    [caseLevelPayments]
+  )
+  const displayNextPaymentDate = useMemo(() => {
+    if (!caseData) return null
+    const trimmed = caseData.paymentInfo.nextPaymentDate?.trim() ?? ''
+    if (trimmed.length > 0) return caseData.paymentInfo.nextPaymentDate
+    return unpaidPlannedDates.length > 0 ? unpaidPlannedDates[0] : null
+  }, [caseData, unpaidPlannedDates])
   const dispatch = useCaseDispatch()
 
   /** 和解対象債権と入金予定履歴で共有（同じ id・同じ並び） */
@@ -222,10 +426,6 @@ function CaseDetailBody({
   const finalPlannedDate =
     plannedDates.length > 0 ? plannedDates.reduce((a, b) => (a > b ? a : b)) : null
 
-  const sumActualFee = caseLevelPayments.reduce(
-    (s, p) => s + (p.actualFeeAllocation ?? 0),
-    0
-  )
   const sumActualAgentFee = caseLevelPayments.reduce(
     (s, p) => s + (p.actualAgentFeeAllocation ?? 0),
     0
@@ -236,6 +436,10 @@ function CaseDetailBody({
   )
   const sumActualRepayment = caseLevelPayments.reduce(
     (s, p) => s + (p.actualRepaymentAllocation ?? 0),
+    0
+  )
+  const sumPlannedRepayment = caseLevelPayments.reduce(
+    (s, p) => s + (p.plannedRepaymentAllocation ?? 0),
     0
   )
 
@@ -429,29 +633,26 @@ function CaseDetailBody({
             {/* ② 入金管理をメインにするため、入金状況サマリを最上部へ */}
             <SectionCard title="入金状況" color="blue">
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-600">累計入金額</span>
-                  <span className="text-xl font-bold text-blue-600">
-                    {caseData.paymentInfo.cumulativePaymentAmount?.toLocaleString()}
-                    <span className="text-sm font-normal text-slate-400 ml-1">円</span>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="shrink-0 text-sm text-slate-600">累計入金額</span>
+                  <span className="min-w-0 truncate text-right text-xl font-bold text-blue-600">
+                    {formatYenPair(
+                      caseData.paymentInfo.cumulativePaymentAmount,
+                      caseData.paymentInfo.cumulativePlannedPayment
+                    )}
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-500">予定額</span>
-                  <span>
-                    {caseData.paymentInfo.cumulativePlannedPayment?.toLocaleString()}円
+                <div className="flex items-center justify-between gap-2 text-sm">
+                  <span className="shrink-0 text-slate-500">残入金予定額</span>
+                  <span className="min-w-0 truncate text-right font-medium tabular-nums">
+                    {remainingPlanned != null ? `${remainingPlanned.toLocaleString()}円` : '-'}
                   </span>
                 </div>
-                {/* ③ 追加サマリ */}
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-500">残入金予定額（予定-入金済）</span>
-                  <span className="font-medium">
-                    {remainingPlanned != null ? remainingPlanned.toLocaleString() : '-'}円
+                <div className="flex items-center justify-between gap-2 text-sm">
+                  <span className="shrink-0 text-slate-500">次回／最終入金予定日</span>
+                  <span className="min-w-0 truncate text-right font-medium">
+                    {formatDatePair(displayNextPaymentDate, finalPlannedDate)}
                   </span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-500">最終入金予定日</span>
-                  <span className="font-medium">{finalPlannedDate ?? '-'}</span>
                 </div>
                 <hr className="border-slate-100" />
                 <div className="grid grid-cols-2 gap-3">
@@ -483,22 +684,26 @@ function CaseDetailBody({
                     </span>
                     <span className="text-slate-400 ml-1">円</span>
                   </div>
-                  <div className="text-sm text-slate-600">
-                    弁済充当額{' '}
+                  <div className="min-w-0 text-sm text-slate-600 sm:col-span-2">
+                    <span className="block text-slate-600">弁済充当額</span>
                     <span className="font-medium text-slate-900">
-                      {sumActualRepayment.toLocaleString()}
+                      {formatYenPair(sumActualRepayment, sumPlannedRepayment)}
                     </span>
-                    <span className="text-slate-400 ml-1">円</span>
-                  </div>
-                  <div className="text-sm text-slate-600">
-                    （参考）報酬充当（実績合計）{' '}
-                    <span className="font-medium text-slate-900">
-                      {sumActualFee.toLocaleString()}
-                    </span>
-                    <span className="text-slate-400 ml-1">円</span>
                   </div>
                 </div>
-                <hr className="border-slate-100" />
+                <VAccountFields
+                  branch={caseData.paymentInfo.vAccountBranch}
+                  number={caseData.paymentInfo.vAccountNumber}
+                  onSave={(b, n) =>
+                    updateCase({
+                      paymentInfo: {
+                        ...caseData.paymentInfo,
+                        vAccountBranch: b,
+                        vAccountNumber: n,
+                      },
+                    })
+                  }
+                />
               </div>
             </SectionCard>
 
