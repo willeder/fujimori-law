@@ -5,6 +5,8 @@ export interface Column<T> {
   header: string
   width?: string
   align?: 'left' | 'center' | 'right'
+  /** false のときソート不可（通番列など） */
+  sortable?: boolean
   render?: (item: T, index: number) => React.ReactNode
 }
 
@@ -14,6 +16,8 @@ interface DataTableProps<T> {
   keyField: keyof T
   onRowClick?: (item: T) => void
   emptyMessage?: string
+  /** compact: 小さめフォント・詰め余白（横スクロール前提の表向け） */
+  density?: 'default' | 'compact'
 }
 
 export function DataTable<T>({
@@ -22,6 +26,7 @@ export function DataTable<T>({
   keyField,
   onRowClick,
   emptyMessage = 'データがありません',
+  density = 'default',
 }: DataTableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
@@ -56,28 +61,38 @@ export function DataTable<T>({
     right: 'text-right',
   }
 
+  const isCompact = density === 'compact'
+  const cellPad = isCompact ? 'px-1 py-0.5' : 'px-3 py-2'
+  const headPad = isCompact ? 'px-1 py-1' : 'px-3 py-2'
+  const tableText = isCompact ? 'text-[10px] leading-tight' : 'text-sm'
+  const headText = isCompact ? 'text-[9px] font-semibold leading-tight' : 'font-semibold'
+  const emptyPad = isCompact ? 'px-2 py-6' : 'px-3 py-8'
+
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+      <table className={`w-full ${tableText}${isCompact ? ' min-w-max' : ''}`}>
         <thead>
           <tr className="bg-slate-50 border-b border-slate-200">
-            {columns.map((col) => (
+            {columns.map((col) => {
+              const sortable = col.sortable !== false
+              return (
               <th
                 key={String(col.key)}
-                className={`px-3 py-2 font-semibold text-slate-600 ${alignClass[col.align ?? 'left']} cursor-pointer hover:bg-slate-100`}
+                className={`${headPad} ${headText} text-slate-600 ${alignClass[col.align ?? 'left']} ${sortable ? 'cursor-pointer hover:bg-slate-100' : ''} whitespace-nowrap`}
                 style={{ width: col.width }}
-                onClick={() => handleSort(String(col.key))}
+                onClick={() => sortable && handleSort(String(col.key))}
               >
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-0.5">
                   {col.header}
-                  {sortKey === String(col.key) && (
+                  {sortable && sortKey === String(col.key) && (
                     <span className="text-blue-500">
                       {sortOrder === 'asc' ? '↑' : '↓'}
                     </span>
                   )}
                 </div>
               </th>
-            ))}
+              )
+            })}
           </tr>
         </thead>
         <tbody>
@@ -85,7 +100,7 @@ export function DataTable<T>({
             <tr>
               <td
                 colSpan={columns.length}
-                className="px-3 py-8 text-center text-slate-400"
+                className={`${emptyPad} text-center text-slate-400`}
               >
                 {emptyMessage}
               </td>
@@ -100,7 +115,7 @@ export function DataTable<T>({
                 {columns.map((col) => (
                   <td
                     key={String(col.key)}
-                    className={`px-3 py-2 ${alignClass[col.align ?? 'left']}`}
+                    className={`${cellPad} ${alignClass[col.align ?? 'left']} whitespace-nowrap tabular-nums`}
                   >
                     {col.render
                       ? col.render(item, index)

@@ -23,6 +23,38 @@ export interface ClientBasicInfo {
   payDay: string | null
   employmentType: string | null // 会社員・公務員、バイト(パート)・派遣、自営・会社経営、無職 等
   cautionRank: 'A' | 'B' | 'C' | null // 要注意ランク
+  /** kintone 等の依頼者レコード番号 */
+  recordNumber?: number | null
+  /** 対応要否 */
+  correspondenceRequired?: string | null
+  /** 対応時間 */
+  correspondenceHours?: string | null
+  /** 同居 */
+  cohabitation?: string | null
+  /** 内密先 */
+  confidentialContact?: string | null
+  /** 緊急連絡先 */
+  emergencyContact?: string | null
+  /** 関係（緊急） */
+  emergencyContactRelation?: string | null
+  /** 旧住所 */
+  previousAddress?: string | null
+  /** 給与口座 */
+  payrollAccount?: string | null
+  /** 勤務先名 */
+  employerName?: string | null
+  /** 勤務先連絡先 */
+  employerContact?: string | null
+  /** 勤務先住所 */
+  employerAddress?: string | null
+  /** 他事務所相談 */
+  otherOfficeConsultation?: string | null
+  /** 遅れ（返済遅延等のメモ） */
+  paymentDelay?: string | null
+  /** 自転車（ローン等のメモ） */
+  bicycleNote?: string | null
+  /** 年金 */
+  pension?: string | null
 }
 
 /** アポ・後確・面談情報 */
@@ -35,6 +67,14 @@ export interface AppointmentInfo {
   acceptanceRank: 'A' | 'B' | 'C' | null // 受任ランク
   acceptanceDate: string | null // 受任日
   elapsedDays: number | null // 経過日数
+  /** C受任昇格日 */
+  cAcceptancePromotionDate: string | null
+  /** 面談時備考１ */
+  interviewMemo1: string | null
+  /** 面談時備考２ */
+  interviewMemo2: string | null
+  /** 収支メモ */
+  incomeExpenseMemo: string | null
 }
 
 /** 債務情報 */
@@ -70,6 +110,8 @@ export interface FeeInfo {
 /** 入金情報 */
 export interface PaymentInfo {
   firstPaymentDate: string | null // 初回入金予定日
+  /** 初回入金が受任から10日以内か等（シート表記に合わせて文字列で保持） */
+  firstPaymentWithinTenDays: string | null
   firstPaymentAmount: number | null // 初回入金額
   monthlyPaymentDay: string | null // 毎月入金日
   basePaymentAmount: number | null // 基本入金額
@@ -81,9 +123,9 @@ export interface PaymentInfo {
   cumulativePoolAllocation: number | null // 累)プール充当額
   cumulativeRepaymentAllocation: number | null // 累)弁済充当額
   totalMinusPoolMinusRepayment: number | null // 総額-プール-累弁済
-  /** V口座（登録後は原則ロック。変更時は確認ダイアログ） */
-  vAccountBranch: string | null // V口座-支店
-  vAccountNumber: string | null // V口座-番号
+  /** バーチャル口座（略称V口座。登録後は原則ロック。変更時は確認ダイアログ） */
+  vAccountBranch: string | null // 支店
+  vAccountNumber: string | null // 口座番号
 }
 
 /** リマインド情報 */

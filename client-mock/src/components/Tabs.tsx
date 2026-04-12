@@ -10,6 +10,13 @@ export interface TabItem {
   accent?: CreditorTabAccent
 }
 
+/**
+ * - none: 従来どおり
+ * - host: タブ見出し固定＋最大高さ。子（内側 Tabs 等）はこの下で高さを受け取り、内側でスクロール
+ * - guest: 親の flex チェーンの中でタブ見出し固定＋アクティブパネルのみ縦スクロール
+ */
+export type TabBodyScrollMode = 'none' | 'host' | 'guest'
+
 interface TabsProps {
   tabs: TabItem[]
   defaultTab?: string
@@ -20,6 +27,9 @@ interface TabsProps {
   variant?: 'default' | 'split'
   /** 下段（債権者）タブなど、密度を上げて高さを詰める */
   density?: 'normal' | 'dense'
+  tabBodyScroll?: TabBodyScrollMode
+  /** tabBodyScroll が host のときのルート高さ（Tailwind。例: h-[min(72vh,34rem)]）。未指定時は約20行相当 */
+  tabBodyMaxHeightClassName?: string
 }
 
 export function Tabs({
@@ -29,6 +39,9 @@ export function Tabs({
   onActiveTabChange,
   variant = 'default',
   density = 'normal',
+  tabBodyScroll = 'none',
+  /** max-h だけだと flex 内で子の flex-1 が効かずスクロールできないことがあるため h-[min(...)] で高さを確定 */
+  tabBodyMaxHeightClassName = 'h-[min(72vh,34rem)]',
 }: TabsProps) {
   const [internalTab, setInternalTab] = useState(defaultTab ?? tabs[0]?.id)
   const controlled =
@@ -41,15 +54,28 @@ export function Tabs({
   const isSplit = variant === 'split'
   const isDense = density === 'dense'
 
+  const tabRowClass =
+    isSplit
+      ? 'grid w-full shrink-0 grid-cols-2 overflow-hidden rounded-md border border-slate-200 bg-white'
+      : 'flex shrink-0 flex-wrap gap-1 overflow-x-auto border-b border-slate-200 pb-px'
+
+  const panelClass =
+    tabBodyScroll === 'none'
+      ? 'mt-4'
+      : tabBodyScroll === 'host'
+        ? 'mt-4 flex min-h-0 flex-1 flex-col overflow-hidden'
+        : 'mt-4 min-h-0 flex-1 overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]'
+
+  const rootClass =
+    tabBodyScroll === 'none'
+      ? ''
+      : tabBodyScroll === 'host'
+        ? `flex min-h-0 flex-col overflow-hidden ${tabBodyMaxHeightClassName}`
+        : 'flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden'
+
   return (
-    <div>
-      <div
-        className={
-          isSplit
-            ? 'grid w-full grid-cols-2 overflow-hidden rounded-md border border-slate-200 bg-white'
-            : 'flex flex-wrap gap-1 overflow-x-auto border-b border-slate-200 pb-px'
-        }
-      >
+    <div className={rootClass || undefined}>
+      <div className={tabRowClass}>
         {tabs.map((tab) => {
           const active = activeTab === tab.id
           const accent = tab.accent
@@ -95,7 +121,15 @@ export function Tabs({
           )
         })}
       </div>
-      <div className="mt-4">{activeContent}</div>
+      <div className={panelClass}>
+        {tabBodyScroll === 'none' ? (
+          activeContent
+        ) : (
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+            {activeContent}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

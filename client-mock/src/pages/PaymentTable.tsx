@@ -8,15 +8,17 @@ interface PaymentTableProps {
   payments: PaymentRecord[]
   /** 新規「入金予定を追加」時に付与する債権者ID。省略＝案件全体行 */
   scheduleCreditorId?: number | null
-  /** 上部の入金サマリ4枠 */
-  showAggregateSummary?: boolean
+}
+
+function fmtNum(n: number | null | undefined) {
+  if (n == null) return <span className="text-slate-300">-</span>
+  return <span>{n.toLocaleString()}</span>
 }
 
 export function PaymentTable({
   caseId,
   payments,
   scheduleCreditorId,
-  showAggregateSummary = true,
 }: PaymentTableProps) {
   const dispatch = useCaseDispatch()
   const allCasePayments = usePaymentsByCaseId(caseId)
@@ -26,7 +28,10 @@ export function PaymentTable({
   const sortedPayments = [...payments].sort((a, b) => {
     const dateA = a.plannedDate ?? ''
     const dateB = b.plannedDate ?? ''
-    return dateB.localeCompare(dateA)
+    if (!dateA && !dateB) return 0
+    if (!dateA) return 1
+    if (!dateB) return -1
+    return dateA.localeCompare(dateB)
   })
 
   const handleEdit = (payment: PaymentRecord) => {
@@ -35,6 +40,7 @@ export function PaymentTable({
       actualDate: payment.actualDate,
       actualAmount: payment.actualAmount,
       actualFeeAllocation: payment.actualFeeAllocation,
+      actualAgentFeeAllocation: payment.actualAgentFeeAllocation,
       actualPoolAllocation: payment.actualPoolAllocation,
       actualRepaymentAllocation: payment.actualRepaymentAllocation,
     })
@@ -57,45 +63,83 @@ export function PaymentTable({
     setEditData({})
   }
 
+  const inputCls =
+    'w-full min-w-[4.5rem] rounded border border-blue-300 px-0.5 py-0.5 text-[10px] leading-tight'
+
   const columns: Column<PaymentRecord>[] = [
     {
-      key: 'creditorInstallmentIndex',
-      header: '和解回',
-      width: '52px',
+      key: '__rowIndex',
+      header: '',
+      width: '22px',
       align: 'center',
-      render: (item) =>
-        item.creditorInstallmentIndex != null ? (
-          <span className="text-slate-600">{item.creditorInstallmentIndex}</span>
-        ) : (
-          <span className="text-slate-300">-</span>
-        ),
+      sortable: false,
+      render: (_item, index) => (
+        <span className="text-slate-500 tabular-nums">{index + 1}</span>
+      ),
     },
     {
       key: 'plannedDate',
-      header: '予定日',
-      width: '100px',
+      header: '予定入金日',
+      width: '76px',
       render: (item) => (
-        <span className={!item.actualDate ? 'font-medium' : ''}>
-          {item.plannedDate}
+        <span className={!item.actualDate ? 'font-medium text-slate-800' : ''}>
+          {item.plannedDate ?? <span className="text-slate-300">-</span>}
         </span>
       ),
     },
     {
       key: 'plannedAmount',
-      header: '予定額',
-      width: '100px',
+      header: '予定入金額',
+      width: '72px',
       align: 'right',
-      render: (item) => (
-        <span>
-          {item.plannedAmount?.toLocaleString()}
-          <span className="text-slate-400 text-xs ml-1">円</span>
-        </span>
-      ),
+      render: (item) => fmtNum(item.plannedAmount),
+    },
+    {
+      key: 'plannedFeeAllocation',
+      header: '予定報酬額',
+      width: '68px',
+      align: 'right',
+      render: (item) => fmtNum(item.plannedFeeAllocation),
+    },
+    {
+      key: 'plannedAgentFeeAllocation',
+      header: '予定弁代報酬額',
+      width: '76px',
+      align: 'right',
+      render: (item) => fmtNum(item.plannedAgentFeeAllocation),
+    },
+    {
+      key: 'plannedPoolAllocation',
+      header: '予定ﾌﾟｰﾙ額',
+      width: '64px',
+      align: 'right',
+      render: (item) => fmtNum(item.plannedPoolAllocation),
+    },
+    {
+      key: 'repaymentCount',
+      header: '予定社数',
+      width: '44px',
+      align: 'right',
+      render: (item) => fmtNum(item.repaymentCount),
+    },
+    {
+      key: 'handlingFee',
+      header: '予定手数料',
+      width: '56px',
+      align: 'right',
+      render: (item) => fmtNum(item.handlingFee),
+    },
+    {
+      key: 'plannedRepaymentAllocation',
+      header: '予定弁済額',
+      width: '64px',
+      align: 'right',
+      render: (item) => fmtNum(item.plannedRepaymentAllocation),
     },
     {
       key: 'actualDate',
       header: '実入金日',
-      width: '100px',
+      width: '76px',
       render: (item) => {
         if (editingId === item.id) {
           return (
@@ -105,21 +149,21 @@ export function PaymentTable({
               onChange={(e) =>
                 setEditData({ ...editData, actualDate: e.target.value || null })
               }
-              className="w-full text-xs border border-blue-300 rounded px-1 py-0.5"
+              className={inputCls}
             />
           )
         }
         return item.actualDate ? (
-          <span className="text-green-600">{item.actualDate}</span>
+          <span className="text-green-700">{item.actualDate}</span>
         ) : (
-          <span className="text-slate-300">未入金</span>
+          <span className="text-slate-300">未</span>
         )
       },
     },
     {
       key: 'actualAmount',
       header: '実入金額',
-      width: '100px',
+      width: '68px',
       align: 'right',
       render: (item) => {
         if (editingId === item.id) {
@@ -133,14 +177,13 @@ export function PaymentTable({
                   actualAmount: Number(e.target.value) || null,
                 })
               }
-              className="w-full text-xs border border-blue-300 rounded px-1 py-0.5 text-right"
+              className={`${inputCls} text-right`}
             />
           )
         }
-        return item.actualAmount ? (
-          <span className="text-green-600 font-medium">
+        return item.actualAmount != null ? (
+          <span className="font-medium text-green-700">
             {item.actualAmount.toLocaleString()}
-            <span className="text-slate-400 text-xs ml-1">円</span>
           </span>
         ) : (
           <span className="text-slate-300">-</span>
@@ -149,8 +192,8 @@ export function PaymentTable({
     },
     {
       key: 'actualFeeAllocation',
-      header: '報酬充当',
-      width: '90px',
+      header: '報酬充当額',
+      width: '64px',
       align: 'right',
       render: (item) => {
         if (editingId === item.id) {
@@ -164,21 +207,41 @@ export function PaymentTable({
                   actualFeeAllocation: Number(e.target.value) || null,
                 })
               }
-              className="w-full text-xs border border-blue-300 rounded px-1 py-0.5 text-right"
+              className={`${inputCls} text-right`}
             />
           )
         }
-        return item.actualFeeAllocation ? (
-          <span>{item.actualFeeAllocation.toLocaleString()}</span>
-        ) : (
-          <span className="text-slate-300">-</span>
-        )
+        return fmtNum(item.actualFeeAllocation)
+      },
+    },
+    {
+      key: 'actualAgentFeeAllocation',
+      header: '弁代報酬充当額',
+      width: '76px',
+      align: 'right',
+      render: (item) => {
+        if (editingId === item.id) {
+          return (
+            <input
+              type="number"
+              value={editData.actualAgentFeeAllocation ?? ''}
+              onChange={(e) =>
+                setEditData({
+                  ...editData,
+                  actualAgentFeeAllocation: Number(e.target.value) || null,
+                })
+              }
+              className={`${inputCls} text-right`}
+            />
+          )
+        }
+        return fmtNum(item.actualAgentFeeAllocation)
       },
     },
     {
       key: 'actualPoolAllocation',
-      header: 'プール充当',
-      width: '90px',
+      header: 'ﾌﾟｰﾙ充当額',
+      width: '60px',
       align: 'right',
       render: (item) => {
         if (editingId === item.id) {
@@ -192,21 +255,35 @@ export function PaymentTable({
                   actualPoolAllocation: Number(e.target.value) || null,
                 })
               }
-              className="w-full text-xs border border-blue-300 rounded px-1 py-0.5 text-right"
+              className={`${inputCls} text-right`}
             />
           )
         }
-        return item.actualPoolAllocation ? (
-          <span>{item.actualPoolAllocation.toLocaleString()}</span>
-        ) : (
-          <span className="text-slate-300">-</span>
-        )
+        return fmtNum(item.actualPoolAllocation)
       },
     },
     {
+      key: 'repaymentCountActual',
+      header: '社数',
+      width: '36px',
+      align: 'right',
+      sortable: false,
+      render: (item) =>
+        item.actualDate ? fmtNum(item.repaymentCount) : <span className="text-slate-300">-</span>,
+    },
+    {
+      key: 'handlingFeeActual',
+      header: '手数料',
+      width: '48px',
+      align: 'right',
+      sortable: false,
+      render: (item) =>
+        item.actualDate ? fmtNum(item.handlingFee) : <span className="text-slate-300">-</span>,
+    },
+    {
       key: 'actualRepaymentAllocation',
-      header: '弁済充当',
-      width: '90px',
+      header: '弁済充当額',
+      width: '64px',
       align: 'right',
       render: (item) => {
         if (editingId === item.id) {
@@ -220,45 +297,33 @@ export function PaymentTable({
                   actualRepaymentAllocation: Number(e.target.value) || null,
                 })
               }
-              className="w-full text-xs border border-blue-300 rounded px-1 py-0.5 text-right"
+              className={`${inputCls} text-right`}
             />
           )
         }
-        return item.actualRepaymentAllocation ? (
-          <span>{item.actualRepaymentAllocation.toLocaleString()}</span>
-        ) : (
-          <span className="text-slate-300">-</span>
-        )
+        return fmtNum(item.actualRepaymentAllocation)
       },
-    },
-    {
-      key: 'cumulativePool',
-      header: '累積プール',
-      width: '100px',
-      align: 'right',
-      render: (item) => (
-        <span className="text-slate-500">
-          {item.cumulativePool?.toLocaleString() ?? '-'}
-        </span>
-      ),
     },
     {
       key: 'actions',
       header: '',
-      width: '80px',
+      width: '72px',
+      sortable: false,
       render: (item) => {
         if (editingId === item.id) {
           return (
-            <div className="flex gap-1">
+            <div className="flex gap-0.5">
               <button
+                type="button"
                 onClick={() => handleSave(item)}
-                className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
+                className="rounded bg-blue-500 px-1 py-0.5 text-[10px] text-white hover:bg-blue-600"
               >
                 保存
               </button>
               <button
+                type="button"
                 onClick={handleCancel}
-                className="px-2 py-1 text-xs bg-slate-200 text-slate-600 rounded hover:bg-slate-300"
+                className="rounded bg-slate-200 px-1 py-0.5 text-[10px] text-slate-700 hover:bg-slate-300"
               >
                 取消
               </button>
@@ -267,8 +332,9 @@ export function PaymentTable({
         }
         return (
           <button
+            type="button"
             onClick={() => handleEdit(item)}
-            className="px-2 py-1 text-xs text-blue-500 hover:text-blue-600 hover:bg-blue-50 rounded"
+            className="rounded px-1 py-0.5 text-[10px] text-blue-600 hover:bg-blue-50"
           >
             編集
           </button>
@@ -277,57 +343,21 @@ export function PaymentTable({
     },
   ]
 
-  // 集計
-  const totalPlanned = payments.reduce((sum, p) => sum + (p.plannedAmount ?? 0), 0)
-  const totalActual = payments.reduce((sum, p) => sum + (p.actualAmount ?? 0), 0)
-  const paidCount = payments.filter((p) => p.actualDate).length
-
   return (
-    <div className="space-y-4">
-      {showAggregateSummary && (
-        <div className="grid grid-cols-2 gap-3 rounded-lg bg-slate-50 p-3 sm:grid-cols-4 sm:gap-4 sm:p-4">
-          <div>
-            <div className="text-xs text-slate-500">入金回数</div>
-            <div className="text-lg font-bold">
-              {paidCount}/{payments.length}
-              <span className="ml-1 text-sm font-normal text-slate-400">回</span>
-            </div>
-          </div>
-          <div>
-            <div className="text-xs text-slate-500">予定額合計</div>
-            <div className="text-lg font-bold">{totalPlanned.toLocaleString()}円</div>
-          </div>
-          <div>
-            <div className="text-xs text-slate-500">実入金額合計</div>
-            <div className="text-lg font-bold text-green-600">
-              {totalActual.toLocaleString()}円
-            </div>
-          </div>
-          <div>
-            <div className="text-xs text-slate-500">差額</div>
-            <div
-              className={`text-lg font-bold ${totalActual - totalPlanned >= 0 ? 'text-green-600' : 'text-red-600'}`}
-            >
-              {(totalActual - totalPlanned).toLocaleString()}円
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* テーブル */}
+    <div className="min-h-0 space-y-3">
       <DataTable
         data={sortedPayments}
         columns={columns}
         keyField="id"
         emptyMessage="入金データがありません"
+        density="compact"
       />
 
-      {/* 新規追加ボタン */}
       <button
+        type="button"
         onClick={() => {
-          const newId =
-            Math.max(0, ...allCasePayments.map((p) => p.id)) + 1
-          const lastPayment = sortedPayments[0]
+          const newId = Math.max(0, ...allCasePayments.map((p) => p.id)) + 1
+          const lastPayment = sortedPayments[sortedPayments.length - 1]
           const scopeCreditorId =
             scheduleCreditorId === undefined ? null : scheduleCreditorId
           const prevInstallmentMax = payments.reduce(
@@ -361,7 +391,7 @@ export function PaymentTable({
             },
           })
         }}
-        className="w-full py-2 text-sm text-blue-500 border border-dashed border-blue-300 rounded hover:bg-blue-50 transition-colors"
+        className="w-full rounded border border-dashed border-blue-300 py-1.5 text-[11px] text-blue-600 transition-colors hover:bg-blue-50"
       >
         + 入金予定を追加
       </button>

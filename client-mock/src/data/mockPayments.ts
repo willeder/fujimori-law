@@ -1,13 +1,12 @@
 /**
- * モックデータ - 入金予定履歴
- * 元データ: docs/data/受任案件管理_マージ済_20260330.xlsx の入金予定履歴シート
- *
- * 債権者別行は mockCreditors の支払条件（開始月・支払日・回数・初回/2回目以降/最終額）から生成し、
- * 案件全体行（creditorId なし）は依頼者→事務所の入金タイミング。カレンダーは一致しない場合がある。
+ * 入金予定履歴モック
+ * - 案件全体行: docs/data/CSVファイル.csv を scripts/generate_mock_from_docs.py で取り込み
+ * - 債権者別行: mockCreditors から生成（buildCreditorRepaymentSchedulesForCase）
  */
-
 import type { Creditor, PaymentRecord } from '../types/case'
+import { mockCasesFromDocs } from './mockCasesFromDocs'
 import { getCreditorsByCaseId } from './mockCreditors'
+import { mockPaymentRecordsFromDocs } from './mockPaymentsFromDocs'
 
 function pad2(n: number): string {
   return String(n).padStart(2, '0')
@@ -32,7 +31,6 @@ function formatYmd(y: number, m: number, day: number): string {
   return `${y}-${pad2(m)}-${pad2(d)}`
 }
 
-/** 債権者の和解支払予定日（毎月 paymentDay）を先頭から maxRows 件 */
 function creditorRepaymentPlannedDates(c: Creditor, maxRows: number): string[] {
   if (!c.paymentStartMonth || c.paymentDay == null || !c.paymentCount) return []
   const { y, m } = parseYearMonth(c.paymentStartMonth)
@@ -45,7 +43,6 @@ function creditorRepaymentPlannedDates(c: Creditor, maxRows: number): string[] {
   return dates
 }
 
-/** 0 始まりの回 index に対する和解支払額（初回・最終・2回目以降） */
 function installmentRepaymentAmount(c: Creditor, indexZeroBased: number): number {
   const n = c.paymentCount ?? 0
   if (n <= 0) return 0
@@ -64,15 +61,10 @@ function creditorRepaymentRowId(creditorId: number, installmentNo: number): numb
 }
 
 export interface BuildCreditorRepaymentOptions {
-  /** 債権者ごとに生成する最大行数（和解回数を上限） */
   maxInstallmentsPerCreditor: number
-  /** 先頭から何回分を実弁済済みにするか（モック上の進捗。案件全体の入金回数と揃えやすい） */
   paidInstallments: number
 }
 
-/**
- * 指定案件の債権者別弁済スケジュールを、和解データ（mockCreditors）から生成する。
- */
 export function buildCreditorRepaymentSchedulesForCase(
   caseId: number,
   options: BuildCreditorRepaymentOptions
@@ -80,7 +72,9 @@ export function buildCreditorRepaymentSchedulesForCase(
   const creditors = getCreditorsByCaseId(caseId)
   const out: PaymentRecord[] = []
   for (const c of creditors) {
-    const dates = creditorRepaymentPlannedDates(c, options.maxInstallmentsPerCreditor)
+    const pc = c.paymentCount ?? 0
+    const maxRows = Math.min(options.maxInstallmentsPerCreditor, pc || 0)
+    const dates = creditorRepaymentPlannedDates(c, maxRows)
     dates.forEach((plannedDate, i) => {
       const installmentNo = i + 1
       const amt = installmentRepaymentAmount(c, i)
@@ -111,353 +105,38 @@ export function buildCreditorRepaymentSchedulesForCase(
   return out
 }
 
+function scheduleOptionsForCase(caseId: number): BuildCreditorRepaymentOptions {
+  const creditors = getCreditorsByCaseId(caseId)
+  if (creditors.length === 0) {
+    return { maxInstallmentsPerCreditor: 0, paidInstallments: 0 }
+  }
+  const maxPc = Math.max(
+    0,
+    ...creditors.map((c) => (typeof c.paymentCount === 'number' ? c.paymentCount : 0)),
+  )
+  const maxInst = Math.min(10, maxPc || 0)
+  const paying = creditors.some((c) => c.status === '弁済中' || c.status === '和解済')
+  const paid = paying ? Math.min(5, Math.max(0, Math.floor(maxInst / 2))) : 0
+  return { maxInstallmentsPerCreditor: maxInst || 0, paidInstallments: paid }
+}
+
+const creditorScheduleRows = mockCasesFromDocs.flatMap((c) =>
+  buildCreditorRepaymentSchedulesForCase(c.id, scheduleOptionsForCase(c.id)),
+)
+
 export const mockPaymentRecords: PaymentRecord[] = [
-  // Case 1: 基本入金額 132,000円
-  {
-    id: 1,
-    caseId: 1,
-    plannedDate: '2025-04-18',
-    plannedAmount: 132000,
-    plannedFeeAllocation: 39600,
-    plannedAgentFeeAllocation: 13200,
-    plannedPoolAllocation: 13200,
-    plannedRepaymentAllocation: 66000,
-    actualDate: '2025-04-18',
-    actualAmount: 132000,
-    actualFeeAllocation: 39600,
-    actualAgentFeeAllocation: 13200,
-    actualPoolAllocation: 13200,
-    actualRepaymentAllocation: 66000,
-    handlingFee: 330,
-    repaymentCount: 6,
-    cumulativePool: 13200,
-  },
-  {
-    id: 2,
-    caseId: 1,
-    plannedDate: '2025-06-18',
-    plannedAmount: 132000,
-    plannedFeeAllocation: 39600,
-    plannedAgentFeeAllocation: 13200,
-    plannedPoolAllocation: 13200,
-    plannedRepaymentAllocation: 66000,
-    actualDate: '2025-06-18',
-    actualAmount: 132000,
-    actualFeeAllocation: 39600,
-    actualAgentFeeAllocation: 13200,
-    actualPoolAllocation: 13200,
-    actualRepaymentAllocation: 66000,
-    handlingFee: 330,
-    repaymentCount: 6,
-    cumulativePool: 26400,
-  },
-  {
-    id: 3,
-    caseId: 1,
-    plannedDate: '2025-08-18',
-    plannedAmount: 132000,
-    plannedFeeAllocation: 39600,
-    plannedAgentFeeAllocation: 13200,
-    plannedPoolAllocation: 13200,
-    plannedRepaymentAllocation: 66000,
-    actualDate: '2025-08-18',
-    actualAmount: 132000,
-    actualFeeAllocation: 39600,
-    actualAgentFeeAllocation: 13200,
-    actualPoolAllocation: 13200,
-    actualRepaymentAllocation: 66000,
-    handlingFee: 330,
-    repaymentCount: 6,
-    cumulativePool: 39600,
-  },
-  {
-    id: 4,
-    caseId: 1,
-    plannedDate: '2025-10-18',
-    plannedAmount: 132000,
-    plannedFeeAllocation: 39600,
-    plannedAgentFeeAllocation: 13200,
-    plannedPoolAllocation: 13200,
-    plannedRepaymentAllocation: 66000,
-    actualDate: '2025-10-18',
-    actualAmount: 132000,
-    actualFeeAllocation: 39600,
-    actualAgentFeeAllocation: 13200,
-    actualPoolAllocation: 13200,
-    actualRepaymentAllocation: 66000,
-    handlingFee: 330,
-    repaymentCount: 6,
-    cumulativePool: 52800,
-  },
-  {
-    id: 5,
-    caseId: 1,
-    plannedDate: '2025-12-18',
-    plannedAmount: 132000,
-    plannedFeeAllocation: 39600,
-    plannedAgentFeeAllocation: 13200,
-    plannedPoolAllocation: 13200,
-    plannedRepaymentAllocation: 66000,
-    actualDate: '2025-12-18',
-    actualAmount: 132000,
-    actualFeeAllocation: 39600,
-    actualAgentFeeAllocation: 13200,
-    actualPoolAllocation: 13200,
-    actualRepaymentAllocation: 66000,
-    handlingFee: 330,
-    repaymentCount: 6,
-    cumulativePool: 66000,
-  },
-  {
-    id: 6,
-    caseId: 1,
-    plannedDate: '2026-02-18',
-    plannedAmount: 132000,
-    plannedFeeAllocation: 39600,
-    plannedAgentFeeAllocation: 13200,
-    plannedPoolAllocation: 13200,
-    plannedRepaymentAllocation: 66000,
-    actualDate: '2026-02-18',
-    actualAmount: 132000,
-    actualFeeAllocation: 39600,
-    actualAgentFeeAllocation: 13200,
-    actualPoolAllocation: 13200,
-    actualRepaymentAllocation: 66000,
-    handlingFee: 330,
-    repaymentCount: 6,
-    cumulativePool: 79200,
-  },
-  {
-    id: 7,
-    caseId: 1,
-    plannedDate: '2026-04-18',
-    plannedAmount: 132000,
-    plannedFeeAllocation: 39600,
-    plannedAgentFeeAllocation: 13200,
-    plannedPoolAllocation: 13200,
-    plannedRepaymentAllocation: 66000,
-    actualDate: null,
-    actualAmount: null,
-    actualFeeAllocation: null,
-    actualAgentFeeAllocation: null,
-    actualPoolAllocation: null,
-    actualRepaymentAllocation: null,
-    handlingFee: null,
-    repaymentCount: null,
-    cumulativePool: 79200,
-  },
-
-  // Case 2: 基本入金額 58,000円
-  {
-    id: 10,
-    caseId: 2,
-    plannedDate: '2025-04-18',
-    plannedAmount: 58000,
-    plannedFeeAllocation: 17400,
-    plannedAgentFeeAllocation: 5800,
-    plannedPoolAllocation: 5800,
-    plannedRepaymentAllocation: 29000,
-    actualDate: '2025-04-18',
-    actualAmount: 58000,
-    actualFeeAllocation: 17400,
-    actualAgentFeeAllocation: 5800,
-    actualPoolAllocation: 5800,
-    actualRepaymentAllocation: 29000,
-    handlingFee: 330,
-    repaymentCount: 6,
-    cumulativePool: 5800,
-  },
-  {
-    id: 11,
-    caseId: 2,
-    plannedDate: '2025-06-18',
-    plannedAmount: 58000,
-    plannedFeeAllocation: 17400,
-    plannedAgentFeeAllocation: 5800,
-    plannedPoolAllocation: 5800,
-    plannedRepaymentAllocation: 29000,
-    actualDate: '2025-06-20',
-    actualAmount: 58000,
-    actualFeeAllocation: 17400,
-    actualAgentFeeAllocation: 5800,
-    actualPoolAllocation: 5800,
-    actualRepaymentAllocation: 29000,
-    handlingFee: 330,
-    repaymentCount: 6,
-    cumulativePool: 11600,
-  },
-  {
-    id: 12,
-    caseId: 2,
-    plannedDate: '2025-08-18',
-    plannedAmount: 58000,
-    plannedFeeAllocation: 17400,
-    plannedAgentFeeAllocation: 5800,
-    plannedPoolAllocation: 5800,
-    plannedRepaymentAllocation: 29000,
-    actualDate: null,
-    actualAmount: null,
-    actualFeeAllocation: null,
-    actualAgentFeeAllocation: null,
-    actualPoolAllocation: null,
-    actualRepaymentAllocation: null,
-    handlingFee: null,
-    repaymentCount: null,
-    cumulativePool: 11600,
-  },
-
-  // Case 3: 基本入金額 29,000円
-  {
-    id: 20,
-    caseId: 3,
-    plannedDate: '2025-05-03',
-    plannedAmount: 29000,
-    plannedFeeAllocation: 8700,
-    plannedAgentFeeAllocation: 2900,
-    plannedPoolAllocation: 2900,
-    plannedRepaymentAllocation: 14500,
-    actualDate: '2025-05-03',
-    actualAmount: 29000,
-    actualFeeAllocation: 8700,
-    actualAgentFeeAllocation: 2900,
-    actualPoolAllocation: 2900,
-    actualRepaymentAllocation: 14500,
-    handlingFee: 330,
-    repaymentCount: 1,
-    cumulativePool: 2900,
-  },
-  {
-    id: 21,
-    caseId: 3,
-    plannedDate: '2025-06-03',
-    plannedAmount: 29000,
-    plannedFeeAllocation: 8700,
-    plannedAgentFeeAllocation: 2900,
-    plannedPoolAllocation: 2900,
-    plannedRepaymentAllocation: 14500,
-    actualDate: '2025-06-03',
-    actualAmount: 29000,
-    actualFeeAllocation: 8700,
-    actualAgentFeeAllocation: 2900,
-    actualPoolAllocation: 2900,
-    actualRepaymentAllocation: 14500,
-    handlingFee: 330,
-    repaymentCount: 1,
-    cumulativePool: 5800,
-  },
-
-  // Case 5: 基本入金額 22,000円
-  {
-    id: 30,
-    caseId: 5,
-    plannedDate: '2025-04-28',
-    plannedAmount: 22000,
-    plannedFeeAllocation: 6600,
-    plannedAgentFeeAllocation: 2200,
-    plannedPoolAllocation: 2200,
-    plannedRepaymentAllocation: 11000,
-    actualDate: '2025-04-28',
-    actualAmount: 22000,
-    actualFeeAllocation: 6600,
-    actualAgentFeeAllocation: 2200,
-    actualPoolAllocation: 2200,
-    actualRepaymentAllocation: 11000,
-    handlingFee: 330,
-    repaymentCount: 2,
-    cumulativePool: 2200,
-  },
-  {
-    id: 31,
-    caseId: 5,
-    plannedDate: '2025-05-28',
-    plannedAmount: 22000,
-    plannedFeeAllocation: 6600,
-    plannedAgentFeeAllocation: 2200,
-    plannedPoolAllocation: 2200,
-    plannedRepaymentAllocation: 11000,
-    actualDate: '2025-05-28',
-    actualAmount: 22000,
-    actualFeeAllocation: 6600,
-    actualAgentFeeAllocation: 2200,
-    actualPoolAllocation: 2200,
-    actualRepaymentAllocation: 11000,
-    handlingFee: 330,
-    repaymentCount: 2,
-    cumulativePool: 4400,
-  },
-
-  // Case 10: キャンセル案件（入金なし）
-  {
-    id: 40,
-    caseId: 10,
-    plannedDate: '2024-01-31',
-    plannedAmount: 49000,
-    plannedFeeAllocation: 14700,
-    plannedAgentFeeAllocation: 4900,
-    plannedPoolAllocation: 4900,
-    plannedRepaymentAllocation: 24500,
-    actualDate: '2024-01-31',
-    actualAmount: 49000,
-    actualFeeAllocation: 14700,
-    actualAgentFeeAllocation: 4900,
-    actualPoolAllocation: 4900,
-    actualRepaymentAllocation: 24500,
-    handlingFee: 330,
-    repaymentCount: 4,
-    cumulativePool: 4900,
-  },
-  {
-    id: 41,
-    caseId: 10,
-    plannedDate: '2024-02-29',
-    plannedAmount: 36000,
-    plannedFeeAllocation: 10800,
-    plannedAgentFeeAllocation: 3600,
-    plannedPoolAllocation: 3600,
-    plannedRepaymentAllocation: 18000,
-    actualDate: null,
-    actualAmount: null,
-    actualFeeAllocation: null,
-    actualAgentFeeAllocation: null,
-    actualPoolAllocation: null,
-    actualRepaymentAllocation: null,
-    handlingFee: null,
-    repaymentCount: null,
-    cumulativePool: 4900,
-  },
-  ...buildCreditorRepaymentSchedulesForCase(1, {
-    maxInstallmentsPerCreditor: 10,
-    paidInstallments: 6,
-  }),
-  ...buildCreditorRepaymentSchedulesForCase(2, {
-    maxInstallmentsPerCreditor: 10,
-    paidInstallments: 2,
-  }),
-  ...buildCreditorRepaymentSchedulesForCase(3, {
-    maxInstallmentsPerCreditor: 8,
-    paidInstallments: 2,
-  }),
-  ...buildCreditorRepaymentSchedulesForCase(5, {
-    maxInstallmentsPerCreditor: 8,
-    paidInstallments: 2,
-  }),
-  ...buildCreditorRepaymentSchedulesForCase(10, {
-    maxInstallmentsPerCreditor: 6,
-    paidInstallments: 1,
-  }),
+  ...mockPaymentRecordsFromDocs,
+  ...creditorScheduleRows,
 ]
 
-/** 案件IDで入金履歴を取得 */
 export function getPaymentRecordsByCaseId(caseId: number): PaymentRecord[] {
   return mockPaymentRecords.filter((p) => p.caseId === caseId)
 }
 
-/** 未入金（予定のみ）を取得 */
 export function getPendingPayments(caseId: number): PaymentRecord[] {
   return getPaymentRecordsByCaseId(caseId).filter((p) => p.actualDate === null)
 }
 
-/** 入金済みを取得 */
 export function getCompletedPayments(caseId: number): PaymentRecord[] {
   return getPaymentRecordsByCaseId(caseId).filter((p) => p.actualDate !== null)
 }

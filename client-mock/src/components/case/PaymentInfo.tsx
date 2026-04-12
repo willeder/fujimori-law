@@ -29,6 +29,12 @@ export function PaymentInfo({ data, onChange, readonly = false }: PaymentInfoPro
         disabled={readonly}
       />
       <EditableField
+        label="10日以内"
+        value={data.firstPaymentWithinTenDays}
+        onChange={(v) => onChange('firstPaymentWithinTenDays', v)}
+        disabled={readonly}
+      />
+      <EditableField
         label="毎月入金日"
         value={data.monthlyPaymentDay}
         onChange={(v) => onChange('monthlyPaymentDay', v)}

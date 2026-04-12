@@ -43,7 +43,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         key: 'status',
         header: 'ステータス',
         width: '120px',
-        render: (item) => <StatusBadge status={item.status} />,
+        render: (item) => <StatusBadge status={item.status} size="sm" />,
       },
       {
         key: 'declaredAmount',
@@ -51,9 +51,9 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         width: '100px',
         align: 'right',
         render: (item) => (
-          <span>
+          <span className="tabular-nums">
             {item.declaredAmount?.toLocaleString()}
-            <span className="text-slate-400 text-xs ml-1">円</span>
+            <span className="ml-0.5 text-[9px] text-slate-400">円</span>
           </span>
         ),
       },
@@ -63,9 +63,9 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         width: '100px',
         align: 'right',
         render: (item) => (
-          <span>
+          <span className="tabular-nums">
             {item.debtAmount?.toLocaleString()}
-            <span className="text-slate-400 text-xs ml-1">円</span>
+            <span className="ml-0.5 text-[9px] text-slate-400">円</span>
           </span>
         ),
       },
@@ -76,9 +76,9 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         align: 'right',
         render: (item) =>
           item.settlementAmount ? (
-            <span className="text-green-600 font-medium">
+            <span className="font-medium text-green-700 tabular-nums">
               {item.settlementAmount.toLocaleString()}
-              <span className="text-slate-400 text-xs ml-1">円</span>
+              <span className="ml-0.5 text-[9px] text-slate-400">円</span>
             </span>
           ) : (
             <span className="text-slate-300">-</span>
@@ -91,9 +91,9 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         align: 'right',
         render: (item) =>
           item.paymentCount ? (
-            <span>
+            <span className="tabular-nums">
               {item.paymentCount}
-              <span className="text-slate-400 text-xs ml-1">回</span>
+              <span className="ml-0.5 text-[9px] text-slate-400">回</span>
             </span>
           ) : (
             <span className="text-slate-300">-</span>
@@ -108,36 +108,44 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
     ]
 
     return (
-      <div className="space-y-4">
-        <div className="text-xs text-slate-500">案件ID: {caseId}</div>
-        {/* 合計サマリ */}
-        <div className="grid grid-cols-4 gap-4 p-4 bg-slate-50 rounded-lg">
+      <div className="min-h-0 space-y-2">
+        <div className="text-[10px] leading-tight text-slate-500">案件ID: {caseId}</div>
+        {/* 合計サマリ（入金スケジュール表と同系の密度） */}
+        <div className="grid grid-cols-2 gap-2 rounded bg-slate-50 p-2 sm:grid-cols-4">
           <div>
-            <div className="text-xs text-slate-500">債権者数</div>
-            <div className="text-lg font-bold">{creditors.length}社</div>
+            <div className="text-[9px] font-medium leading-tight text-slate-500">債権者数</div>
+            <div className="text-xs font-bold tabular-nums text-slate-800">
+              {creditors.length}社
+            </div>
           </div>
           <div>
-            <div className="text-xs text-slate-500">申告債務額合計</div>
-            <div className="text-lg font-bold">{totalDeclared.toLocaleString()}円</div>
+            <div className="text-[9px] font-medium leading-tight text-slate-500">
+              申告債務額合計
+            </div>
+            <div className="text-xs font-bold tabular-nums text-slate-800">
+              {totalDeclared.toLocaleString()}円
+            </div>
           </div>
           <div>
-            <div className="text-xs text-slate-500">債務額合計</div>
-            <div className="text-lg font-bold">{totalDebt.toLocaleString()}円</div>
+            <div className="text-[9px] font-medium leading-tight text-slate-500">債務額合計</div>
+            <div className="text-xs font-bold tabular-nums text-slate-800">
+              {totalDebt.toLocaleString()}円
+            </div>
           </div>
           <div>
-            <div className="text-xs text-slate-500">和解金額合計</div>
-            <div className="text-lg font-bold text-green-600">
+            <div className="text-[9px] font-medium leading-tight text-slate-500">和解金額合計</div>
+            <div className="text-xs font-bold tabular-nums text-green-700">
               {totalSettlement.toLocaleString()}円
             </div>
           </div>
         </div>
 
-        {/* テーブル */}
         <DataTable
           data={creditors}
           columns={columns}
           keyField="id"
           emptyMessage="債権者データがありません"
+          density="compact"
         />
       </div>
     )
@@ -148,18 +156,19 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
   if (!creditor) return null
 
   return (
-    <div className="space-y-3">
+    <div className="min-h-0 space-y-2">
       {/* ステータス */}
-      <div className="flex items-center gap-4">
-        <StatusBadge status={creditor.status} size="md" />
-        <span className="text-sm text-slate-500">
+      <div className="flex flex-wrap items-center gap-2">
+        <StatusBadge status={creditor.status} size="sm" />
+        <span className="text-[10px] leading-tight text-slate-600">
           交渉相手: {creditor.negotiationPartner ?? '直接'}
         </span>
       </div>
 
       {/* 債権情報 */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
         <EditableField
+          compact
           label="申告額"
           value={creditor.declaredAmount}
           onChange={(v) =>
@@ -169,6 +178,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           suffix="円"
         />
         <EditableField
+          compact
           label="債務額"
           value={creditor.debtAmount}
           onChange={(v) =>
@@ -178,6 +188,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           suffix="円"
         />
         <EditableField
+          compact
           label="想定和解（%）"
           value={creditor.expectedSettlement}
           onChange={(v) =>
@@ -189,8 +200,9 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       </div>
 
       {/* 進行状況 */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
         <EditableField
+          compact
           label="ステータス"
           value={creditor.status}
           onChange={(v) => updateCreditor(creditor, { status: v as Creditor['status'] })}
@@ -206,6 +218,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           ]}
         />
         <EditableField
+          compact
           label="受任通知送付日"
           value={creditor.acceptanceNoticeSentDate}
           onChange={(v) =>
@@ -214,6 +227,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           type="date"
         />
         <EditableField
+          compact
           label="次回処理日時"
           value={creditor.nextProcessDate}
           onChange={(v) =>
@@ -227,9 +241,10 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       {['和解済', '弁済中', '完済'].includes(creditor.status) && (
         <>
           <hr className="border-slate-200" />
-          <h4 className="font-medium text-slate-700">和解内容</h4>
-          <div className="grid grid-cols-3 gap-4">
+          <h4 className="text-[10px] font-semibold text-slate-600">和解内容</h4>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             <EditableField
+              compact
               label="和解日"
               value={creditor.settlementDate}
               onChange={(v) =>
@@ -238,6 +253,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
               type="date"
             />
             <EditableField
+              compact
               label="和解金額"
               value={creditor.settlementAmount}
               onChange={(v) =>
@@ -247,6 +263,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
               suffix="円"
             />
             <EditableField
+              compact
               label="支払回数"
               value={creditor.paymentCount}
               onChange={(v) =>
@@ -256,6 +273,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
               suffix="回"
             />
             <EditableField
+              compact
               label="支払開始月"
               value={creditor.paymentStartMonth}
               onChange={(v) =>
@@ -263,6 +281,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
               }
             />
             <EditableField
+              compact
               label="支払日"
               value={creditor.paymentDay}
               onChange={(v) =>
@@ -272,6 +291,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
               suffix="日"
             />
             <EditableField
+              compact
               label="将来利息"
               value={creditor.futureInterest}
               onChange={(v) =>
@@ -285,8 +305,9 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
             />
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             <EditableField
+              compact
               label="初回支払額"
               value={creditor.firstPaymentAmount}
               onChange={(v) =>
@@ -296,6 +317,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
               suffix="円"
             />
             <EditableField
+              compact
               label="２回目以降支払額"
               value={creditor.subsequentPaymentAmount}
               onChange={(v) =>
@@ -307,6 +329,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
               suffix="円"
             />
             <EditableField
+              compact
               label="最終支払額"
               value={creditor.finalPaymentAmount}
               onChange={(v) =>
@@ -317,9 +340,10 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
             />
           </div>
 
-          <h4 className="font-medium text-slate-700 mt-4">振込先情報</h4>
-          <div className="grid grid-cols-3 gap-4">
+          <h4 className="mt-2 text-[10px] font-semibold text-slate-600">振込先情報</h4>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             <EditableField
+              compact
               label="銀行名"
               value={creditor.bankName}
               onChange={(v) =>
@@ -327,6 +351,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
               }
             />
             <EditableField
+              compact
               label="支店名"
               value={creditor.branchName}
               onChange={(v) =>
@@ -334,6 +359,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
               }
             />
             <EditableField
+              compact
               label="口座種別"
               value={creditor.accountType}
               onChange={(v) =>
@@ -346,6 +372,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
               ]}
             />
             <EditableField
+              compact
               label="口座番号"
               value={creditor.accountNumber}
               onChange={(v) =>
@@ -353,6 +380,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
               }
             />
             <EditableField
+              compact
               label="口座名義"
               value={creditor.accountHolder}
               onChange={(v) =>
@@ -365,14 +393,16 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
 
       {/* ④ 債権者資料（リンク/ファイル名のメモ） */}
       <hr className="border-slate-200" />
-      <h4 className="font-medium text-slate-700">債権者資料</h4>
-      <EditableField
-        label="債権者資料"
-        value={creditor.creditorDocuments ?? ''}
-        onChange={(v) => updateCreditor(creditor, { creditorDocuments: v || null })}
-        type="textarea"
-        placeholder="例）債権調査票: driveリンク / 和解提案書: ファイル名 など"
-      />
+      <h4 className="text-[10px] font-semibold text-slate-600">債権者資料</h4>
+      <div className="rounded border border-slate-100 bg-slate-50/50 p-2">
+        <EditableField
+          label="債権者資料"
+          value={creditor.creditorDocuments ?? ''}
+          onChange={(v) => updateCreditor(creditor, { creditorDocuments: v || null })}
+          type="textarea"
+          placeholder="例）債権調査票: driveリンク / 和解提案書: ファイル名 など"
+        />
+      </div>
     </div>
   )
 }
