@@ -1228,7 +1228,7 @@ function CaseDetailBody({
 
         {/* 接触履歴（下部・通常フォントで表示） */}
         <div className="mt-3 min-w-0">
-          <SectionCard title="接触履歴" color="slate" collapsible defaultOpen>
+          <SectionCard title="接触履歴" color="slate" collapsible defaultOpen={false}>
             <Tabs
               variant="split"
               defaultTab="client"
