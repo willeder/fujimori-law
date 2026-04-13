@@ -24,6 +24,9 @@ export function EditableField({
   disabled = false,
   compact = false,
 }: EditableFieldProps) {
+  const labelWithColon =
+    label.endsWith('：') || label.endsWith(':') ? label : `${label}：`
+
   const [isEditing, setIsEditing] = useState(false)
   const [editValue, setEditValue] = useState(String(value ?? ''))
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(null)
@@ -65,23 +68,23 @@ export function EditableField({
   if (disabled) {
     if (compact) {
       return (
-        <div className="flex items-center gap-0.5 min-h-[1.5rem] py-0">
-          <span className="w-[5rem] shrink-0 text-[10px] font-medium text-slate-500 leading-tight break-words">
-            {label}
+        <div className="flex items-center gap-0 min-h-[1.5rem] py-0">
+          <span className="w-[5.25rem] shrink-0 text-[10px] font-medium text-slate-500 leading-tight break-words">
+            {labelWithColon}
           </span>
           <div className="min-w-0 flex-1 text-xs text-slate-700 whitespace-normal break-words leading-tight">
             {formattedDisplay}
-            {suffix && <span className="text-slate-400 ml-0.5">{suffix}</span>}
+            {suffix && <span className="text-slate-400 ml-0">{suffix}</span>}
           </div>
         </div>
       )
     }
     return (
-      <div className="space-y-1">
-        <label className="block text-xs font-medium text-slate-500">{label}</label>
-        <div className="text-sm text-slate-700">
+      <div className="flex min-w-0 items-baseline gap-1">
+        <span className="shrink-0 text-xs font-medium text-slate-500">{labelWithColon}</span>
+        <div className="min-w-0 flex-1 text-sm text-slate-700">
           {formattedDisplay}
-          {suffix && <span className="text-slate-400 ml-1">{suffix}</span>}
+          {suffix && <span className="text-slate-400 ml-0.5">{suffix}</span>}
         </div>
       </div>
     )
@@ -90,12 +93,12 @@ export function EditableField({
   if (!isEditing) {
     if (compact) {
       return (
-        <div className="flex items-center gap-0.5 min-h-[1.5rem] py-0">
-          <span className="w-[5rem] shrink-0 text-[10px] font-medium text-slate-500 leading-tight break-words">
-            {label}
+        <div className="flex items-center gap-0 min-h-[1.5rem] py-0">
+          <span className="w-[5.25rem] shrink-0 text-[10px] font-medium text-slate-500 leading-tight break-words">
+            {labelWithColon}
           </span>
           <div
-            className="group flex min-w-0 flex-1 cursor-pointer items-center gap-1 rounded px-0.5 py-0.5 -mx-0.5 text-xs leading-tight text-slate-700 hover:bg-blue-50/80"
+            className="group flex min-w-0 flex-1 cursor-pointer items-center gap-0.5 rounded px-0.5 py-0.5 -mx-0.5 text-xs leading-tight text-slate-700 hover:bg-blue-50/80"
             onClick={() => {
               setEditValue(String(value ?? ''))
               setIsEditing(true)
@@ -103,7 +106,7 @@ export function EditableField({
           >
             <span className="min-w-0 flex-1 whitespace-normal break-words">
               {formattedDisplay}
-              {suffix && <span className="text-slate-400 ml-0.5">{suffix}</span>}
+              {suffix && <span className="text-slate-400 ml-0">{suffix}</span>}
             </span>
             <span className="shrink-0 text-[10px] text-blue-400 opacity-0 transition-opacity group-hover:opacity-100">
               編集
@@ -113,18 +116,20 @@ export function EditableField({
       )
     }
     return (
-      <div className="space-y-1">
-        <label className="block text-xs font-medium text-slate-500">{label}</label>
+      <div className="flex min-w-0 flex-col gap-0.5">
         <div
-          className="text-sm text-slate-700 cursor-pointer whitespace-normal break-words hover:bg-blue-50 px-2 py-1 -mx-2 rounded transition-colors group"
+          className="flex min-w-0 cursor-pointer items-baseline gap-1 rounded py-0.5 transition-colors group hover:bg-blue-50"
           onClick={() => {
             setEditValue(String(value ?? ''))
             setIsEditing(true)
           }}
         >
-          {formattedDisplay}
-          {suffix && <span className="text-slate-400 ml-1">{suffix}</span>}
-          <span className="text-blue-400 opacity-0 group-hover:opacity-100 ml-2 text-xs">
+          <span className="shrink-0 text-xs font-medium text-slate-500">{labelWithColon}</span>
+          <span className="min-w-0 flex-1 whitespace-normal break-words text-sm text-slate-700">
+            {formattedDisplay}
+            {suffix && <span className="text-slate-400 ml-0.5">{suffix}</span>}
+          </span>
+          <span className="shrink-0 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100 text-xs">
             編集
           </span>
         </div>
@@ -134,11 +139,11 @@ export function EditableField({
 
   if (compact) {
     return (
-      <div className="flex items-center gap-0.5 min-h-[1.75rem] py-0">
-        <span className="w-[5rem] shrink-0 text-[10px] font-medium text-slate-500 leading-tight break-words">
-          {label}
+      <div className="flex items-center gap-0 min-h-[1.75rem] py-0">
+        <span className="w-[5.25rem] shrink-0 text-[10px] font-medium text-slate-500 leading-tight break-words">
+          {labelWithColon}
         </span>
-        <div className="flex min-w-0 flex-1 items-center gap-1">
+        <div className="flex min-w-0 flex-1 items-center gap-0.5">
           {type === 'select' && options ? (
             <select
               ref={inputRef as React.RefObject<HTMLSelectElement>}
@@ -177,7 +182,7 @@ export function EditableField({
               className={inputBase}
             />
           )}
-          {suffix && <span className="text-slate-400 text-xs shrink-0">{suffix}</span>}
+          {suffix && <span className="text-slate-400 text-xs shrink-0 pl-0">{suffix}</span>}
           {type === 'textarea' && (
             <div className="flex shrink-0 gap-0.5">
               <button
@@ -202,9 +207,10 @@ export function EditableField({
   }
 
   return (
-    <div className="space-y-1">
-      <label className="block text-xs font-medium text-slate-500">{label}</label>
-      <div className="flex items-center gap-2">
+    <div className="flex min-w-0 flex-col gap-0.5">
+      <div className="flex min-w-0 items-start gap-1">
+        <span className="shrink-0 pt-1 text-xs font-medium text-slate-500">{labelWithColon}</span>
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
         {type === 'select' && options ? (
           <select
             ref={inputRef as React.RefObject<HTMLSelectElement>}
@@ -260,6 +266,7 @@ export function EditableField({
             </button>
           </div>
         )}
+        </div>
       </div>
     </div>
   )

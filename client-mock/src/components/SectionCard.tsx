@@ -47,7 +47,7 @@ export function SectionCard({
           </button>
         )}
       </div>
-      {isOpen && <div className="min-h-0 p-4">{children}</div>}
+      {isOpen && <div className="min-h-0 min-w-0 p-4">{children}</div>}
     </div>
   )
 }

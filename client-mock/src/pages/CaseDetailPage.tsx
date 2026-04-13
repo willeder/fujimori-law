@@ -116,13 +116,13 @@ function VAccountFields({ branch, number, onSave }: VAccountFieldsProps) {
   if (savedLocked && !editing) {
     return (
       <div className="space-y-2 border-t border-slate-100 pt-3">
-        <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm text-slate-800">
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm text-slate-800">
           <span className="min-w-0">
-            <span className="text-slate-500">支店</span>{' '}
+            <span className="text-slate-500">支店：</span>
             <span className="font-medium tabular-nums">{branch}</span>
           </span>
           <span className="min-w-0">
-            <span className="text-slate-500">口座番号</span>{' '}
+            <span className="text-slate-500">口座番号：</span>
             <span className="font-medium tabular-nums">{number}</span>
           </span>
         </div>
@@ -142,7 +142,7 @@ function VAccountFields({ branch, number, onSave }: VAccountFieldsProps) {
       <div className="space-y-2 border-t border-slate-100 pt-3">
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end sm:gap-x-3">
           <label className="block min-w-0 flex-1 text-sm sm:max-w-[12rem]">
-            <span className="text-slate-500">支店</span>
+            <span className="text-slate-500">支店：</span>
             <input
               className={`${inputCls} mt-0.5 block`}
               value={draftB}
@@ -151,7 +151,7 @@ function VAccountFields({ branch, number, onSave }: VAccountFieldsProps) {
             />
           </label>
           <label className="block min-w-0 flex-1 text-sm sm:max-w-[14rem]">
-            <span className="text-slate-500">口座番号</span>
+            <span className="text-slate-500">口座番号：</span>
             <input
               className={`${inputCls} mt-0.5 block`}
               value={draftN}
@@ -184,7 +184,7 @@ function VAccountFields({ branch, number, onSave }: VAccountFieldsProps) {
     <div className="border-t border-slate-100 pt-3">
       <div className="flex flex-wrap items-end gap-x-2 gap-y-2">
         <label className="block min-w-0 flex-1 basis-[9rem] text-sm sm:max-w-[12rem]">
-          <span className="text-slate-500">支店</span>
+          <span className="text-slate-500">支店：</span>
           <input
             className={`${inputCls} mt-0.5 block`}
             value={draftB}
@@ -194,7 +194,7 @@ function VAccountFields({ branch, number, onSave }: VAccountFieldsProps) {
           />
         </label>
         <label className="block min-w-0 flex-1 basis-[10rem] text-sm sm:max-w-[14rem]">
-          <span className="text-slate-500">口座番号</span>
+          <span className="text-slate-500">口座番号：</span>
           <input
             className={`${inputCls} mt-0.5 block`}
             value={draftN}
@@ -554,31 +554,31 @@ function CaseDetailBody({
           </Link>
           <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-x-6 gap-y-2">
             <span className="shrink-0">
-              <span className="text-slate-500">ID</span>{' '}
+              <span className="text-slate-500">ID：</span>
               <span className="font-medium">{displayCaseId}</span>
             </span>
             <span className="shrink-0">
-              <span className="text-slate-500">名前</span>{' '}
+              <span className="text-slate-500">名前：</span>
               <span className="font-medium">{caseData.clientBasicInfo.name ?? '-'}</span>
             </span>
             <span className="shrink-0">
-              <span className="text-slate-500">フリガナ</span>{' '}
+              <span className="text-slate-500">フリガナ：</span>
               <span className="font-medium">{caseData.clientBasicInfo.furigana ?? '-'}</span>
             </span>
-            <span className="flex shrink-0 items-center gap-2">
-              <span className="text-slate-500">受任後ステータス</span>
+            <span className="flex shrink-0 items-center gap-0.5">
+              <span className="text-slate-500">受任後ステータス：</span>
               <StatusBadge status={caseData.settlementInfo.status} size="md" />
             </span>
             <span className="shrink-0">
-              <span className="text-slate-500">電話番号</span>{' '}
+              <span className="text-slate-500">電話番号：</span>
               <span className="font-medium">{caseData.clientBasicInfo.phone ?? '-'}</span>
             </span>
             <span className="min-w-0 shrink">
-              <span className="text-slate-500">メールアドレス</span>{' '}
+              <span className="text-slate-500">メールアドレス：</span>
               <span className="font-medium break-all">{caseData.clientBasicInfo.email ?? '-'}</span>
             </span>
             <span className="shrink-0">
-              <span className="text-slate-500">要注意ランク</span>{' '}
+              <span className="text-slate-500">要注意ランク：</span>
               <span className="font-medium">{caseData.clientBasicInfo.cautionRank ?? '-'}</span>
             </span>
           </div>
@@ -603,10 +603,10 @@ function CaseDetailBody({
             />
           </div>
         </div>
-        {/* リスト・受任・報酬・入金（1行に統合、横スクロール） */}
-        <div className="border-b border-slate-100 px-6 py-2">
-          <div className="flex flex-nowrap items-center gap-x-3 overflow-x-auto pb-0.5">
-            <div className="min-w-[4.5rem] shrink-0">
+        {/* リスト・受任・報酬・入金（全幅に均等グリッド。狭い画面は列数を段階的に減らして折返し） */}
+        <div className="w-full border-b border-slate-100 px-6 py-2">
+          <div className="grid w-full min-w-0 grid-cols-2 items-end gap-x-1.5 gap-y-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-9">
+            <div className="min-w-0">
               <EditableField
                 compact
                 label="リスト登録日"
@@ -615,7 +615,7 @@ function CaseDetailBody({
                 type="date"
               />
             </div>
-            <div className="min-w-[4.5rem] shrink-0">
+            <div className="min-w-0">
               <EditableField
                 compact
                 label="リスト区分"
@@ -623,7 +623,7 @@ function CaseDetailBody({
                 onChange={(v) => updateMetadata('listCategory', v)}
               />
             </div>
-            <div className="min-w-[4.5rem] shrink-0">
+            <div className="min-w-0">
               <EditableField
                 compact
                 label="受任日"
@@ -632,7 +632,7 @@ function CaseDetailBody({
                 type="date"
               />
             </div>
-            <div className="min-w-[4.5rem] shrink-0">
+            <div className="min-w-0">
               <EditableField
                 compact
                 label="面談担当"
@@ -640,7 +640,7 @@ function CaseDetailBody({
                 onChange={(v) => updateAppointmentInfo('interviewStaff', v)}
               />
             </div>
-            <div className="min-w-[4.5rem] shrink-0">
+            <div className="min-w-0">
               <EditableField
                 compact
                 label="受任ランク"
@@ -654,7 +654,7 @@ function CaseDetailBody({
                 ]}
               />
             </div>
-            <div className="min-w-[4.5rem] shrink-0">
+            <div className="min-w-0">
               <EditableField
                 compact
                 label="通常報酬"
@@ -664,7 +664,7 @@ function CaseDetailBody({
                 suffix="円"
               />
             </div>
-            <div className="min-w-[4.5rem] shrink-0">
+            <div className="min-w-0">
               <EditableField
                 compact
                 label="報酬分割回数"
@@ -674,7 +674,7 @@ function CaseDetailBody({
                 suffix="回"
               />
             </div>
-            <div className="min-w-[4.5rem] shrink-0">
+            <div className="min-w-0">
               <EditableField
                 compact
                 label="毎月入金日"
@@ -682,7 +682,7 @@ function CaseDetailBody({
                 onChange={(v) => updatePaymentInfo('monthlyPaymentDay', v)}
               />
             </div>
-            <div className="min-w-[4.5rem] shrink-0">
+            <div className="min-w-0">
               <EditableField
                 compact
                 label="基本入金額"
@@ -705,8 +705,8 @@ function CaseDetailBody({
             {/* ② 入金管理をメインにするため、入金状況サマリを最上部へ */}
             <SectionCard title="入金状況" color="blue">
               <div className="space-y-3">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="shrink-0 text-sm text-slate-600">累計入金額</span>
+                <div className="flex items-center justify-between gap-1">
+                  <span className="shrink-0 text-sm text-slate-600">累計入金額：</span>
                   <span className="min-w-0 whitespace-normal break-words text-right text-xl font-bold text-blue-600">
                     {formatYenPair(
                       caseData.paymentInfo.cumulativePaymentAmount,
@@ -714,14 +714,14 @@ function CaseDetailBody({
                     )}
                   </span>
                 </div>
-                <div className="flex items-center justify-between gap-2 text-sm">
-                  <span className="shrink-0 text-slate-500">残入金予定額</span>
+                <div className="flex items-center justify-between gap-1 text-sm">
+                  <span className="shrink-0 text-slate-500">残入金予定額：</span>
                   <span className="min-w-0 whitespace-normal break-words text-right font-medium tabular-nums">
                     {remainingPlanned != null ? `${remainingPlanned.toLocaleString()}円` : '-'}
                   </span>
                 </div>
-                <div className="flex items-center justify-between gap-2 text-sm">
-                  <span className="shrink-0 text-slate-500">次回／最終入金予定日</span>
+                <div className="flex items-center justify-between gap-1 text-sm">
+                  <span className="shrink-0 text-slate-500">次回／最終入金予定日：</span>
                   <span className="min-w-0 whitespace-normal break-words text-right font-medium">
                     {formatDatePair(displayNextPaymentDate, finalPlannedDate)}
                   </span>
@@ -729,37 +729,37 @@ function CaseDetailBody({
                 <hr className="border-slate-100" />
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <div className="min-w-0 text-sm text-slate-600">
-                    <span className="text-slate-600">報酬充当額</span>{' '}
+                    <span className="text-slate-600">報酬充当額：</span>
                     <span className="font-medium text-slate-900">
                       {caseData.paymentInfo.cumulativeFeeAllocation?.toLocaleString() ?? '-'}
                     </span>
-                    <span className="text-slate-400 ml-1">円</span>
+                    <span className="text-slate-400">円</span>
                   </div>
                   <div className="min-w-0 text-sm text-slate-600">
-                    <span className="text-slate-600">未回収額</span>{' '}
+                    <span className="text-slate-600">未回収額：</span>
                     <span className="font-medium text-slate-900">
                       {caseData.feeInfo.uncollectedFee?.toLocaleString() ?? '-'}
                     </span>
-                    <span className="text-slate-400 ml-1">円</span>
+                    <span className="text-slate-400">円</span>
                   </div>
                   <div className="min-w-0 text-sm text-slate-600">
-                    <span className="text-slate-600">弁代充当額</span>{' '}
+                    <span className="text-slate-600">弁代充当額：</span>
                     <span className="font-medium text-slate-900">
                       {sumActualAgentFee.toLocaleString()}
                     </span>
-                    <span className="text-slate-400 ml-1">円</span>
+                    <span className="text-slate-400">円</span>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="min-w-0 text-sm text-slate-600">
-                    <span className="text-slate-600">プール充当額</span>{' '}
+                    <span className="text-slate-600">プール充当額：</span>
                     <span className="font-medium text-slate-900">
                       {sumActualPool.toLocaleString()}
                     </span>
-                    <span className="text-slate-400 ml-1">円</span>
+                    <span className="text-slate-400">円</span>
                   </div>
                   <div className="min-w-0 text-sm text-slate-600">
-                    <span className="text-slate-600">弁済充当額</span>{' '}
+                    <span className="text-slate-600">弁済充当額：</span>
                     <span className="font-medium text-slate-900">
                       {formatYenPair(sumActualRepayment, sumPlannedRepayment)}
                     </span>
@@ -1226,9 +1226,9 @@ function CaseDetailBody({
           </div>
         </div>
 
-        {/* 接触履歴（下部：依頼者／債権者をタブで切替） */}
-        <div className="mt-3">
-          <SectionCard title="接触履歴" color="slate" collapsible defaultOpen={false}>
+        {/* 接触履歴（下部・通常フォントで表示） */}
+        <div className="mt-3 min-w-0">
+          <SectionCard title="接触履歴" color="slate" collapsible defaultOpen>
             <Tabs
               variant="split"
               defaultTab="client"

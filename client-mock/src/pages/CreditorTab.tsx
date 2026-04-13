@@ -40,48 +40,49 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       {
         key: 'creditorName',
         header: '債権者',
-        width: '132px',
+        width: '20%',
       },
       {
         key: 'status',
         header: 'ステータス',
-        width: '132px',
-        render: (item) => <StatusBadge status={item.status} size="md" />,
+        width: '12%',
+        cellTruncate: false,
+        render: (item) => <StatusBadge status={item.status} size="sm" />,
       },
       {
         key: 'declaredAmount',
         header: '申告額',
-        width: '108px',
+        width: '12%',
         align: 'right',
         render: (item) => (
           <span className="tabular-nums">
             {item.declaredAmount?.toLocaleString()}
-            <span className="ml-0.5 text-xs text-slate-400">円</span>
+            <span className="ml-0.5 text-[8px] text-slate-400">円</span>
           </span>
         ),
       },
       {
         key: 'debtAmount',
         header: '債務額',
-        width: '108px',
+        width: '12%',
         align: 'right',
         render: (item) => (
           <span className="tabular-nums">
             {item.debtAmount?.toLocaleString()}
-            <span className="ml-0.5 text-xs text-slate-400">円</span>
+            <span className="ml-0.5 text-[8px] text-slate-400">円</span>
           </span>
         ),
       },
       {
         key: 'settlementAmount',
         header: '和解金額',
-        width: '112px',
+        width: '13%',
         align: 'right',
         render: (item) =>
           item.settlementAmount ? (
             <span className="font-medium text-green-700 tabular-nums">
               {item.settlementAmount.toLocaleString()}
-              <span className="ml-0.5 text-xs text-slate-400">円</span>
+              <span className="ml-0.5 text-[8px] text-slate-400">円</span>
             </span>
           ) : (
             <span className="text-slate-300">-</span>
@@ -90,13 +91,13 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       {
         key: 'paymentCount',
         header: '支払回数',
-        width: '88px',
+        width: '10%',
         align: 'right',
         render: (item) =>
           item.paymentCount ? (
             <span className="tabular-nums">
               {item.paymentCount}
-              <span className="ml-0.5 text-xs text-slate-400">回</span>
+              <span className="ml-0.5 text-[8px] text-slate-400">回</span>
             </span>
           ) : (
             <span className="text-slate-300">-</span>
@@ -105,7 +106,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       {
         key: 'settlementDate',
         header: '和解日',
-        width: '108px',
+        width: '21%',
         render: (item) => item.settlementDate ?? '-',
       },
     ]
@@ -150,9 +151,9 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           columns={columns}
           keyField="id"
           emptyMessage="債権者データがありません"
-          density="default"
+          density="dense"
           bodyMaxHeightClassName="max-h-[min(72vh,40rem)]"
-          cellNoWrap
+          cellSingleLine
         />
       </div>
     )

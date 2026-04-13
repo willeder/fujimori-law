@@ -27,6 +27,8 @@ interface TabsProps {
   variant?: 'default' | 'split'
   /** 下段（債権者）タブなど、密度を上げて高さを詰める */
   density?: 'normal' | 'dense'
+  /** tabBodyScroll が none のとき、パネル上の余白（カード内埋め込み等） */
+  panelTopSpacing?: 'normal' | 'tight'
   tabBodyScroll?: TabBodyScrollMode
   /** tabBodyScroll が host のときのルート高さ（Tailwind。例: h-[min(72vh,34rem)]）。未指定時は約20行相当 */
   tabBodyMaxHeightClassName?: string
@@ -39,6 +41,7 @@ export function Tabs({
   onActiveTabChange,
   variant = 'default',
   density = 'normal',
+  panelTopSpacing = 'normal',
   tabBodyScroll = 'none',
   /** max-h だけだと flex 内で子の flex-1 が効かずスクロールできないことがあるため h-[min(...)] で高さを確定 */
   tabBodyMaxHeightClassName = 'h-[min(72vh,34rem)]',
@@ -59,9 +62,11 @@ export function Tabs({
       ? 'grid w-full shrink-0 grid-cols-2 overflow-hidden rounded-md border border-slate-200 bg-white'
       : 'flex shrink-0 flex-wrap gap-1 overflow-x-auto border-b border-slate-200 pb-px'
 
+  const panelTop = tabBodyScroll === 'none' ? (panelTopSpacing === 'tight' ? 'mt-2' : 'mt-4') : ''
+
   const panelClass =
     tabBodyScroll === 'none'
-      ? 'mt-4'
+      ? panelTop
       : tabBodyScroll === 'host'
         ? 'mt-4 flex min-h-0 flex-1 flex-col overflow-hidden'
         : 'mt-4 min-h-0 flex-1 overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]'
