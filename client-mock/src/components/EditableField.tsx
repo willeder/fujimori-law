@@ -66,10 +66,10 @@ export function EditableField({
     if (compact) {
       return (
         <div className="flex items-center gap-0.5 min-h-[1.5rem] py-0">
-          <span className="w-[5rem] shrink-0 text-[10px] font-medium text-slate-500 leading-none truncate">
+          <span className="w-[5rem] shrink-0 text-[10px] font-medium text-slate-500 leading-tight break-words">
             {label}
           </span>
-          <div className="min-w-0 flex-1 text-xs text-slate-700 truncate leading-tight">
+          <div className="min-w-0 flex-1 text-xs text-slate-700 whitespace-normal break-words leading-tight">
             {formattedDisplay}
             {suffix && <span className="text-slate-400 ml-0.5">{suffix}</span>}
           </div>
@@ -91,18 +91,17 @@ export function EditableField({
     if (compact) {
       return (
         <div className="flex items-center gap-0.5 min-h-[1.5rem] py-0">
-          <span className="w-[5rem] shrink-0 text-[10px] font-medium text-slate-500 leading-none truncate">
+          <span className="w-[5rem] shrink-0 text-[10px] font-medium text-slate-500 leading-tight break-words">
             {label}
           </span>
           <div
             className="group flex min-w-0 flex-1 cursor-pointer items-center gap-1 rounded px-0.5 py-0.5 -mx-0.5 text-xs leading-tight text-slate-700 hover:bg-blue-50/80"
-            title={String(formattedDisplay)}
             onClick={() => {
               setEditValue(String(value ?? ''))
               setIsEditing(true)
             }}
           >
-            <span className="min-w-0 flex-1 truncate">
+            <span className="min-w-0 flex-1 whitespace-normal break-words">
               {formattedDisplay}
               {suffix && <span className="text-slate-400 ml-0.5">{suffix}</span>}
             </span>
@@ -117,7 +116,7 @@ export function EditableField({
       <div className="space-y-1">
         <label className="block text-xs font-medium text-slate-500">{label}</label>
         <div
-          className="text-sm text-slate-700 cursor-pointer hover:bg-blue-50 px-2 py-1 -mx-2 rounded transition-colors group"
+          className="text-sm text-slate-700 cursor-pointer whitespace-normal break-words hover:bg-blue-50 px-2 py-1 -mx-2 rounded transition-colors group"
           onClick={() => {
             setEditValue(String(value ?? ''))
             setIsEditing(true)
@@ -136,7 +135,7 @@ export function EditableField({
   if (compact) {
     return (
       <div className="flex items-center gap-0.5 min-h-[1.75rem] py-0">
-        <span className="w-[5rem] shrink-0 text-[10px] font-medium text-slate-500 leading-none truncate">
+        <span className="w-[5rem] shrink-0 text-[10px] font-medium text-slate-500 leading-tight break-words">
           {label}
         </span>
         <div className="flex min-w-0 flex-1 items-center gap-1">

@@ -64,13 +64,13 @@ export function PaymentTable({
   }
 
   const inputCls =
-    'w-full min-w-[4.5rem] rounded border border-blue-300 px-0.5 py-0.5 text-[10px] leading-tight'
+    'w-full min-w-[5rem] rounded border border-blue-300 px-1.5 py-1 text-sm leading-snug'
 
   const columns: Column<PaymentRecord>[] = [
     {
       key: '__rowIndex',
       header: '',
-      width: '22px',
+      width: '28px',
       align: 'center',
       sortable: false,
       render: (_item, index) => (
@@ -80,7 +80,7 @@ export function PaymentTable({
     {
       key: 'plannedDate',
       header: '予定入金日',
-      width: '76px',
+      width: '92px',
       render: (item) => (
         <span className={!item.actualDate ? 'font-medium text-slate-800' : ''}>
           {item.plannedDate ?? <span className="text-slate-300">-</span>}
@@ -90,56 +90,56 @@ export function PaymentTable({
     {
       key: 'plannedAmount',
       header: '予定入金額',
-      width: '72px',
+      width: '84px',
       align: 'right',
       render: (item) => fmtNum(item.plannedAmount),
     },
     {
       key: 'plannedFeeAllocation',
       header: '予定報酬額',
-      width: '68px',
+      width: '78px',
       align: 'right',
       render: (item) => fmtNum(item.plannedFeeAllocation),
     },
     {
       key: 'plannedAgentFeeAllocation',
       header: '予定弁代報酬額',
-      width: '76px',
+      width: '88px',
       align: 'right',
       render: (item) => fmtNum(item.plannedAgentFeeAllocation),
     },
     {
       key: 'plannedPoolAllocation',
       header: '予定ﾌﾟｰﾙ額',
-      width: '64px',
+      width: '74px',
       align: 'right',
       render: (item) => fmtNum(item.plannedPoolAllocation),
     },
     {
       key: 'repaymentCount',
       header: '予定社数',
-      width: '44px',
+      width: '52px',
       align: 'right',
       render: (item) => fmtNum(item.repaymentCount),
     },
     {
       key: 'handlingFee',
       header: '予定手数料',
-      width: '56px',
+      width: '64px',
       align: 'right',
       render: (item) => fmtNum(item.handlingFee),
     },
     {
       key: 'plannedRepaymentAllocation',
       header: '予定弁済額',
-      width: '64px',
+      width: '76px',
       align: 'right',
       render: (item) => fmtNum(item.plannedRepaymentAllocation),
     },
     {
       key: 'actualDate',
       header: '実入金日',
-      width: '76px',
+      width: '92px',
       render: (item) => {
         if (editingId === item.id) {
           return (
@@ -163,7 +163,7 @@ export function PaymentTable({
     {
       key: 'actualAmount',
       header: '実入金額',
-      width: '68px',
+      width: '82px',
       align: 'right',
       render: (item) => {
         if (editingId === item.id) {
@@ -193,7 +193,7 @@ export function PaymentTable({
     {
       key: 'actualFeeAllocation',
       header: '報酬充当額',
-      width: '64px',
+      width: '76px',
       align: 'right',
       render: (item) => {
         if (editingId === item.id) {
@@ -217,7 +217,7 @@ export function PaymentTable({
     {
       key: 'actualAgentFeeAllocation',
       header: '弁代報酬充当額',
-      width: '76px',
+      width: '88px',
       align: 'right',
       render: (item) => {
         if (editingId === item.id) {
@@ -241,7 +241,7 @@ export function PaymentTable({
     {
       key: 'actualPoolAllocation',
       header: 'ﾌﾟｰﾙ充当額',
-      width: '60px',
+      width: '72px',
       align: 'right',
       render: (item) => {
         if (editingId === item.id) {
@@ -265,7 +265,7 @@ export function PaymentTable({
     {
       key: 'repaymentCountActual',
       header: '社数',
-      width: '36px',
+      width: '44px',
       align: 'right',
       sortable: false,
       render: (item) =>
@@ -274,7 +274,7 @@ export function PaymentTable({
     {
       key: 'handlingFeeActual',
       header: '手数料',
-      width: '48px',
+      width: '56px',
       align: 'right',
       sortable: false,
       render: (item) =>
@@ -283,7 +283,7 @@ export function PaymentTable({
     {
       key: 'actualRepaymentAllocation',
       header: '弁済充当額',
-      width: '64px',
+      width: '76px',
       align: 'right',
       render: (item) => {
         if (editingId === item.id) {
@@ -307,23 +307,23 @@ export function PaymentTable({
     {
       key: 'actions',
       header: '',
-      width: '72px',
+      width: '92px',
       sortable: false,
       render: (item) => {
         if (editingId === item.id) {
           return (
-            <div className="flex gap-0.5">
+            <div className="flex flex-wrap gap-1">
               <button
                 type="button"
                 onClick={() => handleSave(item)}
-                className="rounded bg-blue-500 px-1 py-0.5 text-[10px] text-white hover:bg-blue-600"
+                className="rounded bg-blue-500 px-2 py-1 text-xs text-white hover:bg-blue-600"
               >
                 保存
               </button>
               <button
                 type="button"
                 onClick={handleCancel}
-                className="rounded bg-slate-200 px-1 py-0.5 text-[10px] text-slate-700 hover:bg-slate-300"
+                className="rounded bg-slate-200 px-2 py-1 text-xs text-slate-700 hover:bg-slate-300"
               >
                 取消
               </button>
@@ -334,7 +334,7 @@ export function PaymentTable({
           <button
             type="button"
             onClick={() => handleEdit(item)}
-            className="rounded px-1 py-0.5 text-[10px] text-blue-600 hover:bg-blue-50"
+            className="rounded px-2 py-1 text-xs text-blue-600 hover:bg-blue-50"
           >
             編集
           </button>
@@ -350,8 +350,9 @@ export function PaymentTable({
         columns={columns}
         keyField="id"
         emptyMessage="入金データがありません"
-        density="compact"
-        bodyMaxHeightClassName="max-h-[min(58vh,30rem)]"
+        density="default"
+        bodyMaxHeightClassName="max-h-[min(72vh,40rem)]"
+        cellNoWrap
       />
 
       <button
@@ -392,7 +393,7 @@ export function PaymentTable({
             },
           })
         }}
-        className="w-full rounded border border-dashed border-blue-300 py-1.5 text-[11px] text-blue-600 transition-colors hover:bg-blue-50"
+        className="w-full rounded border border-dashed border-blue-300 py-2 text-sm text-blue-600 transition-colors hover:bg-blue-50"
       >
         + 入金予定を追加
       </button>

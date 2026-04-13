@@ -282,10 +282,7 @@ export function SettlementFiles({ caseId }: SettlementFilesProps) {
               </span>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span
-                    className="text-sm font-medium text-slate-700 truncate"
-                    title={file.name}
-                  >
+                  <span className="text-sm font-medium text-slate-700 whitespace-normal break-all">
                     {file.name}
                   </span>
                   <span

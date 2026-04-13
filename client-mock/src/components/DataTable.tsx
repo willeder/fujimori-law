@@ -27,6 +27,10 @@ interface DataTableProps<T> {
    * true のときヘッダー行を sticky にする（親が縦スクロールのとき用。bodyMaxHeightClassName 未指定でも可）
    */
   stickyHeader?: boolean
+  /**
+   * true のとき th/td は折り返さず1行。表幅は内容に合わせ（w-max）横スクロールで閲覧（入金スケジュール等）
+   */
+  cellNoWrap?: boolean
 }
 
 export function DataTable<T>({
@@ -38,6 +42,7 @@ export function DataTable<T>({
   density = 'default',
   bodyMaxHeightClassName,
   stickyHeader = false,
+  cellNoWrap = false,
 }: DataTableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
@@ -92,13 +97,23 @@ export function DataTable<T>({
     ? `min-w-0 overflow-auto ${bodyMaxHeightClassName} isolate`
     : `min-w-0 overflow-x-auto${stickyHeader ? ' isolate' : ''}`
 
-  const tableMinW = isCompact || scrollBody || stickyHeader ? ' min-w-max' : ''
+  const tableMinW = isCompact || scrollBody || stickyHeader || cellNoWrap ? ' min-w-max' : ''
 
   const tableBorder = useStickyHeader ? ' border-separate border-spacing-0' : ''
 
+  const tableWidthClass = cellNoWrap ? 'w-max' : 'w-full'
+
+  const headCellWrap = cellNoWrap
+    ? 'whitespace-nowrap'
+    : 'min-w-0 whitespace-normal break-words'
+
+  const bodyCellWrap = cellNoWrap
+    ? 'whitespace-nowrap'
+    : 'min-w-0 whitespace-normal break-words'
+
   return (
     <div className={scrollWrapClass}>
-      <table className={`w-full ${tableText}${tableMinW}${tableBorder}`}>
+      <table className={`${tableWidthClass} ${tableText}${tableMinW}${tableBorder}`}>
         <thead>
           <tr className="border-b border-slate-200 bg-slate-50">
             {columns.map((col) => {
@@ -106,7 +121,7 @@ export function DataTable<T>({
               return (
               <th
                 key={String(col.key)}
-                className={`${headPad} ${headText} text-slate-600 ${alignClass[col.align ?? 'left']} ${sortable ? 'cursor-pointer hover:bg-slate-100' : ''} whitespace-nowrap ${stickyTh}`}
+                className={`${headPad} ${headText} text-slate-600 ${alignClass[col.align ?? 'left']} ${sortable ? 'cursor-pointer hover:bg-slate-100' : ''} ${headCellWrap} ${stickyTh}`}
                 style={{ width: col.width }}
                 onClick={() => sortable && handleSort(String(col.key))}
               >
@@ -143,7 +158,7 @@ export function DataTable<T>({
                 {columns.map((col) => (
                   <td
                     key={String(col.key)}
-                    className={`${cellPad} ${alignClass[col.align ?? 'left']} whitespace-nowrap tabular-nums`}
+                    className={`${cellPad} ${alignClass[col.align ?? 'left']} ${bodyCellWrap} tabular-nums`}
                   >
                     {col.render
                       ? col.render(item, index)

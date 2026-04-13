@@ -526,12 +526,6 @@ function CaseDetailBody({
       ? cumulativePlanned - cumulativePaid
       : null
 
-  // 和解済み社数を計算
-  const settledCount = creditors.filter((c) =>
-    ['和解済', '弁済中', '完済'].includes(c.status)
-  ).length
-  const totalCreditors = creditors.length
-
   const lineUrlRaw = caseData.clientBasicInfo.lineUrl?.trim() ?? ''
   const lineHref =
     lineUrlRaw.length > 0
@@ -713,7 +707,7 @@ function CaseDetailBody({
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-2">
                   <span className="shrink-0 text-sm text-slate-600">累計入金額</span>
-                  <span className="min-w-0 truncate text-right text-xl font-bold text-blue-600">
+                  <span className="min-w-0 whitespace-normal break-words text-right text-xl font-bold text-blue-600">
                     {formatYenPair(
                       caseData.paymentInfo.cumulativePaymentAmount,
                       caseData.paymentInfo.cumulativePlannedPayment
@@ -722,13 +716,13 @@ function CaseDetailBody({
                 </div>
                 <div className="flex items-center justify-between gap-2 text-sm">
                   <span className="shrink-0 text-slate-500">残入金予定額</span>
-                  <span className="min-w-0 truncate text-right font-medium tabular-nums">
+                  <span className="min-w-0 whitespace-normal break-words text-right font-medium tabular-nums">
                     {remainingPlanned != null ? `${remainingPlanned.toLocaleString()}円` : '-'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-2 text-sm">
                   <span className="shrink-0 text-slate-500">次回／最終入金予定日</span>
-                  <span className="min-w-0 truncate text-right font-medium">
+                  <span className="min-w-0 whitespace-normal break-words text-right font-medium">
                     {formatDatePair(displayNextPaymentDate, finalPlannedDate)}
                   </span>
                 </div>
@@ -1193,7 +1187,7 @@ function CaseDetailBody({
               <div className="flex min-h-0 w-full min-w-0 flex-col">
               <Tabs
                 tabBodyScroll="host"
-                tabBodyMaxHeightClassName="h-[min(72vh,34rem)]"
+                tabBodyMaxHeightClassName="h-[min(82vh,44rem)]"
                 tabs={[
                   {
                     id: 'payments',
@@ -1213,21 +1207,14 @@ function CaseDetailBody({
                     id: 'settlement',
                     label: '和解状況',
                     content: (
-                      <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden">
-                        <div className="shrink-0 text-[10px] leading-tight text-slate-600">
-                          債権者数：{totalCreditors}社（うち和解済：{settledCount}社）
-                        </div>
-                        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-                          <Tabs
-                            tabs={settlementTabs}
-                            defaultTab="all"
-                            activeTabId={displayCreditorScopeTabId}
-                            onActiveTabChange={setCreditorScopeTabId}
-                            density="dense"
-                            tabBodyScroll="guest"
-                          />
-                        </div>
-                      </div>
+                      <Tabs
+                        tabs={settlementTabs}
+                        defaultTab="all"
+                        activeTabId={displayCreditorScopeTabId}
+                        onActiveTabChange={setCreditorScopeTabId}
+                        density="dense"
+                        tabBodyScroll="guest"
+                      />
                     ),
                   },
                 ]}

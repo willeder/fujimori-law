@@ -20,6 +20,9 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
 
   if (view === 'summary') {
     // 合算ビュー
+    const settledCount = creditors.filter((c) =>
+      ['和解済', '弁済中', '完済'].includes(c.status)
+    ).length
     const totalDeclared = creditors.reduce(
       (sum, c) => sum + (c.declaredAmount ?? 0),
       0
@@ -37,48 +40,48 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       {
         key: 'creditorName',
         header: '債権者',
-        width: '120px',
+        width: '132px',
       },
       {
         key: 'status',
         header: 'ステータス',
-        width: '120px',
-        render: (item) => <StatusBadge status={item.status} size="sm" />,
+        width: '132px',
+        render: (item) => <StatusBadge status={item.status} size="md" />,
       },
       {
         key: 'declaredAmount',
         header: '申告額',
-        width: '100px',
+        width: '108px',
         align: 'right',
         render: (item) => (
           <span className="tabular-nums">
             {item.declaredAmount?.toLocaleString()}
-            <span className="ml-0.5 text-[9px] text-slate-400">円</span>
+            <span className="ml-0.5 text-xs text-slate-400">円</span>
           </span>
         ),
       },
       {
         key: 'debtAmount',
         header: '債務額',
-        width: '100px',
+        width: '108px',
         align: 'right',
         render: (item) => (
           <span className="tabular-nums">
             {item.debtAmount?.toLocaleString()}
-            <span className="ml-0.5 text-[9px] text-slate-400">円</span>
+            <span className="ml-0.5 text-xs text-slate-400">円</span>
           </span>
         ),
       },
       {
         key: 'settlementAmount',
         header: '和解金額',
-        width: '100px',
+        width: '112px',
         align: 'right',
         render: (item) =>
           item.settlementAmount ? (
             <span className="font-medium text-green-700 tabular-nums">
               {item.settlementAmount.toLocaleString()}
-              <span className="ml-0.5 text-[9px] text-slate-400">円</span>
+              <span className="ml-0.5 text-xs text-slate-400">円</span>
             </span>
           ) : (
             <span className="text-slate-300">-</span>
@@ -87,13 +90,13 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       {
         key: 'paymentCount',
         header: '支払回数',
-        width: '80px',
+        width: '88px',
         align: 'right',
         render: (item) =>
           item.paymentCount ? (
             <span className="tabular-nums">
               {item.paymentCount}
-              <span className="ml-0.5 text-[9px] text-slate-400">回</span>
+              <span className="ml-0.5 text-xs text-slate-400">回</span>
             </span>
           ) : (
             <span className="text-slate-300">-</span>
@@ -102,39 +105,41 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       {
         key: 'settlementDate',
         header: '和解日',
-        width: '100px',
+        width: '108px',
         render: (item) => item.settlementDate ?? '-',
       },
     ]
 
     return (
-      <div className="min-h-0 space-y-2">
-        <div className="text-[10px] leading-tight text-slate-500">案件ID: {caseId}</div>
-        {/* 合計サマリ（入金スケジュール表と同系の密度） */}
+      <div className="min-h-0 space-y-3">
+        <div className="text-xs leading-snug text-slate-600">
+          債権者数：{creditors.length}社（うち和解済：{settledCount}社）・案件ID: {caseId}
+        </div>
+        {/* 合計サマリ（入金スケジュールのサマリ相当の読みやすさ） */}
         <div className="grid grid-cols-2 gap-2 rounded bg-slate-50 p-2 sm:grid-cols-4">
           <div>
-            <div className="text-[9px] font-medium leading-tight text-slate-500">債権者数</div>
-            <div className="text-xs font-bold tabular-nums text-slate-800">
+            <div className="text-xs font-medium leading-tight text-slate-500">債権者数</div>
+            <div className="text-sm font-bold tabular-nums text-slate-800">
               {creditors.length}社
             </div>
           </div>
           <div>
-            <div className="text-[9px] font-medium leading-tight text-slate-500">
+            <div className="text-xs font-medium leading-tight text-slate-500">
               申告債務額合計
             </div>
-            <div className="text-xs font-bold tabular-nums text-slate-800">
+            <div className="text-sm font-bold tabular-nums text-slate-800">
               {totalDeclared.toLocaleString()}円
             </div>
           </div>
           <div>
-            <div className="text-[9px] font-medium leading-tight text-slate-500">債務額合計</div>
-            <div className="text-xs font-bold tabular-nums text-slate-800">
+            <div className="text-xs font-medium leading-tight text-slate-500">債務額合計</div>
+            <div className="text-sm font-bold tabular-nums text-slate-800">
               {totalDebt.toLocaleString()}円
             </div>
           </div>
           <div>
-            <div className="text-[9px] font-medium leading-tight text-slate-500">和解金額合計</div>
-            <div className="text-xs font-bold tabular-nums text-green-700">
+            <div className="text-xs font-medium leading-tight text-slate-500">和解金額合計</div>
+            <div className="text-sm font-bold tabular-nums text-green-700">
               {totalSettlement.toLocaleString()}円
             </div>
           </div>
@@ -145,7 +150,9 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           columns={columns}
           keyField="id"
           emptyMessage="債権者データがありません"
-          density="compact"
+          density="default"
+          bodyMaxHeightClassName="max-h-[min(72vh,40rem)]"
+          cellNoWrap
         />
       </div>
     )
@@ -156,11 +163,11 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
   if (!creditor) return null
 
   return (
-    <div className="min-h-0 space-y-2">
+    <div className="min-h-0 space-y-3">
       {/* ステータス */}
       <div className="flex flex-wrap items-center gap-2">
-        <StatusBadge status={creditor.status} size="sm" />
-        <span className="text-[10px] leading-tight text-slate-600">
+        <StatusBadge status={creditor.status} size="md" />
+        <span className="text-xs leading-snug text-slate-600">
           交渉相手: {creditor.negotiationPartner ?? '直接'}
         </span>
       </div>
@@ -241,7 +248,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       {['和解済', '弁済中', '完済'].includes(creditor.status) && (
         <>
           <hr className="border-slate-200" />
-          <h4 className="text-[10px] font-semibold text-slate-600">和解内容</h4>
+          <h4 className="text-xs font-semibold text-slate-600">和解内容</h4>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             <EditableField
               compact
@@ -340,7 +347,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
             />
           </div>
 
-          <h4 className="mt-2 text-[10px] font-semibold text-slate-600">振込先情報</h4>
+          <h4 className="mt-2 text-xs font-semibold text-slate-600">振込先情報</h4>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             <EditableField
               compact
@@ -393,7 +400,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
 
       {/* ④ 債権者資料（リンク/ファイル名のメモ） */}
       <hr className="border-slate-200" />
-      <h4 className="text-[10px] font-semibold text-slate-600">債権者資料</h4>
+      <h4 className="text-xs font-semibold text-slate-600">債権者資料</h4>
       <div className="rounded border border-slate-100 bg-slate-50/50 p-2">
         <EditableField
           label="債権者資料"
