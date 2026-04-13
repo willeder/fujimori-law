@@ -3,8 +3,8 @@ import tailwindcss from '@tailwindcss/vite'
 import type { Connect } from 'vite'
 import { defineConfig, type Plugin, type PreviewServer, type ViteDevServer } from 'vite'
 
+/** Vercel `middleware.ts` の BASIC_AUTH_* と同じ値（固定） */
 const DEFAULT_BASIC_USER = 'mock'
-/** 本番では必ず BASIC_AUTH_PASSWORD で上書きすること */
 const DEFAULT_BASIC_PASSWORD = 'Ui7mK9pQ2vLx4wR8'
 
 function parseBasicAuthHeader(
@@ -43,7 +43,7 @@ function basicAuthPlugin(): Plugin {
     if (!process.env.BASIC_AUTH_PASSWORD && !warnedDefaults) {
       warnedDefaults = true
       server.config.logger.warn(
-        `[basic-auth] BASIC_AUTH_PASSWORD 未設定のためデフォルトを使用しています（ユーザー: ${user}）。公開前に .env で上書きしてください。`
+        `[basic-auth] BASIC_AUTH_USER/PASSWORD 未設定のため固定デフォルトを使用（ユーザー: ${user}）。Vercel では middleware.ts の定数が使われます。`
       )
     }
     server.middlewares.use(basicAuthMiddleware(user, pass))
