@@ -6,11 +6,17 @@ import type { ContactHistory } from '../types'
 interface ContactHistoryTableProps {
   caseId: number
   histories: ContactHistory[]
+  /** この表の対象（追加行の targetType に使用） */
+  targetType: '依頼者' | '債権者'
 }
 
 const toolOptions = ['LINE', '電話', 'メール', 'SMS', 'その他'] as const
 
-export function ContactHistoryTable({ caseId, histories }: ContactHistoryTableProps) {
+export function ContactHistoryTable({
+  caseId,
+  histories,
+  targetType,
+}: ContactHistoryTableProps) {
   const dispatch = useCaseDispatch()
   const { contactHistories } = useCaseState()
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -28,6 +34,7 @@ export function ContactHistoryTable({ caseId, histories }: ContactHistoryTablePr
       contactTime: h.contactTime,
       staff: h.staff,
       tool: h.tool,
+      creditorName: h.creditorName ?? null,
       comment: h.comment,
     })
   }
@@ -41,6 +48,7 @@ export function ContactHistoryTable({ caseId, histories }: ContactHistoryTablePr
         contactTime: editData.contactTime ?? null,
         staff: editData.staff ?? null,
         tool: editData.tool ?? null,
+        creditorName: targetType === '債権者' ? (editData.creditorName ?? null) : null,
         comment: editData.comment ?? null,
       },
     })
@@ -56,6 +64,32 @@ export function ContactHistoryTable({ caseId, histories }: ContactHistoryTablePr
   const handleDelete = (h: ContactHistory) => {
     dispatch({ type: 'DELETE_CONTACT_HISTORY', payload: h.id })
   }
+
+  const creditorColumn: Column<ContactHistory>[] =
+    targetType === '債権者'
+      ? [
+          {
+            key: 'creditorName',
+            header: '債権者',
+            width: '120px',
+            render: (h) =>
+              editingId === h.id ? (
+                <input
+                  value={editData.creditorName ?? ''}
+                  onChange={(e) =>
+                    setEditData({ ...editData, creditorName: e.target.value || null })
+                  }
+                  className="w-full rounded border border-blue-300 px-1 py-0.5 text-xs"
+                  placeholder="債権者名"
+                />
+              ) : (
+                <span className={!h.creditorName ? 'text-slate-300' : ''}>
+                  {h.creditorName ?? '-'}
+                </span>
+              ),
+          },
+        ]
+      : []
 
   const columns: Column<ContactHistory>[] = [
     {
@@ -137,6 +171,7 @@ export function ContactHistoryTable({ caseId, histories }: ContactHistoryTablePr
           <span className={!h.tool ? 'text-slate-300' : ''}>{h.tool ?? '-'}</span>
         ),
     },
+    ...creditorColumn,
     {
       key: 'comment',
       header: 'コメント',
@@ -161,6 +196,7 @@ export function ContactHistoryTable({ caseId, histories }: ContactHistoryTablePr
       key: 'actions',
       header: '',
       width: '130px',
+      sortable: false,
       render: (h) => {
         if (editingId === h.id) {
           return (
@@ -211,6 +247,7 @@ export function ContactHistoryTable({ caseId, histories }: ContactHistoryTablePr
         columns={columns}
         keyField="id"
         emptyMessage="接触履歴がありません"
+        bodyMaxHeightClassName="max-h-[min(45vh,22rem)]"
       />
 
       <button
@@ -226,7 +263,8 @@ export function ContactHistoryTable({ caseId, histories }: ContactHistoryTablePr
               contactTime: null,
               staff: null,
               tool: null,
-              targetType: '依頼者',
+              targetType,
+              ...(targetType === '債権者' ? { creditorName: null as string | null } : {}),
               comment: null,
             },
           })
@@ -236,6 +274,7 @@ export function ContactHistoryTable({ caseId, histories }: ContactHistoryTablePr
             contactTime: null,
             staff: null,
             tool: null,
+            creditorName: null,
             comment: null,
           })
         }}
@@ -246,4 +285,3 @@ export function ContactHistoryTable({ caseId, histories }: ContactHistoryTablePr
     </div>
   )
 }
-

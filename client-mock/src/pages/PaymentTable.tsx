@@ -351,6 +351,7 @@ export function PaymentTable({
         keyField="id"
         emptyMessage="入金データがありません"
         density="compact"
+        bodyMaxHeightClassName="max-h-[min(58vh,30rem)]"
       />
 
       <button

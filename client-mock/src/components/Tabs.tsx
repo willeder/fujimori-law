@@ -125,7 +125,13 @@ export function Tabs({
         {tabBodyScroll === 'none' ? (
           activeContent
         ) : (
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+          <div
+            className={
+              tabBodyScroll === 'guest'
+                ? 'flex min-h-0 min-w-0 flex-1 flex-col'
+                : 'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden'
+            }
+          >
             {activeContent}
           </div>
         )}

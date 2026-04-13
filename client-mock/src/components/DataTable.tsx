@@ -18,6 +18,15 @@ interface DataTableProps<T> {
   emptyMessage?: string
   /** compact: 小さめフォント・詰め余白（横スクロール前提の表向け） */
   density?: 'default' | 'compact'
+  /**
+   * 指定時はこの高さで縦スクロールし、ヘッダー行は sticky で固定（tbody のみスクロール相当）
+   * 例: max-h-[min(45vh,22rem)]
+   */
+  bodyMaxHeightClassName?: string
+  /**
+   * true のときヘッダー行を sticky にする（親が縦スクロールのとき用。bodyMaxHeightClassName 未指定でも可）
+   */
+  stickyHeader?: boolean
 }
 
 export function DataTable<T>({
@@ -27,6 +36,8 @@ export function DataTable<T>({
   onRowClick,
   emptyMessage = 'データがありません',
   density = 'default',
+  bodyMaxHeightClassName,
+  stickyHeader = false,
 }: DataTableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
@@ -68,17 +79,34 @@ export function DataTable<T>({
   const headText = isCompact ? 'text-[9px] font-semibold leading-tight' : 'font-semibold'
   const emptyPad = isCompact ? 'px-2 py-6' : 'px-3 py-8'
 
+  const scrollBody =
+    bodyMaxHeightClassName != null && bodyMaxHeightClassName.length > 0
+
+  const useStickyHeader = scrollBody || stickyHeader
+
+  const stickyTh = useStickyHeader
+    ? 'sticky top-0 z-20 bg-slate-50 shadow-[inset_0_-1px_0_0_theme(colors.slate.200)]'
+    : ''
+
+  const scrollWrapClass = scrollBody
+    ? `min-w-0 overflow-auto ${bodyMaxHeightClassName} isolate`
+    : `min-w-0 overflow-x-auto${stickyHeader ? ' isolate' : ''}`
+
+  const tableMinW = isCompact || scrollBody || stickyHeader ? ' min-w-max' : ''
+
+  const tableBorder = useStickyHeader ? ' border-separate border-spacing-0' : ''
+
   return (
-    <div className="overflow-x-auto">
-      <table className={`w-full ${tableText}${isCompact ? ' min-w-max' : ''}`}>
+    <div className={scrollWrapClass}>
+      <table className={`w-full ${tableText}${tableMinW}${tableBorder}`}>
         <thead>
-          <tr className="bg-slate-50 border-b border-slate-200">
+          <tr className="border-b border-slate-200 bg-slate-50">
             {columns.map((col) => {
               const sortable = col.sortable !== false
               return (
               <th
                 key={String(col.key)}
-                className={`${headPad} ${headText} text-slate-600 ${alignClass[col.align ?? 'left']} ${sortable ? 'cursor-pointer hover:bg-slate-100' : ''} whitespace-nowrap`}
+                className={`${headPad} ${headText} text-slate-600 ${alignClass[col.align ?? 'left']} ${sortable ? 'cursor-pointer hover:bg-slate-100' : ''} whitespace-nowrap ${stickyTh}`}
                 style={{ width: col.width }}
                 onClick={() => sortable && handleSort(String(col.key))}
               >
