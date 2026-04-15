@@ -605,8 +605,9 @@ function CaseDetailBody({
         </div>
         {/* リスト・受任・報酬・入金（全幅に均等グリッド。狭い画面は列数を段階的に減らして折返し） */}
         <div className="w-full border-b border-slate-100 px-6 py-2">
-          <div className="grid w-full min-w-0 grid-cols-2 items-end gap-x-1.5 gap-y-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-9">
-            <div className="min-w-0">
+          <div className="min-w-0 overflow-x-auto">
+            <div className="flex w-max min-w-0 flex-nowrap items-end gap-x-2">
+              <div className="min-w-0 shrink-0">
               <EditableField
                 compact
                 label="リスト登録日"
@@ -614,16 +615,16 @@ function CaseDetailBody({
                 onChange={(v) => updateMetadata('listRegisteredDate', v)}
                 type="date"
               />
-            </div>
-            <div className="min-w-0">
+              </div>
+              <div className="min-w-0 shrink-0">
               <EditableField
                 compact
                 label="リスト区分"
                 value={caseData.metadata.listCategory}
                 onChange={(v) => updateMetadata('listCategory', v)}
               />
-            </div>
-            <div className="min-w-0">
+              </div>
+              <div className="min-w-0 shrink-0">
               <EditableField
                 compact
                 label="受任日"
@@ -631,24 +632,24 @@ function CaseDetailBody({
                 onChange={(v) => updateAppointmentInfo('acceptanceDate', v)}
                 type="date"
               />
-            </div>
-            <div className="min-w-0">
+              </div>
+              <div className="min-w-0 shrink-0">
               <EditableField
                 compact
                 label="アポ担当"
                 value={caseData.appointmentInfo.appointmentStaff}
                 onChange={(v) => updateAppointmentInfo('appointmentStaff', v)}
               />
-            </div>
-            <div className="min-w-0">
+              </div>
+              <div className="min-w-0 shrink-0">
               <EditableField
                 compact
                 label="面談担当"
                 value={caseData.appointmentInfo.interviewStaff}
                 onChange={(v) => updateAppointmentInfo('interviewStaff', v)}
               />
-            </div>
-            <div className="min-w-0">
+              </div>
+              <div className="min-w-0 shrink-0">
               <EditableField
                 compact
                 label="受任ランク"
@@ -661,8 +662,8 @@ function CaseDetailBody({
                   { value: 'C', label: 'C' },
                 ]}
               />
-            </div>
-            <div className="min-w-0">
+              </div>
+              <div className="min-w-0 shrink-0">
               <EditableField
                 compact
                 label="通常報酬"
@@ -671,8 +672,8 @@ function CaseDetailBody({
                 type="number"
                 suffix="円"
               />
-            </div>
-            <div className="min-w-0">
+              </div>
+              <div className="min-w-0 shrink-0">
               <EditableField
                 compact
                 label="報酬分割回数"
@@ -681,16 +682,16 @@ function CaseDetailBody({
                 type="number"
                 suffix="回"
               />
-            </div>
-            <div className="min-w-0">
+              </div>
+              <div className="min-w-0 shrink-0">
               <EditableField
                 compact
                 label="毎月入金日"
                 value={caseData.paymentInfo.monthlyPaymentDay}
                 onChange={(v) => updatePaymentInfo('monthlyPaymentDay', v)}
               />
-            </div>
-            <div className="min-w-0">
+              </div>
+              <div className="min-w-0 shrink-0">
               <EditableField
                 compact
                 label="基本入金額"
@@ -699,6 +700,7 @@ function CaseDetailBody({
                 type="number"
                 suffix="円"
               />
+              </div>
             </div>
           </div>
         </div>

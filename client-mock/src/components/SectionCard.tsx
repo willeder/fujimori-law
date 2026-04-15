@@ -29,12 +29,12 @@ export function SectionCard({
       className={`overflow-hidden bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 ${colorMap[color]}`}
     >
       <div
-        className={`rounded-t-lg bg-blue-700 px-4 py-3 flex items-center justify-between border-b border-blue-800/80 ${collapsible ? 'cursor-pointer hover:bg-blue-800' : ''}`}
+        className={`rounded-t-lg bg-[#689BC6] px-4 py-3 flex items-center justify-between border-b border-[#4F7EA6]/60 ${collapsible ? 'cursor-pointer hover:bg-[#5B8FB9]' : ''}`}
         onClick={() => collapsible && setIsOpen(!isOpen)}
       >
         <h3 className="text-sm font-bold text-white">{title}</h3>
         {collapsible && (
-          <button type="button" className="text-blue-100 hover:text-white" aria-label={isOpen ? '折りたたむ' : '展開する'}>
+          <button type="button" className="text-white/90 hover:text-white" aria-label={isOpen ? '折りたたむ' : '展開する'}>
             {isOpen ? (
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />

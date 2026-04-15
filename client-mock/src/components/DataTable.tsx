@@ -48,6 +48,8 @@ interface DataTableProps<T> {
   cellSingleLine?: boolean
   /** cellSingleLine 時、true なら一時的に省略をやめる（行内編集中の入力が切れないようにする） */
   suspendTruncate?: boolean
+  /** 余白をさらに詰める（入金スケジュールなど超高密度表示向け） */
+  tight?: boolean
 }
 
 export function DataTable<T>({
@@ -62,6 +64,7 @@ export function DataTable<T>({
   cellNoWrap = false,
   cellSingleLine = false,
   suspendTruncate = false,
+  tight = false,
 }: DataTableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
@@ -98,8 +101,24 @@ export function DataTable<T>({
 
   const isDense = density === 'dense'
   const isCompact = density === 'compact' || isDense
-  const cellPad = isDense ? 'px-0.5 py-0.5' : isCompact ? 'px-1 py-0.5' : 'px-3 py-2'
-  const headPad = isDense ? 'px-0.5 py-0.5' : isCompact ? 'px-1 py-1' : 'px-3 py-2'
+  const cellPad = isDense
+    ? tight
+      ? 'px-0 py-0.5'
+      : 'px-0.5 py-0.5'
+    : isCompact
+      ? tight
+        ? 'px-0.5 py-0.5'
+        : 'px-1 py-0.5'
+      : 'px-3 py-2'
+  const headPad = isDense
+    ? tight
+      ? 'px-0 py-0.5'
+      : 'px-0.5 py-0.5'
+    : isCompact
+      ? tight
+        ? 'px-0.5 py-0.5'
+        : 'px-1 py-1'
+      : 'px-3 py-2'
   const tableText = isDense ? 'text-[9px] leading-tight' : isCompact ? 'text-[10px] leading-tight' : 'text-sm'
   const headText = isDense
     ? 'text-[8px] font-semibold leading-tight'
@@ -169,10 +188,10 @@ export function DataTable<T>({
                 <div
                   className={
                     cellNoWrap
-                      ? 'flex items-center gap-0.5'
+                      ? `flex items-center ${tight ? 'gap-0' : 'gap-0.5'}`
                       : cellSingleLine
-                        ? 'flex min-w-0 w-full items-center gap-0.5'
-                        : 'flex min-w-0 w-full flex-wrap items-center gap-0.5'
+                        ? `flex min-w-0 w-full items-center ${tight ? 'gap-0' : 'gap-0.5'}`
+                        : `flex min-w-0 w-full flex-wrap items-center ${tight ? 'gap-0' : 'gap-0.5'}`
                   }
                 >
                   {cellNoWrap ? (

@@ -371,6 +371,7 @@ export function PaymentTable({
         density="dense"
         bodyMaxHeightClassName="max-h-[min(72vh,40rem)]"
         cellSingleLine
+        tight
         suspendTruncate={editingId !== null}
       />
 
