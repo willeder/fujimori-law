@@ -11,6 +11,36 @@ interface EditableFieldProps {
   disabled?: boolean
   /** ラベルと値を1行に詰め、余白・字サイズを下げる（詳細ヘッダー等） */
   compact?: boolean
+  /** compact 時のレイアウト（横並び/上下2段） */
+  compactLayout?: 'inline' | 'stacked'
+  /** type="date" のとき、西暦/和暦の表示切替ボタンを出す（入力は西暦のまま） */
+  dateDisplayToggle?: boolean
+}
+
+function parseIsoDateToUtcDate(iso: string): Date | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso)
+  if (!m) return null
+  const y = Number(m[1])
+  const mo = Number(m[2])
+  const d = Number(m[3])
+  if (!Number.isFinite(y) || !Number.isFinite(mo) || !Number.isFinite(d)) return null
+  return new Date(Date.UTC(y, mo - 1, d))
+}
+
+function formatJapaneseEraDate(iso: string): string | null {
+  const dt = parseIsoDateToUtcDate(iso)
+  if (!dt) return null
+  try {
+    return new Intl.DateTimeFormat('ja-JP-u-ca-japanese', {
+      era: 'short',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      timeZone: 'UTC',
+    }).format(dt)
+  } catch {
+    return null
+  }
 }
 
 export function EditableField({
@@ -23,6 +53,8 @@ export function EditableField({
   placeholder,
   disabled = false,
   compact = false,
+  compactLayout = 'inline',
+  dateDisplayToggle = false,
 }: EditableFieldProps) {
   const labelWithColon =
     label.endsWith('：') || label.endsWith(':') ? label : `${label}：`
@@ -30,6 +62,7 @@ export function EditableField({
   const [isEditing, setIsEditing] = useState(false)
   const [editValue, setEditValue] = useState(String(value ?? ''))
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(null)
+  const [dateDisplayMode, setDateDisplayMode] = useState<'gregorian' | 'japanese'>('gregorian')
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -61,21 +94,63 @@ export function EditableField({
       ? value.toLocaleString()
       : displayValue
 
+  const displayText =
+    type === 'date' &&
+    dateDisplayToggle &&
+    dateDisplayMode === 'japanese' &&
+    typeof value === 'string' &&
+    value.length > 0
+      ? formatJapaneseEraDate(value) ?? formattedDisplay
+      : formattedDisplay
+
   const inputBase = compact
     ? 'flex-1 min-w-0 text-xs border border-blue-300 rounded px-1.5 py-0.5 h-7 leading-tight focus:outline-none focus:ring-1 focus:ring-blue-500'
     : 'flex-1 text-sm border border-blue-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500'
 
+  const isStacked = compact && compactLayout === 'stacked'
+  const showDateToggle = type === 'date' && dateDisplayToggle && !isEditing
+  const toggleLabel = dateDisplayMode === 'gregorian' ? '和暦' : '西暦'
+  const toggleButton = showDateToggle ? (
+    <button
+      type="button"
+      className="shrink-0 rounded bg-slate-100 px-1 py-0.5 text-[10px] font-medium text-slate-600 hover:bg-slate-200"
+      onClick={(e) => {
+        e.stopPropagation()
+        setDateDisplayMode((m) => (m === 'gregorian' ? 'japanese' : 'gregorian'))
+      }}
+    >
+      {toggleLabel}
+    </button>
+  ) : null
+
   if (disabled) {
     if (compact) {
+      if (isStacked) {
+        return (
+          <div className="min-w-0">
+            <div className="text-[10px] font-medium text-slate-500 leading-tight whitespace-nowrap">
+              {labelWithColon}
+            </div>
+            <div className="min-w-0 text-xs text-slate-700 whitespace-normal break-words leading-tight">
+              <span>{displayText}</span>
+              {suffix && <span className="text-slate-400 ml-0">{suffix}</span>}
+              {toggleButton && <span className="ml-1 inline-flex align-middle">{toggleButton}</span>}
+            </div>
+          </div>
+        )
+      }
       return (
-        <div className="flex items-center gap-0 min-h-[1.5rem] py-0">
-          <span className="w-[5.25rem] shrink-0 text-[10px] font-medium text-slate-500 leading-tight break-words">
+        <div className="flex min-w-0 items-baseline gap-1 min-h-[1.5rem] py-0">
+          <span className="shrink-0 text-[10px] font-medium text-slate-500 leading-tight whitespace-nowrap">
             {labelWithColon}
           </span>
-          <div className="min-w-0 flex-1 text-xs text-slate-700 whitespace-normal break-words leading-tight">
-            {formattedDisplay}
-            {suffix && <span className="text-slate-400 ml-0">{suffix}</span>}
+          <div className="min-w-0 flex-1 text-xs text-slate-700 leading-tight">
+            <span className="block min-w-0 truncate whitespace-nowrap">
+              {displayText}
+              {suffix && <span className="text-slate-400 ml-0">{suffix}</span>}
+            </span>
           </div>
+          {toggleButton}
         </div>
       )
     }
@@ -83,18 +158,46 @@ export function EditableField({
       <div className="flex min-w-0 items-baseline gap-1">
         <span className="shrink-0 text-xs font-medium text-slate-500">{labelWithColon}</span>
         <div className="min-w-0 flex-1 text-sm text-slate-700">
-          {formattedDisplay}
+          {displayText}
           {suffix && <span className="text-slate-400 ml-0.5">{suffix}</span>}
         </div>
+        {toggleButton}
       </div>
     )
   }
 
   if (!isEditing) {
     if (compact) {
+      if (isStacked) {
+        return (
+          <div className="min-w-0">
+            <div className="text-[10px] font-medium text-slate-500 leading-tight whitespace-nowrap">
+              {labelWithColon}
+            </div>
+            <div
+              className="group min-w-0 cursor-pointer rounded px-0.5 py-0.5 -mx-0.5 text-xs leading-tight text-slate-700 hover:bg-blue-50/80"
+              onClick={() => {
+                setEditValue(String(value ?? ''))
+                setIsEditing(true)
+              }}
+            >
+              <div className="flex min-w-0 items-center gap-1">
+                <span className="min-w-0 flex-1 whitespace-normal break-words">
+                  {displayText}
+                  {suffix && <span className="text-slate-400 ml-0">{suffix}</span>}
+                </span>
+                {toggleButton}
+                <span className="shrink-0 text-[10px] text-blue-400 opacity-0 transition-opacity group-hover:opacity-100">
+                  編集
+                </span>
+              </div>
+            </div>
+          </div>
+        )
+      }
       return (
-        <div className="flex items-center gap-0 min-h-[1.5rem] py-0">
-          <span className="w-[5.25rem] shrink-0 text-[10px] font-medium text-slate-500 leading-tight break-words">
+        <div className="flex min-w-0 items-baseline gap-1 min-h-[1.5rem] py-0">
+          <span className="shrink-0 text-[10px] font-medium text-slate-500 leading-tight whitespace-nowrap">
             {labelWithColon}
           </span>
           <div
@@ -104,10 +207,11 @@ export function EditableField({
               setIsEditing(true)
             }}
           >
-            <span className="min-w-0 flex-1 whitespace-normal break-words">
-              {formattedDisplay}
+            <span className="min-w-0 flex-1 truncate whitespace-nowrap">
+              {displayText}
               {suffix && <span className="text-slate-400 ml-0">{suffix}</span>}
             </span>
+            {toggleButton}
             <span className="shrink-0 text-[10px] text-blue-400 opacity-0 transition-opacity group-hover:opacity-100">
               編集
             </span>
@@ -126,9 +230,10 @@ export function EditableField({
         >
           <span className="shrink-0 text-xs font-medium text-slate-500">{labelWithColon}</span>
           <span className="min-w-0 flex-1 whitespace-normal break-words text-sm text-slate-700">
-            {formattedDisplay}
+            {displayText}
             {suffix && <span className="text-slate-400 ml-0.5">{suffix}</span>}
           </span>
+          {toggleButton}
           <span className="shrink-0 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100 text-xs">
             編集
           </span>
@@ -138,9 +243,77 @@ export function EditableField({
   }
 
   if (compact) {
+    if (isStacked) {
+      return (
+        <div className="min-w-0">
+          <div className="text-[10px] font-medium text-slate-500 leading-tight whitespace-nowrap">
+            {labelWithColon}
+          </div>
+          <div className="flex min-w-0 items-center gap-0.5">
+            {type === 'select' && options ? (
+              <select
+                ref={inputRef as React.RefObject<HTMLSelectElement>}
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onBlur={handleSave}
+                onKeyDown={handleKeyDown}
+                className={inputBase}
+              >
+                <option value="">選択してください</option>
+                {options.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            ) : type === 'textarea' ? (
+              <textarea
+                ref={inputRef as React.RefObject<HTMLTextAreaElement>}
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={placeholder}
+                rows={2}
+                className={`${inputBase} min-h-[2.5rem]`}
+              />
+            ) : (
+              <input
+                ref={inputRef as React.RefObject<HTMLInputElement>}
+                type={type}
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onBlur={handleSave}
+                onKeyDown={handleKeyDown}
+                placeholder={placeholder}
+                className={inputBase}
+              />
+            )}
+            {suffix && <span className="text-slate-400 text-xs shrink-0 pl-0">{suffix}</span>}
+            {type === 'textarea' && (
+              <div className="flex shrink-0 gap-0.5">
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  className="px-1.5 py-0.5 text-[10px] bg-blue-500 text-white rounded hover:bg-blue-600"
+                >
+                  保存
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  className="px-1.5 py-0.5 text-[10px] bg-slate-200 text-slate-600 rounded hover:bg-slate-300"
+                >
+                  取消
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )
+    }
     return (
-      <div className="flex items-center gap-0 min-h-[1.75rem] py-0">
-        <span className="w-[5.25rem] shrink-0 text-[10px] font-medium text-slate-500 leading-tight break-words">
+      <div className="flex min-w-0 items-baseline gap-1 min-h-[1.75rem] py-0">
+        <span className="shrink-0 text-[10px] font-medium text-slate-500 leading-tight whitespace-nowrap">
           {labelWithColon}
         </span>
         <div className="flex min-w-0 flex-1 items-center gap-0.5">

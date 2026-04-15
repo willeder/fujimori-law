@@ -5,6 +5,8 @@ export interface Column<T> {
   header: string
   width?: string
   align?: 'left' | 'center' | 'right'
+  /** ヘッダー（th）の追加クラス（列ごとの背景色など） */
+  headerClassName?: string
   /** false のときソート不可（通番列など） */
   sortable?: boolean
   render?: (item: T, index: number) => React.ReactNode
@@ -160,7 +162,7 @@ export function DataTable<T>({
               return (
               <th
                 key={String(col.key)}
-                className={`${headPad} ${headText} text-slate-600 ${alignClass[col.align ?? 'left']} ${sortable ? 'cursor-pointer hover:bg-slate-100' : ''} ${headCellWrap} ${stickyTh}`}
+                className={`${headPad} ${headText} text-slate-600 ${alignClass[col.align ?? 'left']} ${sortable ? 'cursor-pointer hover:bg-slate-100' : ''} ${headCellWrap} ${stickyTh} ${col.headerClassName ?? ''}`}
                 style={{ width: col.width }}
                 onClick={() => sortable && handleSort(String(col.key))}
               >

@@ -12,42 +12,48 @@ interface ClientBasicInfoProps {
 
 export function ClientBasicInfo({ data, onChange, readonly = false }: ClientBasicInfoProps) {
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-[repeat(auto-fit,minmax(16rem,1fr))] gap-2">
       <EditableField
         label="氏名"
         value={data.name}
         onChange={(v) => onChange('name', v)}
         disabled={readonly}
+        compact
       />
       <EditableField
         label="フリガナ"
         value={data.furigana}
         onChange={(v) => onChange('furigana', v)}
         disabled={readonly}
+        compact
       />
       <EditableField
         label="電話番号"
         value={data.phone}
         onChange={(v) => onChange('phone', v)}
         disabled={readonly}
+        compact
       />
       <EditableField
         label="メールアドレス"
         value={data.email}
         onChange={(v) => onChange('email', v)}
         disabled={readonly}
+        compact
       />
       <EditableField
         label="都道府県"
         value={data.prefecture}
         onChange={(v) => onChange('prefecture', v)}
         disabled={readonly}
+        compact
       />
       <EditableField
         label="住所"
         value={data.address}
         onChange={(v) => onChange('address', v)}
         disabled={readonly}
+        compact
       />
       <EditableField
         label="生年月日"
@@ -55,6 +61,8 @@ export function ClientBasicInfo({ data, onChange, readonly = false }: ClientBasi
         onChange={(v) => onChange('birthDate', v)}
         type="date"
         disabled={readonly}
+        compact
+        dateDisplayToggle
       />
       <EditableField
         label="年齢"
@@ -63,6 +71,7 @@ export function ClientBasicInfo({ data, onChange, readonly = false }: ClientBasi
         type="number"
         suffix="歳"
         disabled={readonly}
+        compact
       />
       <EditableField
         label="性別"
@@ -74,6 +83,7 @@ export function ClientBasicInfo({ data, onChange, readonly = false }: ClientBasi
           { value: '女', label: '女' },
         ]}
         disabled={readonly}
+        compact
       />
       <EditableField
         label="婚姻状況"
@@ -86,12 +96,14 @@ export function ClientBasicInfo({ data, onChange, readonly = false }: ClientBasi
           { value: '離婚', label: '離婚' },
         ]}
         disabled={readonly}
+        compact
       />
       <EditableField
         label="子供"
         value={data.children}
         onChange={(v) => onChange('children', v)}
         disabled={readonly}
+        compact
       />
       <EditableField
         label="居住形態"
@@ -106,6 +118,7 @@ export function ClientBasicInfo({ data, onChange, readonly = false }: ClientBasi
           { value: '実家', label: '実家' },
         ]}
         disabled={readonly}
+        compact
       />
       <EditableField
         label="家賃"
@@ -114,6 +127,7 @@ export function ClientBasicInfo({ data, onChange, readonly = false }: ClientBasi
         type="number"
         suffix="円"
         disabled={readonly}
+        compact
       />
       <EditableField
         label="月収（手取り）"
@@ -122,12 +136,14 @@ export function ClientBasicInfo({ data, onChange, readonly = false }: ClientBasi
         type="number"
         suffix="円"
         disabled={readonly}
+        compact
       />
       <EditableField
         label="給与日"
         value={data.payDay}
         onChange={(v) => onChange('payDay', v)}
         disabled={readonly}
+        compact
       />
       <EditableField
         label="勤務形態"
@@ -141,6 +157,7 @@ export function ClientBasicInfo({ data, onChange, readonly = false }: ClientBasi
           { value: '無職', label: '無職' },
         ]}
         disabled={readonly}
+        compact
       />
       <EditableField
         label="要注意ランク"
@@ -153,6 +170,7 @@ export function ClientBasicInfo({ data, onChange, readonly = false }: ClientBasi
           { value: 'C', label: 'C' },
         ]}
         disabled={readonly}
+        compact
       />
     </div>
   )

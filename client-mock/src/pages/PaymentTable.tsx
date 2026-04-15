@@ -79,8 +79,9 @@ export function PaymentTable({
     },
     {
       key: 'plannedDate',
-      header: '予定入金日',
+      header: '入金日',
       width: '5.75%',
+      headerClassName: 'bg-green-50',
       render: (item) => (
         <span className={!item.actualDate ? 'font-medium text-slate-800' : ''}>
           {item.plannedDate ?? <span className="text-slate-300">-</span>}
@@ -89,57 +90,65 @@ export function PaymentTable({
     },
     {
       key: 'plannedAmount',
-      header: '予定入金額',
+      header: '入金額',
       width: '5.75%',
       align: 'right',
+      headerClassName: 'bg-green-50',
       render: (item) => fmtNum(item.plannedAmount),
     },
     {
       key: 'plannedFeeAllocation',
-      header: '予定報酬額',
+      header: '報酬額',
       width: '5.75%',
       align: 'right',
+      headerClassName: 'bg-green-50',
       render: (item) => fmtNum(item.plannedFeeAllocation),
     },
     {
       key: 'plannedAgentFeeAllocation',
-      header: '予定弁代報酬額',
+      header: '弁代報酬額',
       width: '5.75%',
       align: 'right',
+      headerClassName: 'bg-green-50',
       render: (item) => fmtNum(item.plannedAgentFeeAllocation),
     },
     {
       key: 'plannedPoolAllocation',
-      header: '予定ﾌﾟｰﾙ額',
+      header: 'ﾌﾟｰﾙ額',
       width: '5.75%',
       align: 'right',
+      headerClassName: 'bg-green-50',
       render: (item) => fmtNum(item.plannedPoolAllocation),
     },
     {
       key: 'repaymentCount',
-      header: '予定社数',
+      header: '社数',
       width: '5.75%',
       align: 'right',
+      headerClassName: 'bg-green-50',
       render: (item) => fmtNum(item.repaymentCount),
     },
     {
       key: 'handlingFee',
-      header: '予定手数料',
+      header: '手数料',
       width: '5.75%',
       align: 'right',
+      headerClassName: 'bg-green-50',
       render: (item) => fmtNum(item.handlingFee),
     },
     {
       key: 'plannedRepaymentAllocation',
-      header: '予定弁済額',
+      header: '弁済額',
       width: '5.75%',
       align: 'right',
+      headerClassName: 'bg-green-50',
       render: (item) => fmtNum(item.plannedRepaymentAllocation),
     },
     {
       key: 'actualDate',
       header: '実入金日',
       width: '5.75%',
+      headerClassName: 'bg-blue-50',
       render: (item) => {
         if (editingId === item.id) {
           return (
@@ -165,6 +174,7 @@ export function PaymentTable({
       header: '実入金額',
       width: '5.75%',
       align: 'right',
+      headerClassName: 'bg-blue-50',
       render: (item) => {
         if (editingId === item.id) {
           return (
@@ -195,6 +205,7 @@ export function PaymentTable({
       header: '報酬充当額',
       width: '5.75%',
       align: 'right',
+      headerClassName: 'bg-blue-50',
       render: (item) => {
         if (editingId === item.id) {
           return (
@@ -219,6 +230,7 @@ export function PaymentTable({
       header: '弁代報酬充当額',
       width: '5.75%',
       align: 'right',
+      headerClassName: 'bg-blue-50',
       render: (item) => {
         if (editingId === item.id) {
           return (
@@ -243,6 +255,7 @@ export function PaymentTable({
       header: 'ﾌﾟｰﾙ充当額',
       width: '5.75%',
       align: 'right',
+      headerClassName: 'bg-blue-50',
       render: (item) => {
         if (editingId === item.id) {
           return (
@@ -268,6 +281,7 @@ export function PaymentTable({
       width: '5.75%',
       align: 'right',
       sortable: false,
+      headerClassName: 'bg-blue-50',
       render: (item) =>
         item.actualDate ? fmtNum(item.repaymentCount) : <span className="text-slate-300">-</span>,
     },
@@ -277,6 +291,7 @@ export function PaymentTable({
       width: '5.75%',
       align: 'right',
       sortable: false,
+      headerClassName: 'bg-blue-50',
       render: (item) =>
         item.actualDate ? fmtNum(item.handlingFee) : <span className="text-slate-300">-</span>,
     },
@@ -285,6 +300,7 @@ export function PaymentTable({
       header: '弁済充当額',
       width: '5.75%',
       align: 'right',
+      headerClassName: 'bg-blue-50',
       render: (item) => {
         if (editingId === item.id) {
           return (
@@ -310,6 +326,7 @@ export function PaymentTable({
       width: '6%',
       cellTruncate: false,
       sortable: false,
+      headerClassName: 'bg-blue-50',
       render: (item) => {
         if (editingId === item.id) {
           return (
