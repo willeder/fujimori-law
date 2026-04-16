@@ -43,16 +43,17 @@ type VAccountFieldsProps = {
   onSave: (branch: string | null, number: string | null) => void
 }
 
-/** バーチャル口座：常時インライン編集（ボタンなし・空は null で保持） */
+/** バーチャル口座：未入力は「-」表示、クリックで編集（空は null で保持） */
 function VAccountFields({ branch, number, onSave }: VAccountFieldsProps) {
+  const [editing, setEditing] = useState(false)
   const [draftB, setDraftB] = useState(branch ?? '')
   const [draftN, setDraftN] = useState(number ?? '')
 
   useEffect(() => {
-    setDraftB(branch ?? '')
+    if (!editing) setDraftB(branch ?? '')
   }, [branch])
   useEffect(() => {
-    setDraftN(number ?? '')
+    if (!editing) setDraftN(number ?? '')
   }, [number])
 
   const commit = () => {
@@ -65,14 +66,59 @@ function VAccountFields({ branch, number, onSave }: VAccountFieldsProps) {
     'flex shrink-0 flex-nowrap items-center gap-x-2 whitespace-nowrap leading-none'
   const labelCls = 'inline-flex shrink-0 items-center gap-1 text-xs'
 
-  const onEnterBlur: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
-    if (e.key === 'Enter') {
-      ;(e.currentTarget as HTMLInputElement).blur()
-    }
+  const displayB = (branch ?? '').trim()
+  const displayN = (number ?? '').trim()
+
+  if (!editing) {
+    return (
+      <div
+        className={`${rowCls} group cursor-pointer rounded px-1 py-0.5 -mx-1 hover:bg-blue-50/70`}
+        onClick={() => {
+          setDraftB(branch ?? '')
+          setDraftN(number ?? '')
+          setEditing(true)
+        }}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            setDraftB(branch ?? '')
+            setDraftN(number ?? '')
+            setEditing(true)
+          }
+        }}
+      >
+        <span className="inline-flex shrink-0 items-center text-xs font-semibold text-blue-700">
+          バーチャル口座
+        </span>
+        <span className="inline-flex shrink-0 items-center gap-0.5 text-xs text-slate-800">
+          <span className="text-slate-500">支店：</span>
+          <span className={`font-medium tabular-nums ${displayB ? '' : 'text-slate-400'}`}>
+            {displayB || '-'}
+          </span>
+        </span>
+        <span className="inline-flex shrink-0 items-center gap-0.5 text-xs text-slate-800">
+          <span className="text-slate-500">口座番号：</span>
+          <span className={`font-medium tabular-nums ${displayN ? '' : 'text-slate-400'}`}>
+            {displayN || '-'}
+          </span>
+        </span>
+        <span className="shrink-0 text-xs text-blue-400 opacity-0 transition-opacity group-hover:opacity-100">
+          編集
+        </span>
+      </div>
+    )
   }
 
   return (
-    <div className={rowCls}>
+    <div
+      className={rowCls}
+      onBlur={(e) => {
+        if (e.currentTarget.contains(e.relatedTarget as Node | null)) return
+        commit()
+        setEditing(false)
+      }}
+    >
       <span className="inline-flex shrink-0 items-center text-xs font-semibold text-blue-700">
         バーチャル口座
       </span>
@@ -84,8 +130,14 @@ function VAccountFields({ branch, number, onSave }: VAccountFieldsProps) {
           onChange={(e) => setDraftB(e.target.value)}
           placeholder="未入力"
           autoComplete="off"
-          onBlur={commit}
-          onKeyDown={onEnterBlur}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') (e.currentTarget as HTMLInputElement).blur()
+            if (e.key === 'Escape') {
+              setDraftB(branch ?? '')
+              setDraftN(number ?? '')
+              setEditing(false)
+            }
+          }}
         />
       </label>
       <label className={labelCls}>
@@ -96,8 +148,14 @@ function VAccountFields({ branch, number, onSave }: VAccountFieldsProps) {
           onChange={(e) => setDraftN(e.target.value)}
           placeholder="未入力"
           autoComplete="off"
-          onBlur={commit}
-          onKeyDown={onEnterBlur}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') (e.currentTarget as HTMLInputElement).blur()
+            if (e.key === 'Escape') {
+              setDraftB(branch ?? '')
+              setDraftN(number ?? '')
+              setEditing(false)
+            }
+          }}
         />
       </label>
     </div>

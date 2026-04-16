@@ -207,7 +207,7 @@ export function PaymentTable({
       header: '報酬充当額',
       width: '7rem',
       align: 'right',
-      headerClassName: 'bg-blue-50',
+      headerClassName: 'bg-blue-50 whitespace-nowrap',
       render: (item) => {
         if (editingId === item.id) {
           return (
