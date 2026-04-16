@@ -66,7 +66,7 @@ export function Tabs({
   const tabRowClass =
     isSplit
       ? 'grid w-full shrink-0 grid-cols-2 overflow-hidden rounded-md border border-slate-200 bg-white'
-      : 'flex shrink-0 flex-wrap gap-1 overflow-x-auto border-b border-slate-200 pb-px'
+      : 'flex shrink-0 flex-nowrap gap-1 overflow-x-auto border-b border-slate-200 pb-px'
 
   const panelTop = tabBodyScroll === 'none' ? (panelTopSpacing === 'tight' ? 'mt-2' : 'mt-4') : ''
 
