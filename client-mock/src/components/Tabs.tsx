@@ -32,6 +32,11 @@ interface TabsProps {
   tabBodyScroll?: TabBodyScrollMode
   /** tabBodyScroll が host のときのルート高さ（Tailwind。例: h-[min(72vh,34rem)]）。未指定時は約20行相当 */
   tabBodyMaxHeightClassName?: string
+  /**
+   * タブ行の直下・アクティブパネルの上に表示（入金スケジュールのサマリ帯など）。
+   * tabBodyScroll が guest / host のときのみ有効。
+   */
+  beforeActivePanelContent?: ReactNode
 }
 
 export function Tabs({
@@ -45,6 +50,7 @@ export function Tabs({
   tabBodyScroll = 'none',
   /** max-h だけだと flex 内で子の flex-1 が効かずスクロールできないことがあるため h-[min(...)] で高さを確定 */
   tabBodyMaxHeightClassName = 'h-[min(72vh,34rem)]',
+  beforeActivePanelContent,
 }: TabsProps) {
   const [internalTab, setInternalTab] = useState(defaultTab ?? tabs[0]?.id)
   const controlled =
@@ -128,7 +134,14 @@ export function Tabs({
       </div>
       <div className={panelClass}>
         {tabBodyScroll === 'none' ? (
-          activeContent
+          <>
+            {beforeActivePanelContent != null ? (
+              <div className="min-h-[2rem] min-w-0 shrink-0 overflow-x-auto border-b border-slate-200 bg-slate-50 px-1 py-1">
+                {beforeActivePanelContent}
+              </div>
+            ) : null}
+            {activeContent}
+          </>
         ) : (
           <div
             className={
@@ -137,7 +150,18 @@ export function Tabs({
                 : 'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden'
             }
           >
-            {activeContent}
+            {beforeActivePanelContent != null ? (
+              <>
+                <div className="min-h-[2rem] min-w-0 shrink-0 overflow-x-auto border-b border-slate-200 bg-slate-50 px-1 py-1">
+                  {beforeActivePanelContent}
+                </div>
+                <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-auto">
+                  {activeContent}
+                </div>
+              </>
+            ) : (
+              activeContent
+            )}
           </div>
         )}
       </div>

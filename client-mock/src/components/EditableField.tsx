@@ -11,6 +11,8 @@ interface EditableFieldProps {
   disabled?: boolean
   /** ラベルと値を1行に詰め、余白・字サイズを下げる（詳細ヘッダー等） */
   compact?: boolean
+  /** compact の字サイズ（ヘッダーの「リスト」行などを大きくしたい用途） */
+  compactSize?: 'md' | 'lg'
   /** compact 時のレイアウト（横並び/上下2段） */
   compactLayout?: 'inline' | 'stacked'
   /** type="date" のとき、西暦/和暦の表示切替ボタンを出す（入力は西暦のまま） */
@@ -53,6 +55,7 @@ export function EditableField({
   placeholder,
   disabled = false,
   compact = false,
+  compactSize = 'md',
   compactLayout = 'inline',
   dateDisplayToggle = false,
 }: EditableFieldProps) {
@@ -103,8 +106,13 @@ export function EditableField({
       ? formatJapaneseEraDate(value) ?? formattedDisplay
       : formattedDisplay
 
+  const compactInputBase =
+    compactSize === 'lg'
+      ? 'flex-1 min-w-0 text-base border border-blue-300 rounded px-2 py-1 h-10 leading-tight focus:outline-none focus:ring-1 focus:ring-blue-500'
+      : 'flex-1 min-w-0 text-sm border border-blue-300 rounded px-1.5 py-0.5 h-8 leading-tight focus:outline-none focus:ring-1 focus:ring-blue-500'
+
   const inputBase = compact
-    ? 'flex-1 min-w-0 text-xs border border-blue-300 rounded px-1.5 py-0.5 h-7 leading-tight focus:outline-none focus:ring-1 focus:ring-blue-500'
+    ? compactInputBase
     : 'flex-1 text-sm border border-blue-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500'
 
   const isStacked = compact && compactLayout === 'stacked'
@@ -113,7 +121,7 @@ export function EditableField({
   const toggleButton = showDateToggle ? (
     <button
       type="button"
-      className="shrink-0 rounded bg-slate-100 px-1 py-0.5 text-[10px] font-medium text-slate-600 hover:bg-slate-200"
+      className={`shrink-0 rounded bg-slate-100 px-1 py-0.5 font-medium text-slate-600 hover:bg-slate-200 ${compactSize === 'lg' ? 'text-sm' : 'text-xs'}`}
       onClick={(e) => {
         e.stopPropagation()
         setDateDisplayMode((m) => (m === 'gregorian' ? 'japanese' : 'gregorian'))
@@ -128,10 +136,10 @@ export function EditableField({
       if (isStacked) {
         return (
           <div className="min-w-0">
-            <div className="text-[10px] font-medium text-slate-500 leading-tight whitespace-nowrap">
+            <div className={`${compactSize === 'lg' ? 'text-sm' : 'text-xs'} font-medium text-slate-500 leading-tight whitespace-nowrap`}>
               {labelWithColon}
             </div>
-            <div className="min-w-0 text-xs text-slate-700 whitespace-normal break-words leading-tight">
+            <div className={`min-w-0 ${compactSize === 'lg' ? 'text-base' : 'text-sm'} text-slate-700 whitespace-normal break-words leading-tight`}>
               <span>{displayText}</span>
               {suffix && <span className="text-slate-400 ml-0">{suffix}</span>}
               {toggleButton && <span className="ml-1 inline-flex align-middle">{toggleButton}</span>}
@@ -140,11 +148,11 @@ export function EditableField({
         )
       }
       return (
-        <div className="flex min-w-0 items-baseline gap-1 min-h-[1.5rem] py-0">
-          <span className="shrink-0 text-[10px] font-medium text-slate-500 leading-tight whitespace-nowrap">
+        <div className={`flex min-w-0 items-baseline gap-1 py-0 ${compactSize === 'lg' ? 'min-h-[2.25rem]' : 'min-h-[1.75rem]'}`}>
+          <span className={`shrink-0 font-medium text-slate-500 leading-tight whitespace-nowrap ${compactSize === 'lg' ? 'text-sm' : 'text-xs'}`}>
             {labelWithColon}
           </span>
-          <div className="min-w-0 flex-1 text-xs text-slate-700 leading-tight">
+          <div className={`min-w-0 flex-1 text-slate-700 leading-tight ${compactSize === 'lg' ? 'text-base' : 'text-sm'}`}>
             <span className="block min-w-0 truncate whitespace-nowrap">
               {displayText}
               {suffix && <span className="text-slate-400 ml-0">{suffix}</span>}
@@ -171,11 +179,11 @@ export function EditableField({
       if (isStacked) {
         return (
           <div className="min-w-0">
-            <div className="text-[10px] font-medium text-slate-500 leading-tight whitespace-nowrap">
+            <div className={`${compactSize === 'lg' ? 'text-sm' : 'text-xs'} font-medium text-slate-500 leading-tight whitespace-nowrap`}>
               {labelWithColon}
             </div>
             <div
-              className="group min-w-0 cursor-pointer rounded px-0.5 py-0.5 -mx-0.5 text-xs leading-tight text-slate-700 hover:bg-blue-50/80"
+              className={`group min-w-0 cursor-pointer rounded px-0.5 py-0.5 -mx-0.5 leading-tight text-slate-700 hover:bg-blue-50/80 ${compactSize === 'lg' ? 'text-base' : 'text-sm'}`}
               onClick={() => {
                 setEditValue(String(value ?? ''))
                 setIsEditing(true)
@@ -187,7 +195,7 @@ export function EditableField({
                   {suffix && <span className="text-slate-400 ml-0">{suffix}</span>}
                 </span>
                 {toggleButton}
-                <span className="shrink-0 text-[10px] text-blue-400 opacity-0 transition-opacity group-hover:opacity-100">
+                <span className={`shrink-0 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100 ${compactSize === 'lg' ? 'text-sm' : 'text-xs'}`}>
                   編集
                 </span>
               </div>
@@ -196,12 +204,12 @@ export function EditableField({
         )
       }
       return (
-        <div className="flex min-w-0 items-baseline gap-1 min-h-[1.5rem] py-0">
-          <span className="shrink-0 text-[10px] font-medium text-slate-500 leading-tight whitespace-nowrap">
+        <div className={`flex min-w-0 items-baseline gap-1 py-0 ${compactSize === 'lg' ? 'min-h-[2.25rem]' : 'min-h-[1.75rem]'}`}>
+          <span className={`shrink-0 font-medium text-slate-500 leading-tight whitespace-nowrap ${compactSize === 'lg' ? 'text-sm' : 'text-xs'}`}>
             {labelWithColon}
           </span>
           <div
-            className="group flex min-w-0 flex-1 cursor-pointer items-center gap-0.5 rounded px-0.5 py-0.5 -mx-0.5 text-xs leading-tight text-slate-700 hover:bg-blue-50/80"
+            className={`group flex min-w-0 flex-1 cursor-pointer items-center gap-0.5 rounded px-0.5 py-0.5 -mx-0.5 leading-tight text-slate-700 hover:bg-blue-50/80 ${compactSize === 'lg' ? 'text-base' : 'text-sm'}`}
             onClick={() => {
               setEditValue(String(value ?? ''))
               setIsEditing(true)
@@ -212,7 +220,7 @@ export function EditableField({
               {suffix && <span className="text-slate-400 ml-0">{suffix}</span>}
             </span>
             {toggleButton}
-            <span className="shrink-0 text-[10px] text-blue-400 opacity-0 transition-opacity group-hover:opacity-100">
+            <span className={`shrink-0 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100 ${compactSize === 'lg' ? 'text-sm' : 'text-xs'}`}>
               編集
             </span>
           </div>

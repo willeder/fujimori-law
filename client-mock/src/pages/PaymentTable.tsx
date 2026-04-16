@@ -64,13 +64,13 @@ export function PaymentTable({
   }
 
   const inputCls =
-    'box-border w-full min-w-0 max-w-full rounded border border-blue-300 px-0.5 py-0.5 text-[9px] leading-tight [color-scheme:light]'
+    'box-border w-full min-w-0 max-w-full rounded border border-blue-300 px-2 py-1 text-sm leading-tight [color-scheme:light]'
 
   const columns: Column<PaymentRecord>[] = [
     {
       key: '__rowIndex',
       header: '',
-      width: '2%',
+      width: '2.5rem',
       align: 'center',
       sortable: false,
       render: (_item, index) => (
@@ -80,10 +80,12 @@ export function PaymentTable({
     {
       key: 'plannedDate',
       header: '入金日',
-      width: '5.75%',
+      width: '6.75rem',
       headerClassName: 'bg-green-50',
       render: (item) => (
-        <span className={!item.actualDate ? 'font-medium text-slate-800' : ''}>
+        <span
+          className={`whitespace-nowrap ${!item.actualDate ? 'font-medium text-slate-800' : ''}`}
+        >
           {item.plannedDate ?? <span className="text-slate-300">-</span>}
         </span>
       ),
@@ -91,7 +93,7 @@ export function PaymentTable({
     {
       key: 'plannedAmount',
       header: '入金額',
-      width: '5.75%',
+      width: '6.75rem',
       align: 'right',
       headerClassName: 'bg-green-50',
       render: (item) => fmtNum(item.plannedAmount),
@@ -99,7 +101,7 @@ export function PaymentTable({
     {
       key: 'plannedFeeAllocation',
       header: '報酬額',
-      width: '5.75%',
+      width: '6.75rem',
       align: 'right',
       headerClassName: 'bg-green-50',
       render: (item) => fmtNum(item.plannedFeeAllocation),
@@ -107,7 +109,7 @@ export function PaymentTable({
     {
       key: 'plannedAgentFeeAllocation',
       header: '弁代報酬額',
-      width: '5.75%',
+      width: '7.75rem',
       align: 'right',
       headerClassName: 'bg-green-50',
       render: (item) => fmtNum(item.plannedAgentFeeAllocation),
@@ -115,7 +117,7 @@ export function PaymentTable({
     {
       key: 'plannedPoolAllocation',
       header: 'ﾌﾟｰﾙ額',
-      width: '5.75%',
+      width: '6.25rem',
       align: 'right',
       headerClassName: 'bg-green-50',
       render: (item) => fmtNum(item.plannedPoolAllocation),
@@ -123,7 +125,7 @@ export function PaymentTable({
     {
       key: 'repaymentCount',
       header: '社数',
-      width: '5.75%',
+      width: '4rem',
       align: 'right',
       headerClassName: 'bg-green-50',
       render: (item) => fmtNum(item.repaymentCount),
@@ -131,7 +133,7 @@ export function PaymentTable({
     {
       key: 'handlingFee',
       header: '手数料',
-      width: '5.75%',
+      width: '5.75rem',
       align: 'right',
       headerClassName: 'bg-green-50',
       render: (item) => fmtNum(item.handlingFee),
@@ -139,7 +141,7 @@ export function PaymentTable({
     {
       key: 'plannedRepaymentAllocation',
       header: '弁済額',
-      width: '5.75%',
+      width: '6.75rem',
       align: 'right',
       headerClassName: 'bg-green-50',
       render: (item) => fmtNum(item.plannedRepaymentAllocation),
@@ -147,7 +149,7 @@ export function PaymentTable({
     {
       key: 'actualDate',
       header: '実入金日',
-      width: '5.75%',
+      width: '7.5rem',
       headerClassName: 'bg-blue-50',
       render: (item) => {
         if (editingId === item.id) {
@@ -163,16 +165,16 @@ export function PaymentTable({
           )
         }
         return item.actualDate ? (
-          <span className="text-green-700">{item.actualDate}</span>
+          <span className="whitespace-nowrap text-green-700">{item.actualDate}</span>
         ) : (
-          <span className="text-slate-300">未</span>
+          <span className="whitespace-nowrap text-slate-300">未</span>
         )
       },
     },
     {
       key: 'actualAmount',
       header: '実入金額',
-      width: '5.75%',
+      width: '7.5rem',
       align: 'right',
       headerClassName: 'bg-blue-50',
       render: (item) => {
@@ -203,7 +205,7 @@ export function PaymentTable({
     {
       key: 'actualFeeAllocation',
       header: '報酬充当額',
-      width: '5.75%',
+      width: '7rem',
       align: 'right',
       headerClassName: 'bg-blue-50',
       render: (item) => {
@@ -228,7 +230,7 @@ export function PaymentTable({
     {
       key: 'actualAgentFeeAllocation',
       header: '弁代報酬充当額',
-      width: '5.75%',
+      width: '8.25rem',
       align: 'right',
       headerClassName: 'bg-blue-50',
       render: (item) => {
@@ -253,7 +255,7 @@ export function PaymentTable({
     {
       key: 'actualPoolAllocation',
       header: 'ﾌﾟｰﾙ充当額',
-      width: '5.75%',
+      width: '7rem',
       align: 'right',
       headerClassName: 'bg-blue-50',
       render: (item) => {
@@ -278,7 +280,7 @@ export function PaymentTable({
     {
       key: 'repaymentCountActual',
       header: '社数',
-      width: '5.75%',
+      width: '4rem',
       align: 'right',
       sortable: false,
       headerClassName: 'bg-blue-50',
@@ -288,7 +290,7 @@ export function PaymentTable({
     {
       key: 'handlingFeeActual',
       header: '手数料',
-      width: '5.75%',
+      width: '5.75rem',
       align: 'right',
       sortable: false,
       headerClassName: 'bg-blue-50',
@@ -298,7 +300,7 @@ export function PaymentTable({
     {
       key: 'actualRepaymentAllocation',
       header: '弁済充当額',
-      width: '5.75%',
+      width: '7rem',
       align: 'right',
       headerClassName: 'bg-blue-50',
       render: (item) => {
@@ -323,7 +325,7 @@ export function PaymentTable({
     {
       key: 'actions',
       header: '',
-      width: '6%',
+      width: '6.5rem',
       cellTruncate: false,
       sortable: false,
       headerClassName: 'bg-blue-50',
@@ -334,14 +336,14 @@ export function PaymentTable({
               <button
                 type="button"
                 onClick={() => handleSave(item)}
-                className="rounded bg-blue-500 px-1 py-0.5 text-[9px] text-white hover:bg-blue-600"
+                className="rounded bg-blue-500 px-2 py-1 text-xs text-white hover:bg-blue-600"
               >
                 保存
               </button>
               <button
                 type="button"
                 onClick={handleCancel}
-                className="rounded bg-slate-200 px-1 py-0.5 text-[9px] text-slate-700 hover:bg-slate-300"
+                className="rounded bg-slate-200 px-2 py-1 text-xs text-slate-700 hover:bg-slate-300"
               >
                 取消
               </button>
@@ -352,7 +354,7 @@ export function PaymentTable({
           <button
             type="button"
             onClick={() => handleEdit(item)}
-            className="rounded px-1 py-0.5 text-[9px] text-blue-600 hover:bg-blue-50"
+            className="rounded px-2 py-1 text-xs text-blue-600 hover:bg-blue-50"
           >
             編集
           </button>
@@ -368,9 +370,8 @@ export function PaymentTable({
         columns={columns}
         keyField="id"
         emptyMessage="入金データがありません"
-        density="dense"
+        density="default"
         bodyMaxHeightClassName="max-h-[min(72vh,40rem)]"
-        cellSingleLine
         tight
         suspendTruncate={editingId !== null}
       />
