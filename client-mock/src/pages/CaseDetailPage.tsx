@@ -704,6 +704,63 @@ function CaseDetailBody({
             </div>
           </div>
         </div>
+        {/* ③ 入金状況（スクロール時も常に参照できるサマリ） */}
+        <div className="w-full border-b border-slate-100 bg-slate-50/90 px-6 py-2">
+          <div className="min-w-0 overflow-x-auto">
+            <div className="flex w-max min-w-0 flex-nowrap items-baseline gap-x-5 gap-y-1 text-sm text-slate-800">
+              <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-blue-700">
+                入金状況
+              </span>
+              <span className="shrink-0">
+                <span className="text-slate-500">累計入金額（実／予定）：</span>
+                <span className="font-semibold tabular-nums text-blue-700">
+                  {formatYenPair(
+                    caseData.paymentInfo.cumulativePaymentAmount,
+                    caseData.paymentInfo.cumulativePlannedPayment
+                  )}
+                </span>
+              </span>
+              <span className="shrink-0">
+                <span className="text-slate-500">残入金予定額：</span>
+                <span className="font-medium tabular-nums">
+                  {remainingPlanned != null ? `${remainingPlanned.toLocaleString()}円` : '-'}
+                </span>
+              </span>
+              <span className="shrink-0">
+                <span className="text-slate-500">次回／最終入金予定日：</span>
+                <span className="font-medium tabular-nums">
+                  {formatDatePair(displayNextPaymentDate, finalPlannedDate)}
+                </span>
+              </span>
+              <span className="shrink-0">
+                <span className="text-slate-500">報酬充当：</span>
+                <span className="font-medium tabular-nums">
+                  {caseData.paymentInfo.cumulativeFeeAllocation?.toLocaleString() ?? '-'}円
+                </span>
+              </span>
+              <span className="shrink-0">
+                <span className="text-slate-500">未回収：</span>
+                <span className="font-medium tabular-nums">
+                  {caseData.feeInfo.uncollectedFee?.toLocaleString() ?? '-'}円
+                </span>
+              </span>
+              <span className="shrink-0">
+                <span className="text-slate-500">弁代充当：</span>
+                <span className="font-medium tabular-nums">{sumActualAgentFee.toLocaleString()}円</span>
+              </span>
+              <span className="shrink-0">
+                <span className="text-slate-500">プール充当：</span>
+                <span className="font-medium tabular-nums">{sumActualPool.toLocaleString()}円</span>
+              </span>
+              <span className="shrink-0">
+                <span className="text-slate-500">弁済充当（実／予定）：</span>
+                <span className="font-medium tabular-nums">
+                  {formatYenPair(sumActualRepayment, sumPlannedRepayment)}
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
       </header>
 
       {/* Content（ヘッダー以外のみスクロール） */}
@@ -712,69 +769,9 @@ function CaseDetailBody({
         <div className="grid grid-cols-1 items-start gap-3 lg:grid-cols-5">
           {/* Left Column - Summary */}
           <div className="lg:col-span-1 space-y-3">
-            {/* ② 入金管理をメインにするため、入金状況サマリを最上部へ */}
-            <SectionCard title="入金状況" color="blue">
+            {/* サマリはヘッダー3行目。ここではバーチャル口座のみ */}
+            <SectionCard title="入金状況（バーチャル口座）" color="blue">
               <div className="space-y-3">
-                <div className="flex items-center justify-between gap-1">
-                  <span className="shrink-0 text-sm text-slate-600">累計入金額：</span>
-                  <span className="min-w-0 whitespace-normal break-words text-right text-xl font-bold text-blue-600">
-                    {formatYenPair(
-                      caseData.paymentInfo.cumulativePaymentAmount,
-                      caseData.paymentInfo.cumulativePlannedPayment
-                    )}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-1 text-sm">
-                  <span className="shrink-0 text-slate-500">残入金予定額：</span>
-                  <span className="min-w-0 whitespace-normal break-words text-right font-medium tabular-nums">
-                    {remainingPlanned != null ? `${remainingPlanned.toLocaleString()}円` : '-'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-1 text-sm">
-                  <span className="shrink-0 text-slate-500">次回／最終入金予定日：</span>
-                  <span className="min-w-0 whitespace-normal break-words text-right font-medium">
-                    {formatDatePair(displayNextPaymentDate, finalPlannedDate)}
-                  </span>
-                </div>
-                <hr className="border-slate-100" />
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  <div className="min-w-0 text-sm text-slate-600">
-                    <span className="text-slate-600">報酬充当額：</span>
-                    <span className="font-medium text-slate-900">
-                      {caseData.paymentInfo.cumulativeFeeAllocation?.toLocaleString() ?? '-'}
-                    </span>
-                    <span className="text-slate-400">円</span>
-                  </div>
-                  <div className="min-w-0 text-sm text-slate-600">
-                    <span className="text-slate-600">未回収額：</span>
-                    <span className="font-medium text-slate-900">
-                      {caseData.feeInfo.uncollectedFee?.toLocaleString() ?? '-'}
-                    </span>
-                    <span className="text-slate-400">円</span>
-                  </div>
-                  <div className="min-w-0 text-sm text-slate-600">
-                    <span className="text-slate-600">弁代充当額：</span>
-                    <span className="font-medium text-slate-900">
-                      {sumActualAgentFee.toLocaleString()}
-                    </span>
-                    <span className="text-slate-400">円</span>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div className="min-w-0 text-sm text-slate-600">
-                    <span className="text-slate-600">プール充当額：</span>
-                    <span className="font-medium text-slate-900">
-                      {sumActualPool.toLocaleString()}
-                    </span>
-                    <span className="text-slate-400">円</span>
-                  </div>
-                  <div className="min-w-0 text-sm text-slate-600">
-                    <span className="text-slate-600">弁済充当額：</span>
-                    <span className="font-medium text-slate-900">
-                      {formatYenPair(sumActualRepayment, sumPlannedRepayment)}
-                    </span>
-                  </div>
-                </div>
                 <VAccountFields
                   branch={caseData.paymentInfo.vAccountBranch}
                   number={caseData.paymentInfo.vAccountNumber}
