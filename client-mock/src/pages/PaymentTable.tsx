@@ -229,10 +229,10 @@ export function PaymentTable({
     },
     {
       key: 'actualAgentFeeAllocation',
-      header: '弁代報酬充当額',
-      width: '8.25rem',
+      header: '弁代充当額',
+      width: '7.75rem',
       align: 'right',
-      headerClassName: 'bg-blue-50',
+      headerClassName: 'bg-blue-50 whitespace-nowrap',
       render: (item) => {
         if (editingId === item.id) {
           return (
@@ -257,7 +257,7 @@ export function PaymentTable({
       header: 'ﾌﾟｰﾙ充当額',
       width: '7rem',
       align: 'right',
-      headerClassName: 'bg-blue-50',
+      headerClassName: 'bg-blue-50 whitespace-nowrap',
       render: (item) => {
         if (editingId === item.id) {
           return (
@@ -302,7 +302,7 @@ export function PaymentTable({
       header: '弁済充当額',
       width: '7rem',
       align: 'right',
-      headerClassName: 'bg-blue-50',
+      headerClassName: 'bg-blue-50 whitespace-nowrap',
       render: (item) => {
         if (editingId === item.id) {
           return (

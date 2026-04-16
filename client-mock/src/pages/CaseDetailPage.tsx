@@ -498,7 +498,7 @@ function CaseDetailBody({
               <div className="min-w-0 shrink-0">
               <EditableField
                 compact
-                compactSize="lg"
+                compactSize="md"
                 label="リスト登録日"
                 value={caseData.metadata.listRegisteredDate}
                 onChange={(v) => updateMetadata('listRegisteredDate', v)}
@@ -508,7 +508,7 @@ function CaseDetailBody({
               <div className="min-w-0 shrink-0">
               <EditableField
                 compact
-                compactSize="lg"
+                compactSize="md"
                 label="リスト区分"
                 value={caseData.metadata.listCategory}
                 onChange={(v) => updateMetadata('listCategory', v)}
@@ -517,7 +517,7 @@ function CaseDetailBody({
               <div className="min-w-0 shrink-0">
               <EditableField
                 compact
-                compactSize="lg"
+                compactSize="md"
                 label="受任日"
                 value={caseData.appointmentInfo.acceptanceDate}
                 onChange={(v) => updateAppointmentInfo('acceptanceDate', v)}
@@ -527,7 +527,7 @@ function CaseDetailBody({
               <div className="min-w-0 shrink-0">
               <EditableField
                 compact
-                compactSize="lg"
+                compactSize="md"
                 label="アポ担当"
                 value={caseData.appointmentInfo.appointmentStaff}
                 onChange={(v) => updateAppointmentInfo('appointmentStaff', v)}
@@ -536,7 +536,7 @@ function CaseDetailBody({
               <div className="min-w-0 shrink-0">
               <EditableField
                 compact
-                compactSize="lg"
+                compactSize="md"
                 label="面談担当"
                 value={caseData.appointmentInfo.interviewStaff}
                 onChange={(v) => updateAppointmentInfo('interviewStaff', v)}
@@ -545,7 +545,7 @@ function CaseDetailBody({
               <div className="min-w-0 shrink-0">
               <EditableField
                 compact
-                compactSize="lg"
+                compactSize="md"
                 label="受任ランク"
                 value={caseData.appointmentInfo.acceptanceRank}
                 onChange={(v) => updateAppointmentInfo('acceptanceRank', v)}
@@ -560,7 +560,7 @@ function CaseDetailBody({
               <div className="min-w-0 shrink-0">
               <EditableField
                 compact
-                compactSize="lg"
+                compactSize="md"
                 label="通常報酬"
                 value={caseData.feeInfo.normalFee}
                 onChange={(v) => updateFeeInfo('normalFee', v)}
@@ -571,7 +571,7 @@ function CaseDetailBody({
               <div className="min-w-0 shrink-0">
               <EditableField
                 compact
-                compactSize="lg"
+                compactSize="md"
                 label="報酬分割回数"
                 value={caseData.feeInfo.installmentCount}
                 onChange={(v) => updateFeeInfo('installmentCount', v)}
@@ -582,7 +582,7 @@ function CaseDetailBody({
               <div className="min-w-0 shrink-0">
               <EditableField
                 compact
-                compactSize="lg"
+                compactSize="md"
                 label="毎月入金日"
                 value={caseData.paymentInfo.monthlyPaymentDay}
                 onChange={(v) => updatePaymentInfo('monthlyPaymentDay', v)}
@@ -591,7 +591,7 @@ function CaseDetailBody({
               <div className="min-w-0 shrink-0">
               <EditableField
                 compact
-                compactSize="lg"
+                compactSize="md"
                 label="基本入金額"
                 value={caseData.paymentInfo.basePaymentAmount}
                 onChange={(v) => updatePaymentInfo('basePaymentAmount', v)}
