@@ -82,6 +82,7 @@ export function PaymentTable({
       header: '入金日',
       width: '6.75rem',
       headerClassName: 'bg-green-50',
+      sortable: false,
       render: (item) => (
         <span
           className={`whitespace-nowrap ${!item.actualDate ? 'font-medium text-slate-800' : ''}`}
@@ -96,6 +97,7 @@ export function PaymentTable({
       width: '6.75rem',
       align: 'right',
       headerClassName: 'bg-green-50',
+      sortable: false,
       render: (item) => fmtNum(item.plannedAmount),
     },
     {
@@ -104,6 +106,7 @@ export function PaymentTable({
       width: '6.75rem',
       align: 'right',
       headerClassName: 'bg-green-50',
+      sortable: false,
       render: (item) => fmtNum(item.plannedFeeAllocation),
     },
     {
@@ -112,6 +115,7 @@ export function PaymentTable({
       width: '7.75rem',
       align: 'right',
       headerClassName: 'bg-green-50',
+      sortable: false,
       render: (item) => fmtNum(item.plannedAgentFeeAllocation),
     },
     {
@@ -120,6 +124,7 @@ export function PaymentTable({
       width: '6.25rem',
       align: 'right',
       headerClassName: 'bg-green-50',
+      sortable: false,
       render: (item) => fmtNum(item.plannedPoolAllocation),
     },
     {
@@ -128,6 +133,7 @@ export function PaymentTable({
       width: '4rem',
       align: 'right',
       headerClassName: 'bg-green-50',
+      sortable: false,
       render: (item) => fmtNum(item.repaymentCount),
     },
     {
@@ -136,6 +142,7 @@ export function PaymentTable({
       width: '5.75rem',
       align: 'right',
       headerClassName: 'bg-green-50',
+      sortable: false,
       render: (item) => fmtNum(item.handlingFee),
     },
     {
@@ -144,6 +151,7 @@ export function PaymentTable({
       width: '6.75rem',
       align: 'right',
       headerClassName: 'bg-green-50',
+      sortable: false,
       render: (item) => fmtNum(item.plannedRepaymentAllocation),
     },
     {
@@ -151,6 +159,7 @@ export function PaymentTable({
       header: '実入金日',
       width: '7.5rem',
       headerClassName: 'bg-blue-50',
+      sortable: false,
       render: (item) => {
         if (editingId === item.id) {
           return (
@@ -177,6 +186,7 @@ export function PaymentTable({
       width: '7.5rem',
       align: 'right',
       headerClassName: 'bg-blue-50',
+      sortable: false,
       render: (item) => {
         if (editingId === item.id) {
           return (
@@ -208,6 +218,7 @@ export function PaymentTable({
       width: '7rem',
       align: 'right',
       headerClassName: 'bg-blue-50 whitespace-nowrap',
+      sortable: false,
       render: (item) => {
         if (editingId === item.id) {
           return (
@@ -233,6 +244,7 @@ export function PaymentTable({
       width: '7.75rem',
       align: 'right',
       headerClassName: 'bg-blue-50 whitespace-nowrap',
+      sortable: false,
       render: (item) => {
         if (editingId === item.id) {
           return (
@@ -258,6 +270,7 @@ export function PaymentTable({
       width: '7rem',
       align: 'right',
       headerClassName: 'bg-blue-50 whitespace-nowrap',
+      sortable: false,
       render: (item) => {
         if (editingId === item.id) {
           return (
@@ -303,6 +316,7 @@ export function PaymentTable({
       width: '7rem',
       align: 'right',
       headerClassName: 'bg-blue-50 whitespace-nowrap',
+      sortable: false,
       render: (item) => {
         if (editingId === item.id) {
           return (

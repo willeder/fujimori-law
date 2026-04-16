@@ -7,6 +7,8 @@ export interface Column<T> {
   align?: 'left' | 'center' | 'right'
   /** ヘッダー（th）の追加クラス（列ごとの背景色など） */
   headerClassName?: string
+  /** セル（td）の追加クラス（列ごとの背景色など） */
+  cellClassName?: string
   /** false のときソート不可（通番列など） */
   sortable?: boolean
   render?: (item: T, index: number) => React.ReactNode
@@ -133,7 +135,7 @@ export function DataTable<T>({
   const useStickyHeader = scrollBody || stickyHeader
 
   const stickyTh = useStickyHeader
-    ? 'sticky top-0 z-20 bg-slate-50 shadow-[inset_0_-1px_0_0_theme(colors.slate.200)]'
+    ? 'sticky top-0 z-20 shadow-[inset_0_-1px_0_0_theme(colors.slate.200)]'
     : ''
 
   /** 折り返し+table-auto 時は表がやや広がることがあるため横スクロールも許可 */
@@ -175,7 +177,7 @@ export function DataTable<T>({
     <div className={scrollWrapClass}>
       <table className={`${tableWidthClass} ${tableText}${tableLayoutClass}${tableMinW}${tableBorder}`}>
         <thead>
-          <tr className="border-b border-slate-200 bg-slate-50">
+          <tr className="border-b border-slate-200">
             {columns.map((col) => {
               const sortable = col.sortable !== false
               return (
@@ -245,7 +247,7 @@ export function DataTable<T>({
                   return (
                   <td
                     key={String(col.key)}
-                    className={`${cellPad} ${alignClass[col.align ?? 'left']} ${bodyCellWrap} tabular-nums`}
+                    className={`${cellPad} ${alignClass[col.align ?? 'left']} ${bodyCellWrap} tabular-nums ${col.cellClassName ?? ''}`}
                   >
                     {cellNoWrap ? (
                       col.render

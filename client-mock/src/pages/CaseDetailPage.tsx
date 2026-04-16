@@ -543,31 +543,31 @@ function CaseDetailBody({
           </Link>
           <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-x-6 gap-y-2">
             <span className="flex shrink-0 items-center gap-0.5">
-              <span className="text-slate-500">ステータス：</span>
+              <span className="text-xs text-slate-500">ステータス：</span>
               <StatusBadge status={caseData.settlementInfo.status} size="md" />
             </span>
             <span className="shrink-0">
-              <span className="text-slate-500">ID：</span>
+              <span className="text-xs text-slate-500">ID：</span>
               <span className="font-medium">{displayCaseId}</span>
             </span>
             <span className="shrink-0">
-              <span className="text-slate-500">名前：</span>
+              <span className="text-xs text-slate-500">名前：</span>
               <span className="font-medium">{caseData.clientBasicInfo.name ?? '-'}</span>
             </span>
             <span className="shrink-0">
-              <span className="text-slate-500">フリガナ：</span>
+              <span className="text-xs text-slate-500">フリガナ：</span>
               <span className="font-medium">{caseData.clientBasicInfo.furigana ?? '-'}</span>
             </span>
             <span className="shrink-0">
-              <span className="text-slate-500">電話番号：</span>
+              <span className="text-xs text-slate-500">電話番号：</span>
               <span className="font-medium">{caseData.clientBasicInfo.phone ?? '-'}</span>
             </span>
             <span className="min-w-0 shrink">
-              <span className="text-slate-500">メールアドレス：</span>
+              <span className="text-xs text-slate-500">メールアドレス：</span>
               <span className="font-medium break-all">{caseData.clientBasicInfo.email ?? '-'}</span>
             </span>
             <span className="shrink-0">
-              <span className="text-slate-500">要注意ランク：</span>
+              <span className="text-xs text-slate-500">要注意ランク：</span>
               <span className="font-medium">{caseData.clientBasicInfo.cautionRank ?? '-'}</span>
             </span>
           </div>
@@ -706,7 +706,7 @@ function CaseDetailBody({
         {/* ③ 入金状況（スクロール時も常に参照） */}
         <div className="w-full border-b border-slate-100 bg-slate-50/90 px-6 py-2">
           <div className="min-w-0 overflow-x-auto">
-            <div className="flex w-max min-w-0 flex-nowrap items-baseline gap-x-5 gap-y-1 text-sm text-slate-800">
+            <div className="flex w-max min-w-0 flex-nowrap items-baseline gap-x-5 gap-y-1 text-base text-slate-800">
               <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-blue-700">
                 入金状況
               </span>
@@ -769,34 +769,6 @@ function CaseDetailBody({
                         <div className="min-w-0 overflow-x-auto">
                           <div className="flex w-max min-w-0 flex-nowrap items-center whitespace-nowrap text-sm leading-none text-slate-800">
                             <div className="flex min-h-[2.25rem] items-center gap-x-3 rounded-md bg-slate-100/70 px-2 py-1">
-                              <span className="inline-flex shrink-0 items-center gap-0.5">
-                                <span className="text-slate-500">最終入金予定日：</span>
-                                <span className="font-medium tabular-nums text-slate-900">
-                                  {finalPlannedDate && finalPlannedDate.length > 0
-                                    ? finalPlannedDate
-                                    : '-'}
-                                </span>
-                              </span>
-                              <span className="inline-flex shrink-0 items-center gap-0.5">
-                                <span className="text-slate-500">弁代充当：</span>
-                                <span className="font-medium tabular-nums">
-                                  {sumActualAgentFee.toLocaleString()}円
-                                </span>
-                              </span>
-                              <span className="inline-flex shrink-0 items-center gap-0.5">
-                                <span className="text-slate-500">プール充当：</span>
-                                <span className="font-medium tabular-nums">
-                                  {sumActualPool.toLocaleString()}円
-                                </span>
-                              </span>
-                              <span className="inline-flex shrink-0 items-center gap-0.5 font-medium text-slate-900">
-                                <span className="font-normal text-slate-500">弁済充当（実／予定）：</span>
-                                {formatYenPair(sumActualRepayment, sumPlannedRepayment)}
-                              </span>
-                              <span
-                                className="mx-0.5 h-4 w-px shrink-0 self-center bg-slate-300"
-                                aria-hidden
-                              />
                               <VAccountFields
                                 branch={caseData.paymentInfo.vAccountBranch}
                                 number={caseData.paymentInfo.vAccountNumber}
@@ -810,6 +782,34 @@ function CaseDetailBody({
                                   })
                                 }
                               />
+                              <span
+                                className="mx-0.5 h-4 w-px shrink-0 self-center bg-slate-300"
+                                aria-hidden
+                              />
+                              <span className="inline-flex shrink-0 items-center gap-0.5">
+                                <span className="text-slate-500">最終入金予定日：</span>
+                                <span className="font-medium tabular-nums text-slate-900">
+                                  {finalPlannedDate && finalPlannedDate.length > 0
+                                    ? finalPlannedDate
+                                    : '-'}
+                                </span>
+                              </span>
+                              <span className="inline-flex shrink-0 items-center gap-0.5">
+                                <span className="text-slate-500">累計）弁代報酬充当額：</span>
+                                <span className="font-medium tabular-nums">
+                                  {sumActualAgentFee.toLocaleString()}円
+                                </span>
+                              </span>
+                              <span className="inline-flex shrink-0 items-center gap-0.5">
+                                <span className="text-slate-500">累計）プール充当：</span>
+                                <span className="font-medium tabular-nums">
+                                  {sumActualPool.toLocaleString()}円
+                                </span>
+                              </span>
+                              <span className="inline-flex shrink-0 items-center gap-0.5 font-medium text-slate-900">
+                                <span className="font-normal text-slate-500">累計）弁済充当（実／予定）：</span>
+                                {formatYenPair(sumActualRepayment, sumPlannedRepayment)}
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -890,6 +890,7 @@ function CaseDetailBody({
               {
                 id: 'client',
                 label: '依頼者基本情報',
+                accent: creditorTabAccentSummary(),
                 content: (
                   <div className="grid grid-cols-[repeat(auto-fit,minmax(14rem,1fr))] gap-2">
                     <div className="col-span-full min-w-0 break-all">
@@ -1179,6 +1180,7 @@ function CaseDetailBody({
               {
                 id: 'appointment',
                 label: '受任情報',
+                accent: creditorTabAccentSummary(),
                 content: (
                   <div className="grid grid-cols-[repeat(auto-fit,minmax(16rem,1fr))] gap-2">
                     <div className="min-w-0">
@@ -1356,6 +1358,7 @@ function CaseDetailBody({
               {
                 id: 'files',
                 label: '受任資料',
+                accent: creditorTabAccentSummary(),
                 content: <SettlementFiles caseId={caseData.id} />,
               },
             ]}
