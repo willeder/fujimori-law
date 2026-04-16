@@ -58,7 +58,13 @@ function VAccountFields({ branch, number, onSave }: VAccountFieldsProps) {
   }, [number])
 
   const commit = () => {
-    onSave(draftB.trim() || null, draftN.trim() || null)
+    const norm = (s: string) => {
+      const t = s.replace(/\n/g, '').trim()
+      // 表示用の '-' が紛れた場合は未入力扱いにする
+      if (t === '-') return null
+      return t.length > 0 ? t : null
+    }
+    onSave(norm(draftB), norm(draftN))
   }
 
   const rowCls =
@@ -160,7 +166,7 @@ function VAccountFields({ branch, number, onSave }: VAccountFieldsProps) {
             }
           }}
         >
-          {draftB.trim() ? draftB : '-'}
+          {draftB}
         </span>
       </span>
       <span className={labelCls}>
@@ -192,7 +198,7 @@ function VAccountFields({ branch, number, onSave }: VAccountFieldsProps) {
             }
           }}
         >
-          {draftN.trim() ? draftN : '-'}
+          {draftN}
         </span>
       </span>
     </div>
@@ -752,7 +758,7 @@ function CaseDetailBody({
               <div className="flex min-h-0 w-full min-w-0 flex-col">
               <Tabs
                 tabBodyScroll="host"
-                tabBodyMaxHeightClassName="h-[min(75vh,33rem)]"
+                tabBodyMaxHeightClassName="h-[min(62vh,28rem)]"
                 tabs={[
                   {
                     id: 'payments',
