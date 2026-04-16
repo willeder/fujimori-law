@@ -48,6 +48,7 @@ function VAccountFields({ branch, number, onSave }: VAccountFieldsProps) {
   const [editing, setEditing] = useState(false)
   const [draftB, setDraftB] = useState(branch ?? '')
   const [draftN, setDraftN] = useState(number ?? '')
+  const [cancelSnapshot, setCancelSnapshot] = useState({ b: branch ?? '', n: number ?? '' })
 
   useEffect(() => {
     if (!editing) setDraftB(branch ?? '')
@@ -60,8 +61,6 @@ function VAccountFields({ branch, number, onSave }: VAccountFieldsProps) {
     onSave(draftB.trim() || null, draftN.trim() || null)
   }
 
-  const inputCls =
-    'box-border h-6 w-[8.25rem] shrink-0 rounded border border-slate-200 bg-white px-1.5 text-xs leading-none text-slate-800 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400'
   const rowCls =
     'flex shrink-0 flex-nowrap items-center gap-x-2 whitespace-nowrap leading-none'
   const labelCls = 'inline-flex shrink-0 items-center gap-1 text-xs'
@@ -74,16 +73,22 @@ function VAccountFields({ branch, number, onSave }: VAccountFieldsProps) {
       <div
         className={`${rowCls} group cursor-pointer rounded px-1 py-0.5 -mx-1 hover:bg-blue-50/70`}
         onClick={() => {
-          setDraftB(branch ?? '')
-          setDraftN(number ?? '')
+          const b = branch ?? ''
+          const n = number ?? ''
+          setCancelSnapshot({ b, n })
+          setDraftB(b)
+          setDraftN(n)
           setEditing(true)
         }}
         role="button"
         tabIndex={0}
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
-            setDraftB(branch ?? '')
-            setDraftN(number ?? '')
+            const b = branch ?? ''
+            const n = number ?? ''
+            setCancelSnapshot({ b, n })
+            setDraftB(b)
+            setDraftN(n)
             setEditing(true)
           }
         }}
@@ -110,6 +115,9 @@ function VAccountFields({ branch, number, onSave }: VAccountFieldsProps) {
     )
   }
 
+  const editableCls =
+    'min-w-[3.5rem] rounded px-1 py-0.5 font-medium tabular-nums text-slate-900 outline-none ring-1 ring-transparent focus:ring-blue-400 bg-white/60'
+
   return (
     <div
       className={rowCls}
@@ -122,42 +130,71 @@ function VAccountFields({ branch, number, onSave }: VAccountFieldsProps) {
       <span className="inline-flex shrink-0 items-center text-xs font-semibold text-blue-700">
         バーチャル口座
       </span>
-      <label className={labelCls}>
+      <span className={labelCls}>
         <span className="shrink-0 text-slate-500">支店：</span>
-        <input
-          className={inputCls}
-          value={draftB}
-          onChange={(e) => setDraftB(e.target.value)}
-          placeholder="未入力"
-          autoComplete="off"
+        <span
+          className={`${editableCls} ${draftB.trim() ? '' : 'text-slate-400'}`}
+          contentEditable
+          suppressContentEditableWarning
+          onFocus={(e) => {
+            // 選択しやすいように末尾へ
+            const sel = window.getSelection()
+            if (!sel) return
+            const range = document.createRange()
+            range.selectNodeContents(e.currentTarget)
+            range.collapse(false)
+            sel.removeAllRanges()
+            sel.addRange(range)
+          }}
+          onInput={(e) => setDraftB((e.currentTarget.textContent ?? '').replace(/\n/g, ''))}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') (e.currentTarget as HTMLInputElement).blur()
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              ;(e.currentTarget as HTMLSpanElement).blur()
+            }
             if (e.key === 'Escape') {
-              setDraftB(branch ?? '')
-              setDraftN(number ?? '')
+              e.preventDefault()
+              setDraftB(cancelSnapshot.b)
+              setDraftN(cancelSnapshot.n)
               setEditing(false)
             }
           }}
-        />
-      </label>
-      <label className={labelCls}>
+        >
+          {draftB.trim() ? draftB : '-'}
+        </span>
+      </span>
+      <span className={labelCls}>
         <span className="shrink-0 text-slate-500">口座番号：</span>
-        <input
-          className={inputCls}
-          value={draftN}
-          onChange={(e) => setDraftN(e.target.value)}
-          placeholder="未入力"
-          autoComplete="off"
+        <span
+          className={`${editableCls} ${draftN.trim() ? '' : 'text-slate-400'}`}
+          contentEditable
+          suppressContentEditableWarning
+          onFocus={(e) => {
+            const sel = window.getSelection()
+            if (!sel) return
+            const range = document.createRange()
+            range.selectNodeContents(e.currentTarget)
+            range.collapse(false)
+            sel.removeAllRanges()
+            sel.addRange(range)
+          }}
+          onInput={(e) => setDraftN((e.currentTarget.textContent ?? '').replace(/\n/g, ''))}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') (e.currentTarget as HTMLInputElement).blur()
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              ;(e.currentTarget as HTMLSpanElement).blur()
+            }
             if (e.key === 'Escape') {
-              setDraftB(branch ?? '')
-              setDraftN(number ?? '')
+              e.preventDefault()
+              setDraftB(cancelSnapshot.b)
+              setDraftN(cancelSnapshot.n)
               setEditing(false)
             }
           }}
-        />
-      </label>
+        >
+          {draftN.trim() ? draftN : '-'}
+        </span>
+      </span>
     </div>
   )
 }
@@ -715,23 +752,17 @@ function CaseDetailBody({
               <div className="flex min-h-0 w-full min-w-0 flex-col">
               <Tabs
                 tabBodyScroll="host"
-                tabBodyMaxHeightClassName="h-[min(82vh,44rem)]"
+                tabBodyMaxHeightClassName="h-[min(75vh,33rem)]"
                 tabs={[
                   {
                     id: 'payments',
                     label: '入金スケジュール',
                     content: (
-                      <Tabs
-                        tabs={paymentTabs}
-                        defaultTab="all"
-                        activeTabId={displayCreditorScopeTabId}
-                        onActiveTabChange={setCreditorScopeTabId}
-                        density="dense"
-                        tabBodyScroll="guest"
-                        beforeActivePanelContent={
-                          displayCreditorScopeTabId === 'all' ? (
-                            <div className="flex w-max min-w-0 flex-nowrap items-center whitespace-nowrap text-sm leading-none text-slate-800">
-                              <div className="flex min-h-[2.25rem] items-center gap-x-3 rounded-md bg-slate-100/70 px-2 py-1">
+                      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-2">
+                        {/* 債権者タブ切替でも常に見えるサマリ（「すべて合算」タブの上へ移動） */}
+                        <div className="min-w-0 overflow-x-auto">
+                          <div className="flex w-max min-w-0 flex-nowrap items-center whitespace-nowrap text-sm leading-none text-slate-800">
+                            <div className="flex min-h-[2.25rem] items-center gap-x-3 rounded-md bg-slate-100/70 px-2 py-1">
                               <span className="inline-flex shrink-0 items-center gap-0.5">
                                 <span className="text-slate-500">最終入金予定日：</span>
                                 <span className="font-medium tabular-nums text-slate-900">
@@ -773,11 +804,19 @@ function CaseDetailBody({
                                   })
                                 }
                               />
-                              </div>
                             </div>
-                          ) : undefined
-                        }
-                      />
+                          </div>
+                        </div>
+
+                        <Tabs
+                          tabs={paymentTabs}
+                          defaultTab="all"
+                          activeTabId={displayCreditorScopeTabId}
+                          onActiveTabChange={setCreditorScopeTabId}
+                          density="dense"
+                          tabBodyScroll="guest"
+                        />
+                      </div>
                     ),
                   },
                   {
@@ -843,7 +882,7 @@ function CaseDetailBody({
             collapsible
             defaultOpen={false}
           >
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(14rem,1fr))] gap-2">
               <div className="col-span-full min-w-0 break-all">
                 <EditableField
                   label="LINE@ URL"
@@ -853,13 +892,13 @@ function CaseDetailBody({
                   placeholder="https://chat.line.biz/…（未設定のときは空欄）"
                 />
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 max-w-[8rem]">
                 <EditableField
                   label="都道府県"
                   value={caseData.clientBasicInfo.prefecture}
                   onChange={(v) => updateClientBasicInfo('prefecture', v)}
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
               <div className="min-w-0">
@@ -868,7 +907,7 @@ function CaseDetailBody({
                   value={caseData.clientBasicInfo.residenceType}
                   onChange={(v) => updateClientBasicInfo('residenceType', v)}
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
               <div className="min-w-0">
@@ -879,7 +918,7 @@ function CaseDetailBody({
                   type="number"
                   suffix="円"
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
               <div className="min-w-0">
@@ -889,11 +928,11 @@ function CaseDetailBody({
                   onChange={(v) => updateClientBasicInfo('birthDate', v)}
                   type="date"
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                   dateDisplayToggle
                 />
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 max-w-[7.5rem]">
                 <EditableField
                   label="年齢"
                   value={caseData.clientBasicInfo.age}
@@ -901,10 +940,10 @@ function CaseDetailBody({
                   type="number"
                   suffix="歳"
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 max-w-[7.5rem]">
                 <EditableField
                   label="性別"
                   value={caseData.clientBasicInfo.gender}
@@ -915,10 +954,10 @@ function CaseDetailBody({
                     { value: '女', label: '女' },
                   ]}
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 max-w-[8rem]">
                 <EditableField
                   label="結婚"
                   value={caseData.clientBasicInfo.maritalStatus}
@@ -930,16 +969,16 @@ function CaseDetailBody({
                     { value: '離婚', label: '離婚' },
                   ]}
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 max-w-[7.5rem]">
                 <EditableField
                   label="子供"
                   value={caseData.clientBasicInfo.children}
                   onChange={(v) => updateClientBasicInfo('children', v)}
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
               <div className="min-w-0">
@@ -948,7 +987,7 @@ function CaseDetailBody({
                   value={caseData.clientBasicInfo.cohabitation ?? ''}
                   onChange={(v) => updateClientBasicInfo('cohabitation', v)}
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
               <div className="min-w-0">
@@ -957,7 +996,7 @@ function CaseDetailBody({
                   value={caseData.clientBasicInfo.confidentialContact ?? ''}
                   onChange={(v) => updateClientBasicInfo('confidentialContact', v)}
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
               <div className="min-w-0">
@@ -966,7 +1005,7 @@ function CaseDetailBody({
                   value={caseData.clientBasicInfo.emergencyContact ?? ''}
                   onChange={(v) => updateClientBasicInfo('emergencyContact', v)}
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
               <div className="min-w-0">
@@ -975,25 +1014,25 @@ function CaseDetailBody({
                   value={caseData.clientBasicInfo.emergencyContactRelation ?? ''}
                   onChange={(v) => updateClientBasicInfo('emergencyContactRelation', v)}
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
-              <div className="col-span-full min-w-0 sm:col-span-2">
+              <div className="min-w-0 col-span-2">
                 <EditableField
                   label="住所"
                   value={caseData.clientBasicInfo.address}
                   onChange={(v) => updateClientBasicInfo('address', v)}
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
-              <div className="col-span-full min-w-0 sm:col-span-2">
+              <div className="min-w-0">
                 <EditableField
                   label="旧住所"
                   value={caseData.clientBasicInfo.previousAddress ?? ''}
                   onChange={(v) => updateClientBasicInfo('previousAddress', v)}
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
               <div className="min-w-0">
@@ -1004,7 +1043,7 @@ function CaseDetailBody({
                   type="number"
                   suffix="円"
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
               <div className="min-w-0">
@@ -1013,7 +1052,7 @@ function CaseDetailBody({
                   value={caseData.clientBasicInfo.payDay}
                   onChange={(v) => updateClientBasicInfo('payDay', v)}
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
               <div className="min-w-0">
@@ -1022,7 +1061,7 @@ function CaseDetailBody({
                   value={caseData.clientBasicInfo.payrollAccount ?? ''}
                   onChange={(v) => updateClientBasicInfo('payrollAccount', v)}
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
               <div className="min-w-0">
@@ -1031,43 +1070,43 @@ function CaseDetailBody({
                   value={caseData.clientBasicInfo.employmentType}
                   onChange={(v) => updateClientBasicInfo('employmentType', v)}
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
-              <div className="col-span-full min-w-0 sm:col-span-2">
+              <div className="min-w-0 col-span-2">
                 <EditableField
                   label="勤務先名"
                   value={caseData.clientBasicInfo.employerName ?? ''}
                   onChange={(v) => updateClientBasicInfo('employerName', v)}
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
-              <div className="col-span-full min-w-0 sm:col-span-2">
+              <div className="min-w-0 col-span-2">
                 <EditableField
                   label="勤務先連絡先"
                   value={caseData.clientBasicInfo.employerContact ?? ''}
                   onChange={(v) => updateClientBasicInfo('employerContact', v)}
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
-              <div className="col-span-full min-w-0 sm:col-span-2">
+              <div className="min-w-0 col-span-2">
                 <EditableField
                   label="勤務先住所"
                   value={caseData.clientBasicInfo.employerAddress ?? ''}
                   onChange={(v) => updateClientBasicInfo('employerAddress', v)}
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
-              <div className="col-span-full min-w-0 sm:col-span-2">
+              <div className="min-w-0">
                 <EditableField
                   label="他事務所相談"
                   value={caseData.clientBasicInfo.otherOfficeConsultation ?? ''}
                   onChange={(v) => updateClientBasicInfo('otherOfficeConsultation', v)}
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
               <div className="min-w-0">
@@ -1076,7 +1115,7 @@ function CaseDetailBody({
                   value={caseData.clientBasicInfo.paymentDelay ?? ''}
                   onChange={(v) => updateClientBasicInfo('paymentDelay', v)}
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
               <div className="min-w-0">
@@ -1085,7 +1124,7 @@ function CaseDetailBody({
                   value={caseData.clientBasicInfo.bicycleNote ?? ''}
                   onChange={(v) => updateClientBasicInfo('bicycleNote', v)}
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
               <div className="min-w-0">
@@ -1094,7 +1133,7 @@ function CaseDetailBody({
                   value={caseData.clientBasicInfo.pension ?? ''}
                   onChange={(v) => updateClientBasicInfo('pension', v)}
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
               <div className="min-w-0">
@@ -1104,7 +1143,7 @@ function CaseDetailBody({
                   onChange={(v) => updateClientBasicInfo('recordNumber', v)}
                   type="number"
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
               <div className="min-w-0">
@@ -1113,7 +1152,7 @@ function CaseDetailBody({
                   value={caseData.clientBasicInfo.correspondenceRequired ?? ''}
                   onChange={(v) => updateClientBasicInfo('correspondenceRequired', v)}
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
               <div className="min-w-0">
@@ -1122,7 +1161,7 @@ function CaseDetailBody({
                   value={caseData.clientBasicInfo.correspondenceHours ?? ''}
                   onChange={(v) => updateClientBasicInfo('correspondenceHours', v)}
                   compact
-                  compactLayout="stacked"
+                  compactLayout="inline"
                 />
               </div>
             </div>

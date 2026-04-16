@@ -41,17 +41,24 @@ export function CaseListPage() {
     })
   }, [cases, searchField, searchValue])
 
+  // 一覧は降順（新しいものが上）で固定。ヘッダークリック等で順序を変更させない。
+  const sortedCases = useMemo(() => {
+    return [...filteredCases].sort((a, b) => (b.id ?? 0) - (a.id ?? 0))
+  }, [filteredCases])
+
   const columns: Column<Case>[] = [
     {
       key: 'id',
       header: 'No',
       width: '60px',
       align: 'center',
+      sortable: false,
     },
     {
       key: 'name',
       header: '依頼者名',
       width: '120px',
+      sortable: false,
       render: (item) => (
         <div>
           <div className="font-medium">{item.clientBasicInfo.name}</div>
@@ -65,12 +72,14 @@ export function CaseListPage() {
       key: 'prefecture',
       header: '都道府県',
       width: '80px',
+      sortable: false,
       render: (item) => item.clientBasicInfo.prefecture,
     },
     {
       key: 'status',
       header: 'ステータス',
       width: '140px',
+      sortable: false,
       render: (item) => <StatusBadge status={item.settlementInfo.status} />,
     },
     {
@@ -78,6 +87,7 @@ export function CaseListPage() {
       header: '債権社数',
       width: '80px',
       align: 'right',
+      sortable: false,
       render: (item) => (
         <span>
           {item.debtInfo.creditorCount}
@@ -90,6 +100,7 @@ export function CaseListPage() {
       header: '申告債務額',
       width: '120px',
       align: 'right',
+      sortable: false,
       render: (item) => (
         <span>
           {item.debtInfo.declaredDebtAmount?.toLocaleString()}
@@ -101,12 +112,14 @@ export function CaseListPage() {
       key: 'acceptanceDate',
       header: '受任日',
       width: '100px',
+      sortable: false,
       render: (item) => item.appointmentInfo.acceptanceDate,
     },
     {
       key: 'nextPaymentDate',
       header: '次回入金日',
       width: '100px',
+      sortable: false,
       render: (item) => (
         <span
           className={
@@ -124,6 +137,7 @@ export function CaseListPage() {
       key: 'judicialScrivener',
       header: '担当司法書士',
       width: '100px',
+      sortable: false,
       render: (item) => item.appointmentInfo.judicialScrivener,
     },
     {
@@ -131,6 +145,7 @@ export function CaseListPage() {
       header: 'ランク',
       width: '60px',
       align: 'center',
+      sortable: false,
       render: (item) => (
         <StatusBadge status={item.appointmentInfo.acceptanceRank} />
       ),
@@ -211,7 +226,7 @@ export function CaseListPage() {
       <div className="p-3">
         <div className="bg-white rounded-lg shadow-sm border border-slate-200">
           <DataTable
-            data={filteredCases}
+            data={sortedCases}
             columns={columns}
             keyField="id"
             onRowClick={(item) => navigate(`/cases/${item.id}`)}

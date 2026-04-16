@@ -153,7 +153,7 @@ export function EditableField({
             {labelWithColon}
           </span>
           <div className={`min-w-0 flex-1 text-slate-700 leading-tight ${compactSize === 'lg' ? 'text-base' : 'text-sm'}`}>
-            <span className="block min-w-0 truncate whitespace-nowrap">
+            <span className="block min-w-0 overflow-x-auto whitespace-nowrap [-webkit-overflow-scrolling:touch]">
               {displayText}
               {suffix && <span className="text-slate-400 ml-0">{suffix}</span>}
             </span>
@@ -215,7 +215,7 @@ export function EditableField({
               setIsEditing(true)
             }}
           >
-            <span className="min-w-0 flex-1 truncate whitespace-nowrap">
+            <span className="min-w-0 flex-1 overflow-x-auto whitespace-nowrap [-webkit-overflow-scrolling:touch]">
               {displayText}
               {suffix && <span className="text-slate-400 ml-0">{suffix}</span>}
             </span>
@@ -320,8 +320,16 @@ export function EditableField({
       )
     }
     return (
-      <div className="flex min-w-0 items-baseline gap-1 min-h-[1.75rem] py-0">
-        <span className="shrink-0 text-[10px] font-medium text-slate-500 leading-tight whitespace-nowrap">
+      <div
+        className={`flex min-w-0 items-baseline gap-1 py-0 ${
+          compactSize === 'lg' ? 'min-h-[2.25rem]' : 'min-h-[1.75rem]'
+        }`}
+      >
+        <span
+          className={`shrink-0 font-medium text-slate-500 leading-tight whitespace-nowrap ${
+            compactSize === 'lg' ? 'text-sm' : 'text-xs'
+          }`}
+        >
           {labelWithColon}
         </span>
         <div className="flex min-w-0 flex-1 items-center gap-0.5">
@@ -363,7 +371,15 @@ export function EditableField({
               className={inputBase}
             />
           )}
-          {suffix && <span className="text-slate-400 text-xs shrink-0 pl-0">{suffix}</span>}
+          {suffix && (
+            <span
+              className={`text-slate-400 shrink-0 pl-0 ${
+                compactSize === 'lg' ? 'text-sm' : 'text-xs'
+              }`}
+            >
+              {suffix}
+            </span>
+          )}
           {type === 'textarea' && (
             <div className="flex shrink-0 gap-0.5">
               <button
