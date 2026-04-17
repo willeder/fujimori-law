@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { DataTable, type Column } from '../components'
+import { useUserSettings } from '../context/UserSettingsContext'
 import { useCaseDispatch, useCaseState } from '../store/useCaseStore'
 import type { ContactHistory } from '../types'
 
@@ -24,6 +25,7 @@ export function ContactHistoryTable({
 }: ContactHistoryTableProps) {
   const dispatch = useCaseDispatch()
   const { contactHistories } = useCaseState()
+  const { accountName } = useUserSettings()
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editData, setEditData] = useState<Partial<ContactHistory>>({})
 
@@ -316,15 +318,20 @@ export function ContactHistoryTable({
       <button
         type="button"
         onClick={() => {
+          const now = new Date()
+          const currentDate = now.toISOString().slice(0, 10) // YYYY-MM-DD
+          const currentTime = now.toTimeString().slice(0, 5) // HH:MM
+          const staffName = accountName || null
+
           const newId = Math.max(0, ...contactHistories.map((h) => h.id)) + 1
           dispatch({
             type: 'ADD_CONTACT_HISTORY',
             payload: {
               id: newId,
               caseId,
-              contactDate: null,
-              contactTime: null,
-              staff: null,
+              contactDate: currentDate,
+              contactTime: currentTime,
+              staff: staffName,
               tool: null,
               targetType,
               ...(targetType === '債権者' ? { creditorName: null as string | null } : {}),
@@ -333,9 +340,9 @@ export function ContactHistoryTable({
           })
           setEditingId(newId)
           setEditData({
-            contactDate: null,
-            contactTime: null,
-            staff: null,
+            contactDate: currentDate,
+            contactTime: currentTime,
+            staff: staffName,
             tool: null,
             creditorName: null,
             comment: null,

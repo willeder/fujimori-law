@@ -1,4 +1,5 @@
 // 共通UIコンポーネント
+export { AccountNameControl } from './AccountNameControl'
 export { UiFontScaleControl } from './UiFontScaleControl'
 export { SectionCard } from './SectionCard'
 export { EditableField } from './EditableField'

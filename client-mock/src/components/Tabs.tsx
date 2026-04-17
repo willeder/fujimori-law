@@ -65,7 +65,7 @@ export function Tabs({
 
   const tabRowClass =
     isSplit
-      ? 'grid w-full shrink-0 grid-cols-2 overflow-hidden rounded-md border border-slate-100 bg-slate-50/40'
+      ? 'grid w-full shrink-0 grid-cols-2 overflow-hidden rounded-md border border-slate-300 bg-slate-100'
       : 'flex shrink-0 flex-nowrap gap-0.5 overflow-x-auto border-b border-slate-100 bg-slate-50/30 pb-px'
 
   const panelTop = tabBodyScroll === 'none' ? (panelTopSpacing === 'tight' ? 'mt-1.5' : 'mt-2.5') : ''
@@ -91,15 +91,15 @@ export function Tabs({
           const active = activeTab === tab.id
           const accent = tab.accent
           const base = isSplit
-            ? `w-full px-2 ${isDense ? 'py-0.5 text-[10px] leading-none' : 'py-1 text-xs leading-tight'} font-medium transition-colors text-center`
+            ? `w-full px-2 ${isDense ? 'py-0.5 text-[10px] leading-none' : 'py-1.5 text-[11px] leading-tight'} font-medium transition-colors text-center`
             : accent
               ? `rounded-t-md border-l-2 ${isDense ? 'inline-flex h-7 shrink-0 items-center py-0 pl-1.5 pr-1.5 text-[10px] leading-none' : 'py-1 pl-2 pr-2 text-xs leading-tight'} font-normal whitespace-nowrap transition-colors`
               : `rounded-t-md border-b-2 border-b-transparent ${isDense ? 'inline-flex h-7 shrink-0 items-center px-2 py-0 text-[10px] leading-none' : 'px-2 py-1 text-xs leading-tight'} font-normal whitespace-nowrap transition-colors`
 
           const state = isSplit
             ? active
-              ? 'bg-white font-medium text-slate-900 shadow-[inset_0_-1px_0_0_theme(colors.slate.300)]'
-              : 'bg-transparent text-slate-500 hover:bg-slate-100/50 hover:text-slate-800'
+              ? 'bg-white font-semibold text-slate-900 shadow-sm'
+              : 'bg-slate-100 text-slate-500 hover:bg-slate-50 hover:text-slate-700'
             : active
               ? accent?.active ?? 'border-b-2 border-b-slate-700 font-medium text-slate-900'
               : accent?.inactive ??

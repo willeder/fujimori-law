@@ -9,6 +9,7 @@ import {
   useCaseDispatch,
 } from '../store/useCaseStore'
 import {
+  AccountNameControl,
   SectionCard,
   EditableField,
   StatusBadge,
@@ -573,6 +574,7 @@ function CaseDetailBody({
             </span>
           </div>
           <div className="flex shrink-0 items-center gap-2">
+            <AccountNameControl />
             <UiFontScaleControl variant="select" />
             {lineHref ? (
               <a
@@ -756,7 +758,6 @@ function CaseDetailBody({
           <SectionCard title="入金スケジュール・和解状況" color="green" collapsible defaultOpen>
             <Tabs
               variant="split"
-              density="dense"
               tabBodyScroll="host"
               tabBodyMaxHeightClassName="h-[min(55vh,26rem)]"
               tabs={[
@@ -849,20 +850,8 @@ function CaseDetailBody({
           <SectionCard title="接触履歴" color="slate" collapsible defaultOpen={false}>
             <Tabs
               variant="split"
-              density="dense"
-              defaultTab="client"
+              defaultTab="creditor"
               tabs={[
-                {
-                  id: 'client',
-                  label: '依頼者接触',
-                  content: (
-                    <ContactHistoryTable
-                      caseId={caseData.id}
-                      targetType="依頼者"
-                      histories={contactHistories.filter((h) => h.targetType === '依頼者')}
-                    />
-                  ),
-                },
                 {
                   id: 'creditor',
                   label: '債権者接触',
@@ -871,6 +860,17 @@ function CaseDetailBody({
                       caseId={caseData.id}
                       targetType="債権者"
                       histories={contactHistories.filter((h) => h.targetType === '債権者')}
+                    />
+                  ),
+                },
+                {
+                  id: 'client',
+                  label: '依頼者接触',
+                  content: (
+                    <ContactHistoryTable
+                      caseId={caseData.id}
+                      targetType="依頼者"
+                      histories={contactHistories.filter((h) => h.targetType === '依頼者')}
                     />
                   ),
                 },
@@ -890,41 +890,18 @@ function CaseDetailBody({
                 label: '依頼者基本情報',
                 accent: creditorTabAccentSummary(),
                 content: (
-                  <div className="grid grid-cols-[repeat(auto-fit,minmax(14rem,1fr))] gap-2">
-                    <div className="col-span-full min-w-0 break-all">
+                  <div className="grid grid-cols-[repeat(auto-fit,minmax(10rem,1fr))] gap-2">
+                    {/* Row 1: 性別（短）, 生年月日, 年齢（短）, 年金, 結婚, 子供, 同居, 内密先 */}
+                    <div className="min-w-0 max-w-[7rem]">
                       <EditableField
-                        label="LINE@ URL"
-                        value={caseData.clientBasicInfo.lineUrl ?? ''}
-                        onChange={(v) => updateClientBasicInfo('lineUrl', v)}
-                        type="textarea"
-                        placeholder="https://chat.line.biz/…（未設定のときは空欄）"
-                      />
-                    </div>
-                    <div className="min-w-0 max-w-[8rem]">
-                      <EditableField
-                        label="都道府県"
-                        value={caseData.clientBasicInfo.prefecture}
-                        onChange={(v) => updateClientBasicInfo('prefecture', v)}
-                        compact
-                        compactLayout="inline"
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <EditableField
-                        label="居住形態"
-                        value={caseData.clientBasicInfo.residenceType}
-                        onChange={(v) => updateClientBasicInfo('residenceType', v)}
-                        compact
-                        compactLayout="inline"
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <EditableField
-                        label="家賃"
-                        value={caseData.clientBasicInfo.rent}
-                        onChange={(v) => updateClientBasicInfo('rent', v)}
-                        type="number"
-                        suffix="円"
+                        label="性別"
+                        value={caseData.clientBasicInfo.gender}
+                        onChange={(v) => updateClientBasicInfo('gender', v)}
+                        type="select"
+                        options={[
+                          { value: '男', label: '男' },
+                          { value: '女', label: '女' },
+                        ]}
                         compact
                         compactLayout="inline"
                       />
@@ -940,7 +917,7 @@ function CaseDetailBody({
                         dateDisplayToggle
                       />
                     </div>
-                    <div className="min-w-0 max-w-[7.5rem]">
+                    <div className="min-w-0 max-w-[7rem]">
                       <EditableField
                         label="年齢"
                         value={caseData.clientBasicInfo.age}
@@ -951,21 +928,16 @@ function CaseDetailBody({
                         compactLayout="inline"
                       />
                     </div>
-                    <div className="min-w-0 max-w-[7.5rem]">
+                    <div className="min-w-0">
                       <EditableField
-                        label="性別"
-                        value={caseData.clientBasicInfo.gender}
-                        onChange={(v) => updateClientBasicInfo('gender', v)}
-                        type="select"
-                        options={[
-                          { value: '男', label: '男' },
-                          { value: '女', label: '女' },
-                        ]}
+                        label="年金"
+                        value={caseData.clientBasicInfo.pension ?? ''}
+                        onChange={(v) => updateClientBasicInfo('pension', v)}
                         compact
                         compactLayout="inline"
                       />
                     </div>
-                    <div className="min-w-0 max-w-[8rem]">
+                    <div className="min-w-0">
                       <EditableField
                         label="結婚"
                         value={caseData.clientBasicInfo.maritalStatus}
@@ -980,7 +952,7 @@ function CaseDetailBody({
                         compactLayout="inline"
                       />
                     </div>
-                    <div className="min-w-0 max-w-[7.5rem]">
+                    <div className="min-w-0">
                       <EditableField
                         label="子供"
                         value={caseData.clientBasicInfo.children}
@@ -1007,20 +979,12 @@ function CaseDetailBody({
                         compactLayout="inline"
                       />
                     </div>
+                    {/* Row 2: 都道府県, 住所（長）, 居住形態, 家賃, 旧住所（長） */}
                     <div className="min-w-0">
                       <EditableField
-                        label="緊急連絡先"
-                        value={caseData.clientBasicInfo.emergencyContact ?? ''}
-                        onChange={(v) => updateClientBasicInfo('emergencyContact', v)}
-                        compact
-                        compactLayout="inline"
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <EditableField
-                        label="関係（緊急）"
-                        value={caseData.clientBasicInfo.emergencyContactRelation ?? ''}
-                        onChange={(v) => updateClientBasicInfo('emergencyContactRelation', v)}
+                        label="都道府県"
+                        value={caseData.clientBasicInfo.prefecture}
+                        onChange={(v) => updateClientBasicInfo('prefecture', v)}
                         compact
                         compactLayout="inline"
                       />
@@ -1036,6 +1000,26 @@ function CaseDetailBody({
                     </div>
                     <div className="min-w-0">
                       <EditableField
+                        label="居住形態"
+                        value={caseData.clientBasicInfo.residenceType}
+                        onChange={(v) => updateClientBasicInfo('residenceType', v)}
+                        compact
+                        compactLayout="inline"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <EditableField
+                        label="家賃"
+                        value={caseData.clientBasicInfo.rent}
+                        onChange={(v) => updateClientBasicInfo('rent', v)}
+                        type="number"
+                        suffix="円"
+                        compact
+                        compactLayout="inline"
+                      />
+                    </div>
+                    <div className="min-w-0 col-span-2">
+                      <EditableField
                         label="旧住所"
                         value={caseData.clientBasicInfo.previousAddress ?? ''}
                         onChange={(v) => updateClientBasicInfo('previousAddress', v)}
@@ -1043,7 +1027,8 @@ function CaseDetailBody({
                         compactLayout="inline"
                       />
                     </div>
-                    <div className="min-w-0">
+                    {/* Row 3: 月収（短）, 給与日（短）, 給与口座, 勤務形態, 勤務先名, 勤）連絡先, 勤）住所（長） */}
+                    <div className="min-w-0 max-w-[7rem]">
                       <EditableField
                         label="月収"
                         value={caseData.clientBasicInfo.monthlyIncome}
@@ -1054,7 +1039,7 @@ function CaseDetailBody({
                         compactLayout="inline"
                       />
                     </div>
-                    <div className="min-w-0">
+                    <div className="min-w-0 max-w-[7rem]">
                       <EditableField
                         label="給与日"
                         value={caseData.clientBasicInfo.payDay}
@@ -1081,7 +1066,7 @@ function CaseDetailBody({
                         compactLayout="inline"
                       />
                     </div>
-                    <div className="min-w-0 col-span-2">
+                    <div className="min-w-0">
                       <EditableField
                         label="勤務先名"
                         value={caseData.clientBasicInfo.employerName ?? ''}
@@ -1090,9 +1075,9 @@ function CaseDetailBody({
                         compactLayout="inline"
                       />
                     </div>
-                    <div className="min-w-0 col-span-2">
+                    <div className="min-w-0">
                       <EditableField
-                        label="勤務先連絡先"
+                        label="勤）連絡先"
                         value={caseData.clientBasicInfo.employerContact ?? ''}
                         onChange={(v) => updateClientBasicInfo('employerContact', v)}
                         compact
@@ -1101,9 +1086,28 @@ function CaseDetailBody({
                     </div>
                     <div className="min-w-0 col-span-2">
                       <EditableField
-                        label="勤務先住所"
+                        label="勤）住所"
                         value={caseData.clientBasicInfo.employerAddress ?? ''}
                         onChange={(v) => updateClientBasicInfo('employerAddress', v)}
+                        compact
+                        compactLayout="inline"
+                      />
+                    </div>
+                    {/* Row 4: 緊急連絡先（長）, 関係（緊急）, 他事務所相談, 遅れ, 自転車 */}
+                    <div className="min-w-0 col-span-2">
+                      <EditableField
+                        label="緊急連絡先"
+                        value={caseData.clientBasicInfo.emergencyContact ?? ''}
+                        onChange={(v) => updateClientBasicInfo('emergencyContact', v)}
+                        compact
+                        compactLayout="inline"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <EditableField
+                        label="関係（緊急）"
+                        value={caseData.clientBasicInfo.emergencyContactRelation ?? ''}
+                        onChange={(v) => updateClientBasicInfo('emergencyContactRelation', v)}
                         compact
                         compactLayout="inline"
                       />
@@ -1131,43 +1135,6 @@ function CaseDetailBody({
                         label="自転車"
                         value={caseData.clientBasicInfo.bicycleNote ?? ''}
                         onChange={(v) => updateClientBasicInfo('bicycleNote', v)}
-                        compact
-                        compactLayout="inline"
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <EditableField
-                        label="年金"
-                        value={caseData.clientBasicInfo.pension ?? ''}
-                        onChange={(v) => updateClientBasicInfo('pension', v)}
-                        compact
-                        compactLayout="inline"
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <EditableField
-                        label="レコード番号"
-                        value={caseData.clientBasicInfo.recordNumber}
-                        onChange={(v) => updateClientBasicInfo('recordNumber', v)}
-                        type="number"
-                        compact
-                        compactLayout="inline"
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <EditableField
-                        label="対応要否"
-                        value={caseData.clientBasicInfo.correspondenceRequired ?? ''}
-                        onChange={(v) => updateClientBasicInfo('correspondenceRequired', v)}
-                        compact
-                        compactLayout="inline"
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <EditableField
-                        label="対応時間"
-                        value={caseData.clientBasicInfo.correspondenceHours ?? ''}
-                        onChange={(v) => updateClientBasicInfo('correspondenceHours', v)}
                         compact
                         compactLayout="inline"
                       />

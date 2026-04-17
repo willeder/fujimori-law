@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCaseState } from '../store/useCaseStore'
-import { DataTable, type Column, StatusBadge, UiFontScaleControl } from '../components'
+import { AccountNameControl, DataTable, type Column, StatusBadge, UiFontScaleControl } from '../components'
 import type { Case } from '../types'
 
 type SearchField = 'all' | 'name' | 'prefecture' | 'status' | 'staff'
@@ -181,6 +181,7 @@ export function CaseListPage() {
             </nav>
           </div>
           <div className="flex shrink-0 items-center gap-2">
+            <AccountNameControl />
             <UiFontScaleControl />
             <span className="text-xs text-slate-500">{cases.length}件の案件</span>
           </div>

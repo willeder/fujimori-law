@@ -1,5 +1,6 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { UiFontScaleProvider } from './context/UiFontScaleContext'
+import { UserSettingsProvider } from './context/UserSettingsContext'
 import { CaseProvider } from './store/CaseStore'
 import {
   CaseListPage,
@@ -30,9 +31,11 @@ const router = createBrowserRouter([
 export default function App() {
   return (
     <UiFontScaleProvider>
-      <CaseProvider>
-        <RouterProvider router={router} />
-      </CaseProvider>
+      <UserSettingsProvider>
+        <CaseProvider>
+          <RouterProvider router={router} />
+        </CaseProvider>
+      </UserSettingsProvider>
     </UiFontScaleProvider>
   )
 }

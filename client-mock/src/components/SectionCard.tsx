@@ -30,7 +30,7 @@ export function SectionCard({
       className={`overflow-hidden rounded-lg border border-slate-100 bg-white shadow-none border-l-2 ${colorMap[color]}`}
     >
       <div
-        className={`flex items-center justify-between rounded-t-lg border-b border-[#5a8ab5] px-2 py-1 ${collapsible ? 'cursor-pointer hover:brightness-95' : ''}`}
+        className={`flex items-center justify-between rounded-t-lg px-2 py-0.5 ${collapsible ? 'cursor-pointer hover:brightness-95' : ''}`}
         style={{ backgroundColor: '#689BC6' }}
         onClick={() => collapsible && setIsOpen(!isOpen)}
       >
