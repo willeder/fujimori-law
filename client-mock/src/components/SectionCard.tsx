@@ -8,11 +8,12 @@ interface SectionCardProps {
   defaultOpen?: boolean
 }
 
+/** カテゴリ用のごく薄い左ライン（本文フィールドを主役に） */
 const colorMap = {
-  blue: 'border-l-blue-500',
-  green: 'border-l-green-500',
-  amber: 'border-l-amber-500',
-  slate: 'border-l-slate-400',
+  blue: 'border-l-blue-300/70',
+  green: 'border-l-green-400/60',
+  amber: 'border-l-amber-400/70',
+  slate: 'border-l-slate-300/80',
 }
 
 export function SectionCard({
@@ -26,28 +27,29 @@ export function SectionCard({
 
   return (
     <div
-      className={`overflow-hidden bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 ${colorMap[color]}`}
+      className={`overflow-hidden rounded-lg border border-slate-100 bg-white shadow-none border-l-2 ${colorMap[color]}`}
     >
       <div
-        className={`rounded-t-lg bg-[#689BC6] px-4 py-3 flex items-center justify-between border-b border-[#4F7EA6]/60 ${collapsible ? 'cursor-pointer hover:bg-[#5B8FB9]' : ''}`}
+        className={`flex items-center justify-between rounded-t-lg border-b border-[#5a8ab5] px-2 py-1 ${collapsible ? 'cursor-pointer hover:brightness-95' : ''}`}
+        style={{ backgroundColor: '#689BC6' }}
         onClick={() => collapsible && setIsOpen(!isOpen)}
       >
-        <h3 className="text-sm font-bold text-white">{title}</h3>
+        <h3 className="text-[10px] font-medium tracking-wide text-white">{title}</h3>
         {collapsible && (
-          <button type="button" className="text-white/90 hover:text-white" aria-label={isOpen ? '折りたたむ' : '展開する'}>
+          <button type="button" className="text-white/80 hover:text-white" aria-label={isOpen ? '折りたたむ' : '展開する'}>
             {isOpen ? (
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
               </svg>
             ) : (
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             )}
           </button>
         )}
       </div>
-      {isOpen && <div className="min-h-0 min-w-0 p-4">{children}</div>}
+      {isOpen && <div className="min-h-0 min-w-0 px-2 py-2 sm:px-3">{children}</div>}
     </div>
   )
 }

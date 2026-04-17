@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { DataTable, type Column, StatusBadge } from '../components'
+import { DataTable, type Column, StatusBadge, UiFontScaleControl } from '../components'
 import { useCaseState } from '../store/useCaseStore'
 import type { Case } from '../types'
 
@@ -85,14 +85,18 @@ export function PaymentManagementPage() {
   return (
     <div className="min-h-screen bg-slate-200">
       <header className="bg-white border-b border-slate-200 px-4 py-2">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <h1 className="text-xl font-bold text-slate-800">入金管理一覧</h1>
-          <button
-            onClick={() => navigate('/')}
-            className="text-sm text-blue-600 hover:text-blue-700"
-          >
-            案件一覧へ
-          </button>
+          <div className="flex items-center gap-3">
+            <UiFontScaleControl variant="select" />
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className="text-sm text-blue-600 hover:text-blue-700"
+            >
+              案件一覧へ
+            </button>
+          </div>
         </div>
         <div className="mt-3 flex items-center gap-3">
           <label className="flex items-center gap-2 text-sm text-slate-600">

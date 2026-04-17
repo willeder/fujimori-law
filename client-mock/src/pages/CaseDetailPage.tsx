@@ -13,6 +13,7 @@ import {
   EditableField,
   StatusBadge,
   Tabs,
+  UiFontScaleControl,
 } from '../components'
 import { CreditorTab } from './CreditorTab'
 import { ContactHistoryTable } from './ContactHistoryTable'
@@ -531,53 +532,54 @@ function CaseDetailBody({
     <div className="flex min-h-screen min-h-0 flex-col bg-slate-200">
       {/* Header（スクロール時に固定） */}
       <header className="sticky top-0 z-40 shrink-0 border-b border-slate-200 bg-white shadow-sm">
-        <div className="flex w-full items-center gap-x-6 gap-y-2 border-b border-slate-100 px-6 py-2.5 text-base leading-snug text-slate-800">
+        <div className="flex w-full items-center gap-x-3 px-4 py-0.5 text-sm leading-tight text-slate-800">
           <Link
             to="/"
             className="shrink-0 text-slate-400 hover:text-slate-600"
             aria-label="一覧に戻る"
           >
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </Link>
-          <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-x-6 gap-y-2">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-4">
             <span className="flex shrink-0 items-center gap-0.5">
-              <span className="text-xs text-slate-500">ステータス：</span>
+              <span className="text-[11px] text-slate-500">ステータス：</span>
               <StatusBadge status={caseData.settlementInfo.status} size="md" />
             </span>
             <span className="shrink-0">
-              <span className="text-xs text-slate-500">ID：</span>
+              <span className="text-[11px] text-slate-500">ID：</span>
               <span className="font-medium">{displayCaseId}</span>
             </span>
             <span className="shrink-0">
-              <span className="text-xs text-slate-500">名前：</span>
+              <span className="text-[11px] text-slate-500">名前：</span>
               <span className="font-medium">{caseData.clientBasicInfo.name ?? '-'}</span>
             </span>
             <span className="shrink-0">
-              <span className="text-xs text-slate-500">フリガナ：</span>
+              <span className="text-[11px] text-slate-500">フリガナ：</span>
               <span className="font-medium">{caseData.clientBasicInfo.furigana ?? '-'}</span>
             </span>
             <span className="shrink-0">
-              <span className="text-xs text-slate-500">電話番号：</span>
+              <span className="text-[11px] text-slate-500">電話番号：</span>
               <span className="font-medium">{caseData.clientBasicInfo.phone ?? '-'}</span>
             </span>
             <span className="min-w-0 shrink">
-              <span className="text-xs text-slate-500">メールアドレス：</span>
+              <span className="text-[11px] text-slate-500">メールアドレス：</span>
               <span className="font-medium break-all">{caseData.clientBasicInfo.email ?? '-'}</span>
             </span>
             <span className="shrink-0">
-              <span className="text-xs text-slate-500">要注意ランク：</span>
+              <span className="text-[11px] text-slate-500">要注意ランク：</span>
               <span className="font-medium">{caseData.clientBasicInfo.cautionRank ?? '-'}</span>
             </span>
           </div>
-          <div className="flex shrink-0 items-center gap-0.5">
+          <div className="flex shrink-0 items-center gap-2">
+            <UiFontScaleControl variant="select" />
             {lineHref ? (
               <a
                 href={lineHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center rounded-md bg-[#06C755] px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:opacity-90"
+                className="inline-flex items-center rounded bg-[#06C755] px-2 py-0.5 text-[11px] font-semibold text-white shadow-sm hover:opacity-90"
               >
                 LINE@
               </a>
@@ -593,13 +595,13 @@ function CaseDetailBody({
           </div>
         </div>
         {/* リスト・受任・報酬・入金（全幅に均等グリッド。狭い画面は列数を段階的に減らして折返し） */}
-        <div className="w-full border-b border-slate-100 px-6 py-2">
+        <div className="w-full px-4 py-0.5">
           <div className="min-w-0 overflow-x-auto">
-            <div className="flex w-max min-w-0 flex-nowrap items-end gap-x-2">
+            <div className="flex w-max min-w-0 flex-nowrap items-end gap-x-2 leading-tight">
               <div className="min-w-0 shrink-0">
               <EditableField
                 compact
-                compactSize="md"
+                compactSize="header"
                 label="リスト登録日"
                 value={caseData.metadata.listRegisteredDate}
                 onChange={(v) => updateMetadata('listRegisteredDate', v)}
@@ -609,7 +611,7 @@ function CaseDetailBody({
               <div className="min-w-0 shrink-0">
               <EditableField
                 compact
-                compactSize="md"
+                compactSize="header"
                 label="リスト区分"
                 value={caseData.metadata.listCategory}
                 onChange={(v) => updateMetadata('listCategory', v)}
@@ -618,7 +620,7 @@ function CaseDetailBody({
               <div className="min-w-0 shrink-0">
               <EditableField
                 compact
-                compactSize="md"
+                compactSize="header"
                 label="受任日"
                 value={caseData.appointmentInfo.acceptanceDate}
                 onChange={(v) => updateAppointmentInfo('acceptanceDate', v)}
@@ -628,7 +630,7 @@ function CaseDetailBody({
               <div className="min-w-0 shrink-0">
               <EditableField
                 compact
-                compactSize="md"
+                compactSize="header"
                 label="アポ担当"
                 value={caseData.appointmentInfo.appointmentStaff}
                 onChange={(v) => updateAppointmentInfo('appointmentStaff', v)}
@@ -637,7 +639,7 @@ function CaseDetailBody({
               <div className="min-w-0 shrink-0">
               <EditableField
                 compact
-                compactSize="md"
+                compactSize="header"
                 label="面談担当"
                 value={caseData.appointmentInfo.interviewStaff}
                 onChange={(v) => updateAppointmentInfo('interviewStaff', v)}
@@ -646,7 +648,7 @@ function CaseDetailBody({
               <div className="min-w-0 shrink-0">
               <EditableField
                 compact
-                compactSize="md"
+                compactSize="header"
                 label="受任ランク"
                 value={caseData.appointmentInfo.acceptanceRank}
                 onChange={(v) => updateAppointmentInfo('acceptanceRank', v)}
@@ -661,7 +663,7 @@ function CaseDetailBody({
               <div className="min-w-0 shrink-0">
               <EditableField
                 compact
-                compactSize="md"
+                compactSize="header"
                 label="通常報酬"
                 value={caseData.feeInfo.normalFee}
                 onChange={(v) => updateFeeInfo('normalFee', v)}
@@ -672,7 +674,7 @@ function CaseDetailBody({
               <div className="min-w-0 shrink-0">
               <EditableField
                 compact
-                compactSize="md"
+                compactSize="header"
                 label="報酬分割回数"
                 value={caseData.feeInfo.installmentCount}
                 onChange={(v) => updateFeeInfo('installmentCount', v)}
@@ -683,7 +685,7 @@ function CaseDetailBody({
               <div className="min-w-0 shrink-0">
               <EditableField
                 compact
-                compactSize="md"
+                compactSize="header"
                 label="毎月入金日"
                 value={caseData.paymentInfo.monthlyPaymentDay}
                 onChange={(v) => updatePaymentInfo('monthlyPaymentDay', v)}
@@ -692,7 +694,7 @@ function CaseDetailBody({
               <div className="min-w-0 shrink-0">
               <EditableField
                 compact
-                compactSize="md"
+                compactSize="header"
                 label="基本入金額"
                 value={caseData.paymentInfo.basePaymentAmount}
                 onChange={(v) => updatePaymentInfo('basePaymentAmount', v)}
@@ -704,48 +706,43 @@ function CaseDetailBody({
           </div>
         </div>
         {/* ③ 入金状況（スクロール時も常に参照） */}
-        <div className="w-full border-b border-slate-100 bg-slate-50/90 px-6 py-2">
-          <div className="min-w-0 overflow-x-auto">
-            <div className="flex w-max min-w-0 flex-nowrap items-baseline gap-x-5 gap-y-1 text-base text-slate-800">
-              <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-blue-700">
-                入金状況
+        <div className="flex w-full items-center gap-x-3 px-4 py-0.5 text-sm leading-tight text-slate-800">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-4">
+            <span className="shrink-0">
+              <span className="text-[11px] text-slate-500">累計入金額（実／予定）：</span>
+              <span className="font-medium tabular-nums">
+                {formatYenPair(
+                  caseData.paymentInfo.cumulativePaymentAmount,
+                  caseData.paymentInfo.cumulativePlannedPayment
+                )}
               </span>
-              <span className="shrink-0">
-                <span className="text-slate-500">累計入金額（実／予定）：</span>
-                <span className="font-bold tabular-nums text-blue-700">
-                  {formatYenPair(
-                    caseData.paymentInfo.cumulativePaymentAmount,
-                    caseData.paymentInfo.cumulativePlannedPayment
-                  )}
-                </span>
+            </span>
+            <span className="shrink-0">
+              <span className="text-[11px] text-slate-500">残入金予定額：</span>
+              <span className="font-medium tabular-nums">
+                {remainingPlanned != null ? `${remainingPlanned.toLocaleString()}円` : '-'}
               </span>
-              <span className="shrink-0">
-                <span className="text-slate-500">残入金予定額：</span>
-                <span className="font-medium tabular-nums">
-                  {remainingPlanned != null ? `${remainingPlanned.toLocaleString()}円` : '-'}
-                </span>
+            </span>
+            <span className="shrink-0">
+              <span className="text-[11px] text-slate-500">次回入金予定日：</span>
+              <span className="font-medium tabular-nums">
+                {displayNextPaymentDate && displayNextPaymentDate.trim().length > 0
+                  ? displayNextPaymentDate
+                  : '-'}
               </span>
-              <span className="shrink-0">
-                <span className="text-slate-500">次回入金予定日：</span>
-                <span className="font-medium tabular-nums">
-                  {displayNextPaymentDate && displayNextPaymentDate.trim().length > 0
-                    ? displayNextPaymentDate
-                    : '-'}
-                </span>
+            </span>
+            <span className="shrink-0">
+              <span className="text-[11px] text-slate-500">報酬充当：</span>
+              <span className="font-medium tabular-nums">
+                {caseData.paymentInfo.cumulativeFeeAllocation?.toLocaleString() ?? '-'}円
               </span>
-              <span className="shrink-0">
-                <span className="text-slate-500">報酬充当：</span>
-                <span className="font-medium tabular-nums">
-                  {caseData.paymentInfo.cumulativeFeeAllocation?.toLocaleString() ?? '-'}円
-                </span>
+            </span>
+            <span className="shrink-0">
+              <span className="text-[11px] text-slate-500">未回収：</span>
+              <span className="font-medium tabular-nums">
+                {caseData.feeInfo.uncollectedFee?.toLocaleString() ?? '-'}円
               </span>
-              <span className="shrink-0">
-                <span className="text-slate-500">未回収：</span>
-                <span className="font-medium tabular-nums">
-                  {caseData.feeInfo.uncollectedFee?.toLocaleString() ?? '-'}円
-                </span>
-              </span>
-            </div>
+            </span>
           </div>
         </div>
       </header>
@@ -753,106 +750,106 @@ function CaseDetailBody({
       {/* Content（ヘッダー以外のみスクロール） */}
       <main className="min-h-0 flex-1 overflow-y-auto">
       <div className="flex min-w-0 w-full flex-col">
-        <div className="min-h-0 min-w-0 w-full">
-            <SectionCard title="入金スケジュール・和解状況" color="green">
-              <div className="flex min-h-0 w-full min-w-0 flex-col">
-              <Tabs
-                tabBodyScroll="host"
-                tabBodyMaxHeightClassName="h-[min(62vh,28rem)]"
-                tabs={[
-                  {
-                    id: 'payments',
-                    label: '入金スケジュール',
-                    content: (
-                      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-2">
-                        {/* 債権者タブ切替でも常に見えるサマリ（「すべて合算」タブの上へ移動） */}
-                        <div className="min-w-0 overflow-x-auto">
-                          <div className="flex w-max min-w-0 flex-nowrap items-center whitespace-nowrap text-sm leading-none text-slate-800">
-                            <div className="flex min-h-[2.25rem] items-center gap-x-3 rounded-md bg-slate-100/70 px-2 py-1">
-                              <VAccountFields
-                                branch={caseData.paymentInfo.vAccountBranch}
-                                number={caseData.paymentInfo.vAccountNumber}
-                                onSave={(b, n) =>
-                                  updateCase({
-                                    paymentInfo: {
-                                      ...caseData.paymentInfo,
-                                      vAccountBranch: b,
-                                      vAccountNumber: n,
-                                    },
-                                  })
-                                }
-                              />
-                              <span
-                                className="mx-0.5 h-4 w-px shrink-0 self-center bg-slate-300"
-                                aria-hidden
-                              />
-                              <span className="inline-flex shrink-0 items-center gap-0.5">
-                                <span className="text-slate-500">最終入金予定日：</span>
-                                <span className="font-medium tabular-nums text-slate-900">
-                                  {finalPlannedDate && finalPlannedDate.length > 0
-                                    ? finalPlannedDate
-                                    : '-'}
-                                </span>
+        <div className="min-w-0 space-y-1.5 px-2 pb-2 pt-1.5">
+        {/* 入金スケジュール・和解状況 */}
+        <div className="min-w-0">
+          <SectionCard title="入金スケジュール・和解状況" color="green" collapsible defaultOpen>
+            <Tabs
+              variant="split"
+              density="dense"
+              tabBodyScroll="host"
+              tabBodyMaxHeightClassName="h-[min(55vh,26rem)]"
+              tabs={[
+                {
+                  id: 'payments',
+                  label: '入金スケジュール',
+                  content: (
+                    <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-1.5">
+                      {/* 債権者タブ切替でも常に見えるサマリ */}
+                      <div className="min-w-0 overflow-x-auto">
+                        <div className="flex w-max min-w-0 flex-nowrap items-center whitespace-nowrap text-xs leading-none text-slate-800">
+                          <div className="flex min-h-[1.75rem] items-center gap-x-6 rounded-md border border-slate-100/80 bg-slate-50/60 px-2 py-0.5">
+                            <VAccountFields
+                              branch={caseData.paymentInfo.vAccountBranch}
+                              number={caseData.paymentInfo.vAccountNumber}
+                              onSave={(b, n) =>
+                                updateCase({
+                                  paymentInfo: {
+                                    ...caseData.paymentInfo,
+                                    vAccountBranch: b,
+                                    vAccountNumber: n,
+                                  },
+                                })
+                              }
+                            />
+                            <span
+                              className="mx-0.5 h-3 w-px shrink-0 self-center bg-slate-300"
+                              aria-hidden
+                            />
+                            <span className="inline-flex shrink-0 items-center gap-0.5">
+                              <span className="text-slate-400">最終入金予定日：</span>
+                              <span className="font-medium tabular-nums text-slate-900">
+                                {finalPlannedDate && finalPlannedDate.length > 0
+                                  ? finalPlannedDate
+                                  : '-'}
                               </span>
-                              <span className="inline-flex shrink-0 items-center gap-0.5">
-                                <span className="text-slate-500">累計）弁代報酬充当額：</span>
-                                <span className="font-medium tabular-nums">
-                                  {sumActualAgentFee.toLocaleString()}円
-                                </span>
+                            </span>
+                            <span className="inline-flex shrink-0 items-center gap-0.5">
+                              <span className="text-slate-400">累計）弁代報酬充当額：</span>
+                              <span className="font-medium tabular-nums">
+                                {sumActualAgentFee.toLocaleString()}円
                               </span>
-                              <span className="inline-flex shrink-0 items-center gap-0.5">
-                                <span className="text-slate-500">累計）プール充当：</span>
-                                <span className="font-medium tabular-nums">
-                                  {sumActualPool.toLocaleString()}円
-                                </span>
+                            </span>
+                            <span className="inline-flex shrink-0 items-center gap-0.5">
+                              <span className="text-slate-400">累計）プール充当：</span>
+                              <span className="font-medium tabular-nums">
+                                {sumActualPool.toLocaleString()}円
                               </span>
-                              <span className="inline-flex shrink-0 items-center gap-0.5 font-medium text-slate-900">
-                                <span className="font-normal text-slate-500">累計）弁済充当（実／予定）：</span>
-                                {formatYenPair(sumActualRepayment, sumPlannedRepayment)}
-                              </span>
-                            </div>
+                            </span>
+                            <span className="inline-flex shrink-0 items-center gap-0.5 font-medium text-slate-900">
+                              <span className="font-normal text-slate-400">累計）弁済充当（実／予定）：</span>
+                              {formatYenPair(sumActualRepayment, sumPlannedRepayment)}
+                            </span>
                           </div>
                         </div>
-
-                        <Tabs
-                          tabs={paymentTabs}
-                          defaultTab="all"
-                          activeTabId={displayCreditorScopeTabId}
-                          onActiveTabChange={setCreditorScopeTabId}
-                          density="dense"
-                          tabBodyScroll="guest"
-                        />
                       </div>
-                    ),
-                  },
-                  {
-                    id: 'settlement',
-                    label: '和解状況',
-                    content: (
+
                       <Tabs
-                        tabs={settlementTabs}
+                        tabs={paymentTabs}
                         defaultTab="all"
                         activeTabId={displayCreditorScopeTabId}
                         onActiveTabChange={setCreditorScopeTabId}
                         density="dense"
                         tabBodyScroll="guest"
                       />
-                    ),
-                  },
-                ]}
-                defaultTab="payments"
-                variant="split"
-              />
-              </div>
-            </SectionCard>
+                    </div>
+                  ),
+                },
+                {
+                  id: 'settlement',
+                  label: '和解状況',
+                  content: (
+                    <Tabs
+                      tabs={settlementTabs}
+                      defaultTab="all"
+                      activeTabId={displayCreditorScopeTabId}
+                      onActiveTabChange={setCreditorScopeTabId}
+                      density="dense"
+                      tabBodyScroll="guest"
+                    />
+                  ),
+                },
+              ]}
+              defaultTab="payments"
+            />
+          </SectionCard>
         </div>
-
-        <div className="min-w-0 space-y-3 px-3 pb-3 pt-3">
-        {/* 接触履歴（下部・通常フォントで表示） */}
+        {/* 接触履歴（下部・コンパクト表示） */}
         <div className="min-w-0">
           <SectionCard title="接触履歴" color="slate" collapsible defaultOpen={false}>
             <Tabs
               variant="split"
+              density="dense"
               defaultTab="client"
               tabs={[
                 {
@@ -884,6 +881,7 @@ function CaseDetailBody({
         <SectionCard title="基本情報" color="slate" collapsible defaultOpen={false}>
           <Tabs
             defaultTab="client"
+            density="dense"
             tabBodyScroll="none"
             panelTopSpacing="tight"
             tabs={[

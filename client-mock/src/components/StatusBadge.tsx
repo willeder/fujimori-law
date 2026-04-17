@@ -30,7 +30,7 @@ export function StatusBadge({ status, size = 'sm' }: StatusBadgeProps) {
   }
 
   const colorClass = statusColors[status] ?? 'bg-slate-100 text-slate-600'
-  const sizeClass = size === 'sm' ? 'text-xs px-2 py-0.5' : 'text-sm px-3 py-1'
+  const sizeClass = size === 'sm' ? 'text-[10px] px-1.5 py-px' : 'text-[11px] px-2 py-0.5'
 
   return (
     <span className={`inline-block rounded-full font-medium ${colorClass} ${sizeClass}`}>

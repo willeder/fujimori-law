@@ -52,6 +52,8 @@ interface DataTableProps<T> {
   suspendTruncate?: boolean
   /** 余白をさらに詰める（入金スケジュールなど超高密度表示向け） */
   tight?: boolean
+  /** true のとき thead の縦余白のみ一段詰める（見出し行の高さを抑える） */
+  slimHeader?: boolean
 }
 
 export function DataTable<T>({
@@ -67,6 +69,7 @@ export function DataTable<T>({
   cellSingleLine = false,
   suspendTruncate = false,
   tight = false,
+  slimHeader = false,
 }: DataTableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
@@ -111,23 +114,35 @@ export function DataTable<T>({
       ? tight
         ? 'px-0.5 py-0.5'
         : 'px-1 py-0.5'
-      : 'px-3 py-2'
+      : 'px-2 py-1'
   const headPad = isDense
     ? tight
-      ? 'px-0 py-0.5'
-      : 'px-0.5 py-0.5'
+      ? slimHeader
+        ? 'px-0 py-px'
+        : 'px-0 py-0.5'
+      : slimHeader
+        ? 'px-0.5 py-px'
+        : 'px-0.5 py-0.5'
     : isCompact
       ? tight
-        ? 'px-0.5 py-0.5'
-        : 'px-1 py-1'
-      : 'px-3 py-2'
-  const tableText = isDense ? 'text-[9px] leading-tight' : isCompact ? 'text-[10px] leading-tight' : 'text-sm'
+        ? slimHeader
+          ? 'px-0.5 py-px'
+          : 'px-0.5 py-0.5'
+        : slimHeader
+          ? 'px-1 py-0.5'
+          : 'px-1 py-1'
+      : slimHeader
+        ? 'px-2 py-0.5'
+        : 'px-2 py-1'
+  const tableText = isDense ? 'text-[10px] leading-tight' : isCompact ? 'text-[11px] leading-tight' : 'text-xs'
   const headText = isDense
-    ? 'text-[8px] font-semibold leading-tight'
+    ? 'text-[9px] font-semibold leading-tight'
     : isCompact
-      ? 'text-[9px] font-semibold leading-tight'
-      : 'font-semibold'
-  const emptyPad = isCompact ? 'px-2 py-6' : 'px-3 py-8'
+      ? 'text-[10px] font-semibold leading-tight'
+      : slimHeader
+        ? 'text-[11px] font-semibold leading-tight'
+        : 'text-[11px] font-semibold'
+  const emptyPad = isCompact ? 'px-2 py-4' : 'px-2 py-6'
 
   const scrollBody =
     bodyMaxHeightClassName != null && bodyMaxHeightClassName.length > 0

@@ -65,17 +65,17 @@ export function Tabs({
 
   const tabRowClass =
     isSplit
-      ? 'grid w-full shrink-0 grid-cols-2 overflow-hidden rounded-md border border-slate-200 bg-white'
-      : 'flex shrink-0 flex-nowrap gap-1 overflow-x-auto border-b border-slate-200 pb-px'
+      ? 'grid w-full shrink-0 grid-cols-2 overflow-hidden rounded-md border border-slate-100 bg-slate-50/40'
+      : 'flex shrink-0 flex-nowrap gap-0.5 overflow-x-auto border-b border-slate-100 bg-slate-50/30 pb-px'
 
-  const panelTop = tabBodyScroll === 'none' ? (panelTopSpacing === 'tight' ? 'mt-2' : 'mt-4') : ''
+  const panelTop = tabBodyScroll === 'none' ? (panelTopSpacing === 'tight' ? 'mt-1.5' : 'mt-2.5') : ''
 
   const panelClass =
     tabBodyScroll === 'none'
       ? panelTop
       : tabBodyScroll === 'host'
-        ? 'mt-4 flex min-h-0 flex-1 flex-col overflow-hidden'
-        : 'mt-4 min-h-0 flex-1 overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]'
+        ? 'mt-2 flex min-h-0 flex-1 flex-col overflow-hidden'
+        : 'mt-2 min-h-0 flex-1 overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]'
 
   const rootClass =
     tabBodyScroll === 'none'
@@ -91,23 +91,23 @@ export function Tabs({
           const active = activeTab === tab.id
           const accent = tab.accent
           const base = isSplit
-            ? `w-full px-4 ${isDense ? 'py-1.5 text-xs' : 'py-2 text-sm'} font-semibold transition-colors text-center`
+            ? `w-full px-2 ${isDense ? 'py-0.5 text-[10px] leading-none' : 'py-1 text-xs leading-tight'} font-medium transition-colors text-center`
             : accent
-              ? `rounded-t-md border-l-4 border-b-2 ${isDense ? 'py-1.5 pl-2 pr-2 text-xs' : 'py-2.5 pl-3 pr-3 text-sm'} font-medium whitespace-nowrap transition-colors`
-              : `rounded-t-md border-b-2 ${isDense ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm'} font-medium whitespace-nowrap transition-colors`
+              ? `rounded-t-md border-l-2 ${isDense ? 'inline-flex h-7 shrink-0 items-center py-0 pl-1.5 pr-1.5 text-[10px] leading-none' : 'py-1 pl-2 pr-2 text-xs leading-tight'} font-normal whitespace-nowrap transition-colors`
+              : `rounded-t-md border-b-2 border-b-transparent ${isDense ? 'inline-flex h-7 shrink-0 items-center px-2 py-0 text-[10px] leading-none' : 'px-2 py-1 text-xs leading-tight'} font-normal whitespace-nowrap transition-colors`
 
           const state = isSplit
             ? active
-              ? 'bg-slate-100 text-slate-900'
-              : 'bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+              ? 'bg-white font-medium text-slate-900 shadow-[inset_0_-1px_0_0_theme(colors.slate.300)]'
+              : 'bg-transparent text-slate-500 hover:bg-slate-100/50 hover:text-slate-800'
             : active
-              ? accent?.active ?? 'border-blue-500 text-blue-600'
+              ? accent?.active ?? 'border-b-2 border-b-slate-700 font-medium text-slate-900'
               : accent?.inactive ??
-                'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700'
+                'border-transparent text-slate-500 hover:border-slate-200 hover:bg-slate-100/40 hover:text-slate-700'
 
           const splitDivider =
             isSplit && tab.id !== tabs[tabs.length - 1]?.id
-              ? 'border-r border-slate-200'
+              ? 'border-r border-slate-100'
               : ''
           return (
             <button
@@ -119,7 +119,7 @@ export function Tabs({
               {tab.label}
               {tab.badge !== undefined && (
                 <span
-                  className={`ml-2 rounded-full ${isDense ? 'px-1 py-0.5 text-[10px]' : 'px-1.5 py-0.5 text-xs'} ${
+                  className={`ml-1 rounded-full ${isDense ? 'px-0.5 py-px text-[8px] leading-none' : 'px-1 py-0.5 text-[9px] leading-none'} ${
                     active
                       ? accent?.badgeActive ?? 'bg-blue-100 text-blue-600'
                       : accent?.badgeInactive ?? 'bg-slate-100 text-slate-500'
@@ -136,7 +136,7 @@ export function Tabs({
         {tabBodyScroll === 'none' ? (
           <>
             {beforeActivePanelContent != null ? (
-              <div className="min-h-[2rem] min-w-0 shrink-0 overflow-x-auto border-b border-slate-200 bg-slate-50 px-1 py-1">
+              <div className="min-h-[1.75rem] min-w-0 shrink-0 overflow-x-auto border-b border-slate-100 bg-slate-50/40 px-1 py-0.5">
                 {beforeActivePanelContent}
               </div>
             ) : null}
@@ -152,7 +152,7 @@ export function Tabs({
           >
             {beforeActivePanelContent != null ? (
               <>
-                <div className="min-h-[2rem] min-w-0 shrink-0 overflow-x-auto border-b border-slate-200 bg-slate-50 px-1 py-1">
+                <div className="min-h-[1.75rem] min-w-0 shrink-0 overflow-x-auto border-b border-slate-100 bg-slate-50/40 px-1 py-0.5">
                   {beforeActivePanelContent}
                 </div>
                 <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-auto">

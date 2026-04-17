@@ -11,8 +11,8 @@ interface EditableFieldProps {
   disabled?: boolean
   /** ラベルと値を1行に詰め、余白・字サイズを下げる（詳細ヘッダー等） */
   compact?: boolean
-  /** compact の字サイズ（ヘッダーの「リスト」行などを大きくしたい用途） */
-  compactSize?: 'md' | 'lg'
+  /** compact の字サイズ（`header` は案件詳細ヘッダー2行目向け：項目名を1行目より小さく、値は2行目相当） */
+  compactSize?: 'md' | 'lg' | 'header'
   /** compact 時のレイアウト（横並び/上下2段） */
   compactLayout?: 'inline' | 'stacked'
   /** type="date" のとき、西暦/和暦の表示切替ボタンを出す（入力は西暦のまま） */
@@ -106,14 +106,26 @@ export function EditableField({
       ? formatJapaneseEraDate(value) ?? formattedDisplay
       : formattedDisplay
 
+  const isLg = compactSize === 'lg'
+  const isHdr = compactSize === 'header'
+  /** 項目名：ヘッダー1行目（text-base）より一段小さく */
+  const compactLabelClass = isLg ? 'text-xs' : isHdr ? 'text-[10px]' : 'text-[11px]'
+  /** 入力値：ヘッダー2行目相当（text-sm）。太字・色は子要素側のクラスのみ */
+  const compactValueClass = isLg ? 'text-sm' : 'text-xs'
+  const compactMinHRow = isLg ? 'min-h-[2rem]' : 'min-h-[1.5rem]'
+  const compactEditHintClass = isLg ? 'text-xs' : isHdr ? 'text-[9px]' : 'text-[10px]'
+  const compactSuffixClass = isLg ? 'text-xs' : isHdr ? 'text-[10px]' : 'text-[11px]'
+  const compactToggleClass = isLg ? 'text-xs' : isHdr ? 'text-[10px]' : 'text-[11px]'
+  const stackedEditingLabelClass = isLg ? 'text-xs' : isHdr ? 'text-[10px]' : 'text-[9px]'
+
   const compactInputBase =
-    compactSize === 'lg'
-      ? 'flex-1 min-w-0 text-base border border-blue-300 rounded px-2 py-1 h-10 leading-tight focus:outline-none focus:ring-1 focus:ring-blue-500'
-      : 'flex-1 min-w-0 text-sm border border-blue-300 rounded px-1.5 py-0.5 h-8 leading-tight focus:outline-none focus:ring-1 focus:ring-blue-500'
+    isLg
+      ? 'flex-1 min-w-0 text-sm border border-blue-300 rounded px-1.5 py-0.5 h-8 leading-tight focus:outline-none focus:ring-1 focus:ring-blue-500'
+      : 'flex-1 min-w-0 text-xs border border-blue-300 rounded px-1 py-0.5 h-7 leading-tight focus:outline-none focus:ring-1 focus:ring-blue-500'
 
   const inputBase = compact
     ? compactInputBase
-    : 'flex-1 text-sm border border-blue-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500'
+    : 'flex-1 text-xs border border-blue-300 rounded px-1.5 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500'
 
   const isStacked = compact && compactLayout === 'stacked'
   const showDateToggle = type === 'date' && dateDisplayToggle && !isEditing
@@ -121,7 +133,7 @@ export function EditableField({
   const toggleButton = showDateToggle ? (
     <button
       type="button"
-      className={`shrink-0 rounded bg-slate-100 px-1 py-0.5 font-medium text-slate-600 hover:bg-slate-200 ${compactSize === 'lg' ? 'text-sm' : 'text-xs'}`}
+      className={`shrink-0 rounded bg-slate-100 px-1 py-0.5 font-medium text-slate-600 hover:bg-slate-200 ${compactToggleClass}`}
       onClick={(e) => {
         e.stopPropagation()
         setDateDisplayMode((m) => (m === 'gregorian' ? 'japanese' : 'gregorian'))
@@ -136,10 +148,10 @@ export function EditableField({
       if (isStacked) {
         return (
           <div className="min-w-0">
-            <div className={`${compactSize === 'lg' ? 'text-sm' : 'text-xs'} font-medium text-slate-500 leading-tight whitespace-nowrap`}>
+            <div className={`${compactLabelClass} font-medium text-slate-500 leading-tight whitespace-nowrap`}>
               {labelWithColon}
             </div>
-            <div className={`min-w-0 ${compactSize === 'lg' ? 'text-base' : 'text-sm'} text-slate-700 whitespace-normal break-words leading-tight`}>
+            <div className={`min-w-0 ${compactValueClass} text-slate-700 whitespace-normal break-words leading-tight`}>
               <span>{displayText}</span>
               {suffix && <span className="text-slate-400 ml-0">{suffix}</span>}
               {toggleButton && <span className="ml-1 inline-flex align-middle">{toggleButton}</span>}
@@ -148,11 +160,11 @@ export function EditableField({
         )
       }
       return (
-        <div className={`flex min-w-0 items-baseline gap-1 py-0 ${compactSize === 'lg' ? 'min-h-[2.25rem]' : 'min-h-[1.75rem]'}`}>
-          <span className={`shrink-0 font-medium text-slate-500 leading-tight whitespace-nowrap ${compactSize === 'lg' ? 'text-sm' : 'text-xs'}`}>
+        <div className={`flex min-w-0 items-baseline gap-1 py-0 ${compactMinHRow}`}>
+          <span className={`shrink-0 font-medium text-slate-500 leading-tight whitespace-nowrap ${compactLabelClass}`}>
             {labelWithColon}
           </span>
-          <div className={`min-w-0 flex-1 text-slate-700 leading-tight ${compactSize === 'lg' ? 'text-base' : 'text-sm'}`}>
+          <div className={`min-w-0 flex-1 text-slate-700 leading-tight ${compactValueClass}`}>
             <span className="block min-w-0 overflow-x-auto whitespace-nowrap [-webkit-overflow-scrolling:touch]">
               {displayText}
               {suffix && <span className="text-slate-400 ml-0">{suffix}</span>}
@@ -164,8 +176,8 @@ export function EditableField({
     }
     return (
       <div className="flex min-w-0 items-baseline gap-1">
-        <span className="shrink-0 text-xs font-medium text-slate-500">{labelWithColon}</span>
-        <div className="min-w-0 flex-1 text-sm text-slate-700">
+        <span className="shrink-0 text-[11px] font-medium text-slate-500">{labelWithColon}</span>
+        <div className="min-w-0 flex-1 text-xs text-slate-700">
           {displayText}
           {suffix && <span className="text-slate-400 ml-0.5">{suffix}</span>}
         </div>
@@ -179,11 +191,11 @@ export function EditableField({
       if (isStacked) {
         return (
           <div className="min-w-0">
-            <div className={`${compactSize === 'lg' ? 'text-sm' : 'text-xs'} font-medium text-slate-500 leading-tight whitespace-nowrap`}>
+            <div className={`${compactLabelClass} font-medium text-slate-500 leading-tight whitespace-nowrap`}>
               {labelWithColon}
             </div>
             <div
-              className={`group min-w-0 cursor-pointer rounded px-0.5 py-0.5 -mx-0.5 leading-tight text-slate-700 hover:bg-blue-50/80 ${compactSize === 'lg' ? 'text-base' : 'text-sm'}`}
+              className={`group min-w-0 cursor-pointer rounded px-0.5 py-0.5 -mx-0.5 leading-tight text-slate-700 hover:bg-blue-50/80 ${compactValueClass}`}
               onClick={() => {
                 setEditValue(String(value ?? ''))
                 setIsEditing(true)
@@ -195,7 +207,7 @@ export function EditableField({
                   {suffix && <span className="text-slate-400 ml-0">{suffix}</span>}
                 </span>
                 {toggleButton}
-                <span className={`shrink-0 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100 ${compactSize === 'lg' ? 'text-sm' : 'text-xs'}`}>
+                <span className={`shrink-0 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100 ${compactEditHintClass}`}>
                   編集
                 </span>
               </div>
@@ -204,12 +216,12 @@ export function EditableField({
         )
       }
       return (
-        <div className={`flex min-w-0 items-baseline gap-1 py-0 ${compactSize === 'lg' ? 'min-h-[2.25rem]' : 'min-h-[1.75rem]'}`}>
-          <span className={`shrink-0 font-medium text-slate-500 leading-tight whitespace-nowrap ${compactSize === 'lg' ? 'text-sm' : 'text-xs'}`}>
+        <div className={`flex min-w-0 items-baseline gap-1 py-0 ${compactMinHRow}`}>
+          <span className={`shrink-0 font-medium text-slate-500 leading-tight whitespace-nowrap ${compactLabelClass}`}>
             {labelWithColon}
           </span>
           <div
-            className={`group flex min-w-0 flex-1 cursor-pointer items-center gap-0.5 rounded px-0.5 py-0.5 -mx-0.5 leading-tight text-slate-700 hover:bg-blue-50/80 ${compactSize === 'lg' ? 'text-base' : 'text-sm'}`}
+            className={`group flex min-w-0 flex-1 cursor-pointer items-center gap-0.5 rounded px-0.5 py-0.5 -mx-0.5 leading-tight text-slate-700 hover:bg-blue-50/80 ${compactValueClass}`}
             onClick={() => {
               setEditValue(String(value ?? ''))
               setIsEditing(true)
@@ -220,7 +232,7 @@ export function EditableField({
               {suffix && <span className="text-slate-400 ml-0">{suffix}</span>}
             </span>
             {toggleButton}
-            <span className={`shrink-0 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100 ${compactSize === 'lg' ? 'text-sm' : 'text-xs'}`}>
+            <span className={`shrink-0 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100 ${compactEditHintClass}`}>
               編集
             </span>
           </div>
@@ -236,13 +248,13 @@ export function EditableField({
             setIsEditing(true)
           }}
         >
-          <span className="shrink-0 text-xs font-medium text-slate-500">{labelWithColon}</span>
-          <span className="min-w-0 flex-1 whitespace-normal break-words text-sm text-slate-700">
+          <span className="shrink-0 text-[11px] font-medium text-slate-500">{labelWithColon}</span>
+          <span className="min-w-0 flex-1 whitespace-normal break-words text-xs text-slate-700">
             {displayText}
             {suffix && <span className="text-slate-400 ml-0.5">{suffix}</span>}
           </span>
           {toggleButton}
-          <span className="shrink-0 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100 text-xs">
+          <span className="shrink-0 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100 text-[11px]">
             編集
           </span>
         </div>
@@ -254,7 +266,7 @@ export function EditableField({
     if (isStacked) {
       return (
         <div className="min-w-0">
-          <div className="text-[10px] font-medium text-slate-500 leading-tight whitespace-nowrap">
+          <div className={`${stackedEditingLabelClass} font-medium text-slate-500 leading-tight whitespace-nowrap`}>
             {labelWithColon}
           </div>
           <div className="flex min-w-0 items-center gap-0.5">
@@ -296,7 +308,7 @@ export function EditableField({
                 className={inputBase}
               />
             )}
-            {suffix && <span className="text-slate-400 text-xs shrink-0 pl-0">{suffix}</span>}
+            {suffix && <span className={`text-slate-400 shrink-0 pl-0 ${compactSuffixClass}`}>{suffix}</span>}
             {type === 'textarea' && (
               <div className="flex shrink-0 gap-0.5">
                 <button
@@ -320,16 +332,8 @@ export function EditableField({
       )
     }
     return (
-      <div
-        className={`flex min-w-0 items-baseline gap-1 py-0 ${
-          compactSize === 'lg' ? 'min-h-[2.25rem]' : 'min-h-[1.75rem]'
-        }`}
-      >
-        <span
-          className={`shrink-0 font-medium text-slate-500 leading-tight whitespace-nowrap ${
-            compactSize === 'lg' ? 'text-sm' : 'text-xs'
-          }`}
-        >
+      <div className={`flex min-w-0 items-baseline gap-1 py-0 ${compactMinHRow}`}>
+        <span className={`shrink-0 font-medium text-slate-500 leading-tight whitespace-nowrap ${compactLabelClass}`}>
           {labelWithColon}
         </span>
         <div className="flex min-w-0 flex-1 items-center gap-0.5">
@@ -372,11 +376,7 @@ export function EditableField({
             />
           )}
           {suffix && (
-            <span
-              className={`text-slate-400 shrink-0 pl-0 ${
-                compactSize === 'lg' ? 'text-sm' : 'text-xs'
-              }`}
-            >
+            <span className={`text-slate-400 shrink-0 pl-0 ${compactSuffixClass}`}>
               {suffix}
             </span>
           )}
@@ -406,7 +406,7 @@ export function EditableField({
   return (
     <div className="flex min-w-0 flex-col gap-0.5">
       <div className="flex min-w-0 items-start gap-1">
-        <span className="shrink-0 pt-1 text-xs font-medium text-slate-500">{labelWithColon}</span>
+        <span className="shrink-0 pt-0.5 text-[11px] font-medium text-slate-500">{labelWithColon}</span>
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
         {type === 'select' && options ? (
           <select
@@ -415,7 +415,7 @@ export function EditableField({
             onChange={(e) => setEditValue(e.target.value)}
             onBlur={handleSave}
             onKeyDown={handleKeyDown}
-            className="flex-1 text-sm border border-blue-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 text-xs border border-blue-300 rounded px-1.5 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">選択してください</option>
             {options.map((opt) => (
@@ -431,8 +431,8 @@ export function EditableField({
             onChange={(e) => setEditValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            rows={3}
-            className="flex-1 text-sm border border-blue-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            rows={2}
+            className="flex-1 text-xs border border-blue-300 rounded px-1.5 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         ) : (
           <input
@@ -443,21 +443,21 @@ export function EditableField({
             onBlur={handleSave}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            className="flex-1 text-sm border border-blue-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 text-xs border border-blue-300 rounded px-1.5 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         )}
-        {suffix && <span className="text-slate-400 text-sm">{suffix}</span>}
+        {suffix && <span className="text-slate-400 text-xs">{suffix}</span>}
         {type === 'textarea' && (
           <div className="flex gap-1">
             <button
               onClick={handleSave}
-              className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
+              className="px-1.5 py-0.5 text-[10px] bg-blue-500 text-white rounded hover:bg-blue-600"
             >
               保存
             </button>
             <button
               onClick={handleCancel}
-              className="px-2 py-1 text-xs bg-slate-200 text-slate-600 rounded hover:bg-slate-300"
+              className="px-1.5 py-0.5 text-[10px] bg-slate-200 text-slate-600 rounded hover:bg-slate-300"
             >
               取消
             </button>

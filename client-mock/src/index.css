@@ -4,6 +4,22 @@
   color-scheme: light;
 }
 
+/**
+ * 画面全体の文字スケール（Tailwind の rem ベースのサイズが追従）。
+ * `UiFontScaleProvider` が html に data-ui-font-scale を付与。
+ */
+html {
+  font-size: 100%;
+}
+
+html[data-ui-font-scale='compact'] {
+  font-size: 93.75%;
+}
+
+html[data-ui-font-scale='dense'] {
+  font-size: 85%;
+}
+
 html,
 body,
 #root {

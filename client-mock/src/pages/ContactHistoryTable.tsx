@@ -71,8 +71,8 @@ export function ContactHistoryTable({
   }
 
   const cellIn = embedded
-    ? 'w-full rounded border border-blue-300 px-0.5 py-0 text-[10px] leading-tight'
-    : 'w-full rounded border border-blue-300 px-1 py-0.5 text-xs'
+    ? 'w-full rounded border border-blue-300 px-0.5 py-0 text-[9px] leading-tight'
+    : 'w-full rounded border border-blue-300 px-1 py-0.5 text-[9px] leading-tight'
 
   const creditorColumn: Column<ContactHistory>[] =
     targetType === '債権者'
@@ -213,7 +213,7 @@ export function ContactHistoryTable({
             <textarea
               value={editData.comment ?? ''}
               onChange={(e) => setEditData({ ...editData, comment: e.target.value })}
-              className="w-full min-h-10 rounded border border-blue-300 px-1 py-0.5 text-xs"
+              className="w-full min-h-8 rounded border border-blue-300 px-1 py-0.5 text-[9px] leading-tight"
               placeholder="コメント"
               rows={2}
             />
@@ -227,7 +227,7 @@ export function ContactHistoryTable({
           </span>
         ) : (
           <div
-            className={`whitespace-normal break-words leading-relaxed ${!h.comment ? 'text-slate-300' : ''}`}
+            className={`whitespace-normal break-words leading-snug ${!h.comment ? 'text-slate-300' : ''}`}
           >
             {h.comment ?? '-'}
           </div>
@@ -247,8 +247,8 @@ export function ContactHistoryTable({
                 onClick={() => handleSave(h)}
                 className={
                   embedded
-                    ? 'rounded bg-blue-500 px-1 py-0.5 text-[10px] text-white hover:bg-blue-600'
-                    : 'rounded bg-blue-500 px-2 py-1 text-xs text-white hover:bg-blue-600'
+                    ? 'rounded bg-blue-500 px-1 py-0.5 text-[9px] text-white hover:bg-blue-600'
+                    : 'rounded bg-blue-500 px-1.5 py-0.5 text-[9px] text-white hover:bg-blue-600'
                 }
               >
                 保存
@@ -258,8 +258,8 @@ export function ContactHistoryTable({
                 onClick={handleCancel}
                 className={
                   embedded
-                    ? 'rounded bg-slate-200 px-1 py-0.5 text-[10px] text-slate-700 hover:bg-slate-300'
-                    : 'rounded bg-slate-200 px-2 py-1 text-xs text-slate-700 hover:bg-slate-300'
+                    ? 'rounded bg-slate-200 px-1 py-0.5 text-[9px] text-slate-700 hover:bg-slate-300'
+                    : 'rounded bg-slate-200 px-1.5 py-0.5 text-[9px] text-slate-700 hover:bg-slate-300'
                 }
               >
                 取消
@@ -274,8 +274,8 @@ export function ContactHistoryTable({
               onClick={() => handleEdit(h)}
               className={
                 embedded
-                  ? 'rounded px-1 py-0.5 text-[10px] text-blue-500 hover:bg-blue-50 hover:text-blue-600'
-                  : 'rounded px-2 py-1 text-xs text-blue-500 hover:bg-blue-50 hover:text-blue-600'
+                  ? 'rounded px-1 py-0.5 text-[9px] text-blue-500 hover:bg-blue-50 hover:text-blue-600'
+                  : 'rounded px-1.5 py-0.5 text-[9px] text-blue-500 hover:bg-blue-50 hover:text-blue-600'
               }
             >
               編集
@@ -285,8 +285,8 @@ export function ContactHistoryTable({
               onClick={() => handleDelete(h)}
               className={
                 embedded
-                  ? 'rounded px-1 py-0.5 text-[10px] text-rose-500 hover:bg-rose-50 hover:text-rose-600'
-                  : 'rounded px-2 py-1 text-xs text-rose-500 hover:bg-rose-50 hover:text-rose-600'
+                  ? 'rounded px-1 py-0.5 text-[9px] text-rose-500 hover:bg-rose-50 hover:text-rose-600'
+                  : 'rounded px-1.5 py-0.5 text-[9px] text-rose-500 hover:bg-rose-50 hover:text-rose-600'
               }
             >
               削除
@@ -304,9 +304,10 @@ export function ContactHistoryTable({
         columns={columns}
         keyField="id"
         emptyMessage="接触履歴がありません"
-        density={embedded ? 'compact' : 'default'}
+        density="dense"
         cellNoWrap={embedded}
         stickyHeader
+        slimHeader
         bodyMaxHeightClassName={
           embedded ? 'max-h-[10.5rem]' : 'max-h-[min(55vh,32rem)]'
         }
@@ -342,8 +343,8 @@ export function ContactHistoryTable({
         }}
         className={
           embedded
-            ? 'w-full rounded border border-dashed border-blue-300 py-1 text-[11px] text-blue-500 transition-colors hover:bg-blue-50'
-            : 'w-full rounded border border-dashed border-blue-300 py-2 text-sm text-blue-500 transition-colors hover:bg-blue-50'
+            ? 'w-full rounded border border-dashed border-blue-300 py-0.5 text-[9px] text-blue-500 transition-colors hover:bg-blue-50'
+            : 'w-full rounded border border-dashed border-blue-300 py-1 text-[10px] text-blue-500 transition-colors hover:bg-blue-50'
         }
       >
         + 接触履歴を追加

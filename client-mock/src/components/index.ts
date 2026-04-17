@@ -1,4 +1,5 @@
 // 共通UIコンポーネント
+export { UiFontScaleControl } from './UiFontScaleControl'
 export { SectionCard } from './SectionCard'
 export { EditableField } from './EditableField'
 export { DataTable, type Column } from './DataTable'
