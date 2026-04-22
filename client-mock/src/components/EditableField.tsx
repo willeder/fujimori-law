@@ -17,6 +17,10 @@ interface EditableFieldProps {
   compactLayout?: 'inline' | 'stacked'
   /** type="date" のとき、西暦/和暦の表示切替ボタンを出す（入力は西暦のまま） */
   dateDisplayToggle?: boolean
+  /** 枠線を表示する */
+  bordered?: boolean
+  /** 値が長い場合に省略する（クリックで編集時に全文表示） */
+  truncateValue?: boolean
 }
 
 function parseIsoDateToUtcDate(iso: string): Date | null {
@@ -58,6 +62,8 @@ export function EditableField({
   compactSize = 'md',
   compactLayout = 'inline',
   dateDisplayToggle = false,
+  bordered = false,
+  truncateValue = false,
 }: EditableFieldProps) {
   const labelWithColon =
     label.endsWith('：') || label.endsWith(':') ? label : `${label}：`
@@ -215,9 +221,13 @@ export function EditableField({
           </div>
         )
       }
+      const labelBorderedClass = bordered ? 'border border-slate-200 rounded bg-slate-50 px-1 py-px' : ''
+      const valueSpanClass = truncateValue
+        ? 'min-w-0 flex-1 truncate'
+        : 'min-w-0 flex-1 overflow-x-auto whitespace-nowrap [-webkit-overflow-scrolling:touch]'
       return (
-        <div className={`flex min-w-0 items-baseline gap-1 py-0 ${compactMinHRow}`}>
-          <span className={`shrink-0 font-medium text-slate-500 leading-tight whitespace-nowrap ${compactLabelClass}`}>
+        <div className={`flex min-w-0 items-baseline gap-0.5 py-0 ${compactMinHRow}`}>
+          <span className={`shrink-0 font-medium text-slate-500 leading-tight whitespace-nowrap ${compactLabelClass} ${labelBorderedClass}`}>
             {labelWithColon}
           </span>
           <div
@@ -227,7 +237,7 @@ export function EditableField({
               setIsEditing(true)
             }}
           >
-            <span className="min-w-0 flex-1 overflow-x-auto whitespace-nowrap [-webkit-overflow-scrolling:touch]">
+            <span className={valueSpanClass}>
               {displayText}
               {suffix && <span className="text-slate-400 ml-0">{suffix}</span>}
             </span>
@@ -331,9 +341,10 @@ export function EditableField({
         </div>
       )
     }
+    const editLabelBorderedClass = bordered ? 'border border-slate-200 rounded bg-slate-50 px-1 py-px' : ''
     return (
-      <div className={`flex min-w-0 items-baseline gap-1 py-0 ${compactMinHRow}`}>
-        <span className={`shrink-0 font-medium text-slate-500 leading-tight whitespace-nowrap ${compactLabelClass}`}>
+      <div className={`flex min-w-0 items-baseline gap-0.5 py-0 ${compactMinHRow}`}>
+        <span className={`shrink-0 font-medium text-slate-500 leading-tight whitespace-nowrap ${compactLabelClass} ${editLabelBorderedClass}`}>
           {labelWithColon}
         </span>
         <div className="flex min-w-0 flex-1 items-center gap-0.5">

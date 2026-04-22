@@ -45,7 +45,7 @@ export function Tabs({
   activeTabId: controlledActiveId,
   onActiveTabChange,
   variant = 'default',
-  density = 'normal',
+  density = 'dense',
   panelTopSpacing = 'normal',
   tabBodyScroll = 'none',
   /** max-h だけだと flex 内で子の flex-1 が効かずスクロールできないことがあるため h-[min(...)] で高さを確定 */
@@ -75,7 +75,7 @@ export function Tabs({
       ? panelTop
       : tabBodyScroll === 'host'
         ? 'mt-2 flex min-h-0 flex-1 flex-col overflow-hidden'
-        : 'mt-2 min-h-0 flex-1 overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]'
+        : 'mt-2 min-h-0 flex-1 overflow-auto overscroll-contain [-webkit-overflow-scrolling:touch]'
 
   const rootClass =
     tabBodyScroll === 'none'

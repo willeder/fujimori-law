@@ -108,11 +108,11 @@ export function DataTable<T>({
   const isCompact = density === 'compact' || isDense
   const cellPad = isDense
     ? tight
-      ? 'px-0 py-0.5'
+      ? 'px-0 py-px'
       : 'px-0.5 py-0.5'
     : isCompact
       ? tight
-        ? 'px-0.5 py-0.5'
+        ? 'px-px py-px'
         : 'px-1 py-0.5'
       : 'px-2 py-1'
   const headPad = isDense
@@ -153,18 +153,25 @@ export function DataTable<T>({
     ? 'sticky top-0 z-20 shadow-[inset_0_-1px_0_0_theme(colors.slate.200)]'
     : ''
 
-  /** 折り返し+table-auto 時は表がやや広がることがあるため横スクロールも許可 */
+  /**
+   * 折り返し+table-auto 時は表がやや広がることがあるため横スクロールも許可
+   * stickyHeader を親スクロールコンテナで使う場合は overflow を設定せず
+   * スクロールを親に委譲（sticky が親コンテナ基準で動作）
+   */
   const scrollWrapClass = scrollBody
     ? cellNoWrap
       ? `min-w-0 overflow-auto ${bodyMaxHeightClassName} isolate`
       : `min-w-0 overflow-auto ${bodyMaxHeightClassName} isolate`
-    : `min-w-0 overflow-x-auto${stickyHeader ? ' isolate' : ''}`
+    : stickyHeader
+      ? 'isolate'
+      : 'min-w-0 overflow-x-auto'
 
   /** 横スクロール用の広い表のみ。折り返し表示（w-full）では付けない */
   const tableMinW = cellNoWrap ? ' min-w-max' : ''
 
   const tableBorder = useStickyHeader ? ' border-separate border-spacing-0' : ''
 
+  /** w-full + table-auto でコンテナ幅いっぱいに拡張、列は内容に応じて自動調整 */
   const tableWidthClass = cellNoWrap ? 'w-max' : 'w-full'
 
   /**

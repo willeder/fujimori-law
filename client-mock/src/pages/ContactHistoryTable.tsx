@@ -9,10 +9,6 @@ interface ContactHistoryTableProps {
   histories: ContactHistory[]
   /** この表の対象（追加行の targetType に使用） */
   targetType: '依頼者' | '債権者'
-  /**
-   * 受任資料カード内など狭い領域向け：小フォント・行は1行（折返しなし）・表は横スクロール＋縦スクロール
-   */
-  embedded?: boolean
 }
 
 const toolOptions = ['LINE', '電話', 'メール', 'SMS', 'その他'] as const
@@ -21,13 +17,23 @@ export function ContactHistoryTable({
   caseId,
   histories,
   targetType,
-  embedded = false,
 }: ContactHistoryTableProps) {
   const dispatch = useCaseDispatch()
   const { contactHistories } = useCaseState()
   const { accountName } = useUserSettings()
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editData, setEditData] = useState<Partial<ContactHistory>>({})
+
+  const getLocalNow = () => {
+    const now = new Date()
+    const pad2 = (n: number) => String(n).padStart(2, '0')
+    const y = now.getFullYear()
+    const m = pad2(now.getMonth() + 1)
+    const d = pad2(now.getDate())
+    const hh = pad2(now.getHours())
+    const mm = pad2(now.getMinutes())
+    return { date: `${y}-${m}-${d}`, time: `${hh}:${mm}` }
+  }
 
   const sorted = useMemo(() => {
     const toKey = (h: ContactHistory) => `${h.contactDate ?? ''} ${h.contactTime ?? ''}`
@@ -72,9 +78,7 @@ export function ContactHistoryTable({
     dispatch({ type: 'DELETE_CONTACT_HISTORY', payload: h.id })
   }
 
-  const cellIn = embedded
-    ? 'w-full rounded border border-blue-300 px-0.5 py-0 text-[9px] leading-tight'
-    : 'w-full rounded border border-blue-300 px-1 py-0.5 text-[9px] leading-tight'
+  const cellIn = 'w-full rounded border border-blue-300 px-1 py-0.5 text-[9px] leading-tight'
 
   const creditorColumn: Column<ContactHistory>[] =
     targetType === '債権者'
@@ -82,7 +86,7 @@ export function ContactHistoryTable({
           {
             key: 'creditorName',
             header: '債権者',
-            width: embedded ? '76px' : '120px',
+            width: '120px',
             render: (h) =>
               editingId === h.id ? (
                 <input
@@ -93,13 +97,6 @@ export function ContactHistoryTable({
                   className={cellIn}
                   placeholder="債権者名"
                 />
-              ) : embedded ? (
-                <span
-                  className={`inline-block max-w-[4.5rem] truncate align-middle ${!h.creditorName ? 'text-slate-300' : ''}`}
-                  title={h.creditorName ?? undefined}
-                >
-                  {h.creditorName ?? '-'}
-                </span>
               ) : (
                 <span className={!h.creditorName ? 'text-slate-300' : ''}>
                   {h.creditorName ?? '-'}
@@ -113,7 +110,7 @@ export function ContactHistoryTable({
     {
       key: 'contactDate',
       header: '接触日',
-      width: embedded ? '86px' : '110px',
+      width: '110px',
       render: (h) =>
         editingId === h.id ? (
           <input
@@ -133,7 +130,7 @@ export function ContactHistoryTable({
     {
       key: 'contactTime',
       header: '時刻',
-      width: embedded ? '58px' : '70px',
+      width: '70px',
       align: 'center',
       render: (h) =>
         editingId === h.id ? (
@@ -154,7 +151,7 @@ export function ContactHistoryTable({
     {
       key: 'staff',
       header: '担当',
-      width: embedded ? '64px' : '90px',
+      width: '90px',
       render: (h) =>
         editingId === h.id ? (
           <input
@@ -163,13 +160,6 @@ export function ContactHistoryTable({
             className={cellIn}
             placeholder="担当"
           />
-        ) : embedded ? (
-          <span
-            className={`inline-block max-w-[3.5rem] truncate align-middle ${!h.staff ? 'text-slate-300' : ''}`}
-            title={h.staff ?? undefined}
-          >
-            {h.staff ?? '-'}
-          </span>
         ) : (
           <span className={!h.staff ? 'text-slate-300' : ''}>{h.staff ?? '-'}</span>
         ),
@@ -177,7 +167,7 @@ export function ContactHistoryTable({
     {
       key: 'tool',
       header: 'ツール',
-      width: embedded ? '56px' : '90px',
+      width: '90px',
       render: (h) =>
         editingId === h.id ? (
           <select
@@ -200,33 +190,16 @@ export function ContactHistoryTable({
     {
       key: 'comment',
       header: 'コメント',
-      width: embedded ? '11rem' : undefined,
+      width: undefined,
       render: (h) =>
         editingId === h.id ? (
-          embedded ? (
-            <input
-              type="text"
-              value={editData.comment ?? ''}
-              onChange={(e) => setEditData({ ...editData, comment: e.target.value })}
-              className={`${cellIn} min-w-[6rem]`}
-              placeholder="コメント"
-            />
-          ) : (
-            <textarea
-              value={editData.comment ?? ''}
-              onChange={(e) => setEditData({ ...editData, comment: e.target.value })}
-              className="w-full min-h-8 rounded border border-blue-300 px-1 py-0.5 text-[9px] leading-tight"
-              placeholder="コメント"
-              rows={2}
-            />
-          )
-        ) : embedded ? (
-          <span
-            className={`inline-block max-w-[10rem] truncate align-middle ${!h.comment ? 'text-slate-300' : ''}`}
-            title={h.comment && h.comment.length > 0 ? h.comment : undefined}
-          >
-            {h.comment ?? '-'}
-          </span>
+          <textarea
+            value={editData.comment ?? ''}
+            onChange={(e) => setEditData({ ...editData, comment: e.target.value })}
+            className="w-full min-h-8 rounded border border-blue-300 px-1 py-0.5 text-[9px] leading-tight"
+            placeholder="コメント"
+            rows={2}
+          />
         ) : (
           <div
             className={`whitespace-normal break-words leading-snug ${!h.comment ? 'text-slate-300' : ''}`}
@@ -238,31 +211,23 @@ export function ContactHistoryTable({
     {
       key: 'actions',
       header: '',
-      width: embedded ? '96px' : '130px',
+      width: '130px',
       sortable: false,
       render: (h) => {
         if (editingId === h.id) {
           return (
-            <div className={`flex ${embedded ? 'gap-0.5' : 'gap-1'}`}>
+            <div className="flex gap-1">
               <button
                 type="button"
                 onClick={() => handleSave(h)}
-                className={
-                  embedded
-                    ? 'rounded bg-blue-500 px-1 py-0.5 text-[9px] text-white hover:bg-blue-600'
-                    : 'rounded bg-blue-500 px-1.5 py-0.5 text-[9px] text-white hover:bg-blue-600'
-                }
+                className="rounded bg-blue-500 px-1.5 py-0.5 text-[9px] text-white hover:bg-blue-600"
               >
                 保存
               </button>
               <button
                 type="button"
                 onClick={handleCancel}
-                className={
-                  embedded
-                    ? 'rounded bg-slate-200 px-1 py-0.5 text-[9px] text-slate-700 hover:bg-slate-300'
-                    : 'rounded bg-slate-200 px-1.5 py-0.5 text-[9px] text-slate-700 hover:bg-slate-300'
-                }
+                className="rounded bg-slate-200 px-1.5 py-0.5 text-[9px] text-slate-700 hover:bg-slate-300"
               >
                 取消
               </button>
@@ -270,26 +235,18 @@ export function ContactHistoryTable({
           )
         }
         return (
-          <div className={`flex ${embedded ? 'gap-0.5' : 'gap-1'}`}>
+          <div className="flex gap-1">
             <button
               type="button"
               onClick={() => handleEdit(h)}
-              className={
-                embedded
-                  ? 'rounded px-1 py-0.5 text-[9px] text-blue-500 hover:bg-blue-50 hover:text-blue-600'
-                  : 'rounded px-1.5 py-0.5 text-[9px] text-blue-500 hover:bg-blue-50 hover:text-blue-600'
-              }
+              className="rounded px-1.5 py-0.5 text-[9px] text-blue-500 hover:bg-blue-50 hover:text-blue-600"
             >
               編集
             </button>
             <button
               type="button"
               onClick={() => handleDelete(h)}
-              className={
-                embedded
-                  ? 'rounded px-1 py-0.5 text-[9px] text-rose-500 hover:bg-rose-50 hover:text-rose-600'
-                  : 'rounded px-1.5 py-0.5 text-[9px] text-rose-500 hover:bg-rose-50 hover:text-rose-600'
-              }
+              className="rounded px-1.5 py-0.5 text-[9px] text-rose-500 hover:bg-rose-50 hover:text-rose-600"
             >
               削除
             </button>
@@ -300,62 +257,63 @@ export function ContactHistoryTable({
   ]
 
   return (
-    <div className={embedded ? 'space-y-1.5' : 'space-y-3'}>
-      <DataTable
-        data={sorted}
-        columns={columns}
-        keyField="id"
-        emptyMessage="接触履歴がありません"
-        density="dense"
-        cellNoWrap={embedded}
-        stickyHeader
-        slimHeader
-        bodyMaxHeightClassName={
-          embedded ? 'max-h-[10.5rem]' : 'max-h-[min(55vh,32rem)]'
-        }
-      />
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-1.5">
+      <div className="min-w-0 overflow-x-auto">
+        <div className="min-w-0 rounded-md border border-slate-100/80 bg-slate-50/60 px-2 py-1">
+          <DataTable
+            data={sorted}
+            columns={columns}
+            keyField="id"
+            emptyMessage="接触履歴がありません"
+            density="dense"
+            stickyHeader
+            slimHeader
+            bodyMaxHeightClassName="max-h-[min(55vh,32rem)]"
+          />
+        </div>
+      </div>
 
-      <button
-        type="button"
-        onClick={() => {
-          const now = new Date()
-          const currentDate = now.toISOString().slice(0, 10) // YYYY-MM-DD
-          const currentTime = now.toTimeString().slice(0, 5) // HH:MM
-          const staffName = accountName || null
+      <div className="min-w-0 overflow-x-auto">
+        <div className="flex w-max min-w-0 flex-nowrap items-center whitespace-nowrap text-xs leading-none text-slate-800">
+          <button
+            type="button"
+            onClick={() => {
+              const { date: currentDate, time: currentTime } = getLocalNow()
+              const staffName = accountName || null
 
-          const newId = Math.max(0, ...contactHistories.map((h) => h.id)) + 1
-          dispatch({
-            type: 'ADD_CONTACT_HISTORY',
-            payload: {
-              id: newId,
-              caseId,
-              contactDate: currentDate,
-              contactTime: currentTime,
-              staff: staffName,
-              tool: null,
-              targetType,
-              ...(targetType === '債権者' ? { creditorName: null as string | null } : {}),
-              comment: null,
-            },
-          })
-          setEditingId(newId)
-          setEditData({
-            contactDate: currentDate,
-            contactTime: currentTime,
-            staff: staffName,
-            tool: null,
-            creditorName: null,
-            comment: null,
-          })
-        }}
-        className={
-          embedded
-            ? 'w-full rounded border border-dashed border-blue-300 py-0.5 text-[9px] text-blue-500 transition-colors hover:bg-blue-50'
-            : 'w-full rounded border border-dashed border-blue-300 py-1 text-[10px] text-blue-500 transition-colors hover:bg-blue-50'
-        }
-      >
-        + 接触履歴を追加
-      </button>
+              const newId = Math.max(0, ...contactHistories.map((h) => h.id)) + 1
+              dispatch({
+                type: 'ADD_CONTACT_HISTORY',
+                payload: {
+                  id: newId,
+                  caseId,
+                  contactDate: currentDate,
+                  contactTime: currentTime,
+                  staff: staffName,
+                  tool: null,
+                  targetType,
+                  ...(targetType === '債権者'
+                    ? { creditorName: null as string | null }
+                    : {}),
+                  comment: null,
+                },
+              })
+              setEditingId(newId)
+              setEditData({
+                contactDate: currentDate,
+                contactTime: currentTime,
+                staff: staffName,
+                tool: null,
+                creditorName: null,
+                comment: null,
+              })
+            }}
+            className="min-h-[1.75rem] rounded-md border border-slate-100/80 bg-slate-50/60 px-2 py-0.5 text-xs leading-none text-blue-600 transition-colors hover:bg-blue-50"
+          >
+            + 接触履歴を追加
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
