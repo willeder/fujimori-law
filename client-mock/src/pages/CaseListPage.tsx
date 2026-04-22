@@ -41,9 +41,9 @@ export function CaseListPage() {
     })
   }, [cases, searchField, searchValue])
 
-  // 一覧は降順（新しいものが上）で固定。ヘッダークリック等で順序を変更させない。
+  // 一覧は No（id）昇順で固定。ヘッダークリック等で順序を変更させない。
   const sortedCases = useMemo(() => {
-    return [...filteredCases].sort((a, b) => (b.id ?? 0) - (a.id ?? 0))
+    return [...filteredCases].sort((a, b) => (a.id ?? 0) - (b.id ?? 0))
   }, [filteredCases])
 
   const columns: Column<Case>[] = [
