@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import type { NavigateFunction } from 'react-router-dom'
 import {
   useCase,
@@ -9,12 +9,10 @@ import {
   useCaseDispatch,
 } from '../store/useCaseStore'
 import {
-  AccountNameControl,
   SectionCard,
   EditableField,
   StatusBadge,
   Tabs,
-  UiFontScaleControl,
 } from '../components'
 import { CreditorTab } from './CreditorTab'
 import { ContactHistoryTable } from './ContactHistoryTable'
@@ -533,176 +531,138 @@ function CaseDetailBody({
     <div className="flex min-h-screen min-h-0 flex-col bg-slate-200">
       {/* Header（スクロール時に固定） */}
       <header className="sticky top-0 z-40 shrink-0 border-b border-slate-200 bg-white shadow-sm">
-        <div className="flex w-full items-center gap-x-3 px-4 py-0.5 text-sm leading-tight text-slate-800">
-          <Link
-            to="/"
-            className="shrink-0 text-slate-400 hover:text-slate-600"
-            aria-label="一覧に戻る"
-          >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </Link>
-          <div className="flex min-w-0 flex-1 items-center justify-between gap-x-2">
+        {/* 1行目：基本情報（太字、黒字） */}
+        <div className="flex w-full items-center px-4 py-1 text-sm leading-tight text-slate-800">
+          <div className="flex w-full items-center justify-between">
             <span className="flex shrink-0 items-center gap-1">
-              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-[11px] text-slate-500">ステータス</span>
-              <StatusBadge status={caseData.settlementInfo.status} size="md" />
+              <span className="text-xs text-slate-500">■ステータス</span>
+              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5">
+                <StatusBadge status={caseData.settlementInfo.status} size="md" />
+              </span>
             </span>
             <span className="flex shrink-0 items-center gap-1">
-              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-[11px] text-slate-500">ID</span>
-              <span className="font-medium">{displayCaseId}</span>
+              <span className="text-xs text-slate-500">■ID</span>
+              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 font-medium">{displayCaseId}</span>
             </span>
             <span className="flex shrink-0 items-center gap-1">
-              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-[11px] text-slate-500">名前</span>
-              <span className="font-medium">{caseData.clientBasicInfo.name ?? '-'}</span>
+              <span className="text-xs text-slate-500">■名前</span>
+              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 font-medium">{caseData.clientBasicInfo.name ?? '-'}</span>
             </span>
             <span className="flex shrink-0 items-center gap-1">
-              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-[11px] text-slate-500">フリガナ</span>
-              <span className="font-medium">{caseData.clientBasicInfo.furigana ?? '-'}</span>
+              <span className="text-xs text-slate-500">■フリガナ</span>
+              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 font-medium">{caseData.clientBasicInfo.furigana ?? '-'}</span>
             </span>
             <span className="flex shrink-0 items-center gap-1">
-              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-[11px] text-slate-500">電話番号</span>
-              <span className="font-medium">{caseData.clientBasicInfo.phone ?? '-'}</span>
+              <span className="text-xs text-slate-500">■電話番号</span>
+              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 font-medium">{caseData.clientBasicInfo.phone ?? '-'}</span>
             </span>
             <span className="flex min-w-0 shrink items-center gap-1">
-              <span className="shrink-0 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-[11px] text-slate-500">メール</span>
-              <span className="min-w-0 truncate font-medium">{caseData.clientBasicInfo.email ?? '-'}</span>
+              <span className="shrink-0 text-xs text-slate-500">■メール</span>
+              <span className="min-w-0 truncate rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 font-medium">{caseData.clientBasicInfo.email ?? '-'}</span>
             </span>
             <span className="flex shrink-0 items-center gap-1">
-              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-[11px] text-slate-500">要注意</span>
-              <span className="font-medium">{caseData.clientBasicInfo.cautionRank ?? '-'}</span>
+              <span className="text-xs text-slate-500">■要注意</span>
+              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 font-medium">{caseData.clientBasicInfo.cautionRank ?? '-'}</span>
+            </span>
+            <span className="flex shrink-0 items-center gap-1">
+              {lineHref ? (
+                <a
+                  href={lineHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center rounded bg-[#06C755] px-2 py-0.5 text-xs font-semibold text-white shadow-sm hover:opacity-90"
+                >
+                  LINE@
+                </a>
+              ) : (
+                <span className="text-slate-400 text-xs">LINE@未設定</span>
+              )}
+              <LineUrlQuickEdit
+                lineUrl={caseData.clientBasicInfo.lineUrl}
+                onSave={(next) =>
+                  updateClientBasicInfo('lineUrl', next != null && next.length > 0 ? next : '')
+                }
+              />
             </span>
           </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <AccountNameControl />
-            <UiFontScaleControl variant="select" />
-            {lineHref ? (
-              <a
-                href={lineHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center rounded bg-[#06C755] px-2 py-0.5 text-[11px] font-semibold text-white shadow-sm hover:opacity-90"
-              >
-                LINE@
-              </a>
-            ) : (
-              <span className="text-slate-400">LINE@未設定</span>
-            )}
-            <LineUrlQuickEdit
-              lineUrl={caseData.clientBasicInfo.lineUrl}
-              onSave={(next) =>
-                updateClientBasicInfo('lineUrl', next != null && next.length > 0 ? next : '')
-              }
+        </div>
+        {/* 2行目：リスト・受任情報（デフォルト） */}
+        <div className="flex w-full items-center px-4 py-1 text-sm leading-tight text-slate-800">
+          <div className="flex w-full items-center justify-between">
+            <EditableField
+              compact
+              bordered
+              label="リスト区分"
+              value={caseData.metadata.listCategory}
+              onChange={(v) => updateMetadata('listCategory', v)}
+            />
+            <EditableField
+              compact
+              bordered
+              label="リスト登録日"
+              value={caseData.metadata.listRegisteredDate}
+              onChange={(v) => updateMetadata('listRegisteredDate', v)}
+              type="date"
+            />
+            <EditableField
+              compact
+              bordered
+              label="受任日"
+              value={caseData.appointmentInfo.acceptanceDate}
+              onChange={(v) => updateAppointmentInfo('acceptanceDate', v)}
+              type="date"
+            />
+            <EditableField
+              compact
+              bordered
+              label="アポ担当"
+              value={caseData.appointmentInfo.appointmentStaff}
+              onChange={(v) => updateAppointmentInfo('appointmentStaff', v)}
+            />
+            <EditableField
+              compact
+              bordered
+              label="面談担当"
+              value={caseData.appointmentInfo.interviewStaff}
+              onChange={(v) => updateAppointmentInfo('interviewStaff', v)}
+            />
+            <EditableField
+              compact
+              bordered
+              label="受任ランク"
+              value={caseData.appointmentInfo.acceptanceRank}
+              onChange={(v) => updateAppointmentInfo('acceptanceRank', v)}
+              type="select"
+              options={[
+                { value: 'A', label: 'A' },
+                { value: 'B', label: 'B' },
+                { value: 'C', label: 'C' },
+              ]}
+            />
+            <EditableField
+              compact
+              bordered
+              label="毎月入金日"
+              value={caseData.paymentInfo.monthlyPaymentDay}
+              onChange={(v) => updatePaymentInfo('monthlyPaymentDay', v)}
+            />
+            <EditableField
+              compact
+              bordered
+              label="基本入金額"
+              value={caseData.paymentInfo.basePaymentAmount}
+              onChange={(v) => updatePaymentInfo('basePaymentAmount', v)}
+              type="number"
+              suffix="円"
             />
           </div>
         </div>
-        {/* リスト・受任・報酬・入金（全幅に均等グリッド。狭い画面は列数を段階的に減らして折返し） */}
-        <div className="w-full px-4 py-0.5">
-          <div className="w-full">
-            <div className="flex w-full items-end justify-between gap-x-2 leading-tight">
-              <EditableField
-                compact
-                compactSize="header"
-                bordered
-                label="リスト登録日"
-                value={caseData.metadata.listRegisteredDate}
-                onChange={(v) => updateMetadata('listRegisteredDate', v)}
-                type="date"
-              />
-              <EditableField
-                compact
-                compactSize="header"
-                bordered
-                label="リスト区分"
-                value={caseData.metadata.listCategory}
-                onChange={(v) => updateMetadata('listCategory', v)}
-              />
-              <EditableField
-                compact
-                compactSize="header"
-                bordered
-                label="受任日"
-                value={caseData.appointmentInfo.acceptanceDate}
-                onChange={(v) => updateAppointmentInfo('acceptanceDate', v)}
-                type="date"
-              />
-              <EditableField
-                compact
-                compactSize="header"
-                bordered
-                label="アポ担当"
-                value={caseData.appointmentInfo.appointmentStaff}
-                onChange={(v) => updateAppointmentInfo('appointmentStaff', v)}
-              />
-              <EditableField
-                compact
-                compactSize="header"
-                bordered
-                label="面談担当"
-                value={caseData.appointmentInfo.interviewStaff}
-                onChange={(v) => updateAppointmentInfo('interviewStaff', v)}
-              />
-              <EditableField
-                compact
-                compactSize="header"
-                bordered
-                label="受任ランク"
-                value={caseData.appointmentInfo.acceptanceRank}
-                onChange={(v) => updateAppointmentInfo('acceptanceRank', v)}
-                type="select"
-                options={[
-                  { value: 'A', label: 'A' },
-                  { value: 'B', label: 'B' },
-                  { value: 'C', label: 'C' },
-                ]}
-              />
-              <EditableField
-                compact
-                compactSize="header"
-                bordered
-                label="通常報酬"
-                value={caseData.feeInfo.normalFee}
-                onChange={(v) => updateFeeInfo('normalFee', v)}
-                type="number"
-                suffix="円"
-              />
-              <EditableField
-                compact
-                compactSize="header"
-                bordered
-                label="報酬分割回数"
-                value={caseData.feeInfo.installmentCount}
-                onChange={(v) => updateFeeInfo('installmentCount', v)}
-                type="number"
-                suffix="回"
-              />
-              <EditableField
-                compact
-                compactSize="header"
-                bordered
-                label="毎月入金日"
-                value={caseData.paymentInfo.monthlyPaymentDay}
-                onChange={(v) => updatePaymentInfo('monthlyPaymentDay', v)}
-              />
-              <EditableField
-                compact
-                compactSize="header"
-                bordered
-                label="基本入金額"
-                value={caseData.paymentInfo.basePaymentAmount}
-                onChange={(v) => updatePaymentInfo('basePaymentAmount', v)}
-                type="number"
-                suffix="円"
-              />
-            </div>
-          </div>
-        </div>
-        {/* ③ 入金状況（スクロール時も常に参照） */}
-        <div className="flex w-full items-center px-4 py-0.5 text-sm leading-tight text-slate-800">
-          <div className="flex w-full items-center justify-between gap-x-2">
+        {/* 3行目：入金・報酬状況（太字、青字） */}
+        <div className="flex w-full items-center px-4 py-1 text-sm leading-tight text-slate-800">
+          <div className="flex w-full items-center justify-between">
             <span className="flex shrink-0 items-center gap-1">
-              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-[11px] text-slate-500">累計入金額</span>
-              <span className="font-medium tabular-nums">
+              <span className="text-xs text-slate-500">■累計入金額</span>
+              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 font-medium tabular-nums text-blue-600">
                 {formatYenPair(
                   caseData.paymentInfo.cumulativePaymentAmount,
                   caseData.paymentInfo.cumulativePlannedPayment
@@ -710,29 +670,41 @@ function CaseDetailBody({
               </span>
             </span>
             <span className="flex shrink-0 items-center gap-1">
-              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-[11px] text-slate-500">残入金予定</span>
-              <span className="font-medium tabular-nums">
+              <span className="text-xs text-slate-500">■残入金予定</span>
+              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 font-medium tabular-nums text-blue-600">
                 {remainingPlanned != null ? `${remainingPlanned.toLocaleString()}円` : '-'}
               </span>
             </span>
             <span className="flex shrink-0 items-center gap-1">
-              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-[11px] text-slate-500">次回入金日</span>
-              <span className="font-medium tabular-nums">
+              <span className="text-xs text-slate-500">■次回入金日</span>
+              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 font-medium tabular-nums text-blue-600">
                 {displayNextPaymentDate && displayNextPaymentDate.trim().length > 0
                   ? displayNextPaymentDate
                   : '-'}
               </span>
             </span>
             <span className="flex shrink-0 items-center gap-1">
-              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-[11px] text-slate-500">報酬充当</span>
-              <span className="font-medium tabular-nums">
+              <span className="text-xs text-slate-500">■通常報酬額</span>
+              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 font-medium tabular-nums text-blue-600">
+                {caseData.feeInfo.normalFee?.toLocaleString() ?? '-'}円
+              </span>
+            </span>
+            <span className="flex shrink-0 items-center gap-1">
+              <span className="text-xs text-slate-500">■報酬充当額</span>
+              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 font-medium tabular-nums text-blue-600">
                 {caseData.paymentInfo.cumulativeFeeAllocation?.toLocaleString() ?? '-'}円
               </span>
             </span>
             <span className="flex shrink-0 items-center gap-1">
-              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-[11px] text-slate-500">未回収</span>
-              <span className="font-medium tabular-nums">
+              <span className="text-xs text-slate-500">■報酬未回収</span>
+              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 font-medium tabular-nums text-blue-600">
                 {caseData.feeInfo.uncollectedFee?.toLocaleString() ?? '-'}円
+              </span>
+            </span>
+            <span className="flex shrink-0 items-center gap-1">
+              <span className="text-xs text-slate-500">■報酬分割数</span>
+              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 font-medium tabular-nums text-blue-600">
+                {caseData.feeInfo.installmentCount ?? '-'}回
               </span>
             </span>
           </div>

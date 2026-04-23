@@ -221,17 +221,18 @@ export function EditableField({
           </div>
         )
       }
-      const labelBorderedClass = bordered ? 'border border-slate-200 rounded bg-slate-50 px-1 py-px' : ''
+      const valueBorderedClass = bordered ? 'border border-slate-200 rounded bg-slate-50/50 px-1.5 py-0.5' : 'px-0.5 py-0.5 -mx-0.5'
       const valueSpanClass = truncateValue
         ? 'min-w-0 flex-1 truncate'
         : 'min-w-0 flex-1 overflow-x-auto whitespace-nowrap [-webkit-overflow-scrolling:touch]'
+      const labelPrefix = bordered ? '■' : ''
       return (
-        <div className={`flex min-w-0 items-baseline gap-0.5 py-0 ${compactMinHRow}`}>
-          <span className={`shrink-0 font-medium text-slate-500 leading-tight whitespace-nowrap ${compactLabelClass} ${labelBorderedClass}`}>
-            {labelWithColon}
+        <div className={`flex min-w-0 items-center gap-1 py-0 ${compactMinHRow}`}>
+          <span className={`shrink-0 text-slate-500 leading-tight whitespace-nowrap ${compactLabelClass}`}>
+            {labelPrefix}{label}
           </span>
           <div
-            className={`group flex min-w-0 flex-1 cursor-pointer items-center gap-0.5 rounded px-0.5 py-0.5 -mx-0.5 leading-tight text-slate-700 hover:bg-blue-50/80 ${compactValueClass}`}
+            className={`group flex min-w-0 cursor-pointer items-center gap-0.5 rounded leading-tight text-slate-700 hover:bg-blue-50/80 ${compactValueClass} ${valueBorderedClass}`}
             onClick={() => {
               setEditValue(String(value ?? ''))
               setIsEditing(true)
@@ -341,13 +342,13 @@ export function EditableField({
         </div>
       )
     }
-    const editLabelBorderedClass = bordered ? 'border border-slate-200 rounded bg-slate-50 px-1 py-px' : ''
+    const editLabelPrefix = bordered ? '■' : ''
     return (
-      <div className={`flex min-w-0 items-baseline gap-0.5 py-0 ${compactMinHRow}`}>
-        <span className={`shrink-0 font-medium text-slate-500 leading-tight whitespace-nowrap ${compactLabelClass} ${editLabelBorderedClass}`}>
-          {labelWithColon}
+      <div className={`flex min-w-0 items-center gap-1 py-0 ${compactMinHRow}`}>
+        <span className={`shrink-0 text-slate-500 leading-tight whitespace-nowrap ${compactLabelClass}`}>
+          {editLabelPrefix}{label}
         </span>
-        <div className="flex min-w-0 flex-1 items-center gap-0.5">
+        <div className="flex min-w-0 items-center gap-0.5">
           {type === 'select' && options ? (
             <select
               ref={inputRef as React.RefObject<HTMLSelectElement>}

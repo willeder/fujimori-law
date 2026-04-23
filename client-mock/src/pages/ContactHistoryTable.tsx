@@ -86,7 +86,7 @@ export function ContactHistoryTable({
           {
             key: 'creditorName',
             header: '債権者',
-            width: '9rem',
+            width: '6rem',
             sortable: false,
             render: (h) =>
               editingId === h.id ? (
@@ -111,7 +111,7 @@ export function ContactHistoryTable({
     {
       key: 'contactDate',
       header: '接触日',
-      width: '8rem',
+      width: '6.5rem',
       sortable: false,
       render: (h) =>
         editingId === h.id ? (
@@ -132,7 +132,7 @@ export function ContactHistoryTable({
     {
       key: 'contactTime',
       header: '時刻',
-      width: '6rem',
+      width: '5rem',
       align: 'center',
       sortable: false,
       render: (h) =>
@@ -154,7 +154,7 @@ export function ContactHistoryTable({
     {
       key: 'staff',
       header: '担当',
-      width: '7rem',
+      width: '4rem',
       sortable: false,
       render: (h) =>
         editingId === h.id ? (
@@ -171,7 +171,7 @@ export function ContactHistoryTable({
     {
       key: 'tool',
       header: 'ツール',
-      width: '6.5rem',
+      width: '5rem',
       sortable: false,
       render: (h) =>
         editingId === h.id ? (
@@ -195,6 +195,7 @@ export function ContactHistoryTable({
     {
       key: 'comment',
       header: 'コメント',
+      width: '10rem',
       sortable: false,
       cellTruncate: false,
       render: (h) =>
@@ -202,9 +203,9 @@ export function ContactHistoryTable({
           <textarea
             value={editData.comment ?? ''}
             onChange={(e) => setEditData({ ...editData, comment: e.target.value })}
-            className="w-full min-h-8 rounded border border-blue-300 px-1.5 py-0.5 text-xs leading-tight"
+            className="w-full min-h-[2rem] rounded border border-blue-300 px-1.5 py-0.5 text-xs leading-tight resize-none"
             placeholder="コメント"
-            rows={2}
+            rows={1}
           />
         ) : (
           <div
@@ -217,7 +218,7 @@ export function ContactHistoryTable({
     {
       key: 'actions',
       header: '',
-      width: '7rem',
+      width: '6rem',
       sortable: false,
       cellTruncate: false,
       render: (h) => {
@@ -226,7 +227,10 @@ export function ContactHistoryTable({
             <div className="flex gap-1">
               <button
                 type="button"
-                onClick={() => handleSave(h)}
+                onClick={() => {
+                  const record = contactHistories.find((r) => r.id === editingId) ?? histories.find((r) => r.id === editingId)
+                  if (record) handleSave(record)
+                }}
                 className="rounded bg-blue-500 px-2 py-0.5 text-xs text-white hover:bg-blue-600"
               >
                 保存
@@ -265,6 +269,7 @@ export function ContactHistoryTable({
 
   return (
     <div className="flex min-h-0 w-full flex-1 flex-col gap-1.5">
+
       <div className="w-full">
         <div className="w-full rounded-md border border-slate-100/80 bg-slate-50/60 px-2 py-1 font-medium">
           <DataTable
@@ -281,8 +286,8 @@ export function ContactHistoryTable({
         </div>
       </div>
 
-      <div className="min-w-0 overflow-x-auto">
-        <div className="flex w-max min-w-0 flex-nowrap items-center whitespace-nowrap text-xs leading-none text-slate-800">
+      {editingId == null && (
+        <div className="min-w-0">
           <button
             type="button"
             onClick={() => {
@@ -321,7 +326,7 @@ export function ContactHistoryTable({
             + 接触履歴を追加
           </button>
         </div>
-      </div>
+      )}
     </div>
   )
 }

@@ -37,6 +37,16 @@ export function PaymentTable({
   const handleEdit = (payment: PaymentRecord) => {
     setEditingId(payment.id)
     setEditData({
+      // 予定
+      plannedDate: payment.plannedDate,
+      plannedAmount: payment.plannedAmount,
+      plannedFeeAllocation: payment.plannedFeeAllocation,
+      plannedAgentFeeAllocation: payment.plannedAgentFeeAllocation,
+      plannedPoolAllocation: payment.plannedPoolAllocation,
+      plannedRepaymentAllocation: payment.plannedRepaymentAllocation,
+      repaymentCount: payment.repaymentCount,
+      handlingFee: payment.handlingFee,
+      // 実績
       actualDate: payment.actualDate,
       actualAmount: payment.actualAmount,
       actualFeeAllocation: payment.actualFeeAllocation,
@@ -81,16 +91,30 @@ export function PaymentTable({
     {
       key: 'plannedDate',
       header: '入金日',
-      width: '5rem',
+      width: '6rem',
       headerClassName: 'bg-green-50',
       sortable: false,
-      render: (item) => (
-        <span
-          className={`whitespace-nowrap ${!item.actualDate ? 'font-medium text-slate-800' : ''}`}
-        >
-          {item.plannedDate ?? <span className="text-slate-300">-</span>}
-        </span>
-      ),
+      render: (item) => {
+        if (editingId === item.id) {
+          return (
+            <input
+              type="date"
+              value={editData.plannedDate ?? ''}
+              onChange={(e) =>
+                setEditData({ ...editData, plannedDate: e.target.value || null })
+              }
+              className={inputCls}
+            />
+          )
+        }
+        return (
+          <span
+            className={`whitespace-nowrap ${!item.actualDate ? 'font-medium text-slate-800' : ''}`}
+          >
+            {item.plannedDate ?? <span className="text-slate-300">-</span>}
+          </span>
+        )
+      },
     },
     {
       key: 'plannedAmount',
@@ -99,7 +123,21 @@ export function PaymentTable({
       align: 'right',
       headerClassName: 'bg-green-50',
       sortable: false,
-      render: (item) => fmtNum(item.plannedAmount),
+      render: (item) => {
+        if (editingId === item.id) {
+          return (
+            <input
+              type="number"
+              value={editData.plannedAmount ?? ''}
+              onChange={(e) =>
+                setEditData({ ...editData, plannedAmount: Number(e.target.value) || null })
+              }
+              className={`${inputCls} text-right`}
+            />
+          )
+        }
+        return fmtNum(item.plannedAmount)
+      },
     },
     {
       key: 'plannedFeeAllocation',
@@ -108,7 +146,21 @@ export function PaymentTable({
       align: 'right',
       headerClassName: 'bg-green-50',
       sortable: false,
-      render: (item) => fmtNum(item.plannedFeeAllocation),
+      render: (item) => {
+        if (editingId === item.id) {
+          return (
+            <input
+              type="number"
+              value={editData.plannedFeeAllocation ?? ''}
+              onChange={(e) =>
+                setEditData({ ...editData, plannedFeeAllocation: Number(e.target.value) || null })
+              }
+              className={`${inputCls} text-right`}
+            />
+          )
+        }
+        return fmtNum(item.plannedFeeAllocation)
+      },
     },
     {
       key: 'plannedAgentFeeAllocation',
@@ -117,7 +169,21 @@ export function PaymentTable({
       align: 'right',
       headerClassName: 'bg-green-50',
       sortable: false,
-      render: (item) => fmtNum(item.plannedAgentFeeAllocation),
+      render: (item) => {
+        if (editingId === item.id) {
+          return (
+            <input
+              type="number"
+              value={editData.plannedAgentFeeAllocation ?? ''}
+              onChange={(e) =>
+                setEditData({ ...editData, plannedAgentFeeAllocation: Number(e.target.value) || null })
+              }
+              className={`${inputCls} text-right`}
+            />
+          )
+        }
+        return fmtNum(item.plannedAgentFeeAllocation)
+      },
     },
     {
       key: 'plannedPoolAllocation',
@@ -126,16 +192,44 @@ export function PaymentTable({
       align: 'right',
       headerClassName: 'bg-green-50',
       sortable: false,
-      render: (item) => fmtNum(item.plannedPoolAllocation),
+      render: (item) => {
+        if (editingId === item.id) {
+          return (
+            <input
+              type="number"
+              value={editData.plannedPoolAllocation ?? ''}
+              onChange={(e) =>
+                setEditData({ ...editData, plannedPoolAllocation: Number(e.target.value) || null })
+              }
+              className={`${inputCls} text-right`}
+            />
+          )
+        }
+        return fmtNum(item.plannedPoolAllocation)
+      },
     },
     {
       key: 'repaymentCount',
       header: '社数',
-      width: '2rem',
+      width: '2.5rem',
       align: 'right',
       headerClassName: 'bg-green-50',
       sortable: false,
-      render: (item) => fmtNum(item.repaymentCount),
+      render: (item) => {
+        if (editingId === item.id) {
+          return (
+            <input
+              type="number"
+              value={editData.repaymentCount ?? ''}
+              onChange={(e) =>
+                setEditData({ ...editData, repaymentCount: Number(e.target.value) || null })
+              }
+              className={`${inputCls} text-right`}
+            />
+          )
+        }
+        return fmtNum(item.repaymentCount)
+      },
     },
     {
       key: 'handlingFee',
@@ -144,7 +238,21 @@ export function PaymentTable({
       align: 'right',
       headerClassName: 'bg-green-50',
       sortable: false,
-      render: (item) => fmtNum(item.handlingFee),
+      render: (item) => {
+        if (editingId === item.id) {
+          return (
+            <input
+              type="number"
+              value={editData.handlingFee ?? ''}
+              onChange={(e) =>
+                setEditData({ ...editData, handlingFee: Number(e.target.value) || null })
+              }
+              className={`${inputCls} text-right`}
+            />
+          )
+        }
+        return fmtNum(item.handlingFee)
+      },
     },
     {
       key: 'plannedRepaymentAllocation',
@@ -153,7 +261,21 @@ export function PaymentTable({
       align: 'right',
       headerClassName: 'bg-green-50',
       sortable: false,
-      render: (item) => fmtNum(item.plannedRepaymentAllocation),
+      render: (item) => {
+        if (editingId === item.id) {
+          return (
+            <input
+              type="number"
+              value={editData.plannedRepaymentAllocation ?? ''}
+              onChange={(e) =>
+                setEditData({ ...editData, plannedRepaymentAllocation: Number(e.target.value) || null })
+              }
+              className={`${inputCls} text-right`}
+            />
+          )
+        }
+        return fmtNum(item.plannedRepaymentAllocation)
+      },
     },
     {
       key: 'actualDate',
