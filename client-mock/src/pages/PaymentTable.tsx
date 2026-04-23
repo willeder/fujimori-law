@@ -81,7 +81,7 @@ export function PaymentTable({
     {
       key: 'plannedDate',
       header: '入金日',
-      width: '5.5rem',
+      width: '5rem',
       headerClassName: 'bg-green-50',
       sortable: false,
       render: (item) => (
@@ -95,6 +95,7 @@ export function PaymentTable({
     {
       key: 'plannedAmount',
       header: '入金額',
+      width: '4.5rem',
       align: 'right',
       headerClassName: 'bg-green-50',
       sortable: false,
@@ -103,6 +104,7 @@ export function PaymentTable({
     {
       key: 'plannedFeeAllocation',
       header: '報酬額',
+      width: '4rem',
       align: 'right',
       headerClassName: 'bg-green-50',
       sortable: false,
@@ -111,6 +113,7 @@ export function PaymentTable({
     {
       key: 'plannedAgentFeeAllocation',
       header: '弁代報酬',
+      width: '4rem',
       align: 'right',
       headerClassName: 'bg-green-50',
       sortable: false,
@@ -119,6 +122,7 @@ export function PaymentTable({
     {
       key: 'plannedPoolAllocation',
       header: 'ﾌﾟｰﾙ',
+      width: '3.5rem',
       align: 'right',
       headerClassName: 'bg-green-50',
       sortable: false,
@@ -127,7 +131,7 @@ export function PaymentTable({
     {
       key: 'repaymentCount',
       header: '社数',
-      width: '2.5rem',
+      width: '2rem',
       align: 'right',
       headerClassName: 'bg-green-50',
       sortable: false,
@@ -136,6 +140,7 @@ export function PaymentTable({
     {
       key: 'handlingFee',
       header: '手数料',
+      width: '3.5rem',
       align: 'right',
       headerClassName: 'bg-green-50',
       sortable: false,
@@ -144,6 +149,7 @@ export function PaymentTable({
     {
       key: 'plannedRepaymentAllocation',
       header: '弁済額',
+      width: '4.5rem',
       align: 'right',
       headerClassName: 'bg-green-50',
       sortable: false,
@@ -152,7 +158,7 @@ export function PaymentTable({
     {
       key: 'actualDate',
       header: '実入金日',
-      width: '5.5rem',
+      width: '5rem',
       headerClassName: 'bg-blue-50',
       sortable: false,
       render: (item) => {
@@ -178,6 +184,7 @@ export function PaymentTable({
     {
       key: 'actualAmount',
       header: '実入金額',
+      width: '4.5rem',
       align: 'right',
       headerClassName: 'bg-blue-50',
       sortable: false,
@@ -209,6 +216,7 @@ export function PaymentTable({
     {
       key: 'actualFeeAllocation',
       header: '報酬充当',
+      width: '4rem',
       align: 'right',
       headerClassName: 'bg-blue-50 whitespace-nowrap',
       sortable: false,
@@ -234,6 +242,7 @@ export function PaymentTable({
     {
       key: 'actualAgentFeeAllocation',
       header: '弁代充当',
+      width: '4rem',
       align: 'right',
       headerClassName: 'bg-blue-50 whitespace-nowrap',
       sortable: false,
@@ -259,6 +268,7 @@ export function PaymentTable({
     {
       key: 'actualPoolAllocation',
       header: 'ﾌﾟｰﾙ充当',
+      width: '3.5rem',
       align: 'right',
       headerClassName: 'bg-blue-50 whitespace-nowrap',
       sortable: false,
@@ -284,7 +294,7 @@ export function PaymentTable({
     {
       key: 'repaymentCountActual',
       header: '社数',
-      width: '2.5rem',
+      width: '2rem',
       align: 'right',
       sortable: false,
       headerClassName: 'bg-blue-50',
@@ -294,6 +304,7 @@ export function PaymentTable({
     {
       key: 'handlingFeeActual',
       header: '手数料',
+      width: '3.5rem',
       align: 'right',
       sortable: false,
       headerClassName: 'bg-blue-50',
@@ -303,6 +314,7 @@ export function PaymentTable({
     {
       key: 'actualRepaymentAllocation',
       header: '弁済充当',
+      width: '4.5rem',
       align: 'right',
       headerClassName: 'bg-blue-50 whitespace-nowrap',
       sortable: false,
@@ -375,6 +387,7 @@ export function PaymentTable({
         emptyMessage="入金データがありません"
         density="default"
         stickyHeader
+        cellSingleLine
         suspendTruncate={editingId !== null}
       />
 

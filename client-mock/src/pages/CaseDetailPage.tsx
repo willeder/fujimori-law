@@ -543,33 +543,33 @@ function CaseDetailBody({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </Link>
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-4">
-            <span className="flex shrink-0 items-center gap-0.5">
-              <span className="text-[11px] text-slate-500">ステータス：</span>
+          <div className="flex min-w-0 flex-1 items-center justify-between gap-x-2">
+            <span className="flex shrink-0 items-center gap-1">
+              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-[11px] text-slate-500">ステータス</span>
               <StatusBadge status={caseData.settlementInfo.status} size="md" />
             </span>
-            <span className="shrink-0">
-              <span className="text-[11px] text-slate-500">ID：</span>
+            <span className="flex shrink-0 items-center gap-1">
+              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-[11px] text-slate-500">ID</span>
               <span className="font-medium">{displayCaseId}</span>
             </span>
-            <span className="shrink-0">
-              <span className="text-[11px] text-slate-500">名前：</span>
+            <span className="flex shrink-0 items-center gap-1">
+              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-[11px] text-slate-500">名前</span>
               <span className="font-medium">{caseData.clientBasicInfo.name ?? '-'}</span>
             </span>
-            <span className="shrink-0">
-              <span className="text-[11px] text-slate-500">フリガナ：</span>
+            <span className="flex shrink-0 items-center gap-1">
+              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-[11px] text-slate-500">フリガナ</span>
               <span className="font-medium">{caseData.clientBasicInfo.furigana ?? '-'}</span>
             </span>
-            <span className="shrink-0">
-              <span className="text-[11px] text-slate-500">電話番号：</span>
+            <span className="flex shrink-0 items-center gap-1">
+              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-[11px] text-slate-500">電話番号</span>
               <span className="font-medium">{caseData.clientBasicInfo.phone ?? '-'}</span>
             </span>
-            <span className="min-w-0 shrink">
-              <span className="text-[11px] text-slate-500">メールアドレス：</span>
-              <span className="font-medium break-all">{caseData.clientBasicInfo.email ?? '-'}</span>
+            <span className="flex min-w-0 shrink items-center gap-1">
+              <span className="shrink-0 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-[11px] text-slate-500">メール</span>
+              <span className="min-w-0 truncate font-medium">{caseData.clientBasicInfo.email ?? '-'}</span>
             </span>
-            <span className="shrink-0">
-              <span className="text-[11px] text-slate-500">要注意ランク：</span>
+            <span className="flex shrink-0 items-center gap-1">
+              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-[11px] text-slate-500">要注意</span>
               <span className="font-medium">{caseData.clientBasicInfo.cautionRank ?? '-'}</span>
             </span>
           </div>
@@ -598,59 +598,54 @@ function CaseDetailBody({
         </div>
         {/* リスト・受任・報酬・入金（全幅に均等グリッド。狭い画面は列数を段階的に減らして折返し） */}
         <div className="w-full px-4 py-0.5">
-          <div className="min-w-0 overflow-x-auto">
-            <div className="flex w-max min-w-0 flex-nowrap items-end gap-x-2 leading-tight">
-              <div className="min-w-0 shrink-0">
+          <div className="w-full">
+            <div className="flex w-full items-end justify-between gap-x-2 leading-tight">
               <EditableField
                 compact
                 compactSize="header"
+                bordered
                 label="リスト登録日"
                 value={caseData.metadata.listRegisteredDate}
                 onChange={(v) => updateMetadata('listRegisteredDate', v)}
                 type="date"
               />
-              </div>
-              <div className="min-w-0 shrink-0">
               <EditableField
                 compact
                 compactSize="header"
+                bordered
                 label="リスト区分"
                 value={caseData.metadata.listCategory}
                 onChange={(v) => updateMetadata('listCategory', v)}
               />
-              </div>
-              <div className="min-w-0 shrink-0">
               <EditableField
                 compact
                 compactSize="header"
+                bordered
                 label="受任日"
                 value={caseData.appointmentInfo.acceptanceDate}
                 onChange={(v) => updateAppointmentInfo('acceptanceDate', v)}
                 type="date"
               />
-              </div>
-              <div className="min-w-0 shrink-0">
               <EditableField
                 compact
                 compactSize="header"
+                bordered
                 label="アポ担当"
                 value={caseData.appointmentInfo.appointmentStaff}
                 onChange={(v) => updateAppointmentInfo('appointmentStaff', v)}
               />
-              </div>
-              <div className="min-w-0 shrink-0">
               <EditableField
                 compact
                 compactSize="header"
+                bordered
                 label="面談担当"
                 value={caseData.appointmentInfo.interviewStaff}
                 onChange={(v) => updateAppointmentInfo('interviewStaff', v)}
               />
-              </div>
-              <div className="min-w-0 shrink-0">
               <EditableField
                 compact
                 compactSize="header"
+                bordered
                 label="受任ランク"
                 value={caseData.appointmentInfo.acceptanceRank}
                 onChange={(v) => updateAppointmentInfo('acceptanceRank', v)}
@@ -661,57 +656,52 @@ function CaseDetailBody({
                   { value: 'C', label: 'C' },
                 ]}
               />
-              </div>
-              <div className="min-w-0 shrink-0">
               <EditableField
                 compact
                 compactSize="header"
+                bordered
                 label="通常報酬"
                 value={caseData.feeInfo.normalFee}
                 onChange={(v) => updateFeeInfo('normalFee', v)}
                 type="number"
                 suffix="円"
               />
-              </div>
-              <div className="min-w-0 shrink-0">
               <EditableField
                 compact
                 compactSize="header"
+                bordered
                 label="報酬分割回数"
                 value={caseData.feeInfo.installmentCount}
                 onChange={(v) => updateFeeInfo('installmentCount', v)}
                 type="number"
                 suffix="回"
               />
-              </div>
-              <div className="min-w-0 shrink-0">
               <EditableField
                 compact
                 compactSize="header"
+                bordered
                 label="毎月入金日"
                 value={caseData.paymentInfo.monthlyPaymentDay}
                 onChange={(v) => updatePaymentInfo('monthlyPaymentDay', v)}
               />
-              </div>
-              <div className="min-w-0 shrink-0">
               <EditableField
                 compact
                 compactSize="header"
+                bordered
                 label="基本入金額"
                 value={caseData.paymentInfo.basePaymentAmount}
                 onChange={(v) => updatePaymentInfo('basePaymentAmount', v)}
                 type="number"
                 suffix="円"
               />
-              </div>
             </div>
           </div>
         </div>
         {/* ③ 入金状況（スクロール時も常に参照） */}
-        <div className="flex w-full items-center gap-x-3 px-4 py-0.5 text-sm leading-tight text-slate-800">
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-4">
-            <span className="shrink-0">
-              <span className="text-[11px] text-slate-500">累計入金額（実／予定）：</span>
+        <div className="flex w-full items-center px-4 py-0.5 text-sm leading-tight text-slate-800">
+          <div className="flex w-full items-center justify-between gap-x-2">
+            <span className="flex shrink-0 items-center gap-1">
+              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-[11px] text-slate-500">累計入金額</span>
               <span className="font-medium tabular-nums">
                 {formatYenPair(
                   caseData.paymentInfo.cumulativePaymentAmount,
@@ -719,28 +709,28 @@ function CaseDetailBody({
                 )}
               </span>
             </span>
-            <span className="shrink-0">
-              <span className="text-[11px] text-slate-500">残入金予定額：</span>
+            <span className="flex shrink-0 items-center gap-1">
+              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-[11px] text-slate-500">残入金予定</span>
               <span className="font-medium tabular-nums">
                 {remainingPlanned != null ? `${remainingPlanned.toLocaleString()}円` : '-'}
               </span>
             </span>
-            <span className="shrink-0">
-              <span className="text-[11px] text-slate-500">次回入金予定日：</span>
+            <span className="flex shrink-0 items-center gap-1">
+              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-[11px] text-slate-500">次回入金日</span>
               <span className="font-medium tabular-nums">
                 {displayNextPaymentDate && displayNextPaymentDate.trim().length > 0
                   ? displayNextPaymentDate
                   : '-'}
               </span>
             </span>
-            <span className="shrink-0">
-              <span className="text-[11px] text-slate-500">報酬充当：</span>
+            <span className="flex shrink-0 items-center gap-1">
+              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-[11px] text-slate-500">報酬充当</span>
               <span className="font-medium tabular-nums">
                 {caseData.paymentInfo.cumulativeFeeAllocation?.toLocaleString() ?? '-'}円
               </span>
             </span>
-            <span className="shrink-0">
-              <span className="text-[11px] text-slate-500">未回収：</span>
+            <span className="flex shrink-0 items-center gap-1">
+              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-[11px] text-slate-500">未回収</span>
               <span className="font-medium tabular-nums">
                 {caseData.feeInfo.uncollectedFee?.toLocaleString() ?? '-'}円
               </span>
@@ -755,7 +745,7 @@ function CaseDetailBody({
         <div className="min-w-0 space-y-1.5 px-2 pb-2 pt-1.5">
         {/* 入金スケジュール・和解状況 */}
         <div className="min-w-0">
-          <SectionCard title="入金スケジュール・和解状況" color="green" collapsible defaultOpen>
+          <SectionCard title="入金スケジュール・和解状況" color="green">
             <Tabs
               variant="split"
               tabBodyScroll="host"
@@ -847,7 +837,7 @@ function CaseDetailBody({
         </div>
         {/* 接触履歴（下部・コンパクト表示） */}
         <div className="min-w-0">
-          <SectionCard title="接触履歴" color="slate" collapsible defaultOpen={false}>
+          <SectionCard title="接触履歴" color="slate">
             <Tabs
               variant="split"
               defaultTab="creditor"

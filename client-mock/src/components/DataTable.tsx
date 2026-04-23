@@ -114,7 +114,9 @@ export function DataTable<T>({
       ? tight
         ? 'px-px py-px'
         : 'px-1 py-0.5'
-      : 'px-2 py-1'
+      : tight
+        ? 'px-1 py-0.5'
+        : 'px-2 py-1'
   const headPad = isDense
     ? tight
       ? slimHeader
@@ -131,9 +133,13 @@ export function DataTable<T>({
         : slimHeader
           ? 'px-1 py-0.5'
           : 'px-1 py-1'
-      : slimHeader
-        ? 'px-2 py-0.5'
-        : 'px-2 py-1'
+      : tight
+        ? slimHeader
+          ? 'px-1 py-px'
+          : 'px-1 py-0.5'
+        : slimHeader
+          ? 'px-2 py-0.5'
+          : 'px-2 py-1'
   const tableText = isDense ? 'text-[10px] leading-tight' : isCompact ? 'text-[11px] leading-tight' : 'text-xs'
   const headText = isDense
     ? 'text-[9px] font-semibold leading-tight'
@@ -254,7 +260,7 @@ export function DataTable<T>({
             sortedData.map((item, index) => (
               <tr
                 key={String(getValue(item, String(keyField)))}
-                className={`border-b border-slate-100 ${onRowClick ? 'cursor-pointer hover:bg-blue-50' : ''} ${index % 2 === 1 ? 'bg-slate-50/50' : ''}`}
+                className={`border-b border-slate-100 ${onRowClick ? 'cursor-pointer hover:bg-blue-50' : ''} ${index % 2 === 1 ? 'bg-slate-200/50' : ''}`}
                 onClick={() => onRowClick?.(item)}
               >
                 {columns.map((col) => {

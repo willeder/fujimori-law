@@ -78,7 +78,7 @@ export function ContactHistoryTable({
     dispatch({ type: 'DELETE_CONTACT_HISTORY', payload: h.id })
   }
 
-  const cellIn = 'w-full rounded border border-blue-300 px-1 py-0.5 text-[9px] leading-tight'
+  const cellIn = 'w-full rounded border border-blue-300 px-1.5 py-0.5 text-xs leading-tight'
 
   const creditorColumn: Column<ContactHistory>[] =
     targetType === '債権者'
@@ -86,7 +86,8 @@ export function ContactHistoryTable({
           {
             key: 'creditorName',
             header: '債権者',
-            width: '120px',
+            width: '9rem',
+            sortable: false,
             render: (h) =>
               editingId === h.id ? (
                 <input
@@ -110,7 +111,8 @@ export function ContactHistoryTable({
     {
       key: 'contactDate',
       header: '接触日',
-      width: '110px',
+      width: '8rem',
+      sortable: false,
       render: (h) =>
         editingId === h.id ? (
           <input
@@ -130,8 +132,9 @@ export function ContactHistoryTable({
     {
       key: 'contactTime',
       header: '時刻',
-      width: '70px',
+      width: '6rem',
       align: 'center',
+      sortable: false,
       render: (h) =>
         editingId === h.id ? (
           <input
@@ -151,7 +154,8 @@ export function ContactHistoryTable({
     {
       key: 'staff',
       header: '担当',
-      width: '90px',
+      width: '7rem',
+      sortable: false,
       render: (h) =>
         editingId === h.id ? (
           <input
@@ -167,7 +171,8 @@ export function ContactHistoryTable({
     {
       key: 'tool',
       header: 'ツール',
-      width: '90px',
+      width: '6.5rem',
+      sortable: false,
       render: (h) =>
         editingId === h.id ? (
           <select
@@ -190,13 +195,14 @@ export function ContactHistoryTable({
     {
       key: 'comment',
       header: 'コメント',
-      width: undefined,
+      sortable: false,
+      cellTruncate: false,
       render: (h) =>
         editingId === h.id ? (
           <textarea
             value={editData.comment ?? ''}
             onChange={(e) => setEditData({ ...editData, comment: e.target.value })}
-            className="w-full min-h-8 rounded border border-blue-300 px-1 py-0.5 text-[9px] leading-tight"
+            className="w-full min-h-8 rounded border border-blue-300 px-1.5 py-0.5 text-xs leading-tight"
             placeholder="コメント"
             rows={2}
           />
@@ -211,8 +217,9 @@ export function ContactHistoryTable({
     {
       key: 'actions',
       header: '',
-      width: '130px',
+      width: '7rem',
       sortable: false,
+      cellTruncate: false,
       render: (h) => {
         if (editingId === h.id) {
           return (
@@ -220,14 +227,14 @@ export function ContactHistoryTable({
               <button
                 type="button"
                 onClick={() => handleSave(h)}
-                className="rounded bg-blue-500 px-1.5 py-0.5 text-[9px] text-white hover:bg-blue-600"
+                className="rounded bg-blue-500 px-2 py-0.5 text-xs text-white hover:bg-blue-600"
               >
                 保存
               </button>
               <button
                 type="button"
                 onClick={handleCancel}
-                className="rounded bg-slate-200 px-1.5 py-0.5 text-[9px] text-slate-700 hover:bg-slate-300"
+                className="rounded bg-slate-200 px-2 py-0.5 text-xs text-slate-700 hover:bg-slate-300"
               >
                 取消
               </button>
@@ -239,14 +246,14 @@ export function ContactHistoryTable({
             <button
               type="button"
               onClick={() => handleEdit(h)}
-              className="rounded px-1.5 py-0.5 text-[9px] text-blue-500 hover:bg-blue-50 hover:text-blue-600"
+              className="rounded px-2 py-0.5 text-xs text-blue-500 hover:bg-blue-50 hover:text-blue-600"
             >
               編集
             </button>
             <button
               type="button"
               onClick={() => handleDelete(h)}
-              className="rounded px-1.5 py-0.5 text-[9px] text-rose-500 hover:bg-rose-50 hover:text-rose-600"
+              className="rounded px-2 py-0.5 text-xs text-rose-500 hover:bg-rose-50 hover:text-rose-600"
             >
               削除
             </button>
@@ -257,17 +264,18 @@ export function ContactHistoryTable({
   ]
 
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-1.5">
-      <div className="min-w-0 overflow-x-auto">
-        <div className="min-w-0 rounded-md border border-slate-100/80 bg-slate-50/60 px-2 py-1">
+    <div className="flex min-h-0 w-full flex-1 flex-col gap-1.5">
+      <div className="w-full">
+        <div className="w-full rounded-md border border-slate-100/80 bg-slate-50/60 px-2 py-1 font-medium">
           <DataTable
             data={sorted}
             columns={columns}
             keyField="id"
             emptyMessage="接触履歴がありません"
-            density="dense"
+            density="default"
             stickyHeader
-            slimHeader
+            cellSingleLine
+            suspendTruncate={editingId !== null}
             bodyMaxHeightClassName="max-h-[min(55vh,32rem)]"
           />
         </div>
