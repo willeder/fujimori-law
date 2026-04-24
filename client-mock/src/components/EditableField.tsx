@@ -25,6 +25,8 @@ interface EditableFieldProps {
   confirmMessage?: string;
   /** 値の表示をカスタマイズするレンダー関数 */
   renderValue?: (value: string | number | null | undefined) => React.ReactNode;
+  /** 値エリアを親要素の幅いっぱいに広げる */
+  fillWidth?: boolean;
 }
 
 function parseIsoDateToUtcDate(iso: string): Date | null {
@@ -71,6 +73,7 @@ export function EditableField({
   truncateValue = false,
   confirmMessage,
   renderValue,
+  fillWidth = false,
 }: EditableFieldProps) {
   const labelWithColon =
     label.endsWith("：") || label.endsWith(":") ? label : `${label}：`;
@@ -288,6 +291,9 @@ export function EditableField({
         ? "min-w-0 flex-1 truncate"
         : "min-w-0 flex-1 overflow-x-auto whitespace-nowrap [-webkit-overflow-scrolling:touch]";
       const labelPrefix = bordered ? "・" : "";
+      const valueContainerClass = fillWidth
+        ? `group flex min-w-0 flex-1 cursor-pointer items-center gap-0.5 rounded leading-tight text-slate-700 hover:bg-blue-50/80 ${compactValueClass} ${valueBorderedClass}`
+        : `group flex min-w-0 cursor-pointer items-center gap-0.5 rounded leading-tight text-slate-700 hover:bg-blue-50/80 ${compactValueClass} ${valueBorderedClass}`;
       return (
         <div
           className={`flex min-w-0 items-center gap-1 py-0 ${compactMinHRow}`}
@@ -299,7 +305,7 @@ export function EditableField({
             {label}
           </span>
           <div
-            className={`group flex min-w-0 cursor-pointer items-center gap-0.5 rounded leading-tight text-slate-700 hover:bg-blue-50/80 ${compactValueClass} ${valueBorderedClass}`}
+            className={valueContainerClass}
             onClick={() => {
               setEditValue(String(value ?? ""));
               setIsEditing(true);
@@ -422,6 +428,9 @@ export function EditableField({
       );
     }
     const editLabelPrefix = bordered ? "・" : "";
+    const editInputContainerClass = fillWidth
+      ? "flex min-w-0 flex-1 items-center gap-0.5"
+      : "flex min-w-0 items-center gap-0.5";
     return (
       <div className={`flex min-w-0 items-center gap-1 py-0 ${compactMinHRow}`}>
         <span
@@ -430,7 +439,7 @@ export function EditableField({
           {editLabelPrefix}
           {label}
         </span>
-        <div className="flex min-w-0 items-center gap-0.5">
+        <div className={editInputContainerClass}>
           {type === "select" && options ? (
             <select
               ref={inputRef as React.RefObject<HTMLSelectElement>}
