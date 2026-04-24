@@ -556,11 +556,11 @@ function CaseDetailBody({
           </span>
         </div>
         {/* 2行目：基本情報（8カラムグリッド） */}
-        <div className="grid grid-cols-8 px-2 py-1">
-          <div className="flex items-center gap-1">
+        <div className="grid grid-cols-8 gap-1 px-2 py-1">
+          <div className="flex items-center gap-1 min-w-0">
             <span className="text-xs text-slate-500 shrink-0">ステータス</span>
             <span
-              className="text-[14px] rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              className="flex-1 min-w-0 text-[14px] rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
               onClick={() => {
                 const newStatus = prompt("ステータスを入力", caseData.settlementInfo.status || "");
                 if (newStatus !== null) updateSettlementInfo("status", newStatus);
@@ -569,10 +569,10 @@ function CaseDetailBody({
               <StatusBadge status={caseData.settlementInfo.status || ""} size="md" />
             </span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 min-w-0">
             <span className="text-xs text-slate-500 shrink-0">ID</span>
             <span
-              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              className="flex-1 min-w-0 text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
               onClick={() => {
                 const newVal = prompt("IDを入力", caseData.metadata.externalId || "");
                 if (newVal !== null) updateMetadata("externalId", newVal);
@@ -581,10 +581,10 @@ function CaseDetailBody({
               {caseData.metadata.externalId || "-"}
             </span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 min-w-0">
             <span className="text-xs text-slate-500 shrink-0">名前</span>
             <span
-              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              className="flex-1 min-w-0 text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
               onClick={() => {
                 const newVal = prompt("名前を入力", caseData.clientBasicInfo.name || "");
                 if (newVal !== null) updateClientBasicInfo("name", newVal);
@@ -593,10 +593,10 @@ function CaseDetailBody({
               {caseData.clientBasicInfo.name || "-"}
             </span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 min-w-0">
             <span className="text-xs text-slate-500 shrink-0">フリガナ</span>
             <span
-              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
+              className="flex-1 min-w-0 text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
               onClick={() => {
                 const newVal = prompt("フリガナを入力", caseData.clientBasicInfo.furigana || "");
                 if (newVal !== null) updateClientBasicInfo("furigana", newVal);
@@ -605,10 +605,10 @@ function CaseDetailBody({
               {caseData.clientBasicInfo.furigana || "-"}
             </span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 min-w-0">
             <span className="text-xs text-slate-500 shrink-0">電話番号</span>
             <span
-              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              className="flex-1 min-w-0 text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
               onClick={() => {
                 const newVal = prompt("電話番号を入力", caseData.clientBasicInfo.phone || "");
                 if (newVal !== null) updateClientBasicInfo("phone", newVal);
@@ -617,10 +617,10 @@ function CaseDetailBody({
               {caseData.clientBasicInfo.phone || "-"}
             </span>
           </div>
-          <div className="flex items-center gap-1 col-span-2">
+          <div className="flex items-center gap-1 min-w-0 col-span-2">
             <span className="text-xs text-slate-500 shrink-0">メール</span>
             <span
-              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
+              className="flex-1 min-w-0 text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
               onClick={() => {
                 const newVal = prompt("メールを入力", caseData.clientBasicInfo.email || "");
                 if (newVal !== null) updateClientBasicInfo("email", newVal);
@@ -629,10 +629,10 @@ function CaseDetailBody({
               {caseData.clientBasicInfo.email || "-"}
             </span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 min-w-0">
             <span className="text-xs text-slate-500 shrink-0">要注意</span>
             <span
-              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              className="flex-1 min-w-0 text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
               onClick={() => {
                 const newVal = prompt("要注意ランク (A/B/C)", caseData.clientBasicInfo.cautionRank || "");
                 if (newVal !== null) updateClientBasicInfo("cautionRank", newVal);
@@ -643,11 +643,11 @@ function CaseDetailBody({
           </div>
         </div>
         {/* 3行目：リスト・受任情報（8カラムグリッド） */}
-        <div className="grid grid-cols-8 px-2 py-1">
-          <div className="flex items-center gap-1">
+        <div className="grid grid-cols-8 gap-1 px-2 py-1">
+          <div className="flex items-center gap-1 min-w-0">
             <span className="text-xs text-slate-500 shrink-0">リスト区分</span>
             <span
-              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
+              className="flex-1 min-w-0 text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
               onClick={() => {
                 const newVal = prompt("リスト区分を入力", caseData.metadata.listCategory || "");
                 if (newVal !== null) updateMetadata("listCategory", newVal);
@@ -656,10 +656,10 @@ function CaseDetailBody({
               {caseData.metadata.listCategory || "-"}
             </span>
           </div>
-          <div className="flex items-center gap-1">
-            <span className="text-xs text-slate-500 shrink-0">リスト登録日</span>
+          <div className="flex items-center gap-1 min-w-0">
+            <span className="text-xs text-slate-500 shrink-0">登録日</span>
             <span
-              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              className="flex-1 min-w-0 text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
               onClick={() => {
                 const newVal = prompt("リスト登録日を入力 (YYYY-MM-DD)", caseData.metadata.listRegisteredDate || "");
                 if (newVal !== null) updateMetadata("listRegisteredDate", newVal);
@@ -668,10 +668,10 @@ function CaseDetailBody({
               {caseData.metadata.listRegisteredDate || "-"}
             </span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 min-w-0">
             <span className="text-xs text-slate-500 shrink-0">受任日</span>
             <span
-              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              className="flex-1 min-w-0 text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
               onClick={() => {
                 const newVal = prompt("受任日を入力 (YYYY-MM-DD)", caseData.appointmentInfo.acceptanceDate || "");
                 if (newVal !== null) updateAppointmentInfo("acceptanceDate", newVal);
@@ -680,10 +680,10 @@ function CaseDetailBody({
               {caseData.appointmentInfo.acceptanceDate || "-"}
             </span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 min-w-0">
             <span className="text-xs text-slate-500 shrink-0">アポ担当</span>
             <span
-              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
+              className="flex-1 min-w-0 text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
               onClick={() => {
                 const newVal = prompt("アポ担当を入力", caseData.appointmentInfo.appointmentStaff || "");
                 if (newVal !== null) updateAppointmentInfo("appointmentStaff", newVal);
@@ -692,10 +692,10 @@ function CaseDetailBody({
               {caseData.appointmentInfo.appointmentStaff || "-"}
             </span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 min-w-0">
             <span className="text-xs text-slate-500 shrink-0">面談担当</span>
             <span
-              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
+              className="flex-1 min-w-0 text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
               onClick={() => {
                 const newVal = prompt("面談担当を入力", caseData.appointmentInfo.interviewStaff || "");
                 if (newVal !== null) updateAppointmentInfo("interviewStaff", newVal);
@@ -704,10 +704,10 @@ function CaseDetailBody({
               {caseData.appointmentInfo.interviewStaff || "-"}
             </span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 min-w-0">
             <span className="text-xs text-slate-500 shrink-0">受任ランク</span>
             <span
-              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              className="flex-1 min-w-0 text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
               onClick={() => {
                 const newVal = prompt("受任ランク (A/B/C)", caseData.appointmentInfo.acceptanceRank || "");
                 if (newVal !== null) updateAppointmentInfo("acceptanceRank", newVal);
@@ -716,10 +716,10 @@ function CaseDetailBody({
               {caseData.appointmentInfo.acceptanceRank || "-"}
             </span>
           </div>
-          <div className="flex items-center gap-1">
-            <span className="text-xs text-slate-500 shrink-0">毎月入金日</span>
+          <div className="flex items-center gap-1 min-w-0">
+            <span className="text-xs text-slate-500 shrink-0">入金日</span>
             <span
-              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              className="flex-1 min-w-0 text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
               onClick={() => {
                 const newVal = prompt("毎月入金日を入力", caseData.paymentInfo.monthlyPaymentDay || "");
                 if (newVal !== null) updatePaymentInfo("monthlyPaymentDay", newVal);
@@ -728,10 +728,10 @@ function CaseDetailBody({
               {caseData.paymentInfo.monthlyPaymentDay || "-"}
             </span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 min-w-0">
             <span className="text-xs text-slate-500 shrink-0">基本入金額</span>
             <span
-              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              className="flex-1 min-w-0 text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
               onClick={() => {
                 const newVal = prompt("基本入金額を入力", String(caseData.paymentInfo.basePaymentAmount || ""));
                 if (newVal !== null) updatePaymentInfo("basePaymentAmount", newVal);
@@ -744,28 +744,28 @@ function CaseDetailBody({
           </div>
         </div>
         {/* 4行目：入金・報酬状況（8カラムグリッド） */}
-        <div className="grid grid-cols-8 px-2 py-1">
-          <div className="flex items-center gap-1 col-span-2">
+        <div className="grid grid-cols-8 gap-1 px-2 py-1">
+          <div className="flex items-center gap-1 min-w-0 col-span-2">
             <span className="text-xs text-slate-500 shrink-0">累計入金額</span>
-            <span className="text-[14px] font-medium tabular-nums text-blue-600 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5">
+            <span className="flex-1 min-w-0 text-[14px] font-medium tabular-nums text-blue-600 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate">
               {formatYenPair(
                 caseData.paymentInfo.cumulativePaymentAmount,
                 caseData.paymentInfo.cumulativePlannedPayment,
               )}
             </span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 min-w-0">
             <span className="text-xs text-slate-500 shrink-0">残入金予定</span>
-            <span className="text-[14px] font-medium tabular-nums text-blue-600 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5">
+            <span className="flex-1 min-w-0 text-[14px] font-medium tabular-nums text-blue-600 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate">
               {remainingPlanned != null
                 ? `${remainingPlanned.toLocaleString()}円`
                 : "-"}
             </span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 min-w-0">
             <span className="text-xs text-slate-500 shrink-0">次回入金日</span>
             <span
-              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              className="flex-1 min-w-0 text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
               onClick={() => {
                 const newVal = prompt("次回入金日を入力 (YYYY-MM-DD)", caseData.paymentInfo.nextPaymentDate || "");
                 if (newVal !== null) updatePaymentInfo("nextPaymentDate", newVal);
@@ -774,10 +774,10 @@ function CaseDetailBody({
               {caseData.paymentInfo.nextPaymentDate || "-"}
             </span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 min-w-0">
             <span className="text-xs text-slate-500 shrink-0">通常報酬額</span>
             <span
-              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              className="flex-1 min-w-0 text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
               onClick={() => {
                 const newVal = prompt("通常報酬額を入力", String(caseData.feeInfo.normalFee || ""));
                 if (newVal !== null) updateFeeInfo("normalFee", newVal);
@@ -788,18 +788,18 @@ function CaseDetailBody({
                 : "-"}
             </span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 min-w-0">
             <span className="text-xs text-slate-500 shrink-0">報酬充当額</span>
-            <span className="text-[14px] font-medium tabular-nums text-blue-600 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5">
+            <span className="flex-1 min-w-0 text-[14px] font-medium tabular-nums text-blue-600 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate">
               {caseData.paymentInfo.cumulativeFeeAllocation != null
                 ? `${caseData.paymentInfo.cumulativeFeeAllocation.toLocaleString()}円`
                 : "-"}
             </span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 min-w-0">
             <span className="text-xs text-slate-500 shrink-0">報酬未回収</span>
             <span
-              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              className="flex-1 min-w-0 text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
               onClick={() => {
                 const newVal = prompt("報酬未回収を入力", String(caseData.feeInfo.uncollectedFee || ""));
                 if (newVal !== null) updateFeeInfo("uncollectedFee", newVal);
@@ -810,10 +810,10 @@ function CaseDetailBody({
                 : "-"}
             </span>
           </div>
-          <div className="flex items-center gap-1">
-            <span className="text-xs text-slate-500 shrink-0">報酬分割数</span>
+          <div className="flex items-center gap-1 min-w-0">
+            <span className="text-xs text-slate-500 shrink-0">分割数</span>
             <span
-              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              className="flex-1 min-w-0 text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
               onClick={() => {
                 const newVal = prompt("報酬分割数を入力", String(caseData.feeInfo.installmentCount || ""));
                 if (newVal !== null) updateFeeInfo("installmentCount", newVal);
