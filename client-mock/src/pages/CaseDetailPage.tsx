@@ -523,262 +523,306 @@ function CaseDetailBody({
     <div className="flex min-h-screen min-h-0 flex-col bg-slate-200">
       {/* Header（スクロール時に固定） */}
       <header className="sticky top-0 z-40 shrink-0 border-b border-slate-200 bg-white shadow-sm">
-        {/* 1行目：基本情報（太字、黒字） */}
-        <div className="flex w-full items-center px-4 py-1 text-base leading-tight text-slate-800">
-          <div className="flex w-full items-center justify-between">
-            <EditableField
-              compact
-              compactSize="header"
-              bordered
-              label="ステータス"
-              value={caseData.settlementInfo.status}
-              onChange={(v) => updateSettlementInfo("status", v)}
-              type="select"
-              options={[
-                { value: "全和解済_支払中", label: "全和解済_支払中" },
-                { value: "資格者面談待ち", label: "資格者面談待ち" },
-                { value: "和解交渉中", label: "和解交渉中" },
-                { value: "キャンセル", label: "キャンセル" },
-                { value: "辞任", label: "辞任" },
-              ]}
-              confirmMessage="ステータスを変更しますか？"
-              renderValue={(v) => (
-                <StatusBadge status={v as string} size="md" />
-              )}
+        {/* 1行目：一覧に戻る（左）、LINE@（右） */}
+        <div className="flex w-full items-center justify-between px-4 py-1.5 border-b border-slate-100">
+          <button
+            onClick={() => navigate("/")}
+            className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+          >
+            ← 一覧に戻る
+          </button>
+          <span className="flex shrink-0 items-center gap-1">
+            {lineHref ? (
+              <a
+                href={lineHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center rounded bg-[#06C755] px-3 py-1 text-sm font-semibold text-white shadow-sm hover:opacity-90"
+              >
+                LINE@
+              </a>
+            ) : (
+              <span className="text-slate-400 text-sm">LINE@未設定</span>
+            )}
+            <LineUrlQuickEdit
+              lineUrl={caseData.clientBasicInfo.lineUrl}
+              onSave={(next) =>
+                updateClientBasicInfo(
+                  "lineUrl",
+                  next != null && next.length > 0 ? next : "",
+                )
+              }
             />
-            <EditableField
-              compact
-              compactSize="header"
-              bordered
-              label="ID"
-              value={caseData.metadata.externalId}
-              onChange={(v) => updateMetadata("externalId", v)}
-            />
-            <EditableField
-              compact
-              compactSize="header"
-              bordered
-              label="名前"
-              value={caseData.clientBasicInfo.name}
-              onChange={(v) => updateClientBasicInfo("name", v)}
-            />
-            <EditableField
-              compact
-              compactSize="header"
-              bordered
-              label="フリガナ"
-              value={caseData.clientBasicInfo.furigana}
-              onChange={(v) => updateClientBasicInfo("furigana", v)}
-            />
-            <EditableField
-              compact
-              compactSize="header"
-              bordered
-              label="電話番号"
-              value={caseData.clientBasicInfo.phone}
-              onChange={(v) => updateClientBasicInfo("phone", v)}
-            />
-            <EditableField
-              compact
-              compactSize="header"
-              bordered
-              label="メール"
-              value={caseData.clientBasicInfo.email}
-              onChange={(v) => updateClientBasicInfo("email", v)}
-              truncateValue
-            />
-            <EditableField
-              compact
-              compactSize="header"
-              bordered
-              label="要注意"
-              value={caseData.clientBasicInfo.cautionRank}
-              onChange={(v) => updateClientBasicInfo("cautionRank", v)}
-              type="select"
-              options={[
-                { value: "A", label: "A" },
-                { value: "B", label: "B" },
-                { value: "C", label: "C" },
-              ]}
-            />
-            <span className="flex shrink-0 items-center gap-1">
-              {lineHref ? (
-                <a
-                  href={lineHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center rounded bg-[#06C755] px-2 py-0.5 text-base font-semibold text-white shadow-sm hover:opacity-90"
-                >
-                  LINE@
-                </a>
-              ) : (
-                <span className="text-slate-400 text-base">LINE@未設定</span>
-              )}
-              <LineUrlQuickEdit
-                lineUrl={caseData.clientBasicInfo.lineUrl}
-                onSave={(next) =>
-                  updateClientBasicInfo(
-                    "lineUrl",
-                    next != null && next.length > 0 ? next : "",
-                  )
-                }
-              />
+          </span>
+        </div>
+        {/* 2行目：基本情報（8カラムグリッド） */}
+        <div className="grid grid-cols-8 px-2 py-1">
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-slate-500 shrink-0">ステータス</span>
+            <span
+              className="text-[14px] rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              onClick={() => {
+                const newStatus = prompt("ステータスを入力", caseData.settlementInfo.status || "");
+                if (newStatus !== null) updateSettlementInfo("status", newStatus);
+              }}
+            >
+              <StatusBadge status={caseData.settlementInfo.status || ""} size="md" />
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-slate-500 shrink-0">ID</span>
+            <span
+              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              onClick={() => {
+                const newVal = prompt("IDを入力", caseData.metadata.externalId || "");
+                if (newVal !== null) updateMetadata("externalId", newVal);
+              }}
+            >
+              {caseData.metadata.externalId || "-"}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-slate-500 shrink-0">名前</span>
+            <span
+              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              onClick={() => {
+                const newVal = prompt("名前を入力", caseData.clientBasicInfo.name || "");
+                if (newVal !== null) updateClientBasicInfo("name", newVal);
+              }}
+            >
+              {caseData.clientBasicInfo.name || "-"}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-slate-500 shrink-0">フリガナ</span>
+            <span
+              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
+              onClick={() => {
+                const newVal = prompt("フリガナを入力", caseData.clientBasicInfo.furigana || "");
+                if (newVal !== null) updateClientBasicInfo("furigana", newVal);
+              }}
+            >
+              {caseData.clientBasicInfo.furigana || "-"}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-slate-500 shrink-0">電話番号</span>
+            <span
+              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              onClick={() => {
+                const newVal = prompt("電話番号を入力", caseData.clientBasicInfo.phone || "");
+                if (newVal !== null) updateClientBasicInfo("phone", newVal);
+              }}
+            >
+              {caseData.clientBasicInfo.phone || "-"}
+            </span>
+          </div>
+          <div className="flex items-center gap-1 col-span-2">
+            <span className="text-xs text-slate-500 shrink-0">メール</span>
+            <span
+              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
+              onClick={() => {
+                const newVal = prompt("メールを入力", caseData.clientBasicInfo.email || "");
+                if (newVal !== null) updateClientBasicInfo("email", newVal);
+              }}
+            >
+              {caseData.clientBasicInfo.email || "-"}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-slate-500 shrink-0">要注意</span>
+            <span
+              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              onClick={() => {
+                const newVal = prompt("要注意ランク (A/B/C)", caseData.clientBasicInfo.cautionRank || "");
+                if (newVal !== null) updateClientBasicInfo("cautionRank", newVal);
+              }}
+            >
+              {caseData.clientBasicInfo.cautionRank || "-"}
             </span>
           </div>
         </div>
-        {/* 2行目：リスト・受任情報（デフォルト） */}
-        <div className="flex w-full items-center px-4 py-1 text-base leading-tight text-slate-800">
-          <div className="flex w-full items-center justify-between">
-            <EditableField
-              compact
-              compactSize="header"
-              bordered
-              label="リスト区分"
-              value={caseData.metadata.listCategory}
-              onChange={(v) => updateMetadata("listCategory", v)}
-            />
-            <EditableField
-              compact
-              compactSize="header"
-              bordered
-              label="リスト登録日"
-              value={caseData.metadata.listRegisteredDate}
-              onChange={(v) => updateMetadata("listRegisteredDate", v)}
-              type="date"
-            />
-            <EditableField
-              compact
-              compactSize="header"
-              bordered
-              label="受任日"
-              value={caseData.appointmentInfo.acceptanceDate}
-              onChange={(v) => updateAppointmentInfo("acceptanceDate", v)}
-              type="date"
-            />
-            <EditableField
-              compact
-              compactSize="header"
-              bordered
-              label="アポ担当"
-              value={caseData.appointmentInfo.appointmentStaff}
-              onChange={(v) => updateAppointmentInfo("appointmentStaff", v)}
-            />
-            <EditableField
-              compact
-              compactSize="header"
-              bordered
-              label="面談担当"
-              value={caseData.appointmentInfo.interviewStaff}
-              onChange={(v) => updateAppointmentInfo("interviewStaff", v)}
-            />
-            <EditableField
-              compact
-              compactSize="header"
-              bordered
-              label="受任ランク"
-              value={caseData.appointmentInfo.acceptanceRank}
-              onChange={(v) => updateAppointmentInfo("acceptanceRank", v)}
-              type="select"
-              options={[
-                { value: "A", label: "A" },
-                { value: "B", label: "B" },
-                { value: "C", label: "C" },
-              ]}
-            />
-            <EditableField
-              compact
-              compactSize="header"
-              bordered
-              label="毎月入金日"
-              value={caseData.paymentInfo.monthlyPaymentDay}
-              onChange={(v) => updatePaymentInfo("monthlyPaymentDay", v)}
-            />
-            <EditableField
-              compact
-              compactSize="header"
-              bordered
-              label="基本入金額"
-              value={caseData.paymentInfo.basePaymentAmount}
-              onChange={(v) => updatePaymentInfo("basePaymentAmount", v)}
-              type="number"
-              suffix="円"
-            />
+        {/* 3行目：リスト・受任情報（8カラムグリッド） */}
+        <div className="grid grid-cols-8 px-2 py-1">
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-slate-500 shrink-0">リスト区分</span>
+            <span
+              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
+              onClick={() => {
+                const newVal = prompt("リスト区分を入力", caseData.metadata.listCategory || "");
+                if (newVal !== null) updateMetadata("listCategory", newVal);
+              }}
+            >
+              {caseData.metadata.listCategory || "-"}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-slate-500 shrink-0">リスト登録日</span>
+            <span
+              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              onClick={() => {
+                const newVal = prompt("リスト登録日を入力 (YYYY-MM-DD)", caseData.metadata.listRegisteredDate || "");
+                if (newVal !== null) updateMetadata("listRegisteredDate", newVal);
+              }}
+            >
+              {caseData.metadata.listRegisteredDate || "-"}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-slate-500 shrink-0">受任日</span>
+            <span
+              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              onClick={() => {
+                const newVal = prompt("受任日を入力 (YYYY-MM-DD)", caseData.appointmentInfo.acceptanceDate || "");
+                if (newVal !== null) updateAppointmentInfo("acceptanceDate", newVal);
+              }}
+            >
+              {caseData.appointmentInfo.acceptanceDate || "-"}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-slate-500 shrink-0">アポ担当</span>
+            <span
+              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
+              onClick={() => {
+                const newVal = prompt("アポ担当を入力", caseData.appointmentInfo.appointmentStaff || "");
+                if (newVal !== null) updateAppointmentInfo("appointmentStaff", newVal);
+              }}
+            >
+              {caseData.appointmentInfo.appointmentStaff || "-"}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-slate-500 shrink-0">面談担当</span>
+            <span
+              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300 truncate"
+              onClick={() => {
+                const newVal = prompt("面談担当を入力", caseData.appointmentInfo.interviewStaff || "");
+                if (newVal !== null) updateAppointmentInfo("interviewStaff", newVal);
+              }}
+            >
+              {caseData.appointmentInfo.interviewStaff || "-"}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-slate-500 shrink-0">受任ランク</span>
+            <span
+              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              onClick={() => {
+                const newVal = prompt("受任ランク (A/B/C)", caseData.appointmentInfo.acceptanceRank || "");
+                if (newVal !== null) updateAppointmentInfo("acceptanceRank", newVal);
+              }}
+            >
+              {caseData.appointmentInfo.acceptanceRank || "-"}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-slate-500 shrink-0">毎月入金日</span>
+            <span
+              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              onClick={() => {
+                const newVal = prompt("毎月入金日を入力", caseData.paymentInfo.monthlyPaymentDay || "");
+                if (newVal !== null) updatePaymentInfo("monthlyPaymentDay", newVal);
+              }}
+            >
+              {caseData.paymentInfo.monthlyPaymentDay || "-"}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-slate-500 shrink-0">基本入金額</span>
+            <span
+              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              onClick={() => {
+                const newVal = prompt("基本入金額を入力", String(caseData.paymentInfo.basePaymentAmount || ""));
+                if (newVal !== null) updatePaymentInfo("basePaymentAmount", newVal);
+              }}
+            >
+              {caseData.paymentInfo.basePaymentAmount != null
+                ? `${caseData.paymentInfo.basePaymentAmount.toLocaleString()}円`
+                : "-"}
+            </span>
           </div>
         </div>
-        {/* 3行目：入金・報酬状況（太字、青字） */}
-        <div className="flex w-full items-center px-4 py-1 text-base leading-tight text-slate-800">
-          <div className="flex w-full items-center justify-between">
-            {/* 累計入金額 - 計算フィールド（編集不可） */}
-            <span className="flex shrink-0 items-center gap-1">
-              <span className="text-xs text-slate-500">・累計入金額</span>
-              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-base font-medium tabular-nums text-blue-600">
-                {formatYenPair(
-                  caseData.paymentInfo.cumulativePaymentAmount,
-                  caseData.paymentInfo.cumulativePlannedPayment,
-                )}
-              </span>
+        {/* 4行目：入金・報酬状況（8カラムグリッド） */}
+        <div className="grid grid-cols-8 px-2 py-1">
+          <div className="flex items-center gap-1 col-span-2">
+            <span className="text-xs text-slate-500 shrink-0">累計入金額</span>
+            <span className="text-[14px] font-medium tabular-nums text-blue-600 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5">
+              {formatYenPair(
+                caseData.paymentInfo.cumulativePaymentAmount,
+                caseData.paymentInfo.cumulativePlannedPayment,
+              )}
             </span>
-            {/* 残入金予定 - 計算フィールド（編集不可） */}
-            <span className="flex shrink-0 items-center gap-1">
-              <span className="text-xs text-slate-500">・残入金予定</span>
-              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-base font-medium tabular-nums text-blue-600">
-                {remainingPlanned != null
-                  ? `${remainingPlanned.toLocaleString()}円`
-                  : "-"}
-              </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-slate-500 shrink-0">残入金予定</span>
+            <span className="text-[14px] font-medium tabular-nums text-blue-600 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5">
+              {remainingPlanned != null
+                ? `${remainingPlanned.toLocaleString()}円`
+                : "-"}
             </span>
-            {/* 次回入金日 - 編集可能 */}
-            <EditableField
-              compact
-              compactSize="header"
-              bordered
-              label="次回入金日"
-              value={caseData.paymentInfo.nextPaymentDate}
-              onChange={(v) => updatePaymentInfo("nextPaymentDate", v)}
-              type="date"
-            />
-            {/* 通常報酬額 - 編集可能 */}
-            <EditableField
-              compact
-              compactSize="header"
-              bordered
-              label="通常報酬額"
-              value={caseData.feeInfo.normalFee}
-              onChange={(v) => updateFeeInfo("normalFee", v)}
-              type="number"
-              suffix="円"
-            />
-            {/* 報酬充当額 - 計算フィールド（編集不可） */}
-            <span className="flex shrink-0 items-center gap-1">
-              <span className="text-xs text-slate-500">・報酬充当額</span>
-              <span className="rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 text-base font-medium tabular-nums text-blue-600">
-                {caseData.paymentInfo.cumulativeFeeAllocation?.toLocaleString() ??
-                  "-"}
-                円
-              </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-slate-500 shrink-0">次回入金日</span>
+            <span
+              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              onClick={() => {
+                const newVal = prompt("次回入金日を入力 (YYYY-MM-DD)", caseData.paymentInfo.nextPaymentDate || "");
+                if (newVal !== null) updatePaymentInfo("nextPaymentDate", newVal);
+              }}
+            >
+              {caseData.paymentInfo.nextPaymentDate || "-"}
             </span>
-            {/* 報酬未回収 - 編集可能 */}
-            <EditableField
-              compact
-              compactSize="header"
-              bordered
-              label="報酬未回収"
-              value={caseData.feeInfo.uncollectedFee}
-              onChange={(v) => updateFeeInfo("uncollectedFee", v)}
-              type="number"
-              suffix="円"
-            />
-            {/* 報酬分割数 - 編集可能 */}
-            <EditableField
-              compact
-              compactSize="header"
-              bordered
-              label="報酬分割数"
-              value={caseData.feeInfo.installmentCount}
-              onChange={(v) => updateFeeInfo("installmentCount", v)}
-              type="number"
-              suffix="回"
-            />
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-slate-500 shrink-0">通常報酬額</span>
+            <span
+              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              onClick={() => {
+                const newVal = prompt("通常報酬額を入力", String(caseData.feeInfo.normalFee || ""));
+                if (newVal !== null) updateFeeInfo("normalFee", newVal);
+              }}
+            >
+              {caseData.feeInfo.normalFee != null
+                ? `${caseData.feeInfo.normalFee.toLocaleString()}円`
+                : "-"}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-slate-500 shrink-0">報酬充当額</span>
+            <span className="text-[14px] font-medium tabular-nums text-blue-600 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5">
+              {caseData.paymentInfo.cumulativeFeeAllocation != null
+                ? `${caseData.paymentInfo.cumulativeFeeAllocation.toLocaleString()}円`
+                : "-"}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-slate-500 shrink-0">報酬未回収</span>
+            <span
+              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              onClick={() => {
+                const newVal = prompt("報酬未回収を入力", String(caseData.feeInfo.uncollectedFee || ""));
+                if (newVal !== null) updateFeeInfo("uncollectedFee", newVal);
+              }}
+            >
+              {caseData.feeInfo.uncollectedFee != null
+                ? `${caseData.feeInfo.uncollectedFee.toLocaleString()}円`
+                : "-"}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-slate-500 shrink-0">報酬分割数</span>
+            <span
+              className="text-[14px] font-medium text-slate-800 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 cursor-pointer hover:border-blue-300"
+              onClick={() => {
+                const newVal = prompt("報酬分割数を入力", String(caseData.feeInfo.installmentCount || ""));
+                if (newVal !== null) updateFeeInfo("installmentCount", newVal);
+              }}
+            >
+              {caseData.feeInfo.installmentCount != null
+                ? `${caseData.feeInfo.installmentCount}回`
+                : "-"}
+            </span>
           </div>
         </div>
       </header>
