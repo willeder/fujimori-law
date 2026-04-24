@@ -189,13 +189,13 @@ export function DataTable<T>({
   const headCellWrap = cellNoWrap
     ? 'whitespace-nowrap'
     : cellSingleLine
-      ? 'min-w-0 max-w-0 overflow-hidden whitespace-nowrap'
+      ? 'overflow-hidden whitespace-nowrap'
       : 'min-w-0 whitespace-normal break-words align-top'
 
   const bodyCellWrap = cellNoWrap
     ? 'whitespace-nowrap'
     : cellSingleLine
-      ? 'min-w-0 max-w-0 overflow-hidden whitespace-nowrap'
+      ? 'overflow-hidden whitespace-nowrap'
       : 'min-w-0 whitespace-normal break-words align-top'
 
   /** table-fixed で列幅を守りつつ中身の min-content で列が膨らむのを防ぐ */

@@ -86,7 +86,7 @@ export function ContactHistoryTable({
           {
             key: 'creditorName',
             header: '債権者',
-            width: '6rem',
+            width: '5rem',
             sortable: false,
             render: (h) =>
               editingId === h.id ? (
@@ -110,8 +110,8 @@ export function ContactHistoryTable({
   const columns: Column<ContactHistory>[] = [
     {
       key: 'contactDate',
-      header: '接触日',
-      width: '6.5rem',
+      header: '日付',
+      width: '8.5rem',
       sortable: false,
       render: (h) =>
         editingId === h.id ? (
@@ -132,7 +132,7 @@ export function ContactHistoryTable({
     {
       key: 'contactTime',
       header: '時刻',
-      width: '5rem',
+      width: '6rem',
       align: 'center',
       sortable: false,
       render: (h) =>
@@ -154,7 +154,7 @@ export function ContactHistoryTable({
     {
       key: 'staff',
       header: '担当',
-      width: '4rem',
+      width: '5rem',
       sortable: false,
       render: (h) =>
         editingId === h.id ? (
@@ -171,7 +171,7 @@ export function ContactHistoryTable({
     {
       key: 'tool',
       header: 'ツール',
-      width: '5rem',
+      width: '5.5rem',
       sortable: false,
       render: (h) =>
         editingId === h.id ? (
@@ -195,7 +195,6 @@ export function ContactHistoryTable({
     {
       key: 'comment',
       header: 'コメント',
-      width: '10rem',
       sortable: false,
       cellTruncate: false,
       render: (h) =>
@@ -218,7 +217,7 @@ export function ContactHistoryTable({
     {
       key: 'actions',
       header: '',
-      width: '6rem',
+      width: '7rem',
       sortable: false,
       cellTruncate: false,
       render: (h) => {
