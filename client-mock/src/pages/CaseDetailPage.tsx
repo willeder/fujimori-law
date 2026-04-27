@@ -740,34 +740,29 @@ function CaseDetailBody({
         </div>
         {/* 4行目：入金・報酬状況（8カラムグリッド） */}
         <div className="grid grid-cols-8 gap-0.5 px-2 py-0.5 [&>div]:min-w-0">
-          <div className="flex items-center gap-1 col-span-2">
-            <span className="text-xs text-slate-500 shrink-0">累計入金額</span>
-            <span className="flex-1 min-w-0 text-xs font-medium tabular-nums text-blue-600 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate">
+          <div className="flex min-w-0 items-center gap-1 py-0 min-h-[1.5rem] col-span-2">
+            <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[11px]">・累計入金額</span>
+            <span className="flex-1 min-w-0 text-xs font-medium tabular-nums text-slate-700 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate">
               {formatYenPair(
                 caseData.paymentInfo.cumulativePaymentAmount,
                 caseData.paymentInfo.cumulativePlannedPayment,
               )}
             </span>
           </div>
-          <div className="flex items-center gap-1">
-            <span className="text-xs text-slate-500 shrink-0">残入金予定</span>
-            <span className="flex-1 min-w-0 text-xs font-medium tabular-nums text-blue-600 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate">
+          <div className="flex min-w-0 items-center gap-1 py-0 min-h-[1.5rem]">
+            <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[11px]">・残入金予定</span>
+            <span className="flex-1 min-w-0 text-xs font-medium tabular-nums text-slate-700 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate">
               {remainingPlanned != null
                 ? `${remainingPlanned.toLocaleString()}円`
                 : "-"}
             </span>
           </div>
-          <EditableField
-            label="次回入金日"
-            value={caseData.paymentInfo.nextPaymentDate}
-            onChange={(v) => updatePaymentInfo("nextPaymentDate", v)}
-            type="date"
-            compact
-            compactLayout="inline"
-            bordered
-            truncateValue
-            fillWidth
-          />
+          <div className="flex min-w-0 items-center gap-1 py-0 min-h-[1.5rem]">
+            <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[11px]">・次回入金日</span>
+            <span className="flex-1 min-w-0 text-xs font-bold tabular-nums text-blue-600 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate">
+              {caseData.paymentInfo.nextPaymentDate ?? "-"}
+            </span>
+          </div>
           <EditableField
             label="通常報酬額"
             value={caseData.feeInfo.normalFee}
@@ -780,26 +775,22 @@ function CaseDetailBody({
             truncateValue
             fillWidth
           />
-          <div className="flex items-center gap-1">
-            <span className="text-xs text-slate-500 shrink-0">報酬充当額</span>
-            <span className="flex-1 min-w-0 text-xs font-medium tabular-nums text-blue-600 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate">
+          <div className="flex min-w-0 items-center gap-1 py-0 min-h-[1.5rem]">
+            <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[11px]">・報酬充当額</span>
+            <span className="flex-1 min-w-0 text-xs font-medium tabular-nums text-slate-700 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate">
               {caseData.paymentInfo.cumulativeFeeAllocation != null
                 ? `${caseData.paymentInfo.cumulativeFeeAllocation.toLocaleString()}円`
                 : "-"}
             </span>
           </div>
-          <EditableField
-            label="報酬未回収"
-            value={caseData.feeInfo.uncollectedFee}
-            onChange={(v) => updateFeeInfo("uncollectedFee", v)}
-            type="number"
-            suffix="円"
-            compact
-            compactLayout="inline"
-            bordered
-            truncateValue
-            fillWidth
-          />
+          <div className="flex min-w-0 items-center gap-1 py-0 min-h-[1.5rem]">
+            <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[11px]">・報酬未回収</span>
+            <span className="flex-1 min-w-0 text-xs font-bold tabular-nums text-blue-600 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate">
+              {caseData.feeInfo.uncollectedFee != null
+                ? `${caseData.feeInfo.uncollectedFee.toLocaleString()}円`
+                : "-"}
+            </span>
+          </div>
           <EditableField
             label="分割数"
             value={caseData.feeInfo.installmentCount}
@@ -857,7 +848,7 @@ function CaseDetailBody({
                                   <span className="text-slate-400">
                                     最終入金予定日：
                                   </span>
-                                  <span className="font-medium tabular-nums text-slate-900">
+                                  <span className="font-bold tabular-nums text-blue-600">
                                     {finalPlannedDate &&
                                     finalPlannedDate.length > 0
                                       ? finalPlannedDate
@@ -868,7 +859,7 @@ function CaseDetailBody({
                                   <span className="text-slate-400">
                                     累計）弁代報酬充当額：
                                   </span>
-                                  <span className="font-medium tabular-nums">
+                                  <span className="font-bold tabular-nums text-blue-600">
                                     {sumActualAgentFee.toLocaleString()}円
                                   </span>
                                 </span>
@@ -876,11 +867,11 @@ function CaseDetailBody({
                                   <span className="text-slate-400">
                                     累計）プール充当：
                                   </span>
-                                  <span className="font-medium tabular-nums">
+                                  <span className="font-bold tabular-nums text-blue-600">
                                     {sumActualPool.toLocaleString()}円
                                   </span>
                                 </span>
-                                <span className="inline-flex shrink-0 items-center gap-0.5 font-medium text-slate-900">
+                                <span className="inline-flex shrink-0 items-center gap-0.5 font-bold text-blue-600">
                                   <span className="font-normal text-slate-400">
                                     累計）弁済充当（実／予定）：
                                   </span>
@@ -993,6 +984,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
@@ -1008,6 +1000,7 @@ function CaseDetailBody({
                             dateDisplayToggle
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
@@ -1021,6 +1014,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
@@ -1040,6 +1034,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
@@ -1053,6 +1048,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         {/* Row 2: 居住形態(2), 都道府県(2), 住所(4), 同居(2) = 10 */}
@@ -1067,6 +1063,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
@@ -1080,6 +1077,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-4">
@@ -1093,6 +1091,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
@@ -1106,6 +1105,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         {/* Row 3: 旧住所(4), 内密先(2), 緊急連絡先(2), 関係(緊急)(2) = 10 */}
@@ -1122,6 +1122,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
@@ -1137,6 +1138,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
@@ -1152,6 +1154,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
@@ -1171,6 +1174,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         {/* Row 4: 月収(2), 給与日(2), 給与口座(2), 勤務形態(2), 勤務先名(2) = 10 */}
@@ -1187,6 +1191,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
@@ -1198,6 +1203,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
@@ -1213,6 +1219,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
@@ -1226,6 +1233,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
@@ -1239,6 +1247,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         {/* Row 5: 勤)連絡先(4), 勤)住所(4), 空(2) = 10 */}
@@ -1255,6 +1264,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-4">
@@ -1270,6 +1280,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="col-span-2" />
@@ -1285,6 +1296,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-1">
@@ -1298,6 +1310,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-1">
@@ -1311,6 +1324,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
@@ -1330,6 +1344,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                       </div>
@@ -1353,6 +1368,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
@@ -1366,6 +1382,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
@@ -1380,6 +1397,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
@@ -1395,6 +1413,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
@@ -1416,6 +1435,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         {/* Row 2: C受任昇格日(2), 債権社数(2), 申告債務額(2), 予定弁済総数(2), 予定弁済報酬総額(2) = 10 */}
@@ -1436,6 +1456,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
@@ -1449,6 +1470,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
@@ -1464,6 +1486,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
@@ -1479,6 +1502,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
@@ -1494,6 +1518,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         {/* Row 3: 依頼前返済額(2), 依頼後返済額(2), 初回入金予定日(2), 10日以内(2), 初回入金額(2) = 10 */}
@@ -1510,6 +1535,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
@@ -1525,6 +1551,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
@@ -1539,6 +1566,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
@@ -1554,6 +1582,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
@@ -1569,6 +1598,7 @@ function CaseDetailBody({
                             compactLayout="inline"
                             bordered
                             truncateValue
+                            fillWidth
                           />
                         </div>
                         {/* Row 4-6: テキストエリア（フルスパン） */}
