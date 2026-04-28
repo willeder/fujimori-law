@@ -742,7 +742,7 @@ function CaseDetailBody({
         <div className="grid grid-cols-8 gap-0.5 px-2 py-0.5 [&>div]:min-w-0">
           <div className="flex min-w-0 items-center gap-1 py-0 min-h-[1.5rem] col-span-2">
             <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[11px]">・累計入金額</span>
-            <span className="flex-1 min-w-0 text-xs font-medium tabular-nums text-slate-700 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate">
+            <span className="flex-1 min-w-0 text-xs font-bold tabular-nums text-blue-600 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate">
               {formatYenPair(
                 caseData.paymentInfo.cumulativePaymentAmount,
                 caseData.paymentInfo.cumulativePlannedPayment,
@@ -751,7 +751,7 @@ function CaseDetailBody({
           </div>
           <div className="flex min-w-0 items-center gap-1 py-0 min-h-[1.5rem]">
             <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[11px]">・残入金予定</span>
-            <span className="flex-1 min-w-0 text-xs font-medium tabular-nums text-slate-700 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate">
+            <span className="flex-1 min-w-0 text-xs font-bold tabular-nums text-blue-600 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate">
               {remainingPlanned != null
                 ? `${remainingPlanned.toLocaleString()}円`
                 : "-"}
@@ -777,7 +777,7 @@ function CaseDetailBody({
           />
           <div className="flex min-w-0 items-center gap-1 py-0 min-h-[1.5rem]">
             <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[11px]">・報酬充当額</span>
-            <span className="flex-1 min-w-0 text-xs font-medium tabular-nums text-slate-700 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate">
+            <span className="flex-1 min-w-0 text-xs font-bold tabular-nums text-blue-600 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate">
               {caseData.paymentInfo.cumulativeFeeAllocation != null
                 ? `${caseData.paymentInfo.cumulativeFeeAllocation.toLocaleString()}円`
                 : "-"}
