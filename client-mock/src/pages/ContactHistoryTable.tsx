@@ -75,6 +75,10 @@ export function ContactHistoryTable({
   }
 
   const handleDelete = (h: ContactHistory) => {
+    const ok = window.confirm(
+      'この接触履歴を削除しますか？\n「OK」で削除、「キャンセル」で取りやめます。',
+    )
+    if (!ok) return
     dispatch({ type: 'DELETE_CONTACT_HISTORY', payload: h.id })
   }
 
