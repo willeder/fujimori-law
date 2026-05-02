@@ -514,7 +514,9 @@ export function EditableField({
         <span className="shrink-0 pt-0.5 text-[11px] font-medium text-slate-500">
           {labelWithColon}
         </span>
-        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
+        <div
+          className={`flex min-w-0 flex-1 flex-wrap gap-1 ${type === "textarea" ? "items-start" : "items-center"}`}
+        >
           {type === "select" && options ? (
             <select
               ref={inputRef as React.RefObject<HTMLSelectElement>}
@@ -539,7 +541,7 @@ export function EditableField({
               onKeyDown={handleKeyDown}
               placeholder={placeholder}
               rows={2}
-              className="flex-1 text-xs border border-blue-300 rounded px-1.5 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="min-h-[2.75rem] max-h-48 min-w-0 grow resize-y text-xs border border-blue-300 rounded px-1.5 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           ) : (
             <input

@@ -243,6 +243,10 @@ function CaseDetailBody({
 
   /** 和解対象債権と入金予定履歴で共有（同じ id・同じ並び） */
   const [creditorScopeTabId, setCreditorScopeTabId] = useState("all");
+  /** 入金スケジュール / 和解状況 の上段タブ（カード高さの切り替えに使用） */
+  const [paymentScheduleSectionTab, setPaymentScheduleSectionTab] = useState<
+    "payments" | "settlement"
+  >("payments");
   const displayCreditorScopeTabId =
     creditorScopeTabId === "all" ||
     creditors.some((c) => String(c.id) === creditorScopeTabId)
@@ -816,7 +820,22 @@ function CaseDetailBody({
                 <Tabs
                   variant="split"
                   tabBodyScroll="host"
-                  tabBodyMaxHeightClassName="h-[min(55vh,26rem)]"
+                  tabBodyMaxHeightClassName={
+                    paymentScheduleSectionTab === "settlement" &&
+                    displayCreditorScopeTabId !== "all"
+                      ? "h-fit max-h-[min(55vh,26rem)]"
+                      : "h-[min(55vh,26rem)]"
+                  }
+                  hostBodyNaturalHeight={
+                    paymentScheduleSectionTab === "settlement" &&
+                    displayCreditorScopeTabId !== "all"
+                  }
+                  activeTabId={paymentScheduleSectionTab}
+                  onActiveTabChange={(id) =>
+                    setPaymentScheduleSectionTab(
+                      id === "settlement" ? "settlement" : "payments",
+                    )
+                  }
                   tabs={[
                     {
                       id: "payments",
@@ -906,6 +925,7 @@ function CaseDetailBody({
                           onActiveTabChange={setCreditorScopeTabId}
                           density="dense"
                           tabBodyScroll="guest"
+                          guestExpandToParent={(id) => id === "all"}
                         />
                       ),
                     },

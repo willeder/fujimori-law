@@ -181,17 +181,20 @@ export interface Creditor {
   debtAmount: number | null // 債務額
   expectedSettlement: number | null // 想定和解
   status: CreditorStatus
+  check?: string | null // CHECK
   nextProcessDate: string | null // 次回処理日時
   acceptanceNoticeSentDate: string | null // 受任通知送付日
   debtInquiryArrivalDate: string | null // 債権調査到着日
   customerCode: string | null // 顧客コード
   contractDate: string | null // 調査票_契約日
   settlementProposalDate: string | null // 和解提案日
+  settlementProposal?: number | null // 和解提案
   responseStatus?: string | null // 回答状況
   settlementDate: string | null // 和解日
   settlementAmount: number | null // 和解金額（= 和解）
   settlementDebtAmount?: number | null // 和解時債務金額
   settlementContentComment?: string | null // 和解内容コメント
+  reminder?: string | null // リマインド
   creditorDocuments?: string | null // 債権者資料（リンク/ファイル名のメモ）
   paymentStartMonth: string | null // 支払開始月
   paymentDay: number | null // 支払日
@@ -202,10 +205,14 @@ export interface Creditor {
   finalPaymentMonth: string | null // 最終支払月
   futureInterest: string | null // 将来利息
   bankName: string | null // 振込先銀行名
+  financialInstitutionCode?: string | null // 金融機関コード
   branchName: string | null // 振込先支店名
+  branchCode?: string | null // 支店コード
   accountType: string | null // 振込先口座種別
   accountNumber: string | null // 振込先口座番号
   accountHolder: string | null // 振込先口座名義
+  designatedCode?: string | null // 指定コード
+  repaymentTarget?: string | null // 弁済対象
 }
 
 /** 入金予定/実績 */

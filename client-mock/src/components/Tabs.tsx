@@ -33,10 +33,19 @@ interface TabsProps {
   /** tabBodyScroll が host のときのルート高さ（Tailwind。例: h-[min(72vh,34rem)]）。未指定時は約20行相当 */
   tabBodyMaxHeightClassName?: string
   /**
+   * host のとき本文を固定の余白まで伸ばさず、内容の高さに合わせる（max は tabBodyMaxHeightClassName 側で指定）。
+   */
+  hostBodyNaturalHeight?: boolean
+  /**
    * タブ行の直下・アクティブパネルの上に表示（入金スケジュールのサマリ帯など）。
    * tabBodyScroll が guest / host のときのみ有効。
    */
   beforeActivePanelContent?: ReactNode
+  /**
+   * guest のとき、ルート・パネルを親の余白まで flex 伸長するか。
+   * false のときは内容の高さに寄せ、長い内容はルートでスクロール（和解状況の個別債権者タブ向け）。
+   */
+  guestExpandToParent?: boolean | ((activeTabId: string) => boolean)
 }
 
 export function Tabs({
@@ -51,6 +60,8 @@ export function Tabs({
   /** max-h だけだと flex 内で子の flex-1 が効かずスクロールできないことがあるため h-[min(...)] で高さを確定 */
   tabBodyMaxHeightClassName = 'h-[min(72vh,34rem)]',
   beforeActivePanelContent,
+  guestExpandToParent = true,
+  hostBodyNaturalHeight = false,
 }: TabsProps) {
   const [internalTab, setInternalTab] = useState(defaultTab ?? tabs[0]?.id)
   const controlled =
@@ -59,6 +70,11 @@ export function Tabs({
   const setActiveTab = controlled ? onActiveTabChange : setInternalTab
 
   const activeContent = tabs.find((t) => t.id === activeTab)?.content
+
+  const guestExpand =
+    typeof guestExpandToParent === 'function'
+      ? guestExpandToParent(activeTab)
+      : guestExpandToParent
 
   const isSplit = variant === 'split'
   const isDense = density === 'dense'
@@ -74,15 +90,23 @@ export function Tabs({
     tabBodyScroll === 'none'
       ? panelTop
       : tabBodyScroll === 'host'
-        ? 'mt-2 flex min-h-0 flex-1 flex-col overflow-hidden'
-        : 'mt-2 min-h-0 flex-1 overflow-auto overscroll-contain [-webkit-overflow-scrolling:touch]'
+        ? hostBodyNaturalHeight
+          ? 'mt-2 flex min-h-0 shrink-0 flex-col overflow-x-hidden'
+          : 'mt-2 flex min-h-0 flex-1 flex-col overflow-hidden'
+        : tabBodyScroll === 'guest' && !guestExpand
+          ? 'mt-2 min-h-0 max-h-full shrink-0 overflow-auto overscroll-contain [-webkit-overflow-scrolling:touch]'
+          : 'mt-2 min-h-0 flex-1 overflow-auto overscroll-contain [-webkit-overflow-scrolling:touch]'
 
   const rootClass =
     tabBodyScroll === 'none'
       ? ''
       : tabBodyScroll === 'host'
-        ? `flex min-h-0 flex-col overflow-hidden ${tabBodyMaxHeightClassName}`
-        : 'flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden'
+        ? hostBodyNaturalHeight
+          ? `flex min-h-0 w-full min-w-0 flex-col overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch] ${tabBodyMaxHeightClassName}`
+          : `flex min-h-0 flex-col overflow-hidden ${tabBodyMaxHeightClassName}`
+        : tabBodyScroll === 'guest' && !guestExpand
+          ? 'flex min-h-0 w-full min-w-0 max-h-full flex-col overflow-auto overscroll-contain [-webkit-overflow-scrolling:touch]'
+          : 'flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden'
 
   return (
     <div className={rootClass || undefined}>
@@ -146,8 +170,12 @@ export function Tabs({
           <div
             className={
               tabBodyScroll === 'guest'
-                ? 'flex min-h-0 min-w-0 flex-1 flex-col'
-                : 'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden'
+                ? guestExpand
+                  ? 'flex min-h-0 min-w-0 flex-1 flex-col'
+                  : 'flex min-h-0 min-w-0 flex-col'
+                : tabBodyScroll === 'host' && hostBodyNaturalHeight
+                  ? 'flex min-h-0 min-w-0 flex-col'
+                  : 'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden'
             }
           >
             {beforeActivePanelContent != null ? (
