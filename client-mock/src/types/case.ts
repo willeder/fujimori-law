@@ -213,6 +213,7 @@ export interface Creditor {
   accountHolder: string | null // 振込先口座名義
   designatedCode?: string | null // 指定コード
   repaymentTarget?: string | null // 弁済対象
+  memo?: string | null // メモ
 }
 
 /** 入金予定/実績 */

@@ -38,15 +38,34 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
 
     const columns: Column<Creditor>[] = [
       {
+        key: 'status',
+        header: 'ステータス',
+        width: '120px',
+        cellTruncate: false,
+        render: (item) => <StatusBadge status={item.status} size="sm" />,
+      },
+      {
         key: 'creditorName',
         header: '債権者',
         width: '120px',
       },
       {
-        key: 'negotiationPartner',
-        header: '交渉相手',
-        width: '100px',
-        render: (item) => item.negotiationPartner ?? '-',
+        key: 'acceptanceNoticeSentDate',
+        header: '受任通知送付日',
+        width: '120px',
+        render: (item) => item.acceptanceNoticeSentDate ?? '-',
+      },
+      {
+        key: 'settlementProposalDate',
+        header: '和解提案日',
+        width: '110px',
+        render: (item) => item.settlementProposalDate ?? '-',
+      },
+      {
+        key: 'settlementDate',
+        header: '和解日',
+        width: '110px',
+        render: (item) => item.settlementDate ?? '-',
       },
       {
         key: 'declaredAmount',
@@ -59,60 +78,6 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
             {item.declaredAmount && <span className="ml-0.5 text-[8px] text-slate-400">円</span>}
           </span>
         ),
-      },
-      {
-        key: 'expectedSettlement',
-        header: '想定和解',
-        width: '90px',
-        align: 'right',
-        render: (item) => (
-          <span className="tabular-nums">
-            {item.expectedSettlement != null ? `${item.expectedSettlement}%` : '-'}
-          </span>
-        ),
-      },
-      {
-        key: 'status',
-        header: '債権者別ステータス',
-        width: '140px',
-        cellTruncate: false,
-        render: (item) => <StatusBadge status={item.status} size="sm" />,
-      },
-      {
-        key: 'check',
-        header: 'CHECK',
-        width: '80px',
-        render: (item) => item.check ?? '-',
-      },
-      {
-        key: 'nextProcessDate',
-        header: '次回処理日時',
-        width: '110px',
-        render: (item) => item.nextProcessDate ?? '-',
-      },
-      {
-        key: 'acceptanceNoticeSentDate',
-        header: '受任通知送付日',
-        width: '120px',
-        render: (item) => item.acceptanceNoticeSentDate ?? '-',
-      },
-      {
-        key: 'debtInquiryArrivalDate',
-        header: '債権調査到着日',
-        width: '120px',
-        render: (item) => item.debtInquiryArrivalDate ?? '-',
-      },
-      {
-        key: 'customerCode',
-        header: '顧客コード',
-        width: '100px',
-        render: (item) => item.customerCode ?? '-',
-      },
-      {
-        key: 'contractDate',
-        header: '調査票_契約日',
-        width: '120px',
-        render: (item) => item.contractDate ?? '-',
       },
       {
         key: 'debtAmount',
@@ -142,34 +107,16 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         },
       },
       {
-        key: 'settlementProposalDate',
-        header: '和解提案日',
-        width: '110px',
-        render: (item) => item.settlementProposalDate ?? '-',
-      },
-      {
-        key: 'settlementProposal',
-        header: '和解提案',
-        width: '100px',
+        key: 'settlementDebtAmount',
+        header: '和解時債務金額',
+        width: '120px',
         align: 'right',
         render: (item) => (
           <span className="tabular-nums">
-            {item.settlementProposal?.toLocaleString() ?? '-'}
-            {item.settlementProposal && <span className="ml-0.5 text-[8px] text-slate-400">円</span>}
+            {item.settlementDebtAmount?.toLocaleString() ?? '-'}
+            {item.settlementDebtAmount && <span className="ml-0.5 text-[8px] text-slate-400">円</span>}
           </span>
         ),
-      },
-      {
-        key: 'responseStatus',
-        header: '回答状況',
-        width: '100px',
-        render: (item) => item.responseStatus ?? '-',
-      },
-      {
-        key: 'settlementDate',
-        header: '和解日',
-        width: '110px',
-        render: (item) => item.settlementDate ?? '-',
       },
       {
         key: 'settlementAmount',
@@ -185,183 +132,6 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           ) : (
             <span className="text-slate-300">-</span>
           ),
-      },
-      {
-        key: 'settlementDebtAmount',
-        header: '和解時債務金額',
-        width: '120px',
-        align: 'right',
-        render: (item) => (
-          <span className="tabular-nums">
-            {item.settlementDebtAmount?.toLocaleString() ?? '-'}
-            {item.settlementDebtAmount && <span className="ml-0.5 text-[8px] text-slate-400">円</span>}
-          </span>
-        ),
-      },
-      {
-        key: 'settlementContentComment',
-        header: '和解内容コメント',
-        width: '150px',
-        render: (item) => item.settlementContentComment ?? '-',
-      },
-      {
-        key: 'reminder',
-        header: 'リマインド',
-        width: '100px',
-        render: (item) => item.reminder ?? '-',
-      },
-      {
-        key: 'settlementAmount2',
-        header: '和解金額',
-        width: '100px',
-        align: 'right',
-        render: (item) =>
-          item.settlementAmount ? (
-            <span className="font-medium text-green-700 tabular-nums">
-              {item.settlementAmount.toLocaleString()}
-              <span className="ml-0.5 text-[8px] text-slate-400">円</span>
-            </span>
-          ) : (
-            <span className="text-slate-300">-</span>
-          ),
-      },
-      {
-        key: 'paymentStartMonth',
-        header: '支払開始月',
-        width: '110px',
-        render: (item) => item.paymentStartMonth ?? '-',
-      },
-      {
-        key: 'paymentDay',
-        header: '支払日',
-        width: '80px',
-        align: 'right',
-        render: (item) =>
-          item.paymentDay ? (
-            <span className="tabular-nums">
-              {item.paymentDay}
-              <span className="ml-0.5 text-[8px] text-slate-400">日</span>
-            </span>
-          ) : (
-            <span className="text-slate-300">-</span>
-          ),
-      },
-      {
-        key: 'paymentCount',
-        header: '支払回数',
-        width: '90px',
-        align: 'right',
-        render: (item) =>
-          item.paymentCount ? (
-            <span className="tabular-nums">
-              {item.paymentCount}
-              <span className="ml-0.5 text-[8px] text-slate-400">回</span>
-            </span>
-          ) : (
-            <span className="text-slate-300">-</span>
-          ),
-      },
-      {
-        key: 'firstPaymentAmount',
-        header: '初回支払額',
-        width: '110px',
-        align: 'right',
-        render: (item) => (
-          <span className="tabular-nums">
-            {item.firstPaymentAmount?.toLocaleString() ?? '-'}
-            {item.firstPaymentAmount && <span className="ml-0.5 text-[8px] text-slate-400">円</span>}
-          </span>
-        ),
-      },
-      {
-        key: 'subsequentPaymentAmount',
-        header: '２回目以降支払額',
-        width: '140px',
-        align: 'right',
-        render: (item) => (
-          <span className="tabular-nums">
-            {item.subsequentPaymentAmount?.toLocaleString() ?? '-'}
-            {item.subsequentPaymentAmount && <span className="ml-0.5 text-[8px] text-slate-400">円</span>}
-          </span>
-        ),
-      },
-      {
-        key: 'finalPaymentAmount',
-        header: '最終支払額',
-        width: '110px',
-        align: 'right',
-        render: (item) => (
-          <span className="tabular-nums">
-            {item.finalPaymentAmount?.toLocaleString() ?? '-'}
-            {item.finalPaymentAmount && <span className="ml-0.5 text-[8px] text-slate-400">円</span>}
-          </span>
-        ),
-      },
-      {
-        key: 'finalPaymentMonth',
-        header: '最終支払月',
-        width: '110px',
-        render: (item) => item.finalPaymentMonth ?? '-',
-      },
-      {
-        key: 'futureInterest',
-        header: '将来利息',
-        width: '90px',
-        render: (item) => item.futureInterest ?? '-',
-      },
-      {
-        key: 'bankName',
-        header: '振込先銀行名',
-        width: '120px',
-        render: (item) => item.bankName ?? '-',
-      },
-      {
-        key: 'financialInstitutionCode',
-        header: '金融機関コード',
-        width: '120px',
-        render: (item) => item.financialInstitutionCode ?? '-',
-      },
-      {
-        key: 'branchName',
-        header: '振込先支店名',
-        width: '120px',
-        render: (item) => item.branchName ?? '-',
-      },
-      {
-        key: 'branchCode',
-        header: '支店コード',
-        width: '100px',
-        render: (item) => item.branchCode ?? '-',
-      },
-      {
-        key: 'accountType',
-        header: '振込先口座種別',
-        width: '130px',
-        render: (item) => item.accountType ?? '-',
-      },
-      {
-        key: 'accountNumber',
-        header: '振込先口座番号',
-        width: '130px',
-        render: (item) => item.accountNumber ?? '-',
-      },
-      {
-        key: 'accountHolder',
-        header: '振込先口座名義',
-        width: '130px',
-        render: (item) => item.accountHolder ?? '-',
-      },
-      {
-        key: 'designatedCode',
-        header: '指定コード',
-        width: '100px',
-        render: (item) => item.designatedCode ?? '-',
-      },
-      {
-        key: 'repaymentTarget',
-        header: '弁済対象',
-        width: '100px',
-        render: (item) => item.repaymentTarget ?? '-',
       },
     ]
 
@@ -420,132 +190,9 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
   const debtDifference = (creditor.debtAmount ?? 0) - (creditor.declaredAmount ?? 0)
 
   return (
-    <div className="grid w-full max-w-full grid-cols-10 content-start gap-x-0.5 gap-y-0.5 self-start">
-      {/* 基本情報行 */}
-      <div className="min-w-0 col-span-4">
-        <EditableField
-          label="債権者"
-          value={creditor.creditorName}
-          onChange={(v) =>
-            updateCreditor(creditor, { creditorName: v || '' })
-          }
-          compact
-          compactLayout="inline"
-          bordered
-          truncateValue
-          fillWidth
-        />
-      </div>
-      <div className="min-w-0 col-span-4">
-        <EditableField
-          label="交渉相手"
-          value={creditor.negotiationPartner}
-          onChange={(v) =>
-            updateCreditor(creditor, { negotiationPartner: v || null })
-          }
-          compact
-          compactLayout="inline"
-          bordered
-          truncateValue
-          fillWidth
-        />
-      </div>
-      <div className="min-w-0 col-span-2">
-        <EditableField
-          label="CHECK"
-          value={creditor.check}
-          onChange={(v) =>
-            updateCreditor(creditor, { check: v || null })
-          }
-          compact
-          compactLayout="inline"
-          bordered
-          truncateValue
-          fillWidth
-        />
-      </div>
-
-      {/* 債権情報行1 */}
-      <div className="min-w-0 col-span-2">
-        <EditableField
-          label="申告額"
-          value={creditor.declaredAmount}
-          onChange={(v) =>
-            updateCreditor(creditor, { declaredAmount: Number(v) || null })
-          }
-          type="number"
-          suffix="円"
-          compact
-          compactLayout="inline"
-          bordered
-          truncateValue
-          fillWidth
-        />
-      </div>
-      <div className="min-w-0 col-span-2">
-        <EditableField
-          label="想定和解"
-          value={creditor.expectedSettlement}
-          onChange={(v) =>
-            updateCreditor(creditor, { expectedSettlement: Number(v) || null })
-          }
-          type="number"
-          suffix="%"
-          compact
-          compactLayout="inline"
-          bordered
-          truncateValue
-          fillWidth
-        />
-      </div>
-      <div className="min-w-0 col-span-2">
-        <EditableField
-          label="顧客コード"
-          value={creditor.customerCode}
-          onChange={(v) =>
-            updateCreditor(creditor, { customerCode: v || null })
-          }
-          compact
-          compactLayout="inline"
-          bordered
-          truncateValue
-          fillWidth
-        />
-      </div>
-      <div className="min-w-0 col-span-2">
-        <EditableField
-          label="調査票_契約日"
-          value={creditor.contractDate}
-          onChange={(v) =>
-            updateCreditor(creditor, { contractDate: v || null })
-          }
-          type="date"
-          compact
-          compactLayout="inline"
-          bordered
-          truncateValue
-          fillWidth
-        />
-      </div>
-      <div className="min-w-0 col-span-2">
-        <EditableField
-          label="債務額"
-          value={creditor.debtAmount}
-          onChange={(v) =>
-            updateCreditor(creditor, { debtAmount: Number(v) || null })
-          }
-          type="number"
-          suffix="円"
-          compact
-          compactLayout="inline"
-          bordered
-          truncateValue
-          fillWidth
-        />
-      </div>
-
-      {/* 進行状況行 */}
-      <div className="min-w-0 col-span-2">
+    <div className="grid w-full max-w-full grid-cols-5 content-start gap-x-0.5 gap-y-0.5 self-start">
+      {/* 1行目: ステータス(1), 次回処理日時(1), メモ(3) */}
+      <div className="min-w-0 col-span-1">
         <EditableField
           label="ステータス"
           value={creditor.status}
@@ -567,7 +214,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           fillWidth
         />
       </div>
-      <div className="min-w-0 col-span-2">
+      <div className="min-w-0 col-span-1">
         <EditableField
           label="次回処理日時"
           value={creditor.nextProcessDate}
@@ -582,7 +229,69 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           fillWidth
         />
       </div>
+      <div className="min-w-0 col-span-3">
+        <EditableField
+          label="メモ"
+          value={creditor.memo}
+          onChange={(v) =>
+            updateCreditor(creditor, { memo: v || null })
+          }
+          compact
+          compactLayout="inline"
+          bordered
+          truncateValue
+          fillWidth
+        />
+      </div>
+
+      {/* 2行目: 債権者(2), 申告額(1), 想定和解(1), 受任通知送付日(1) */}
       <div className="min-w-0 col-span-2">
+        <EditableField
+          label="債権者"
+          value={creditor.creditorName}
+          onChange={(v) =>
+            updateCreditor(creditor, { creditorName: v || '' })
+          }
+          compact
+          compactLayout="inline"
+          bordered
+          truncateValue
+          fillWidth
+        />
+      </div>
+      <div className="min-w-0 col-span-1">
+        <EditableField
+          label="申告額"
+          value={creditor.declaredAmount}
+          onChange={(v) =>
+            updateCreditor(creditor, { declaredAmount: Number(v) || null })
+          }
+          type="number"
+          suffix="円"
+          compact
+          compactLayout="inline"
+          bordered
+          truncateValue
+          fillWidth
+        />
+      </div>
+      <div className="min-w-0 col-span-1">
+        <EditableField
+          label="想定和解"
+          value={creditor.expectedSettlement}
+          onChange={(v) =>
+            updateCreditor(creditor, { expectedSettlement: Number(v) || null })
+          }
+          type="number"
+          suffix="%"
+          compact
+          compactLayout="inline"
+          bordered
+          truncateValue
+          fillWidth
+        />
+      </div>
+      <div className="min-w-0 col-span-1">
         <EditableField
           label="受任通知送付日"
           value={creditor.acceptanceNoticeSentDate}
@@ -597,7 +306,9 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           fillWidth
         />
       </div>
-      <div className="min-w-0 col-span-2">
+
+      {/* 3行目: 債権調査到着日(1), 調査票_契約日(1), 顧客コード(1), 債務額(1), 差額(1) */}
+      <div className="min-w-0 col-span-1">
         <EditableField
           label="債権調査到着日"
           value={creditor.debtInquiryArrivalDate}
@@ -612,7 +323,52 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           fillWidth
         />
       </div>
-      <div className="min-w-0 col-span-2">
+      <div className="min-w-0 col-span-1">
+        <EditableField
+          label="調査票_契約日"
+          value={creditor.contractDate}
+          onChange={(v) =>
+            updateCreditor(creditor, { contractDate: v || null })
+          }
+          type="date"
+          compact
+          compactLayout="inline"
+          bordered
+          truncateValue
+          fillWidth
+        />
+      </div>
+      <div className="min-w-0 col-span-1">
+        <EditableField
+          label="顧客コード"
+          value={creditor.customerCode}
+          onChange={(v) =>
+            updateCreditor(creditor, { customerCode: v || null })
+          }
+          compact
+          compactLayout="inline"
+          bordered
+          truncateValue
+          fillWidth
+        />
+      </div>
+      <div className="min-w-0 col-span-1">
+        <EditableField
+          label="債務額"
+          value={creditor.debtAmount}
+          onChange={(v) =>
+            updateCreditor(creditor, { debtAmount: Number(v) || null })
+          }
+          type="number"
+          suffix="円"
+          compact
+          compactLayout="inline"
+          bordered
+          truncateValue
+          fillWidth
+        />
+      </div>
+      <div className="min-w-0 col-span-1">
         <EditableField
           label="差額"
           value={debtDifference !== 0 ? debtDifference : null}
@@ -628,8 +384,8 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         />
       </div>
 
-      {/* 和解提案行 */}
-      <div className="min-w-0 col-span-2">
+      {/* 4行目(左寄せ): 和解提案日(1), 和解提案(1), 回答状況(1), 空(2) */}
+      <div className="min-w-0 col-span-1">
         <EditableField
           label="和解提案日"
           value={creditor.settlementProposalDate}
@@ -644,7 +400,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           fillWidth
         />
       </div>
-      <div className="min-w-0 col-span-2">
+      <div className="min-w-0 col-span-1">
         <EditableField
           label="和解提案"
           value={creditor.settlementProposal}
@@ -660,7 +416,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           fillWidth
         />
       </div>
-      <div className="min-w-0 col-span-3">
+      <div className="min-w-0 col-span-1">
         <EditableField
           label="回答状況"
           value={creditor.responseStatus}
@@ -674,13 +430,17 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           fillWidth
         />
       </div>
-      <div className="min-w-0 col-span-3">
+      <div className="min-w-0 col-span-2" />
+
+      {/* 5行目: 和解日(1), 和解(1), 和解時債務金額(1), コメント(2) */}
+      <div className="min-w-0 col-span-1">
         <EditableField
-          label="リマインド"
-          value={creditor.reminder}
+          label="和解日"
+          value={creditor.settlementDate}
           onChange={(v) =>
-            updateCreditor(creditor, { reminder: v || null })
+            updateCreditor(creditor, { settlementDate: v || null })
           }
+          type="date"
           compact
           compactLayout="inline"
           bordered
@@ -688,353 +448,50 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           fillWidth
         />
       </div>
-
-      {/* 和解内容（和解済みの場合のみ編集可能） */}
-      {['和解済', '弁済中', '完済'].includes(creditor.status) && (
-        <>
-          {/* 和解情報行 */}
-          <div className="min-w-0 col-span-2">
-            <EditableField
-              label="和解日"
-              value={creditor.settlementDate}
-              onChange={(v) =>
-                updateCreditor(creditor, { settlementDate: v || null })
-              }
-              type="date"
-              compact
-              compactLayout="inline"
-              bordered
-              truncateValue
-              fillWidth
-            />
-          </div>
-          <div className="min-w-0 col-span-2">
-            <EditableField
-              label="和解金額"
-              value={creditor.settlementAmount}
-              onChange={(v) =>
-                updateCreditor(creditor, { settlementAmount: Number(v) || null })
-              }
-              type="number"
-              suffix="円"
-              compact
-              compactLayout="inline"
-              bordered
-              truncateValue
-              fillWidth
-            />
-          </div>
-          <div className="min-w-0 col-span-2">
-            <EditableField
-              label="和解時債務金額"
-              value={creditor.settlementDebtAmount}
-              onChange={(v) =>
-                updateCreditor(creditor, { settlementDebtAmount: Number(v) || null })
-              }
-              type="number"
-              suffix="円"
-              compact
-              compactLayout="inline"
-              bordered
-              truncateValue
-              fillWidth
-            />
-          </div>
-          <div className="min-w-0 col-span-4">
-            <EditableField
-              label="和解内容コメント"
-              value={creditor.settlementContentComment}
-              onChange={(v) =>
-                updateCreditor(creditor, { settlementContentComment: v || null })
-              }
-              compact
-              compactLayout="inline"
-              bordered
-              truncateValue
-              fillWidth
-            />
-          </div>
-
-          {/* 支払条件行1 */}
-          <div className="min-w-0 col-span-2">
-            <EditableField
-              label="支払回数"
-              value={creditor.paymentCount}
-              onChange={(v) =>
-                updateCreditor(creditor, { paymentCount: Number(v) || null })
-              }
-              type="number"
-              suffix="回"
-              compact
-              compactLayout="inline"
-              bordered
-              truncateValue
-              fillWidth
-            />
-          </div>
-          <div className="min-w-0 col-span-2">
-            <EditableField
-              label="支払開始月"
-              value={creditor.paymentStartMonth}
-              onChange={(v) =>
-                updateCreditor(creditor, { paymentStartMonth: v || null })
-              }
-              compact
-              compactLayout="inline"
-              bordered
-              truncateValue
-              fillWidth
-            />
-          </div>
-          <div className="min-w-0 col-span-2">
-            <EditableField
-              label="支払日"
-              value={creditor.paymentDay}
-              onChange={(v) =>
-                updateCreditor(creditor, { paymentDay: Number(v) || null })
-              }
-              type="number"
-              suffix="日"
-              compact
-              compactLayout="inline"
-              bordered
-              truncateValue
-              fillWidth
-            />
-          </div>
-          <div className="min-w-0 col-span-2">
-            <EditableField
-              label="最終支払月"
-              value={creditor.finalPaymentMonth}
-              onChange={(v) =>
-                updateCreditor(creditor, { finalPaymentMonth: v || null })
-              }
-              compact
-              compactLayout="inline"
-              bordered
-              truncateValue
-              fillWidth
-            />
-          </div>
-          <div className="min-w-0 col-span-2">
-            <EditableField
-              label="将来利息"
-              value={creditor.futureInterest}
-              onChange={(v) =>
-                updateCreditor(creditor, { futureInterest: v || null })
-              }
-              type="select"
-              options={[
-                { value: 'なし', label: 'なし' },
-                { value: 'あり', label: 'あり' },
-              ]}
-              compact
-              compactLayout="inline"
-              bordered
-              truncateValue
-              fillWidth
-            />
-          </div>
-
-          {/* 支払金額行 */}
-          <div className="min-w-0 col-span-2">
-            <EditableField
-              label="初回支払額"
-              value={creditor.firstPaymentAmount}
-              onChange={(v) =>
-                updateCreditor(creditor, { firstPaymentAmount: Number(v) || null })
-              }
-              type="number"
-              suffix="円"
-              compact
-              compactLayout="inline"
-              bordered
-              truncateValue
-              fillWidth
-            />
-          </div>
-          <div className="min-w-0 col-span-2">
-            <EditableField
-              label="２回目以降支払額"
-              value={creditor.subsequentPaymentAmount}
-              onChange={(v) =>
-                updateCreditor(creditor, {
-                  subsequentPaymentAmount: Number(v) || null,
-                })
-              }
-              type="number"
-              suffix="円"
-              compact
-              compactLayout="inline"
-              bordered
-              truncateValue
-              fillWidth
-            />
-          </div>
-          <div className="min-w-0 col-span-2">
-            <EditableField
-              label="最終支払額"
-              value={creditor.finalPaymentAmount}
-              onChange={(v) =>
-                updateCreditor(creditor, { finalPaymentAmount: Number(v) || null })
-              }
-              type="number"
-              suffix="円"
-              compact
-              compactLayout="inline"
-              bordered
-              truncateValue
-              fillWidth
-            />
-          </div>
-          <div className="min-w-0 col-span-4" />
-
-          {/* 振込先情報行1 */}
-          <div className="min-w-0 col-span-2">
-            <EditableField
-              label="振込先銀行名"
-              value={creditor.bankName}
-              onChange={(v) =>
-                updateCreditor(creditor, { bankName: v || null })
-              }
-              compact
-              compactLayout="inline"
-              bordered
-              truncateValue
-              fillWidth
-            />
-          </div>
-          <div className="min-w-0 col-span-2">
-            <EditableField
-              label="金融機関コード"
-              value={creditor.financialInstitutionCode}
-              onChange={(v) =>
-                updateCreditor(creditor, { financialInstitutionCode: v || null })
-              }
-              compact
-              compactLayout="inline"
-              bordered
-              truncateValue
-              fillWidth
-            />
-          </div>
-          <div className="min-w-0 col-span-2">
-            <EditableField
-              label="振込先支店名"
-              value={creditor.branchName}
-              onChange={(v) =>
-                updateCreditor(creditor, { branchName: v || null })
-              }
-              compact
-              compactLayout="inline"
-              bordered
-              truncateValue
-              fillWidth
-            />
-          </div>
-          <div className="min-w-0 col-span-2">
-            <EditableField
-              label="支店コード"
-              value={creditor.branchCode}
-              onChange={(v) =>
-                updateCreditor(creditor, { branchCode: v || null })
-              }
-              compact
-              compactLayout="inline"
-              bordered
-              truncateValue
-              fillWidth
-            />
-          </div>
-          <div className="min-w-0 col-span-2">
-            <EditableField
-              label="振込先口座種別"
-              value={creditor.accountType}
-              onChange={(v) =>
-                updateCreditor(creditor, { accountType: v || null })
-              }
-              type="select"
-              options={[
-                { value: '普通', label: '普通' },
-                { value: '当座', label: '当座' },
-              ]}
-              compact
-              compactLayout="inline"
-              bordered
-              truncateValue
-              fillWidth
-            />
-          </div>
-
-          {/* 振込先情報行2 */}
-          <div className="min-w-0 col-span-2">
-            <EditableField
-              label="振込先口座番号"
-              value={creditor.accountNumber}
-              onChange={(v) =>
-                updateCreditor(creditor, { accountNumber: v || null })
-              }
-              compact
-              compactLayout="inline"
-              bordered
-              truncateValue
-              fillWidth
-            />
-          </div>
-          <div className="min-w-0 col-span-2">
-            <EditableField
-              label="振込先口座名義"
-              value={creditor.accountHolder}
-              onChange={(v) =>
-                updateCreditor(creditor, { accountHolder: v || null })
-              }
-              compact
-              compactLayout="inline"
-              bordered
-              truncateValue
-              fillWidth
-            />
-          </div>
-          <div className="min-w-0 col-span-2">
-            <EditableField
-              label="指定コード"
-              value={creditor.designatedCode}
-              onChange={(v) =>
-                updateCreditor(creditor, { designatedCode: v || null })
-              }
-              compact
-              compactLayout="inline"
-              bordered
-              truncateValue
-              fillWidth
-            />
-          </div>
-          <div className="min-w-0 col-span-2">
-            <EditableField
-              label="弁済対象"
-              value={creditor.repaymentTarget}
-              onChange={(v) =>
-                updateCreditor(creditor, { repaymentTarget: v || null })
-              }
-              compact
-              compactLayout="inline"
-              bordered
-              truncateValue
-              fillWidth
-            />
-          </div>
-          <div className="min-w-0 col-span-2" />
-        </>
-      )}
-
-      {/* 債権者資料 */}
-      <div className="min-w-0 col-span-full">
+      <div className="min-w-0 col-span-1">
         <EditableField
-          label="債権者資料"
-          value={creditor.creditorDocuments ?? ''}
-          onChange={(v) => updateCreditor(creditor, { creditorDocuments: v || null })}
-          type="textarea"
-          placeholder="例）債権調査票: driveリンク / 和解提案書: ファイル名 など"
+          label="和解"
+          value={creditor.settlementAmount}
+          onChange={(v) =>
+            updateCreditor(creditor, { settlementAmount: Number(v) || null })
+          }
+          type="number"
+          suffix="円"
+          compact
+          compactLayout="inline"
+          bordered
+          truncateValue
+          fillWidth
+        />
+      </div>
+      <div className="min-w-0 col-span-1">
+        <EditableField
+          label="和解時債務金額"
+          value={creditor.settlementDebtAmount}
+          onChange={(v) =>
+            updateCreditor(creditor, { settlementDebtAmount: Number(v) || null })
+          }
+          type="number"
+          suffix="円"
+          compact
+          compactLayout="inline"
+          bordered
+          truncateValue
+          fillWidth
+        />
+      </div>
+      <div className="min-w-0 col-span-2">
+        <EditableField
+          label="コメント"
+          value={creditor.settlementContentComment}
+          onChange={(v) =>
+            updateCreditor(creditor, { settlementContentComment: v || null })
+          }
+          compact
+          compactLayout="inline"
+          bordered
+          truncateValue
+          fillWidth
         />
       </div>
     </div>
