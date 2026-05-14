@@ -7,6 +7,7 @@ import {
   CaseDetailPage,
   SettlementResultsPage,
   PaymentManagementPage,
+  PaymentDiscrepancyPage,
 } from './pages'
 
 const router = createBrowserRouter([
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
   {
     path: '/payment-management',
     element: <PaymentManagementPage />,
+  },
+  {
+    path: '/payment-discrepancy',
+    element: <PaymentDiscrepancyPage />,
   },
   {
     path: '/cases/:id',

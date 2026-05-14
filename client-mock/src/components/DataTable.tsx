@@ -25,6 +25,8 @@ interface DataTableProps<T> {
   keyField: keyof T
   onRowClick?: (item: T) => void
   emptyMessage?: string
+  /** 行ごとのクラス名を返す関数（背景色など） */
+  getRowClassName?: (item: T, index: number) => string
   /**
    * default: 通常
    * compact: 小さめフォント・詰め余白
@@ -62,6 +64,7 @@ export function DataTable<T>({
   keyField,
   onRowClick,
   emptyMessage = 'データがありません',
+  getRowClassName,
   density = 'default',
   bodyMaxHeightClassName,
   stickyHeader = false,
@@ -257,10 +260,12 @@ export function DataTable<T>({
               </td>
             </tr>
           ) : (
-            sortedData.map((item, index) => (
+            sortedData.map((item, index) => {
+              const customRowClass = getRowClassName?.(item, index) ?? ''
+              return (
               <tr
                 key={String(getValue(item, String(keyField)))}
-                className={`border-b border-slate-100 ${onRowClick ? 'cursor-pointer hover:bg-blue-50' : ''} ${index % 2 === 1 ? 'bg-slate-200/50' : ''}`}
+                className={`border-b border-slate-100 ${onRowClick ? 'cursor-pointer hover:bg-blue-50' : ''} ${index % 2 === 1 && !customRowClass ? 'bg-slate-200/50' : ''} ${customRowClass}`}
                 onClick={() => onRowClick?.(item)}
               >
                 {columns.map((col) => {
@@ -292,7 +297,8 @@ export function DataTable<T>({
                   )
                 })}
               </tr>
-            ))
+              )
+            })
           )}
         </tbody>
       </table>

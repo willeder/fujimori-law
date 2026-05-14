@@ -15,6 +15,95 @@ function fmtNum(n: number | null | undefined) {
   return <span>{n.toLocaleString()}</span>
 }
 
+/**
+ * 実入金額に基づいて各充当額を自動計算
+ *
+ * 入金情報の計上定義:
+ * ①プール金の計算（予定時）
+ *   新計算式: 入金予定額 - 報酬充当予定額 - 弁代報酬充当予定額 - 弁済充当予定額 - 手数料
+ *   ※手数料と同額のプール金計上は廃止
+ *
+ * ②実入金反映時
+ *   A) 予定金額と同額：予定の各項目の数値を反映
+ *   B) 予定金額より超過：報酬額などは予定のまま、プール金へ差額を加算
+ *   C) 予定金額より不足：実入金額に合わせて各項目を反映し、補充行を追加
+ *
+ * 充当優先順位: 弁済 → 弁代報酬 → 手数料 → 報酬
+ */
+function calculateActualAllocations(
+  payment: PaymentRecord,
+  actualAmount: number | null
+): Partial<PaymentRecord> {
+  if (actualAmount == null) {
+    return {
+      actualFeeAllocation: null,
+      actualAgentFeeAllocation: null,
+      actualPoolAllocation: null,
+      actualRepaymentAllocation: null,
+    }
+  }
+
+  const plannedAmount = payment.plannedAmount ?? 0
+
+  // A) 予定金額と同額の場合：予定の各項目の数値をそのまま反映
+  if (actualAmount === plannedAmount) {
+    return {
+      actualFeeAllocation: payment.plannedFeeAllocation,
+      actualAgentFeeAllocation: payment.plannedAgentFeeAllocation,
+      actualPoolAllocation: payment.plannedPoolAllocation,
+      actualRepaymentAllocation: payment.plannedRepaymentAllocation,
+    }
+  }
+
+  // B) 予定金額より超過の場合：報酬額などは予定のまま、プール金へ差額を加算
+  if (actualAmount > plannedAmount) {
+    const excess = actualAmount - plannedAmount
+    const basePool = payment.plannedPoolAllocation ?? 0
+    return {
+      actualFeeAllocation: payment.plannedFeeAllocation,
+      actualAgentFeeAllocation: payment.plannedAgentFeeAllocation,
+      actualPoolAllocation: basePool + excess,
+      actualRepaymentAllocation: payment.plannedRepaymentAllocation,
+    }
+  }
+
+  // C) 予定金額より不足の場合：実入金額に合わせて各項目を反映
+  // 充当優先順位: 弁済 → 弁代報酬 → 手数料 → 報酬 → プール
+  const plannedRepayment = payment.plannedRepaymentAllocation ?? 0
+  const plannedAgentFee = payment.plannedAgentFeeAllocation ?? 0
+  const plannedHandlingFee = payment.handlingFee ?? 0
+  const plannedFee = payment.plannedFeeAllocation ?? 0
+
+  let remaining = actualAmount
+
+  // 1. 弁済充当（最優先、予定額まで）
+  const actualRepayment = Math.min(remaining, plannedRepayment)
+  remaining -= actualRepayment
+
+  // 2. 弁代報酬充当（予定額まで）
+  const actualAgentFee = Math.min(remaining, plannedAgentFee)
+  remaining -= actualAgentFee
+
+  // 3. 手数料（予定額まで）
+  const actualHandlingFee = Math.min(remaining, plannedHandlingFee)
+  remaining -= actualHandlingFee
+
+  // 4. 報酬充当（予定額まで）
+  const actualFee = Math.min(remaining, plannedFee)
+  remaining -= actualFee
+
+  // 5. プール金（残り）
+  const actualPool = remaining
+
+  return {
+    actualRepaymentAllocation: actualRepayment > 0 ? actualRepayment : null,
+    actualAgentFeeAllocation: actualAgentFee > 0 ? actualAgentFee : null,
+    actualPoolAllocation: actualPool > 0 ? actualPool : null,
+    actualFeeAllocation: actualFee > 0 ? actualFee : null,
+    handlingFee: actualHandlingFee > 0 ? actualHandlingFee : null,
+  }
+}
+
 export function PaymentTable({
   caseId,
   payments,
@@ -57,11 +146,93 @@ export function PaymentTable({
   }
 
   const handleSave = (payment: PaymentRecord) => {
+    let finalData = { ...editData }
+
+    // 実入金日が入力されている場合、充当額を自動計算
+    if (finalData.actualDate) {
+      // 実入金額が未入力なら予定額をデフォルトで使用
+      const actualAmount = finalData.actualAmount ?? payment.plannedAmount
+      finalData.actualAmount = actualAmount
+
+      // 各充当額を自動計算（手動入力がない場合のみ）
+      const calculated = calculateActualAllocations(payment, actualAmount)
+      if (finalData.actualFeeAllocation === payment.actualFeeAllocation) {
+        finalData.actualFeeAllocation = calculated.actualFeeAllocation
+      }
+      if (finalData.actualAgentFeeAllocation === payment.actualAgentFeeAllocation) {
+        finalData.actualAgentFeeAllocation = calculated.actualAgentFeeAllocation
+      }
+      if (finalData.actualPoolAllocation === payment.actualPoolAllocation) {
+        finalData.actualPoolAllocation = calculated.actualPoolAllocation
+      }
+      if (finalData.actualRepaymentAllocation === payment.actualRepaymentAllocation) {
+        finalData.actualRepaymentAllocation = calculated.actualRepaymentAllocation
+      }
+
+      // 実入金が不足の場合、補充レコードを追加
+      const plannedAmount = payment.plannedAmount ?? 0
+      const shortage = plannedAmount - (actualAmount ?? 0)
+      if (shortage > 0 && finalData.actualDate) {
+        // 今回の入金の次の入金を探す
+        const currentIndex = sortedPayments.findIndex((p) => p.id === payment.id)
+        const nextPayment = sortedPayments[currentIndex + 1]
+
+        // 補充レコードの入金予定日を決定
+        // 今回の入金日の翌日、または次回入金日の前日
+        let supplementDate: string
+        const currentDate = new Date(finalData.actualDate)
+        if (nextPayment?.plannedDate) {
+          const nextDate = new Date(nextPayment.plannedDate)
+          // 次回入金日の1日前
+          nextDate.setDate(nextDate.getDate() - 1)
+          // 今回の入金日より後であることを確認
+          if (nextDate > currentDate) {
+            supplementDate = nextDate.toISOString().split('T')[0]
+          } else {
+            // 今回の入金日の翌日
+            currentDate.setDate(currentDate.getDate() + 1)
+            supplementDate = currentDate.toISOString().split('T')[0]
+          }
+        } else {
+          // 次回入金がない場合、今回の入金日の翌日
+          currentDate.setDate(currentDate.getDate() + 1)
+          supplementDate = currentDate.toISOString().split('T')[0]
+        }
+
+        // 新しい補充レコードを追加
+        const newId = Math.max(0, ...allCasePayments.map((p) => p.id)) + 1
+        dispatch({
+          type: 'ADD_PAYMENT',
+          payload: {
+            id: newId,
+            caseId,
+            creditorId: payment.creditorId,
+            creditorInstallmentIndex: null,
+            plannedDate: supplementDate,
+            plannedAmount: shortage,
+            plannedFeeAllocation: null,
+            plannedAgentFeeAllocation: null,
+            plannedPoolAllocation: null,
+            plannedRepaymentAllocation: null,
+            actualDate: null,
+            actualAmount: null,
+            actualFeeAllocation: null,
+            actualAgentFeeAllocation: null,
+            actualPoolAllocation: null,
+            actualRepaymentAllocation: null,
+            handlingFee: null,
+            repaymentCount: null,
+            cumulativePool: null,
+          },
+        })
+      }
+    }
+
     dispatch({
       type: 'UPDATE_PAYMENT',
       payload: {
         ...payment,
-        ...editData,
+        ...finalData,
       },
     })
     setEditingId(null)
@@ -511,6 +682,17 @@ export function PaymentTable({
         stickyHeader
         cellSingleLine
         suspendTruncate={editingId !== null}
+        getRowClassName={(item) => {
+          // 実入金日がない場合はデフォルト
+          if (!item.actualDate) return ''
+          const planned = item.plannedAmount ?? 0
+          const actual = item.actualAmount ?? 0
+          // 実入金額 < 予定額: 赤い背景
+          if (actual < planned) return 'bg-red-50'
+          // 実入金額 > 予定額: 青い背景
+          if (actual > planned) return 'bg-blue-50'
+          return ''
+        }}
       />
 
       <button

@@ -178,6 +178,13 @@ export function CaseListPage() {
               >
                 和解実績一覧
               </button>
+              <span className="text-slate-300">|</span>
+              <button
+                onClick={() => navigate('/payment-discrepancy')}
+                className="text-xs text-slate-600 hover:text-slate-900"
+              >
+                入金額相違一覧
+              </button>
             </nav>
           </div>
           <div className="flex shrink-0 items-center gap-2">

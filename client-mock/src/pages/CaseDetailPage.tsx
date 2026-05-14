@@ -235,8 +235,9 @@ function CaseDetailBody({
   const creditors = useCreditorsByCaseId(Number(id));
   const contactHistories = useContactHistoriesByCaseId(Number(id));
   const payments = usePaymentsByCaseId(Number(id));
+  // 案件全体行（creditorId == null）から合計行（plannedDate == null）を除外
   const caseLevelPayments = useMemo(
-    () => payments.filter((p) => p.creditorId == null),
+    () => payments.filter((p) => p.creditorId == null && p.plannedDate != null),
     [payments],
   );
   const dispatch = useCaseDispatch();
@@ -508,13 +509,26 @@ function CaseDetailBody({
     0,
   );
 
-  const cumulativePaid = caseData.paymentInfo.cumulativePaymentAmount ?? 0;
-  const cumulativePlanned = caseData.paymentInfo.cumulativePlannedPayment ?? 0;
-  const remainingPlanned =
-    caseData.paymentInfo.cumulativePlannedPayment != null &&
-    caseData.paymentInfo.cumulativePaymentAmount != null
-      ? cumulativePlanned - cumulativePaid
-      : null;
+  // 累計入金額：全入金スケジュール（合計行を除く）の実入金額の合計
+  const paymentsWithoutSummary = payments.filter((p) => p.plannedDate != null);
+  const cumulativePaid = paymentsWithoutSummary.reduce(
+    (s, p) => s + (p.actualAmount ?? 0),
+    0,
+  );
+  // 累計入金予定額：全入金スケジュール（合計行を除く）の予定入金額の合計
+  const cumulativePlanned = paymentsWithoutSummary.reduce(
+    (s, p) => s + (p.plannedAmount ?? 0),
+    0,
+  );
+  const remainingPlanned = cumulativePlanned - cumulativePaid;
+
+  // 次回入金日：実入金日が未入力の最初の入金予定日（日付順でソート）
+  const nextPaymentDate = useMemo(() => {
+    const unpaidPayments = caseLevelPayments
+      .filter((p) => p.actualDate == null && p.plannedDate != null)
+      .sort((a, b) => (a.plannedDate ?? "").localeCompare(b.plannedDate ?? ""));
+    return unpaidPayments[0]?.plannedDate ?? null;
+  }, [caseLevelPayments]);
 
   const lineUrlRaw = caseData.clientBasicInfo.lineUrl?.trim() ?? "";
   const lineHref =
@@ -747,10 +761,7 @@ function CaseDetailBody({
           <div className="flex min-w-0 items-center gap-1 py-0 min-h-[1.5rem] col-span-2">
             <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[11px]">・累計入金額</span>
             <span className="flex-1 min-w-0 text-xs font-bold tabular-nums text-blue-600 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate">
-              {formatYenPair(
-                caseData.paymentInfo.cumulativePaymentAmount,
-                caseData.paymentInfo.cumulativePlannedPayment,
-              )}
+              {formatYenPair(cumulativePaid, cumulativePlanned)}
             </span>
           </div>
           <div className="flex min-w-0 items-center gap-1 py-0 min-h-[1.5rem]">
@@ -764,7 +775,7 @@ function CaseDetailBody({
           <div className="flex min-w-0 items-center gap-1 py-0 min-h-[1.5rem]">
             <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[11px]">・次回入金日</span>
             <span className="flex-1 min-w-0 text-xs font-bold tabular-nums text-blue-600 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate">
-              {caseData.paymentInfo.nextPaymentDate ?? "-"}
+              {nextPaymentDate ?? "-"}
             </span>
           </div>
           <EditableField
