@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { DataTable, type Column } from '../components'
 import { useUserSettings } from '../context/UserSettingsContext'
 import { useCaseDispatch, useCaseState } from '../store/useCaseStore'
@@ -23,6 +23,15 @@ export function ContactHistoryTable({
   const { accountName } = useUserSettings()
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editData, setEditData] = useState<Partial<ContactHistory>>({})
+  const wrapperRef = useRef<HTMLDivElement>(null)
+
+  /** 追加直後に最下段（新規行）まで縦スクロール */
+  const scrollToBottom = () => {
+    requestAnimationFrame(() => {
+      const scroller = wrapperRef.current?.querySelector<HTMLElement>('.overflow-auto')
+      if (scroller) scroller.scrollTop = scroller.scrollHeight
+    })
+  }
 
   const getLocalNow = () => {
     const now = new Date()
@@ -36,8 +45,10 @@ export function ContactHistoryTable({
   }
 
   const sorted = useMemo(() => {
-    const toKey = (h: ContactHistory) => `${h.contactDate ?? ''} ${h.contactTime ?? ''}`
-    return [...histories].sort((a, b) => toKey(b).localeCompare(toKey(a)))
+    // 時系列の昇順（上が古い・下が新しい）。新規行は現在時刻なので最下段に並ぶ
+    const toKey = (h: ContactHistory) =>
+      `${h.contactDate ?? ''} ${h.contactTime ?? ''} ${String(h.id).padStart(8, '0')}`
+    return [...histories].sort((a, b) => toKey(a).localeCompare(toKey(b)))
   }, [histories])
 
   const handleEdit = (h: ContactHistory) => {
@@ -213,7 +224,7 @@ export function ContactHistoryTable({
           />
         ) : (
           <div
-            className={`leading-snug ${!h.comment ? 'text-slate-300' : ''}`}
+            className={`whitespace-pre-wrap break-words leading-snug ${!h.comment ? 'text-slate-300' : ''}`}
           >
             {h.comment ?? '-'}
           </div>
@@ -272,7 +283,7 @@ export function ContactHistoryTable({
   ]
 
   return (
-    <div className="flex min-h-0 w-full flex-1 flex-col gap-1.5">
+    <div ref={wrapperRef} className="flex min-h-0 w-full flex-1 flex-col gap-1.5">
 
       <div className="w-full">
         <div className="w-full rounded-md border border-slate-100/80 bg-slate-50/60 px-2 py-1 font-medium">
@@ -324,6 +335,7 @@ export function ContactHistoryTable({
                 creditorName: null,
                 comment: null,
               })
+              scrollToBottom()
             }}
             className="min-h-[1.75rem] rounded-md border border-slate-100/80 bg-slate-50/60 px-2 py-0.5 text-xs leading-none text-blue-600 transition-colors hover:bg-blue-50"
           >
