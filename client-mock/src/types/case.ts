@@ -10,12 +10,14 @@ export interface ClientBasicInfo {
   phone: string | null
   lineUrl?: string | null // LINE@ URL
   email: string | null
+  postalCode?: string | null // 郵便番号
   prefecture: string | null
   address: string | null
   birthDate: string | null
   age: number | null
   gender: '男' | '女' | null
   maritalStatus: '既婚' | '未婚' | '離婚' | null
+  maidenName?: string | null // 旧姓
   children: string | null
   residenceType: string | null // 持家(ﾛｰﾝ無)、持家(ﾛｰﾝ有)、賃貸、社宅、実家 等
   rent: number | null
@@ -47,6 +49,12 @@ export interface ClientBasicInfo {
   employerContact?: string | null
   /** 勤務先住所 */
   employerAddress?: string | null
+  /** 旧)勤務先名 */
+  previousEmployerName?: string | null
+  /** 旧)勤務連絡先 */
+  previousEmployerContact?: string | null
+  /** 旧)勤務先住所 */
+  previousEmployerAddress?: string | null
   /** 他事務所相談 */
   otherOfficeConsultation?: string | null
   /** 遅れ（返済遅延等のメモ） */
@@ -123,6 +131,8 @@ export interface PaymentInfo {
   cumulativePoolAllocation: number | null // 累)プール充当額
   cumulativeRepaymentAllocation: number | null // 累)弁済充当額
   totalMinusPoolMinusRepayment: number | null // 総額-プール-累弁済
+  /** 催促通知除外: '除外' | null */
+  notificationExcluded: '除外' | null
   /** バーチャル口座（略称V口座。登録後は原則ロック。変更時は確認ダイアログ） */
   vAccountBranch: string | null // 支店
   vAccountNumber: string | null // 口座番号
@@ -171,6 +181,9 @@ export type CreditorStatus =
   | '弁済中'
   | '完済'
 
+/** 弁済除外ステータス */
+export type RepaymentExcludedStatus = '停止' | '終了' | null
+
 /** 債権者情報（和解対象債権） */
 export interface Creditor {
   id: number
@@ -179,8 +192,12 @@ export interface Creditor {
   negotiationPartner: string | null // 交渉相手
   declaredAmount: number | null // 申告額
   debtAmount: number | null // 債務額
-  expectedSettlement: number | null // 想定和解
+  expectedSettlement: number | null // 想定和解（%）
+  expectedSettlementAmount: number | null // 和解予定額（金額）
+  expectedPaymentCount: number | null // 和解予定回数
+  expectedFutureInterest: string | null // 和解予定利息
   status: CreditorStatus
+  repaymentExcluded: RepaymentExcludedStatus // 弁済除外（停止・終了）
   check?: string | null // CHECK
   nextProcessDate: string | null // 次回処理日時
   acceptanceNoticeSentDate: string | null // 受任通知送付日
@@ -252,4 +269,46 @@ export interface ContactHistory {
   targetType: '依頼者' | '債権者'
   creditorName?: string | null // 債権者の場合
   comment: string | null
+}
+
+/** 弁済対象ステータス */
+export type RepaymentStatus = 'active' | 'suspended' | 'completed' | null
+
+/** 入金遅延統計 */
+export interface PaymentDelayStats {
+  caseId: number
+  totalPayments: number // 総入金回数
+  delayedPayments: number // 遅延回数
+  delayRate: number // 遅延率 (0-1)
+  consecutiveDelays: number // 連続遅延回数
+  lastDelayDate: string | null // 最後の遅延日
+  riskLevel: 'low' | 'medium' | 'high' // 遅延リスク
+  avgDelayDays: number // 平均遅延日数
+}
+
+/** LINE通知設定 */
+export interface LineNotificationConfig {
+  enabled: boolean
+  reminderDaysBefore: number[] // [7, 3, 1] = 7日前、3日前、1日前
+  sendTime: string // "10:00" 送信時刻
+}
+
+/** LINE通知履歴 */
+export interface LineNotificationLog {
+  id: number
+  caseId: number
+  notificationType: 'payment_reminder' | 'deposit_confirm' | 'deadline_alert'
+  scheduledDate: string
+  sentDate: string | null
+  status: 'pending' | 'sent' | 'failed' | 'cancelled'
+  recipientLineUserId?: string | null
+  messageContent: string
+  errorMessage?: string | null
+}
+
+/** 遅延案件情報（ダッシュボード表示用） */
+export interface DelayedCaseInfo {
+  case: Case
+  stats: PaymentDelayStats
+  overduePayments: PaymentRecord[]
 }

@@ -201,18 +201,19 @@ export function ContactHistoryTable({
       header: 'コメント',
       sortable: false,
       cellTruncate: false,
+      cellMultiline: true,
       render: (h) =>
         editingId === h.id ? (
           <textarea
             value={editData.comment ?? ''}
             onChange={(e) => setEditData({ ...editData, comment: e.target.value })}
-            className="w-full min-h-[2rem] rounded border border-blue-300 px-1.5 py-0.5 text-xs leading-tight resize-none"
+            className="w-full min-h-[3rem] rounded border border-blue-300 px-1.5 py-0.5 text-xs leading-snug resize-y"
             placeholder="コメント"
-            rows={1}
+            rows={2}
           />
         ) : (
           <div
-            className={`whitespace-normal break-words leading-snug ${!h.comment ? 'text-slate-300' : ''}`}
+            className={`leading-snug ${!h.comment ? 'text-slate-300' : ''}`}
           >
             {h.comment ?? '-'}
           </div>

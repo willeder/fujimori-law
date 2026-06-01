@@ -12,7 +12,8 @@ interface PaymentTableProps {
 
 function fmtNum(n: number | null | undefined) {
   if (n == null) return <span className="text-slate-300">-</span>
-  return <span>{n.toLocaleString()}</span>
+  const isNegative = n < 0
+  return <span className={isNegative ? 'text-red-600' : ''}>{n.toLocaleString()}</span>
 }
 
 /**

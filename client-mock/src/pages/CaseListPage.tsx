@@ -173,6 +173,13 @@ export function CaseListPage() {
               </button>
               <span className="text-slate-300">|</span>
               <button
+                onClick={() => navigate('/payment-delay')}
+                className="text-xs text-slate-600 hover:text-slate-900"
+              >
+                入金遅延モニタリング
+              </button>
+              <span className="text-slate-300">|</span>
+              <button
                 onClick={() => navigate('/settlement-results')}
                 className="text-xs text-slate-600 hover:text-slate-900"
               >

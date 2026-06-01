@@ -2,15 +2,12 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useReducer,
   type ReactNode,
   type Dispatch,
 } from 'react'
 import type { Case, ContactHistory, Creditor, PaymentRecord } from '../types'
-import { mockCases } from '../data/mockCases'
-import { mockCreditors } from '../data/mockCreditors'
-import { mockContactHistories } from '../data/mockContactHistories'
-import { mockPaymentRecords } from '../data/mockPayments'
 
 // State型
 interface CaseState {
@@ -19,10 +16,23 @@ interface CaseState {
   contactHistories: ContactHistory[]
   paymentRecords: PaymentRecord[]
   selectedCaseId: number | null
+  /** 実データ JSON の読み込み状態 */
+  loading: boolean
+  loadError: string | null
+}
+
+/** LOAD_ALL のペイロード（実行時 fetch した実データ一式） */
+export interface CaseDataset {
+  cases: Case[]
+  creditors: Creditor[]
+  contactHistories: ContactHistory[]
+  paymentRecords: PaymentRecord[]
 }
 
 // Action型
 type CaseAction =
+  | { type: 'LOAD_ALL'; payload: CaseDataset }
+  | { type: 'LOAD_ERROR'; payload: string }
   | { type: 'UPDATE_CASE'; payload: Case }
   | { type: 'UPDATE_CREDITOR'; payload: Creditor }
   | { type: 'ADD_CREDITOR'; payload: Creditor }
@@ -38,6 +48,18 @@ type CaseAction =
 // Reducer
 function caseReducer(state: CaseState, action: CaseAction): CaseState {
   switch (action.type) {
+    case 'LOAD_ALL':
+      return {
+        ...state,
+        cases: action.payload.cases,
+        creditors: action.payload.creditors,
+        contactHistories: action.payload.contactHistories,
+        paymentRecords: action.payload.paymentRecords,
+        loading: false,
+        loadError: null,
+      }
+    case 'LOAD_ERROR':
+      return { ...state, loading: false, loadError: action.payload }
     case 'UPDATE_CASE':
       return {
         ...state,
@@ -110,13 +132,33 @@ function caseReducer(state: CaseState, action: CaseAction): CaseState {
   }
 }
 
-// 初期状態
+// 初期状態（実データは実行時 fetch で投入）
 const initialState: CaseState = {
-  cases: mockCases,
-  creditors: mockCreditors,
-  contactHistories: mockContactHistories,
-  paymentRecords: mockPaymentRecords,
+  cases: [],
+  creditors: [],
+  contactHistories: [],
+  paymentRecords: [],
   selectedCaseId: null,
+  loading: true,
+  loadError: null,
+}
+
+/** public/data/ から実データ JSON を取得 */
+async function fetchDataset(): Promise<CaseDataset> {
+  const base = import.meta.env.BASE_URL || '/'
+  const load = async <T,>(name: string): Promise<T> => {
+    const res = await fetch(`${base}data/${name}`)
+    if (!res.ok) throw new Error(`${name}: HTTP ${res.status}`)
+    return (await res.json()) as T
+  }
+  const [cases, creditors, contactHistories, paymentRecords] =
+    await Promise.all([
+      load<Case[]>('cases.json'),
+      load<Creditor[]>('creditors.json'),
+      load<ContactHistory[]>('contactHistories.json'),
+      load<PaymentRecord[]>('payments.json'),
+    ])
+  return { cases, creditors, contactHistories, paymentRecords }
 }
 
 // Context
@@ -126,6 +168,24 @@ const CaseDispatchContext = createContext<Dispatch<CaseAction> | null>(null)
 // Provider
 export function CaseProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(caseReducer, initialState)
+
+  useEffect(() => {
+    let cancelled = false
+    fetchDataset()
+      .then((data) => {
+        if (!cancelled) dispatch({ type: 'LOAD_ALL', payload: data })
+      })
+      .catch((err: unknown) => {
+        if (!cancelled)
+          dispatch({
+            type: 'LOAD_ERROR',
+            payload: err instanceof Error ? err.message : String(err),
+          })
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   return (
     <CaseStateContext.Provider value={state}>

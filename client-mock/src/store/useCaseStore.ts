@@ -11,6 +11,12 @@ export function useCaseDispatch() {
   return useCaseDispatchContext()
 }
 
+/** 実データ JSON の読み込み状態 */
+export function useCaseLoading() {
+  const { loading, loadError } = useCaseStateContext()
+  return { loading, loadError }
+}
+
 export function useCase(id: number) {
   const { cases } = useCaseState()
   return cases.find((c) => c.id === id)

@@ -17,6 +17,11 @@ export interface Column<T> {
    * 未指定は省略する
    */
   cellTruncate?: boolean
+  /**
+   * cellSingleLine 時のみ。true の列は複数行表示を許可（コメント欄など）
+   * whitespace-pre-wrap で改行を保持
+   */
+  cellMultiline?: boolean
 }
 
 interface DataTableProps<T> {
@@ -274,9 +279,11 @@ export function DataTable<T>({
                       ? innerCellClassBase
                       : suspendTruncate
                         ? `${innerCellClassBase} whitespace-nowrap`
-                        : col.cellTruncate === false
-                          ? `${innerCellClassBase} whitespace-nowrap`
-                          : `${innerCellClassBase} truncate`
+                        : col.cellMultiline
+                          ? `${innerCellClassBase} whitespace-pre-wrap break-words`
+                          : col.cellTruncate === false
+                            ? `${innerCellClassBase} whitespace-nowrap`
+                            : `${innerCellClassBase} truncate`
                   return (
                   <td
                     key={String(col.key)}
