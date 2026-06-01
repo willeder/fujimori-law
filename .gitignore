@@ -1,1 +1,19 @@
 .venv-xlsx/
+.venv/
+
+# Node / Next.js
+node_modules/
+.next/
+next-env.d.ts
+out/
+
+# 環境変数
+.env
+.env.local
+.env*.local
+
+# Prisma 生成物
+/src/generated/
+
+# 生成データ（再生成可: npm run data:build）。大容量のためコミットしない
+/client-mock/public/data/*.json

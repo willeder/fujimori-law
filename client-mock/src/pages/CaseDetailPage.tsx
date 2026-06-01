@@ -257,6 +257,20 @@ function CaseDetailBody({
       ? creditorScopeTabId
       : "all";
 
+  /**
+   * 債権者ごとの弁済完了（完済）判定。
+   * 「済」は和解成立ではなく、その債権者の弁済予定がすべて入金済みのときだけ付ける。
+   * 弁済予定が無い（未スケジュール）の債権者は完済とみなさない。
+   */
+  const creditorFullyRepaid = useMemo(() => {
+    const m = new Map<number, boolean>();
+    for (const c of creditors) {
+      const rows = payments.filter((p) => p.creditorId === c.id);
+      m.set(c.id, rows.length > 0 && rows.every((p) => p.actualDate != null));
+    }
+    return m;
+  }, [creditors, payments]);
+
   const settlementTabs = useMemo(() => {
     if (!caseData) return [];
     return [
@@ -275,14 +289,14 @@ function CaseDetailBody({
       ...creditors.map((c) => ({
         id: String(c.id),
         label: c.creditorName,
-        badge: c.status === "和解済" ? "済" : undefined,
+        badge: creditorFullyRepaid.get(c.id) ? "済" : undefined,
         accent: creditorTabAccentForName(c.creditorName, c.id),
         content: (
           <CreditorTab caseId={caseData.id} creditors={[c]} view="detail" />
         ),
       })),
     ];
-  }, [caseData, creditors]);
+  }, [caseData, creditors, creditorFullyRepaid]);
 
   const paymentTabs = useMemo(() => {
     if (!caseData) return [];
@@ -302,7 +316,7 @@ function CaseDetailBody({
       ...creditors.map((c) => ({
         id: String(c.id),
         label: c.creditorName,
-        badge: c.status === "和解済" ? "済" : undefined,
+        badge: creditorFullyRepaid.get(c.id) ? "済" : undefined,
         accent: creditorTabAccentForName(c.creditorName, c.id),
         content: (
           <CreditorPaymentTable
@@ -313,7 +327,7 @@ function CaseDetailBody({
         ),
       })),
     ];
-  }, [caseData, caseLevelPayments, creditors, payments]);
+  }, [caseData, caseLevelPayments, creditors, payments, creditorFullyRepaid]);
 
   if (!caseData) {
     return (

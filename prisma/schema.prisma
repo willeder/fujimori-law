@@ -1,0 +1,394 @@
+// 受任案件管理システム — 本実装用 Prisma スキーマ
+// DB: PostgreSQL (Neon 想定) / ORM: Prisma
+// 既存の client-mock/src/types/case.ts の型をリレーショナルに落とし込み、
+// LINE 連携（userId 紐付け・通知ログ）と認証（Auth.js）テーブルを追加。
+//
+// 命名: モデル=PascalCase / フィールド=camelCase / テーブル=snake_case(@@map)
+// 金額=Int（円・整数）/ 日付=DateTime @db.Date / 日時=DateTime
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // 実行時はプーラー（Supabase: Transaction pooler 6543, pgbouncer）
+  url       = env("DATABASE_URL")
+  // マイグレーション/seed は直結相当（Supabase: Session pooler 5432）
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================================
+// 案件（依頼者）— 旧 Case 型を 1 テーブルに集約
+// ============================================================
+model Case {
+  id           Int      @id @default(autoincrement())
+  // kintone 等の外部ID（移行時の突合キー・ユニーク）
+  externalId   String?  @unique
+  recordNumber Int?
+
+  // --- 依頼者 基本情報 ---
+  name         String
+  furigana     String?
+  phone        String?
+  lineUrl      String?
+  email        String?
+  postalCode   String?
+  prefecture   String?
+  address      String?
+  birthDate    DateTime? @db.Date
+  age          Int?
+  gender       String?   // 男 / 女
+  maritalStatus String?  // 既婚 / 未婚 / 離婚
+  maidenName   String?
+  children     String?
+  residenceType String?
+  rent         Int?
+  monthlyIncome Int?
+  payDay       String?
+  employmentType String?
+  cautionRank  String?   // A / B / C
+  correspondenceRequired String?
+  correspondenceHours    String?
+  cohabitation String?
+  confidentialContact    String?
+  emergencyContact       String?
+  emergencyContactRelation String?
+  previousAddress        String?
+  payrollAccount         String?
+  employerName           String?
+  employerContact        String?
+  employerAddress        String?
+  previousEmployerName   String?
+  previousEmployerContact String?
+  previousEmployerAddress String?
+  otherOfficeConsultation String?
+  paymentDelay String?
+  bicycleNote  String?
+  pension      String?
+
+  // --- アポ・後確・面談 ---
+  appointmentStaff String?
+  followUpStaff    String?
+  interviewStaff   String?
+  judicialScrivener String?
+  debtAdjustmentType String? // 任意整理 / 自己破産 / 個人再生
+  acceptanceRank   String?   // A / B / C
+  acceptanceDate   DateTime? @db.Date
+  elapsedDays      Int?
+  cAcceptancePromotionDate DateTime? @db.Date
+  interviewMemo1   String?
+  interviewMemo2   String?
+  incomeExpenseMemo String?
+
+  // --- 債務情報 ---
+  creditorCount      Int?
+  declaredDebtAmount Int?
+  totalDebtAmount    Int?
+  preRequestPayment  Int?
+  postRequestPayment Int?
+
+  // --- 和解情報 ---
+  settlementStatus           String? // 受任後ステータス
+  settlementProposalDate     DateTime? @db.Date
+  settlementCount            Int?
+  postSettlementPaymentCount Int?
+  plannedPaymentCount        Int?
+  plannedAgentCount          Int?
+  allSettlementDocSentDate   DateTime? @db.Date
+
+  // --- 報酬情報 ---
+  normalFee              Int?
+  officeFee              Int?
+  installmentCount       Int?
+  agentPayment           String?
+  plannedPaymentFeeTotal Int?
+  uncollectedFee         Int?
+
+  // --- 入金情報（案件サマリ） ---
+  firstPaymentDate            DateTime? @db.Date
+  firstPaymentWithinTenDays   String?
+  firstPaymentAmount          Int?
+  monthlyPaymentDay           String?
+  basePaymentAmount           Int?
+  nextPaymentDate             DateTime? @db.Date
+  cumulativePaymentAmount     Int?
+  cumulativePlannedPayment    Int?
+  cumulativeFeeAllocation     Int?
+  cumulativePlannedFeeAllocation Int?
+  cumulativePoolAllocation    Int?
+  cumulativeRepaymentAllocation Int?
+  totalMinusPoolMinusRepayment Int?
+  notificationExcluded        String? // 除外 / null
+  vAccountBranch              String?
+  vAccountNumber             String?
+
+  // --- リマインド ---
+  reminderDate     DateTime? @db.Date
+  reminderTime     String?
+  nextResponseDate DateTime? @db.Date
+  responseTime     String?
+
+  // --- メタ ---
+  listCategory       String?
+  listRegisteredDate DateTime? @db.Date
+  acceptanceDocs     String?
+  createdBy          String?
+  updatedBy          String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  // --- リレーション ---
+  creditors        Creditor[]
+  payments         Payment[]
+  contactHistories ContactHistory[]
+  lineLink         LineLink?
+  notificationLogs LineNotificationLog[]
+
+  @@index([cautionRank])
+  @@index([settlementStatus])
+  @@index([name])
+  @@map("cases")
+}
+
+// ============================================================
+// 債権者（和解対象債権）
+// ============================================================
+model Creditor {
+  id     Int  @id @default(autoincrement())
+  caseId Int
+  case   Case @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  creditorName        String
+  negotiationPartner  String?
+  declaredAmount      Int?
+  debtAmount          Int?
+  expectedSettlement  Int?
+  expectedSettlementAmount Int?
+  expectedPaymentCount Int?
+  expectedFutureInterest String?
+  status              String  // 受任通知発送待ち / 和解済 / 弁済中 ...
+  repaymentExcluded   String? // 停止 / 終了 / null
+  check               String?
+  nextProcessDate     DateTime? @db.Date
+  acceptanceNoticeSentDate DateTime? @db.Date
+  debtInquiryArrivalDate   DateTime? @db.Date
+  customerCode        String?
+  contractDate        DateTime? @db.Date
+  settlementProposalDate DateTime? @db.Date
+  settlementProposal  Int?
+  responseStatus      String?
+  settlementDate      DateTime? @db.Date
+  settlementAmount    Int?
+  settlementDebtAmount Int?
+  settlementContentComment String?
+  reminder            String?
+  paymentStartMonth   String?  // YYYY-MM
+  paymentDay          Int?
+  paymentCount        Int?
+  firstPaymentAmount  Int?
+  subsequentPaymentAmount Int?
+  finalPaymentAmount  Int?
+  finalPaymentMonth   String?  // YYYY-MM
+  futureInterest      String?
+  bankName            String?
+  financialInstitutionCode String?
+  branchName          String?
+  branchCode          String?
+  accountType         String?
+  accountNumber       String?
+  accountHolder       String?
+  designatedCode      String?
+  repaymentTarget     String?
+
+  payments Payment[]
+
+  @@index([caseId])
+  @@index([status])
+  @@map("creditors")
+}
+
+// ============================================================
+// 入金予定/実績（案件全体行 + 債権者別行）
+// creditorId == null: 案件全体の入金明細（入金情報由来）
+// creditorId 有り    : 当該債権者の弁済スケジュール
+// ============================================================
+model Payment {
+  id     Int  @id @default(autoincrement())
+  caseId Int
+  case   Case @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  creditorId Int?
+  creditor   Creditor? @relation(fields: [creditorId], references: [id], onDelete: SetNull)
+  creditorInstallmentIndex Int?
+
+  plannedDate              DateTime? @db.Date
+  plannedAmount            Int?
+  plannedFeeAllocation     Int?
+  plannedAgentFeeAllocation Int?
+  plannedPoolAllocation    Int?
+  plannedRepaymentAllocation Int?
+  actualDate               DateTime? @db.Date
+  actualAmount             Int?
+  actualFeeAllocation      Int?
+  actualAgentFeeAllocation Int?
+  actualPoolAllocation     Int?
+  actualRepaymentAllocation Int?
+  handlingFee              Int?
+  repaymentCount           Int?
+  cumulativePool           Int?
+
+  @@index([caseId])
+  @@index([creditorId])
+  @@index([plannedDate])
+  @@map("payments")
+}
+
+// ============================================================
+// 接触履歴（依頼者 / 債権者）
+// ============================================================
+enum ContactTarget {
+  CLIENT   // 依頼者
+  CREDITOR // 債権者
+}
+
+model ContactHistory {
+  id     Int  @id @default(autoincrement())
+  caseId Int
+  case   Case @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  contactDate  DateTime? @db.Date
+  contactTime  String?
+  staff        String?
+  tool         String?   // LINE / 電話 / メール ...
+  targetType   ContactTarget
+  creditorName String?   // 債権者接触のとき
+  comment      String?   @db.Text // 改行を含む複数行コメント
+
+  createdAt DateTime @default(now())
+
+  @@index([caseId])
+  @@index([targetType])
+  @@map("contact_histories")
+}
+
+// ============================================================
+// LINE 連携：依頼者の LINE userId 紐付け（登録コード方式）
+// ============================================================
+enum LineLinkStatus {
+  PENDING // コード発行済・未連携
+  LINKED  // userId 紐付け済
+  BLOCKED // ブロック/解除
+}
+
+model LineLink {
+  id               Int            @id @default(autoincrement())
+  caseId           Int            @unique
+  case             Case           @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  registrationCode String         @unique // 友だち追加後に送ってもらう一意コード
+  lineUserId       String?        @unique // Webhook で取得
+  status           LineLinkStatus @default(PENDING)
+  codeExpiresAt    DateTime?
+  linkedAt         DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@index([lineUserId])
+  @@map("line_links")
+}
+
+// ============================================================
+// LINE 通知ログ（push 配信の履歴・冪等性）
+// ============================================================
+enum NotificationType {
+  PAYMENT_REMINDER // 入金予定リマインド
+  DEPOSIT_CONFIRM  // 入金確認
+  DEADLINE_ALERT   // 期限アラート
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  CANCELLED
+}
+
+model LineNotificationLog {
+  id                 Int                @id @default(autoincrement())
+  caseId             Int
+  case               Case               @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  type               NotificationType
+  scheduledDate      DateTime           @db.Date
+  sentAt             DateTime?
+  status             NotificationStatus @default(PENDING)
+  recipientLineUserId String?
+  messageContent     String             @db.Text
+  errorMessage       String?
+  createdAt          DateTime           @default(now())
+
+  // 同一案件・同一予定日・同一種別の二重送信防止
+  @@unique([caseId, scheduledDate, type])
+  @@index([status])
+  @@map("line_notification_logs")
+}
+
+// ============================================================
+// 認証（Auth.js / 事務所スタッフ）
+// ============================================================
+enum UserRole {
+  ADMIN
+  STAFF
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  passwordHash  String?   // Credentials 認証時
+  image         String?
+  role          UserRole  @default(STAFF)
+  accounts      Account[]
+  sessions      Session[]
+  createdAt     DateTime  @default(now())
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}

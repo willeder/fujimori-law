@@ -143,20 +143,19 @@ const initialState: CaseState = {
   loadError: null,
 }
 
-/** public/data/ から実データ JSON を取得 */
+/** DB 接続 API（/api/*、開発時は Vite proxy で Next.js へ中継）から実データを取得 */
 async function fetchDataset(): Promise<CaseDataset> {
-  const base = import.meta.env.BASE_URL || '/'
-  const load = async <T,>(name: string): Promise<T> => {
-    const res = await fetch(`${base}data/${name}`)
-    if (!res.ok) throw new Error(`${name}: HTTP ${res.status}`)
+  const load = async <T,>(path: string): Promise<T> => {
+    const res = await fetch(path)
+    if (!res.ok) throw new Error(`${path}: HTTP ${res.status}`)
     return (await res.json()) as T
   }
   const [cases, creditors, contactHistories, paymentRecords] =
     await Promise.all([
-      load<Case[]>('cases.json'),
-      load<Creditor[]>('creditors.json'),
-      load<ContactHistory[]>('contactHistories.json'),
-      load<PaymentRecord[]>('payments.json'),
+      load<Case[]>('/api/cases'),
+      load<Creditor[]>('/api/creditors'),
+      load<ContactHistory[]>('/api/contact-histories'),
+      load<PaymentRecord[]>('/api/payments'),
     ])
   return { cases, creditors, contactHistories, paymentRecords }
 }
