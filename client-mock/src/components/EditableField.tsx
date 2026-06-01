@@ -122,6 +122,11 @@ export function EditableField({
       ? value.toLocaleString()
       : displayValue;
 
+  // マイナス値は赤字で表示
+  const isNegativeNumber =
+    type === "number" && typeof value === "number" && value < 0;
+  const negativeTextClass = isNegativeNumber ? "text-red-600" : "";
+
   const displayText = renderValue
     ? renderValue(value)
     : type === "date" &&
@@ -203,7 +208,7 @@ export function EditableField({
             <div
               className={`min-w-0 ${compactValueClass} text-slate-700 whitespace-normal break-words leading-tight`}
             >
-              <span>{displayText}</span>
+              <span className={negativeTextClass}>{displayText}</span>
               {suffix && <span className="text-slate-400 ml-0">{suffix}</span>}
               {toggleButton && (
                 <span className="ml-1 inline-flex align-middle">
@@ -226,7 +231,7 @@ export function EditableField({
           <div
             className={`min-w-0 flex-1 text-slate-700 leading-tight ${compactValueClass}`}
           >
-            <span className="block min-w-0 overflow-x-auto whitespace-nowrap [-webkit-overflow-scrolling:touch]">
+            <span className={`block min-w-0 overflow-x-auto whitespace-nowrap [-webkit-overflow-scrolling:touch] ${negativeTextClass}`}>
               {displayText}
               {suffix && <span className="text-slate-400 ml-0">{suffix}</span>}
             </span>
@@ -240,7 +245,7 @@ export function EditableField({
         <span className="shrink-0 text-[11px] font-medium text-slate-500">
           {labelWithColon}
         </span>
-        <div className="min-w-0 flex-1 text-xs text-slate-700">
+        <div className={`min-w-0 flex-1 text-xs text-slate-700 ${negativeTextClass}`}>
           {displayText}
           {suffix && <span className="text-slate-400 ml-0.5">{suffix}</span>}
         </div>
@@ -267,7 +272,7 @@ export function EditableField({
               }}
             >
               <div className="flex min-w-0 items-center gap-1">
-                <span className="min-w-0 flex-1 whitespace-normal break-words">
+                <span className={`min-w-0 flex-1 whitespace-normal break-words ${negativeTextClass}`}>
                   {displayText}
                   {suffix && (
                     <span className="text-slate-400 ml-0">{suffix}</span>
@@ -311,7 +316,7 @@ export function EditableField({
               setIsEditing(true);
             }}
           >
-            <span className={valueSpanClass}>
+            <span className={`${valueSpanClass} ${negativeTextClass}`}>
               {displayText}
               {suffix && <span className="text-slate-400 ml-0">{suffix}</span>}
             </span>
@@ -337,7 +342,7 @@ export function EditableField({
           <span className="shrink-0 text-[11px] font-medium text-slate-500">
             {labelWithColon}
           </span>
-          <span className="min-w-0 flex-1 whitespace-normal break-words text-xs text-slate-700">
+          <span className={`min-w-0 flex-1 whitespace-normal break-words text-xs text-slate-700 ${negativeTextClass}`}>
             {displayText}
             {suffix && <span className="text-slate-400 ml-0.5">{suffix}</span>}
           </span>

@@ -12,6 +12,7 @@ import { SectionCard, EditableField, StatusBadge, Tabs } from "../components";
 import { CreditorTab } from "./CreditorTab";
 import { ContactHistoryTable } from "./ContactHistoryTable";
 import { PaymentTable } from "./PaymentTable";
+import { CreditorPaymentTable } from "./CreditorPaymentTable";
 import { SettlementFiles } from "../components/case/SettlementFiles";
 import { LineUrlQuickEdit } from "../components/case/LineUrlQuickEdit";
 import type { Case } from "../types";
@@ -23,11 +24,13 @@ import {
 function formatYenPair(left: number | null, right: number | null) {
   const l = left != null ? `${left.toLocaleString()}円` : "-";
   const r = right != null ? `${right.toLocaleString()}円` : "-";
+  const leftNegative = left != null && left < 0;
+  const rightNegative = right != null && right < 0;
   return (
     <span className="inline-flex items-center gap-0.5 tabular-nums leading-none">
-      <span>{l}</span>
+      <span className={leftNegative ? "text-red-600" : ""}>{l}</span>
       <span className="font-normal text-slate-400">/</span>
-      <span>{r}</span>
+      <span className={rightNegative ? "text-red-600" : ""}>{r}</span>
     </span>
   );
 }
@@ -302,10 +305,10 @@ function CaseDetailBody({
         badge: c.status === "和解済" ? "済" : undefined,
         accent: creditorTabAccentForName(c.creditorName, c.id),
         content: (
-          <PaymentTable
+          <CreditorPaymentTable
             caseId={caseData.id}
+            creditor={c}
             payments={payments.filter((p) => p.creditorId === c.id)}
-            scheduleCreditorId={c.id}
           />
         ),
       })),
@@ -766,7 +769,7 @@ function CaseDetailBody({
           </div>
           <div className="flex min-w-0 items-center gap-1 py-0 min-h-[1.5rem]">
             <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[11px]">・残入金予定</span>
-            <span className="flex-1 min-w-0 text-xs font-bold tabular-nums text-blue-600 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate">
+            <span className={`flex-1 min-w-0 text-xs font-bold tabular-nums rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate ${remainingPlanned != null && remainingPlanned < 0 ? "text-red-600" : "text-blue-600"}`}>
               {remainingPlanned != null
                 ? `${remainingPlanned.toLocaleString()}円`
                 : "-"}
@@ -792,7 +795,7 @@ function CaseDetailBody({
           />
           <div className="flex min-w-0 items-center gap-1 py-0 min-h-[1.5rem]">
             <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[11px]">・報酬充当額</span>
-            <span className="flex-1 min-w-0 text-xs font-bold tabular-nums text-blue-600 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate">
+            <span className={`flex-1 min-w-0 text-xs font-bold tabular-nums rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate ${caseData.paymentInfo.cumulativeFeeAllocation != null && caseData.paymentInfo.cumulativeFeeAllocation < 0 ? "text-red-600" : "text-blue-600"}`}>
               {caseData.paymentInfo.cumulativeFeeAllocation != null
                 ? `${caseData.paymentInfo.cumulativeFeeAllocation.toLocaleString()}円`
                 : "-"}
@@ -800,7 +803,7 @@ function CaseDetailBody({
           </div>
           <div className="flex min-w-0 items-center gap-1 py-0 min-h-[1.5rem]">
             <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[11px]">・報酬未回収</span>
-            <span className="flex-1 min-w-0 text-xs font-bold tabular-nums text-blue-600 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate">
+            <span className={`flex-1 min-w-0 text-xs font-bold tabular-nums rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate ${caseData.feeInfo.uncollectedFee != null && caseData.feeInfo.uncollectedFee < 0 ? "text-red-600" : "text-blue-600"}`}>
               {caseData.feeInfo.uncollectedFee != null
                 ? `${caseData.feeInfo.uncollectedFee.toLocaleString()}円`
                 : "-"}
@@ -857,6 +860,33 @@ function CaseDetailBody({
                           <div className="min-w-0 overflow-x-auto">
                             <div className="flex w-max min-w-0 flex-nowrap items-center whitespace-nowrap text-xs leading-none text-slate-800">
                               <div className="flex min-h-[1.75rem] items-center gap-x-6 rounded-md border border-slate-100/80 bg-slate-50/60 px-2 py-0.5">
+                                {/* 催促通知除外 */}
+                                <span className="inline-flex shrink-0 items-center gap-1">
+                                  <span className="text-xs text-slate-500">催促通知除外：</span>
+                                  <select
+                                    value={caseData.paymentInfo.notificationExcluded ?? ''}
+                                    onChange={(e) =>
+                                      updateCase({
+                                        paymentInfo: {
+                                          ...caseData.paymentInfo,
+                                          notificationExcluded: e.target.value === '除外' ? '除外' : null,
+                                        },
+                                      })
+                                    }
+                                    className={`rounded border border-slate-200 px-1.5 py-0.5 text-xs ${
+                                      caseData.paymentInfo.notificationExcluded === '除外'
+                                        ? 'font-bold text-red-600'
+                                        : 'text-slate-700'
+                                    }`}
+                                  >
+                                    <option value="">-</option>
+                                    <option value="除外" className="font-bold text-red-600">除外</option>
+                                  </select>
+                                </span>
+                                <span
+                                  className="mx-0.5 h-3 w-px shrink-0 self-center bg-slate-300"
+                                  aria-hidden
+                                />
                                 <VAccountFields
                                   branch={caseData.paymentInfo.vAccountBranch}
                                   number={caseData.paymentInfo.vAccountNumber}
@@ -889,7 +919,7 @@ function CaseDetailBody({
                                   <span className="text-slate-400">
                                     累計）弁代報酬充当額：
                                   </span>
-                                  <span className="font-bold tabular-nums text-blue-600">
+                                  <span className={`font-bold tabular-nums ${sumActualAgentFee < 0 ? "text-red-600" : "text-blue-600"}`}>
                                     {sumActualAgentFee.toLocaleString()}円
                                   </span>
                                 </span>
@@ -897,7 +927,7 @@ function CaseDetailBody({
                                   <span className="text-slate-400">
                                     累計）プール充当：
                                   </span>
-                                  <span className="font-bold tabular-nums text-blue-600">
+                                  <span className={`font-bold tabular-nums ${sumActualPool < 0 ? "text-red-600" : "text-blue-600"}`}>
                                     {sumActualPool.toLocaleString()}円
                                   </span>
                                 </span>
@@ -1000,23 +1030,39 @@ function CaseDetailBody({
                     accent: creditorTabAccentSummary(),
                     content: (
                       <div className="grid grid-cols-10 gap-x-0.5 gap-y-0.5">
-                        {/* Row 1: 性別(2), 生年月日(2), 年齢(2), 結婚(2), 子供(2) = 10 */}
-                        <div className="min-w-0 col-span-2">
-                          <EditableField
-                            label="性別"
-                            value={caseData.clientBasicInfo.gender}
-                            onChange={(v) => updateClientBasicInfo("gender", v)}
-                            type="select"
-                            options={[
-                              { value: "男", label: "男" },
-                              { value: "女", label: "女" },
-                            ]}
-                            compact
-                            compactLayout="inline"
-                            bordered
-                            truncateValue
-                            fillWidth
-                          />
+                        {/* Row 1: 性別+年齢(2), 生年月日(2), 結婚(2), 旧姓(2), 子供(2) = 10 */}
+                        <div className="min-w-0 col-span-2 flex gap-0.5">
+                          <div className="min-w-0 flex-1">
+                            <EditableField
+                              label="性別"
+                              value={caseData.clientBasicInfo.gender}
+                              onChange={(v) => updateClientBasicInfo("gender", v)}
+                              type="select"
+                              options={[
+                                { value: "男", label: "男" },
+                                { value: "女", label: "女" },
+                              ]}
+                              compact
+                              compactLayout="inline"
+                              bordered
+                              truncateValue
+                              fillWidth
+                            />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <EditableField
+                              label="年齢"
+                              value={caseData.clientBasicInfo.age}
+                              onChange={(v) => updateClientBasicInfo("age", v)}
+                              type="number"
+                              suffix="歳"
+                              compact
+                              compactLayout="inline"
+                              bordered
+                              truncateValue
+                              fillWidth
+                            />
+                          </div>
                         </div>
                         <div className="min-w-0 col-span-2">
                           <EditableField
@@ -1029,20 +1075,6 @@ function CaseDetailBody({
                             compact
                             compactLayout="inline"
                             dateDisplayToggle
-                            bordered
-                            truncateValue
-                            fillWidth
-                          />
-                        </div>
-                        <div className="min-w-0 col-span-2">
-                          <EditableField
-                            label="年齢"
-                            value={caseData.clientBasicInfo.age}
-                            onChange={(v) => updateClientBasicInfo("age", v)}
-                            type="number"
-                            suffix="歳"
-                            compact
-                            compactLayout="inline"
                             bordered
                             truncateValue
                             fillWidth
@@ -1070,6 +1102,20 @@ function CaseDetailBody({
                         </div>
                         <div className="min-w-0 col-span-2">
                           <EditableField
+                            label="旧姓"
+                            value={caseData.clientBasicInfo.maidenName ?? ""}
+                            onChange={(v) =>
+                              updateClientBasicInfo("maidenName", v)
+                            }
+                            compact
+                            compactLayout="inline"
+                            bordered
+                            truncateValue
+                            fillWidth
+                          />
+                        </div>
+                        <div className="min-w-0 col-span-2">
+                          <EditableField
                             label="子供"
                             value={caseData.clientBasicInfo.children}
                             onChange={(v) =>
@@ -1082,7 +1128,7 @@ function CaseDetailBody({
                             fillWidth
                           />
                         </div>
-                        {/* Row 2: 居住形態(2), 都道府県(2), 住所(4), 同居(2) = 10 */}
+                        {/* Row 2: 居住形態(2), 郵便番号(2), 住所(都道府県から全て)(4), 同居(2) = 10 */}
                         <div className="min-w-0 col-span-2">
                           <EditableField
                             label="居住形態"
@@ -1099,10 +1145,10 @@ function CaseDetailBody({
                         </div>
                         <div className="min-w-0 col-span-2">
                           <EditableField
-                            label="都道府県"
-                            value={caseData.clientBasicInfo.prefecture}
+                            label="郵便番号"
+                            value={caseData.clientBasicInfo.postalCode ?? ""}
                             onChange={(v) =>
-                              updateClientBasicInfo("prefecture", v)
+                              updateClientBasicInfo("postalCode", v)
                             }
                             compact
                             compactLayout="inline"
@@ -1114,7 +1160,14 @@ function CaseDetailBody({
                         <div className="min-w-0 col-span-4">
                           <EditableField
                             label="住所"
-                            value={caseData.clientBasicInfo.address}
+                            value={
+                              [
+                                caseData.clientBasicInfo.prefecture,
+                                caseData.clientBasicInfo.address,
+                              ]
+                                .filter(Boolean)
+                                .join("") || ""
+                            }
                             onChange={(v) =>
                               updateClientBasicInfo("address", v)
                             }
@@ -1315,7 +1368,65 @@ function CaseDetailBody({
                           />
                         </div>
                         <div className="col-span-2" />
-                        {/* Row 6: 年金(1), 遅れ(1), 自転車(1), 他事務所相談(1), 空(6) = 10 */}
+                        {/* Row 5.5: 旧)勤務先名(2), 旧)勤務連絡先(4), 旧)勤務先住所(4) = 10 */}
+                        <div className="min-w-0 col-span-2">
+                          <EditableField
+                            label="旧)勤務先名"
+                            value={
+                              caseData.clientBasicInfo.previousEmployerName ??
+                              ""
+                            }
+                            onChange={(v) =>
+                              updateClientBasicInfo("previousEmployerName", v)
+                            }
+                            compact
+                            compactLayout="inline"
+                            bordered
+                            truncateValue
+                            fillWidth
+                          />
+                        </div>
+                        <div className="min-w-0 col-span-4">
+                          <EditableField
+                            label="旧)勤務連絡先"
+                            value={
+                              caseData.clientBasicInfo
+                                .previousEmployerContact ?? ""
+                            }
+                            onChange={(v) =>
+                              updateClientBasicInfo(
+                                "previousEmployerContact",
+                                v,
+                              )
+                            }
+                            compact
+                            compactLayout="inline"
+                            bordered
+                            truncateValue
+                            fillWidth
+                          />
+                        </div>
+                        <div className="min-w-0 col-span-4">
+                          <EditableField
+                            label="旧)勤務先住所"
+                            value={
+                              caseData.clientBasicInfo
+                                .previousEmployerAddress ?? ""
+                            }
+                            onChange={(v) =>
+                              updateClientBasicInfo(
+                                "previousEmployerAddress",
+                                v,
+                              )
+                            }
+                            compact
+                            compactLayout="inline"
+                            bordered
+                            truncateValue
+                            fillWidth
+                          />
+                        </div>
+                        {/* Row 6: 年金(1), 遅れ(1), 自転車(1), 他事務所(2), 都道府県(1), 空(4) = 10 */}
                         <div className="min-w-0 col-span-1">
                           <EditableField
                             label="年金"
@@ -1378,6 +1489,21 @@ function CaseDetailBody({
                             fillWidth
                           />
                         </div>
+                        <div className="min-w-0 col-span-1">
+                          <EditableField
+                            label="都道府県"
+                            value={caseData.clientBasicInfo.prefecture ?? ""}
+                            onChange={(v) =>
+                              updateClientBasicInfo("prefecture", v)
+                            }
+                            compact
+                            compactLayout="inline"
+                            bordered
+                            truncateValue
+                            fillWidth
+                          />
+                        </div>
+                        <div className="col-span-4" />
                       </div>
                     ),
                   },

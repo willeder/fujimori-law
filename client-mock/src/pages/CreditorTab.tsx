@@ -45,6 +45,33 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         render: (item) => <StatusBadge status={item.status} size="sm" />,
       },
       {
+        key: 'repaymentExcluded',
+        header: '弁済除外',
+        width: '80px',
+        cellTruncate: false,
+        render: (item) => {
+          const isExcluded = item.repaymentExcluded === '停止' || item.repaymentExcluded === '終了'
+          return (
+            <select
+              value={item.repaymentExcluded ?? ''}
+              onChange={(e) => {
+                const value = e.target.value as '停止' | '終了' | ''
+                updateCreditor(item, {
+                  repaymentExcluded: value === '' ? null : value,
+                })
+              }}
+              className={`w-full rounded border border-slate-200 px-1 py-0.5 text-xs ${
+                isExcluded ? 'font-bold text-red-600' : 'text-slate-700'
+              }`}
+            >
+              <option value="">-</option>
+              <option value="停止" className="font-bold text-red-600">停止</option>
+              <option value="終了" className="font-bold text-red-600">終了</option>
+            </select>
+          )
+        },
+      },
+      {
         key: 'creditorName',
         header: '債権者',
         width: '120px',
@@ -98,8 +125,9 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         align: 'right',
         render: (item) => {
           const diff = (item.debtAmount ?? 0) - (item.declaredAmount ?? 0)
+          const isNegative = diff < 0
           return (
-            <span className="tabular-nums">
+            <span className={`tabular-nums ${isNegative ? 'text-red-600' : ''}`}>
               {diff !== 0 ? diff.toLocaleString() : '-'}
               {diff !== 0 && <span className="ml-0.5 text-[8px] text-slate-400">円</span>}
             </span>
