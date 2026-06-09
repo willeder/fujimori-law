@@ -16,4 +16,4 @@ export type {
   CreditorStatus,
   PaymentRecord,
   ContactHistory,
-} from './case'
+} from './case.js'

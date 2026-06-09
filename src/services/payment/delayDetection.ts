@@ -1,4 +1,4 @@
-import type { PaymentRecord, PaymentDelayStats } from '../../types/case'
+import type { PaymentRecord, PaymentDelayStats } from '../../types/case.js'
 
 /**
  * 入金遅延検知サービス

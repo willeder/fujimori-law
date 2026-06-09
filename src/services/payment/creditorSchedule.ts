@@ -10,7 +10,7 @@
  *
  * 注意: 債権者別の実績は合算からの推定値。actualDate は予定日で近似している。
  */
-import type { Creditor, PaymentRecord } from '../../types/case'
+import type { Creditor, PaymentRecord } from '../../types/case.js'
 
 function pad2(n: number): string {
   return String(n).padStart(2, '0')
