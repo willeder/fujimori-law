@@ -38,19 +38,38 @@ async function route(req: Request): Promise<Response> {
   // 例: {"region":"hnd1","dbPingMs":12} なら東京・近接。region が iad1 等で
   // dbPingMs が大きいとクロスリージョン（regions:["hnd1"] 未反映）。
   if (path === '/api/_diag') {
-    const t0 = Date.now()
-    let dbPingMs = -1
+    const pings: number[] = []
     let dbError: string | null = null
     try {
-      await prisma.$queryRawUnsafe('SELECT 1')
-      dbPingMs = Date.now() - t0
+      // 1回目=接続確立込み / 2・3回目=ウォームRTT
+      for (let i = 0; i < 3; i++) {
+        const t = Date.now()
+        await prisma.$queryRawUnsafe('SELECT 1')
+        pings.push(Date.now() - t)
+      }
     } catch (e) {
       dbError = e instanceof Error ? e.message : String(e)
     }
+    // 接続先の設定を確認（認証情報は出さない）
+    let dbHost: string | null = null
+    let dbPort: string | null = null
+    let pgbouncer = false
+    let connectionLimit: string | null = null
+    try {
+      const url = new URL(process.env.DATABASE_URL ?? '')
+      dbHost = url.hostname
+      dbPort = url.port
+      pgbouncer = url.searchParams.get('pgbouncer') === 'true'
+      connectionLimit = url.searchParams.get('connection_limit')
+    } catch {
+      /* DATABASE_URL 未設定/不正 */
+    }
     return json({
       region: process.env.VERCEL_REGION ?? null,
-      dbPingMs,
+      coldConnectMs: pings[0] ?? -1,
+      warmRttMs: pings.slice(1),
       dbError,
+      db: { host: dbHost, port: dbPort, pgbouncer, connectionLimit },
       now: new Date().toISOString(),
     })
   }
