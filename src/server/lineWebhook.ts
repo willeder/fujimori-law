@@ -8,8 +8,8 @@
  *   message  … テキストを登録コードとして照合し、案件に lineUserId を紐付け（LINKED）
  *   unfollow … ブロック扱いで連携を無効化（BLOCKED）
  */
-import { prisma } from './db'
-import { replyText, verifyLineSignature } from './line'
+import { prisma } from './db.js'
+import { replyText, verifyLineSignature } from './line.js'
 
 const WELCOME =
   '友だち追加ありがとうございます。\n本人確認のため、事務所からお渡しした「登録コード」をこのトークに送信してください。'

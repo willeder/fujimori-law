@@ -6,7 +6,7 @@
  *   POST /api/auth/logout                       → セッション破棄・Cookie 消去
  *   GET  /api/auth/me                           → 現在のユーザー
  */
-import { prisma } from './db'
+import { prisma } from './db.js'
 import {
   buildClearCookie,
   buildSessionCookie,
@@ -16,8 +16,8 @@ import {
   getSessionUser,
   toSafeUser,
   verifyPassword,
-} from './auth'
-import { writeAudit } from './audit'
+} from './auth.js'
+import { writeAudit } from './audit.js'
 
 export type AuthResponse = {
   status: number

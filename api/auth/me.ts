@@ -1,7 +1,7 @@
 /**
  * Vercel Function: 現在のユーザー取得（本番）。
  */
-import { handleMe } from '../../src/server/authHandlers'
+import { handleMe } from '../../src/server/authHandlers.js'
 
 export const config = { runtime: 'nodejs' }
 

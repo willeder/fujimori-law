@@ -7,7 +7,7 @@
  *   https://<本番ドメイン>/api/line/webhook
  * を設定する。
  */
-import { handleLineWebhook } from '../../src/server/lineWebhook'
+import { handleLineWebhook } from '../../src/server/lineWebhook.js'
 
 export const config = { runtime: 'nodejs' }
 

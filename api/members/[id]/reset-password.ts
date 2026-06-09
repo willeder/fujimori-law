@@ -1,8 +1,8 @@
 /**
  * Vercel Function: メンバーのパスワード再発行（ADMIN 限定）。
  */
-import { resetPassword } from '../../../src/server/memberHandlers'
-import { jsonResponse, reqMeta, resolveActor, unauthorized } from '../../../src/server/apiAuth'
+import { resetPassword } from '../../../src/server/memberHandlers.js'
+import { jsonResponse, reqMeta, resolveActor, unauthorized } from '../../../src/server/apiAuth.js'
 
 export const config = { runtime: 'nodejs' }
 

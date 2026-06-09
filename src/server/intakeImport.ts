@@ -9,8 +9,8 @@
  * 文字コードは UTF-8 / UTF-8(BOM) / Shift-JIS を自動判定。
  * preview は検証のみ（無書込）、commit はトランザクションで Case+Creditor を作成し監査ログを残す。
  */
-import { prisma } from './db'
-import { writeAudit, type Actor } from './audit'
+import { prisma } from './db.js'
+import { writeAudit, type Actor } from './audit.js'
 
 // ── 列マッピング（新kintone-取込のヘッダー名 → DBフィールド） ──────────
 type FieldType = 'string' | 'int' | 'date'

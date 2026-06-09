@@ -9,9 +9,9 @@
  *   POST   /api/members/:id/reset-password  パスワード再発行
  */
 import type { User } from '@prisma/client'
-import { prisma } from './db'
-import { hashPassword, toSafeUser } from './auth'
-import { writeAudit, writeChange, diffFields } from './audit'
+import { prisma } from './db.js'
+import { hashPassword, toSafeUser } from './auth.js'
+import { writeAudit, writeChange, diffFields } from './audit.js'
 
 export type ApiResult = { status: number; body: unknown }
 export type Actor = Pick<User, 'id' | 'email' | 'role'>

@@ -9,8 +9,8 @@ import { Prisma, PrismaClient } from '@prisma/client'
 import {
   calculateDelayStats,
   detectPaymentDelays,
-} from '../services/payment/delayDetection'
-import { writeAudit, writeChange } from './audit'
+} from '../services/payment/delayDetection.js'
+import { writeAudit, writeChange } from './audit.js'
 
 const g = globalThis as unknown as { __prisma?: PrismaClient }
 const prisma = g.__prisma ?? new PrismaClient()

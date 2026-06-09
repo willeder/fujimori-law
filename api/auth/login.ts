@@ -2,7 +2,7 @@
  * Vercel Function: ログイン（本番）。
  * 実処理は src/server/authHandlers.ts に集約。
  */
-import { handleLogin } from '../../src/server/authHandlers'
+import { handleLogin } from '../../src/server/authHandlers.js'
 
 export const config = { runtime: 'nodejs' }
 

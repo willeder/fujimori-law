@@ -6,7 +6,7 @@
  *   - 金額: 1回目=初回支払額 / 2回目以降=2回目以降額
  *   - 整形: コードのゼロ埋め(金融機関4/支店3/口座7)、預金種目(普通1/当座2/他4)、ASC半角化、振込依頼人名
  */
-import { prisma } from './db'
+import { prisma } from './db.js'
 
 // ── 全角→半角（Excel ASC 相当） ──────────────────────────
 const KATA_MAP: Record<string, string> = {

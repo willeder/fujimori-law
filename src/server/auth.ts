@@ -8,7 +8,7 @@
  */
 import crypto from 'node:crypto'
 import type { User } from '@prisma/client'
-import { prisma } from './db'
+import { prisma } from './db.js'
 
 export const SESSION_COOKIE = 'fl_session'
 const SESSION_TTL_DAYS = 7

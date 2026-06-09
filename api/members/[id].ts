@@ -1,8 +1,8 @@
 /**
  * Vercel Function: メンバー更新（氏名・ロール・状態。ADMIN 限定）。
  */
-import { updateMember } from '../../src/server/memberHandlers'
-import { jsonResponse, reqMeta, resolveActor, unauthorized } from '../../src/server/apiAuth'
+import { updateMember } from '../../src/server/memberHandlers.js'
+import { jsonResponse, reqMeta, resolveActor, unauthorized } from '../../src/server/apiAuth.js'
 
 export const config = { runtime: 'nodejs' }
 

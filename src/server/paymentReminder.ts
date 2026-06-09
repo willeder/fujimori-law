@@ -8,8 +8,8 @@
  * 冪等化: line_notification_logs を (caseId, scheduledDate, type) 一意で
  *         upsert し、二重送信を防止する。
  */
-import { prisma } from './db'
-import { pushText } from './line'
+import { prisma } from './db.js'
+import { pushText } from './line.js'
 
 /** 既定: 入金予定日の「前日」に配信 */
 export const DEFAULT_DAYS_BEFORE = 1

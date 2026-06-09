@@ -8,7 +8,7 @@
  * （監査の取りこぼしより業務継続を優先する設計。ただしログには出す）。
  */
 import type { AuditAction, ChangeAction, Prisma } from '@prisma/client'
-import { prisma } from './db'
+import { prisma } from './db.js'
 
 export type Actor = { id?: string | null; email?: string | null }
 

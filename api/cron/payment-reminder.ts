@@ -10,7 +10,7 @@
 import {
   runPaymentReminder,
   DEFAULT_DAYS_BEFORE,
-} from '../../src/server/paymentReminder'
+} from '../../src/server/paymentReminder.js'
 
 export const config = { runtime: 'nodejs' }
 

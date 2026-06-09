@@ -8,6 +8,9 @@
 
 generator client {
   provider = "prisma-client-js"
+  // Vercel(AWS Lambda / Amazon Linux, Node18+→OpenSSL3) 実行環境向けエンジンを同梱。
+  // これが無いと本番で「Query engine ... could not be found」→ FUNCTION_INVOCATION_FAILED。
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {

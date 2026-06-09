@@ -2,8 +2,8 @@
  * Vercel Functions 用の共通ヘルパー（Web 標準 Request 前提）。
  * セッションから actor を解決し、ReqMeta と JSON レスポンスを作る。
  */
-import { getSessionToken, getSessionUser } from './auth'
-import type { Actor, ApiResult, ReqMeta } from './memberHandlers'
+import { getSessionToken, getSessionUser } from './auth.js'
+import type { Actor, ApiResult, ReqMeta } from './memberHandlers.js'
 
 export function reqMeta(req: Request): ReqMeta {
   return {

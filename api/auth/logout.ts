@@ -1,7 +1,7 @@
 /**
  * Vercel Function: ログアウト（本番）。
  */
-import { handleLogout } from '../../src/server/authHandlers'
+import { handleLogout } from '../../src/server/authHandlers.js'
 
 export const config = { runtime: 'nodejs' }
 

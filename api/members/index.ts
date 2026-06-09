@@ -1,8 +1,8 @@
 /**
  * Vercel Function: メンバー一覧・追加（ADMIN 限定）。
  */
-import { listMembers, createMember } from '../../src/server/memberHandlers'
-import { jsonResponse, reqMeta, resolveActor, unauthorized } from '../../src/server/apiAuth'
+import { listMembers, createMember } from '../../src/server/memberHandlers.js'
+import { jsonResponse, reqMeta, resolveActor, unauthorized } from '../../src/server/apiAuth.js'
 
 export const config = { runtime: 'nodejs' }
 
