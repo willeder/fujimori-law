@@ -19,6 +19,7 @@ import {
 import * as gmo from '../src/server/gmoTransfer.js'
 import * as intake from '../src/server/intakeImport.js'
 import { resolveActor, reqMeta, unauthorized } from '../src/server/apiAuth.js'
+import { prisma } from '../src/server/db.js'
 
 export const config = { runtime: 'nodejs' }
 
@@ -32,6 +33,27 @@ async function route(req: Request): Promise<Response> {
   const u = new URL(req.url)
   const path = u.pathname
   const method = req.method
+
+  // ── 診断（認証不要）: 実行リージョンと DB 往復ms を返す ──
+  // 例: {"region":"hnd1","dbPingMs":12} なら東京・近接。region が iad1 等で
+  // dbPingMs が大きいとクロスリージョン（regions:["hnd1"] 未反映）。
+  if (path === '/api/_diag') {
+    const t0 = Date.now()
+    let dbPingMs = -1
+    let dbError: string | null = null
+    try {
+      await prisma.$queryRawUnsafe('SELECT 1')
+      dbPingMs = Date.now() - t0
+    } catch (e) {
+      dbError = e instanceof Error ? e.message : String(e)
+    }
+    return json({
+      region: process.env.VERCEL_REGION ?? null,
+      dbPingMs,
+      dbError,
+      now: new Date().toISOString(),
+    })
+  }
 
   // データルートはすべてログイン必須（dev のセッションゲートと同等）
   const actor = await resolveActor(req)
