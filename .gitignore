@@ -7,6 +7,9 @@ node_modules/
 next-env.d.ts
 out/
 
+# pnpm ローカルストア（リポジトリには含めない。382MB/1万件超）
+.pnpm-store/
+
 # 環境変数
 .env
 .env.local
@@ -16,4 +19,24 @@ out/
 /src/generated/
 
 # 生成データ（再生成可: npm run data:build）。大容量のためコミットしない
-/client-mock/public/data/*.json
+/public/data/*.json
+
+# 実顧客データ・PII（接触履歴/入金/和解/実案件ファイル等）。GitHubに上げない
+/docs/data/
+
+# 一時QA/検証スクリプト（実パスワードを含む場合があるためコミット禁止）
+/scripts/_qa*.mjs
+
+# Vite ビルド成果物
+dist/
+dist-ssr/
+*.local
+
+# TypeScript インクリメンタルビルドキャッシュ（再生成可）
+*.tsbuildinfo
+
+# Vercel CLI
+.vercel
+
+# Claude Code ローカル設定（端末固有・共有しない）
+.claude/settings.local.json

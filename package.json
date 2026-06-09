@@ -1,36 +1,52 @@
 {
   "name": "fujimori-law",
-  "version": "0.1.0",
   "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "packageManager": "pnpm@11.5.2",
   "scripts": {
-    "dev": "next dev",
-    "build": "prisma generate && next build",
-    "start": "next start",
-    "lint": "next lint",
+    "dev": "vite",
+    "build": "prisma generate && tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
-    "data:build": "python3 scripts/generate_realdata_json.py"
+    "data:build": "python3 scripts/generate_realdata_json.py",
+    "auth:create-admin": "tsx scripts/create-admin.ts",
+    "auth:seed-staff": "tsx scripts/seed-staff.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
-    "@line/bot-sdk": "^9.5.0",
     "@prisma/client": "^6.19.0",
-    "next": "^15.1.0",
-    "next-auth": "^5.0.0-beta.25",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "dotenv": "^16.4.7",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-router-dom": "^7.13.2"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.0.0",
-    "@types/node": "^22.10.0",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
+    "@eslint/js": "^9.39.4",
+    "@tailwindcss/cli": "^4.2.2",
+    "@tailwindcss/postcss": "^4.2.2",
+    "@tailwindcss/vite": "^4.2.2",
+    "@types/node": "^24.12.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vercel/functions": "^3.4.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "autoprefixer": "^10.4.27",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.4.0",
+    "postcss": "^8.5.8",
     "prisma": "^6.19.0",
-    "tailwindcss": "^4.0.0",
+    "tailwindcss": "^4.2.2",
     "tsx": "^4.19.0",
-    "typescript": "^5.7.0"
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.57.0",
+    "vite": "^8.0.1"
   }
 }

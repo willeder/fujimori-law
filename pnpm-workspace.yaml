@@ -1,0 +1,21 @@
+# pnpm 設定。pnpm は既定で依存の postinstall/build スクリプトを無効化するため、
+# 信頼できる依存のビルドを明示的に許可する（Prisma エンジン・esbuild バイナリ等）。
+allowBuilds:
+  '@parcel/watcher': true
+  '@prisma/client': true
+  '@prisma/engines': true
+  esbuild: true
+  prisma: true
+
+# 対象アーキテクチャを明示し、ネイティブ最適依存（rolldown/esbuild のバイナリ）を
+# 開発機(macOS)だけでなく Linux(Vercel/CI) 用もロックファイルに含める。
+# これが無いと「Cannot find native binding」で Linux ビルドが失敗する。
+supportedArchitectures:
+  os:
+    - current
+    - linux
+    - darwin
+  cpu:
+    - current
+    - x64
+    - arm64

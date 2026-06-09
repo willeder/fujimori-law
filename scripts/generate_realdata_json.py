@@ -26,7 +26,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "docs/data/source"
-OUT = ROOT / "client-mock/public/data"
+OUT = ROOT / "public/data"
 
 csv.field_size_limit(min(sys.maxsize, 2**31 - 1))
 

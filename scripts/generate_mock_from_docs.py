@@ -21,9 +21,9 @@ import openpyxl
 ROOT = Path(__file__).resolve().parents[1]
 CSV_PATH = ROOT / "docs/data/CSVファイル.csv"
 XLSX_PATH = ROOT / "docs/data/受任案件管理_マージ済_20260330.xlsx"
-OUT_CASES = ROOT / "client-mock/src/data/mockCasesFromDocs.ts"
-OUT_PAYMENTS = ROOT / "client-mock/src/data/mockPaymentsFromDocs.ts"
-OUT_CREDITORS = ROOT / "client-mock/src/data/mockCreditorsFromDocs.ts"
+OUT_CASES = ROOT / "src/data/mockCasesFromDocs.ts"
+OUT_PAYMENTS = ROOT / "src/data/mockPaymentsFromDocs.ts"
+OUT_CREDITORS = ROOT / "src/data/mockCreditorsFromDocs.ts"
 
 # メインシート上の出現順で、依頼者シート・CSV の両方に存在する ID のうち末尾 N 件を採用
 SELECT_CASE_COUNT = 30

@@ -11,7 +11,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider  = "postgresql"
   // 実行時はプーラー（Supabase: Transaction pooler 6543, pgbouncer）
   url       = env("DATABASE_URL")
   // マイグレーション/seed は直結相当（Supabase: Session pooler 5432）
@@ -22,64 +22,64 @@ datasource db {
 // 案件（依頼者）— 旧 Case 型を 1 テーブルに集約
 // ============================================================
 model Case {
-  id           Int      @id @default(autoincrement())
+  id           Int     @id @default(autoincrement())
   // kintone 等の外部ID（移行時の突合キー・ユニーク）
-  externalId   String?  @unique
+  externalId   String? @unique
   recordNumber Int?
 
   // --- 依頼者 基本情報 ---
-  name         String
-  furigana     String?
-  phone        String?
-  lineUrl      String?
-  email        String?
-  postalCode   String?
-  prefecture   String?
-  address      String?
-  birthDate    DateTime? @db.Date
-  age          Int?
-  gender       String?   // 男 / 女
-  maritalStatus String?  // 既婚 / 未婚 / 離婚
-  maidenName   String?
-  children     String?
-  residenceType String?
-  rent         Int?
-  monthlyIncome Int?
-  payDay       String?
-  employmentType String?
-  cautionRank  String?   // A / B / C
-  correspondenceRequired String?
-  correspondenceHours    String?
-  cohabitation String?
-  confidentialContact    String?
-  emergencyContact       String?
+  name                     String
+  furigana                 String?
+  phone                    String?
+  lineUrl                  String?
+  email                    String?
+  postalCode               String?
+  prefecture               String?
+  address                  String?
+  birthDate                DateTime? @db.Date
+  age                      Int?
+  gender                   String? // 男 / 女
+  maritalStatus            String? // 既婚 / 未婚 / 離婚
+  maidenName               String?
+  children                 String?
+  residenceType            String?
+  rent                     Int?
+  monthlyIncome            Int?
+  payDay                   String?
+  employmentType           String?
+  cautionRank              String? // A / B / C
+  correspondenceRequired   String?
+  correspondenceHours      String?
+  cohabitation             String?
+  confidentialContact      String?
+  emergencyContact         String?
   emergencyContactRelation String?
-  previousAddress        String?
-  payrollAccount         String?
-  employerName           String?
-  employerContact        String?
-  employerAddress        String?
-  previousEmployerName   String?
-  previousEmployerContact String?
-  previousEmployerAddress String?
-  otherOfficeConsultation String?
-  paymentDelay String?
-  bicycleNote  String?
-  pension      String?
+  previousAddress          String?
+  payrollAccount           String?
+  employerName             String?
+  employerContact          String?
+  employerAddress          String?
+  previousEmployerName     String?
+  previousEmployerContact  String?
+  previousEmployerAddress  String?
+  otherOfficeConsultation  String?
+  paymentDelay             String?
+  bicycleNote              String?
+  pension                  String?
 
   // --- アポ・後確・面談 ---
-  appointmentStaff String?
-  followUpStaff    String?
-  interviewStaff   String?
-  judicialScrivener String?
-  debtAdjustmentType String? // 任意整理 / 自己破産 / 個人再生
-  acceptanceRank   String?   // A / B / C
-  acceptanceDate   DateTime? @db.Date
-  elapsedDays      Int?
+  appointmentStaff         String?
+  followUpStaff            String?
+  interviewStaff           String?
+  judicialScrivener        String?
+  debtAdjustmentType       String? // 任意整理 / 自己破産 / 個人再生
+  acceptanceRank           String? // A / B / C
+  acceptanceDate           DateTime? @db.Date
+  elapsedDays              Int?
   cAcceptancePromotionDate DateTime? @db.Date
-  interviewMemo1   String?
-  interviewMemo2   String?
-  incomeExpenseMemo String?
+  interviewMemo1           String?
+  interviewMemo2           String?
+  incomeExpenseMemo        String?
 
   // --- 債務情報 ---
   creditorCount      Int?
@@ -106,22 +106,22 @@ model Case {
   uncollectedFee         Int?
 
   // --- 入金情報（案件サマリ） ---
-  firstPaymentDate            DateTime? @db.Date
-  firstPaymentWithinTenDays   String?
-  firstPaymentAmount          Int?
-  monthlyPaymentDay           String?
-  basePaymentAmount           Int?
-  nextPaymentDate             DateTime? @db.Date
-  cumulativePaymentAmount     Int?
-  cumulativePlannedPayment    Int?
-  cumulativeFeeAllocation     Int?
+  firstPaymentDate               DateTime? @db.Date
+  firstPaymentWithinTenDays      String?
+  firstPaymentAmount             Int?
+  monthlyPaymentDay              String?
+  basePaymentAmount              Int?
+  nextPaymentDate                DateTime? @db.Date
+  cumulativePaymentAmount        Int?
+  cumulativePlannedPayment       Int?
+  cumulativeFeeAllocation        Int?
   cumulativePlannedFeeAllocation Int?
-  cumulativePoolAllocation    Int?
-  cumulativeRepaymentAllocation Int?
-  totalMinusPoolMinusRepayment Int?
-  notificationExcluded        String? // 除外 / null
-  vAccountBranch              String?
-  vAccountNumber             String?
+  cumulativePoolAllocation       Int?
+  cumulativeRepaymentAllocation  Int?
+  totalMinusPoolMinusRepayment   Int?
+  notificationExcluded           String? // 除外 / null
+  vAccountBranch                 String?
+  vAccountNumber                 String?
 
   // --- リマインド ---
   reminderDate     DateTime? @db.Date
@@ -159,47 +159,47 @@ model Creditor {
   caseId Int
   case   Case @relation(fields: [caseId], references: [id], onDelete: Cascade)
 
-  creditorName        String
-  negotiationPartner  String?
-  declaredAmount      Int?
-  debtAmount          Int?
-  expectedSettlement  Int?
+  creditorName             String
+  negotiationPartner       String?
+  declaredAmount           Int?
+  debtAmount               Int?
+  expectedSettlement       Int?
   expectedSettlementAmount Int?
-  expectedPaymentCount Int?
-  expectedFutureInterest String?
-  status              String  // 受任通知発送待ち / 和解済 / 弁済中 ...
-  repaymentExcluded   String? // 停止 / 終了 / null
-  check               String?
-  nextProcessDate     DateTime? @db.Date
+  expectedPaymentCount     Int?
+  expectedFutureInterest   String?
+  status                   String // 受任通知発送待ち / 和解済 / 弁済中 ...
+  repaymentExcluded        String? // 停止 / 終了 / null
+  check                    String?
+  nextProcessDate          DateTime? @db.Date
   acceptanceNoticeSentDate DateTime? @db.Date
   debtInquiryArrivalDate   DateTime? @db.Date
-  customerCode        String?
-  contractDate        DateTime? @db.Date
-  settlementProposalDate DateTime? @db.Date
-  settlementProposal  Int?
-  responseStatus      String?
-  settlementDate      DateTime? @db.Date
-  settlementAmount    Int?
-  settlementDebtAmount Int?
+  customerCode             String?
+  contractDate             DateTime? @db.Date
+  settlementProposalDate   DateTime? @db.Date
+  settlementProposal       Int?
+  responseStatus           String?
+  settlementDate           DateTime? @db.Date
+  settlementAmount         Int?
+  settlementDebtAmount     Int?
   settlementContentComment String?
-  reminder            String?
-  paymentStartMonth   String?  // YYYY-MM
-  paymentDay          Int?
-  paymentCount        Int?
-  firstPaymentAmount  Int?
-  subsequentPaymentAmount Int?
-  finalPaymentAmount  Int?
-  finalPaymentMonth   String?  // YYYY-MM
-  futureInterest      String?
-  bankName            String?
+  reminder                 String?
+  paymentStartMonth        String? // YYYY-MM
+  paymentDay               Int?
+  paymentCount             Int?
+  firstPaymentAmount       Int?
+  subsequentPaymentAmount  Int?
+  finalPaymentAmount       Int?
+  finalPaymentMonth        String? // YYYY-MM
+  futureInterest           String?
+  bankName                 String?
   financialInstitutionCode String?
-  branchName          String?
-  branchCode          String?
-  accountType         String?
-  accountNumber       String?
-  accountHolder       String?
-  designatedCode      String?
-  repaymentTarget     String?
+  branchName               String?
+  branchCode               String?
+  accountType              String?
+  accountNumber            String?
+  accountHolder            String?
+  designatedCode           String?
+  repaymentTarget          String?
 
   payments Payment[]
 
@@ -218,25 +218,25 @@ model Payment {
   caseId Int
   case   Case @relation(fields: [caseId], references: [id], onDelete: Cascade)
 
-  creditorId Int?
-  creditor   Creditor? @relation(fields: [creditorId], references: [id], onDelete: SetNull)
+  creditorId               Int?
+  creditor                 Creditor? @relation(fields: [creditorId], references: [id], onDelete: SetNull)
   creditorInstallmentIndex Int?
 
-  plannedDate              DateTime? @db.Date
-  plannedAmount            Int?
-  plannedFeeAllocation     Int?
-  plannedAgentFeeAllocation Int?
-  plannedPoolAllocation    Int?
+  plannedDate                DateTime? @db.Date
+  plannedAmount              Int?
+  plannedFeeAllocation       Int?
+  plannedAgentFeeAllocation  Int?
+  plannedPoolAllocation      Int?
   plannedRepaymentAllocation Int?
-  actualDate               DateTime? @db.Date
-  actualAmount             Int?
-  actualFeeAllocation      Int?
-  actualAgentFeeAllocation Int?
-  actualPoolAllocation     Int?
-  actualRepaymentAllocation Int?
-  handlingFee              Int?
-  repaymentCount           Int?
-  cumulativePool           Int?
+  actualDate                 DateTime? @db.Date
+  actualAmount               Int?
+  actualFeeAllocation        Int?
+  actualAgentFeeAllocation   Int?
+  actualPoolAllocation       Int?
+  actualRepaymentAllocation  Int?
+  handlingFee                Int?
+  repaymentCount             Int?
+  cumulativePool             Int?
 
   @@index([caseId])
   @@index([creditorId])
@@ -248,7 +248,7 @@ model Payment {
 // 接触履歴（依頼者 / 債権者）
 // ============================================================
 enum ContactTarget {
-  CLIENT   // 依頼者
+  CLIENT // 依頼者
   CREDITOR // 債権者
 }
 
@@ -257,13 +257,13 @@ model ContactHistory {
   caseId Int
   case   Case @relation(fields: [caseId], references: [id], onDelete: Cascade)
 
-  contactDate  DateTime? @db.Date
+  contactDate  DateTime?     @db.Date
   contactTime  String?
   staff        String?
-  tool         String?   // LINE / 電話 / メール ...
+  tool         String? // LINE / 電話 / メール ...
   targetType   ContactTarget
-  creditorName String?   // 債権者接触のとき
-  comment      String?   @db.Text // 改行を含む複数行コメント
+  creditorName String? // 債権者接触のとき
+  comment      String?       @db.Text // 改行を含む複数行コメント
 
   createdAt DateTime @default(now())
 
@@ -277,7 +277,7 @@ model ContactHistory {
 // ============================================================
 enum LineLinkStatus {
   PENDING // コード発行済・未連携
-  LINKED  // userId 紐付け済
+  LINKED // userId 紐付け済
   BLOCKED // ブロック/解除
 }
 
@@ -302,8 +302,8 @@ model LineLink {
 // ============================================================
 enum NotificationType {
   PAYMENT_REMINDER // 入金予定リマインド
-  DEPOSIT_CONFIRM  // 入金確認
-  DEADLINE_ALERT   // 期限アラート
+  DEPOSIT_CONFIRM // 入金確認
+  DEADLINE_ALERT // 期限アラート
 }
 
 enum NotificationStatus {
@@ -314,17 +314,17 @@ enum NotificationStatus {
 }
 
 model LineNotificationLog {
-  id                 Int                @id @default(autoincrement())
-  caseId             Int
-  case               Case               @relation(fields: [caseId], references: [id], onDelete: Cascade)
-  type               NotificationType
-  scheduledDate      DateTime           @db.Date
-  sentAt             DateTime?
-  status             NotificationStatus @default(PENDING)
+  id                  Int                @id @default(autoincrement())
+  caseId              Int
+  case                Case               @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  type                NotificationType
+  scheduledDate       DateTime           @db.Date
+  sentAt              DateTime?
+  status              NotificationStatus @default(PENDING)
   recipientLineUserId String?
-  messageContent     String             @db.Text
-  errorMessage       String?
-  createdAt          DateTime           @default(now())
+  messageContent      String             @db.Text
+  errorMessage        String?
+  createdAt           DateTime           @default(now())
 
   // 同一案件・同一予定日・同一種別の二重送信防止
   @@unique([caseId, scheduledDate, type])
@@ -340,18 +340,33 @@ enum UserRole {
   STAFF
 }
 
+enum UserStatus {
+  ACTIVE // 有効
+  DISABLED // 無効化（ログイン不可・ログは保持）
+}
+
 model User {
-  id            String    @id @default(cuid())
+  id            String     @id @default(cuid())
   name          String?
-  email         String    @unique
+  email         String     @unique
   emailVerified DateTime?
-  passwordHash  String?   // Credentials 認証時
+  passwordHash  String? // Credentials 認証時（scrypt）
   image         String?
-  role          UserRole  @default(STAFF)
+  role          UserRole   @default(STAFF)
+  status        UserStatus @default(ACTIVE)
+  lastLoginAt   DateTime?
   accounts      Account[]
   sessions      Session[]
-  createdAt     DateTime  @default(now())
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 
+  // 監査・変更履歴（実行者として）
+  auditLogs       AuditLog[]  @relation("AuditActor")
+  changeLogs      ChangeLog[] @relation("ChangeActor")
+  revertedChanges ChangeLog[] @relation("ChangeReverter")
+
+  @@index([role])
+  @@index([status])
   @@map("users")
 }
 
@@ -391,4 +406,73 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verification_tokens")
+}
+
+// ============================================================
+// 行動ログ（監査ログ）：誰が・いつ・何をしたか
+// ============================================================
+enum AuditAction {
+  LOGIN // ログイン成功
+  LOGIN_FAILED // ログイン失敗
+  LOGOUT // ログアウト
+  CREATE // 作成
+  UPDATE // 更新
+  DELETE // 削除
+  VIEW // 閲覧（機微データ）
+  EXPORT // エクスポート/出力
+}
+
+model AuditLog {
+  id         BigInt      @id @default(autoincrement())
+  // 実行者。ユーザー削除後もログを残すため任意参照＋メール文字列を保存
+  actorId    String?
+  actor      User?       @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+  actorEmail String? // 実行時のメール（スナップショット）
+  action     AuditAction
+  // 対象（例: entity="User" entityId="<id>"）。横断検索用に文字列で保持
+  entity     String?
+  entityId   String?
+  summary    String? // 人間可読の要約（例:「ロールを STAFF→ADMIN に変更」）
+  metadata   Json? // 補足（任意の構造化情報）
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime    @default(now())
+
+  @@index([actorId])
+  @@index([action])
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ============================================================
+// 変更履歴：フィールド単位の before/after と revert（元に戻す）
+// ============================================================
+enum ChangeAction {
+  CREATE
+  UPDATE
+  DELETE
+}
+
+model ChangeLog {
+  id           BigInt       @id @default(autoincrement())
+  actorId      String?
+  actor        User?        @relation("ChangeActor", fields: [actorId], references: [id], onDelete: SetNull)
+  actorEmail   String?
+  entity       String // 例: "User"
+  entityId     String // 変更対象の主キー
+  action       ChangeAction
+  before       Json? // 変更前スナップショット（DELETE/UPDATE）
+  after        Json? // 変更後スナップショット（CREATE/UPDATE）
+  // revert（元に戻す）
+  reverted     Boolean      @default(false)
+  revertedAt   DateTime?
+  revertedById String?
+  revertedBy   User?        @relation("ChangeReverter", fields: [revertedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime     @default(now())
+
+  @@index([entity, entityId])
+  @@index([actorId])
+  @@index([createdAt])
+  @@map("change_logs")
 }

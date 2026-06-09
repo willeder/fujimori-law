@@ -6,7 +6,7 @@
  * 事前に: python3 scripts/generate_realdata_json.py
  * 実行:   npx prisma db seed   （package.json の prisma.seed に tsx 等を設定）
  *
- * データ位置は DATA_DIR で上書き可（既定: client-mock/public/data）。
+ * データ位置は DATA_DIR で上書き可（既定: public/data）。
  */
 import { PrismaClient, ContactTarget } from '@prisma/client'
 import { readFileSync } from 'node:fs'
@@ -15,7 +15,7 @@ import { join } from 'node:path'
 const prisma = new PrismaClient()
 
 const DATA_DIR =
-  process.env.DATA_DIR ?? join(process.cwd(), 'client-mock', 'public', 'data')
+  process.env.DATA_DIR ?? join(process.cwd(), 'public', 'data')
 
 const read = <T,>(name: string): T =>
   JSON.parse(readFileSync(join(DATA_DIR, name), 'utf-8')) as T
