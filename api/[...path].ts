@@ -1,12 +1,14 @@
 /**
- * Vercel Function（キャッチオール）: データ系 API の本番提供。
- * 開発時は vite.config.ts の dbApiPlugin が同じルートを処理する。ここはその本番版。
+ * Vercel Function（キャッチオール・従来 req/res 形式）: データ系 API の本番提供。
  *
- * 専用関数が存在する auth / members / line/webhook / cron は、より具体的な
- * ファイルが優先されるため、このキャッチオールには到達しない。
- * 残りのデータルート（cases / creditors / payments / contact-histories /
- * changes / line/links / gmo / intake）をまとめて捌く。すべてログイン必須。
+ * Web 形式（export GET/POST）のキャッチオールは多階層（例: /api/cases/1）で
+ * ルーティングされない事象があったため、マルチセグメントで実績のある
+ * 従来の default export（Node req/res）形式で実装し、req.url で振り分ける。
+ *
+ * 専用関数がある auth / members / line/webhook / cron は、より具体的な
+ * ファイルが優先されるためここには到達しない。残りのデータルートを捌く。
  */
+import type { IncomingMessage, ServerResponse } from 'node:http'
 import {
   apiRoutes,
   getCaseById,
@@ -18,30 +20,40 @@ import {
 } from '../src/server/handlers.js'
 import * as gmo from '../src/server/gmoTransfer.js'
 import * as intake from '../src/server/intakeImport.js'
-import { resolveActor, reqMeta, unauthorized } from '../src/server/apiAuth.js'
+import { getSessionToken, getSessionUser } from '../src/server/auth.js'
 import { prisma } from '../src/server/db.js'
 
 export const config = { runtime: 'nodejs' }
 
-const json = (data: unknown, status = 200): Response =>
-  new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json; charset=utf-8' },
+function readRawBuffer(req: IncomingMessage): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = []
+    req.on('data', (c: Buffer) => chunks.push(c))
+    req.on('end', () => resolve(Buffer.concat(chunks)))
+    req.on('error', reject)
   })
+}
 
-async function route(req: Request): Promise<Response> {
-  const u = new URL(req.url)
-  const path = u.pathname
-  const method = req.method
+export default async function handler(
+  req: IncomingMessage,
+  res: ServerResponse
+): Promise<void> {
+  const method = req.method ?? 'GET'
+  const rawUrl = req.url ?? '/'
+  const path = rawUrl.split('?')[0]
+  const query = new URLSearchParams(rawUrl.split('?')[1] ?? '')
 
-  // ── 診断（認証不要）: 実行リージョンと DB 往復ms を返す ──
-  // 例: {"region":"hnd1","dbPingMs":12} なら東京・近接。region が iad1 等で
-  // dbPingMs が大きいとクロスリージョン（regions:["hnd1"] 未反映）。
+  const json = (data: unknown, status = 200) => {
+    res.statusCode = status
+    res.setHeader('Content-Type', 'application/json; charset=utf-8')
+    res.end(JSON.stringify(data))
+  }
+
+  // ── 診断（認証不要）: 実行リージョンと DB 往復ms ──
   if (path === '/api/_diag') {
     const pings: number[] = []
     let dbError: string | null = null
     try {
-      // 1回目=接続確立込み / 2・3回目=ウォームRTT
       for (let i = 0; i < 3; i++) {
         const t = Date.now()
         await prisma.$queryRawUnsafe('SELECT 1')
@@ -50,127 +62,132 @@ async function route(req: Request): Promise<Response> {
     } catch (e) {
       dbError = e instanceof Error ? e.message : String(e)
     }
-    // 接続先の設定を確認（認証情報は出さない）
-    let dbHost: string | null = null
-    let dbPort: string | null = null
-    let pgbouncer = false
-    let connectionLimit: string | null = null
+    let db: Record<string, unknown> = {}
     try {
-      const url = new URL(process.env.DATABASE_URL ?? '')
-      dbHost = url.hostname
-      dbPort = url.port
-      pgbouncer = url.searchParams.get('pgbouncer') === 'true'
-      connectionLimit = url.searchParams.get('connection_limit')
+      const u = new URL(process.env.DATABASE_URL ?? '')
+      db = {
+        host: u.hostname,
+        port: u.port,
+        pgbouncer: u.searchParams.get('pgbouncer') === 'true',
+        connectionLimit: u.searchParams.get('connection_limit'),
+      }
     } catch {
-      /* DATABASE_URL 未設定/不正 */
+      /* noop */
     }
-    return json({
+    json({
       region: process.env.VERCEL_REGION ?? null,
       coldConnectMs: pings[0] ?? -1,
       warmRttMs: pings.slice(1),
       dbError,
-      db: { host: dbHost, port: dbPort, pgbouncer, connectionLimit },
+      db,
       now: new Date().toISOString(),
     })
+    return
   }
 
-  // データルートはすべてログイン必須（dev のセッションゲートと同等）
-  const actor = await resolveActor(req)
-  if (!actor) return unauthorized()
-  const meta = reqMeta(req)
-  const editActor = { id: actor.id, email: actor.email }
+  // ── 認証（データルートは全てログイン必須） ──
+  const cookieHeader = (req.headers['cookie'] as string | undefined) ?? null
+  const sessionUser = await getSessionUser(getSessionToken(cookieHeader))
+  if (!sessionUser) {
+    json({ error: 'unauthenticated' }, 401)
+    return
+  }
+  const fwd = req.headers['x-forwarded-for']
+  const meta = {
+    ip: (Array.isArray(fwd) ? fwd[0] : fwd)?.split(',')[0]?.trim() ?? null,
+    userAgent: (req.headers['user-agent'] as string | undefined) ?? null,
+  }
+  const editActor = { id: sessionUser.id, email: sessionUser.email }
 
   try {
     // ── 相談票CSV取込 ──
     if (path === '/api/intake/template') {
       const csv = intake.INTAKE_HEADERS.join(',') + '\r\n'
-      const bom = Buffer.from([0xef, 0xbb, 0xbf])
-      return new Response(new Uint8Array(Buffer.concat([bom, Buffer.from(csv, 'utf8')])), {
-        headers: {
-          'Content-Type': 'text/csv; charset=utf-8',
-          'Content-Disposition': 'attachment; filename="intake_template.csv"',
-        },
-      })
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8')
+      res.setHeader('Content-Disposition', 'attachment; filename="intake_template.csv"')
+      res.end(Buffer.concat([Buffer.from([0xef, 0xbb, 0xbf]), Buffer.from(csv, 'utf8')]))
+      return
     }
     if (path === '/api/intake/preview' && method === 'POST') {
-      const buf = Buffer.from(await req.arrayBuffer())
-      return json(await intake.previewIntake(buf))
+      json(await intake.previewIntake(await readRawBuffer(req)))
+      return
     }
     if (path === '/api/intake/commit' && method === 'POST') {
-      const buf = Buffer.from(await req.arrayBuffer())
-      const r = await intake.commitIntake(editActor, buf)
-      return json(r.body, r.status)
+      const r = await intake.commitIntake(editActor, await readRawBuffer(req))
+      json(r.body, r.status)
+      return
     }
 
     // ── GMO 一括振込ファイル ──
     if (path === '/api/gmo/transfers' || path === '/api/gmo/transfers/file') {
       const today = new Date().toISOString().slice(0, 10)
-      const start = u.searchParams.get('start') ?? today
-      const end = u.searchParams.get('end') ?? today
-      const ref = u.searchParams.get('ref') ?? today
+      const start = query.get('start') ?? today
+      const end = query.get('end') ?? today
+      const ref = query.get('ref') ?? today
       const result = await gmo.buildGmoTransfers(start, end, ref)
       if (path === '/api/gmo/transfers/file') {
         const outputCount = result.count - result.incompleteCount
         if (outputCount > 999) {
-          const zip = gmo.buildZip(gmo.gmoCsvChunks(result))
-          return new Response(new Uint8Array(zip), {
-            headers: {
-              'Content-Type': 'application/zip',
-              'Content-Disposition': `attachment; filename="gmo_transfer_${start}.zip"`,
-            },
-          })
+          res.setHeader('Content-Type', 'application/zip')
+          res.setHeader('Content-Disposition', `attachment; filename="gmo_transfer_${start}.zip"`)
+          res.end(gmo.buildZip(gmo.gmoCsvChunks(result)))
+          return
         }
-        const buf = gmo.toShiftJis(gmo.toGmoCsv(result))
-        return new Response(new Uint8Array(buf), {
-          headers: {
-            'Content-Type': 'text/csv; charset=Shift_JIS',
-            'Content-Disposition': `attachment; filename="gmo_transfer_${start}.csv"`,
-          },
-        })
+        res.setHeader('Content-Type', 'text/csv; charset=Shift_JIS')
+        res.setHeader('Content-Disposition', `attachment; filename="gmo_transfer_${start}.csv"`)
+        res.end(gmo.toShiftJis(gmo.toGmoCsv(result)))
+        return
       }
-      return json(result)
+      json(result)
+      return
     }
 
     // ── 案件編集・変更履歴・revert ──
     const caseById = path.match(/^\/api\/cases\/(\d+)$/)
     if (caseById) {
-      if (method === 'GET') return json(await getCaseById(Number(caseById[1])))
+      if (method === 'GET') {
+        json(await getCaseById(Number(caseById[1])))
+        return
+      }
       if (method === 'PATCH') {
-        const r = await updateCaseField(editActor, Number(caseById[1]), await req.text(), meta)
-        return json(r.body, r.status)
+        const raw = (await readRawBuffer(req)).toString('utf8')
+        const r = await updateCaseField(editActor, Number(caseById[1]), raw, meta)
+        json(r.body, r.status)
+        return
       }
     }
     const changesMatch = path.match(/^\/api\/cases\/(\d+)\/changes$/)
-    if (changesMatch && method === 'GET') return json(await getCaseChanges(Number(changesMatch[1])))
-
+    if (changesMatch && method === 'GET') {
+      json(await getCaseChanges(Number(changesMatch[1])))
+      return
+    }
     const revertMatch = path.match(/^\/api\/changes\/(\d+)\/revert$/)
     if (revertMatch && method === 'POST') {
       const r = await revertChange(editActor, revertMatch[1], meta)
-      return json(r.body, r.status)
+      json(r.body, r.status)
+      return
     }
 
     // ── LINE 連携リンク ──
     const lineLinks = path.match(/^\/api\/line\/links\/(\d+)$/)
     if (lineLinks) {
       const cid = Number(lineLinks[1])
-      return json(method === 'POST' ? await issueLineCode(cid) : await getLineLink(cid))
+      json(method === 'POST' ? await issueLineCode(cid) : await getLineLink(cid))
+      return
     }
 
     // ── 一覧・集計（apiRoutes マップ。caseId 任意） ──
     if (method === 'GET') {
-      const handler = apiRoutes[path]
-      if (handler) {
-        const cidParam = u.searchParams.get('caseId')
-        return json(await handler(cidParam ? Number(cidParam) : undefined))
+      const fn = apiRoutes[path]
+      if (fn) {
+        const cid = query.get('caseId')
+        json(await fn(cid ? Number(cid) : undefined))
+        return
       }
     }
 
-    return json({ error: 'not found' }, 404)
+    json({ error: 'not found' }, 404)
   } catch (e) {
-    return json({ error: e instanceof Error ? e.message : String(e) }, 500)
+    json({ error: e instanceof Error ? e.message : String(e) }, 500)
   }
 }
-
-export const GET = route
-export const POST = route
-export const PATCH = route
