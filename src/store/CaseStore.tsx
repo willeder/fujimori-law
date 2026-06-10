@@ -190,10 +190,22 @@ const initialState: CaseState = {
   loadedFullCaseIds: [],
 }
 
-async function loadJson<T>(path: string): Promise<T> {
-  const res = await fetch(path)
-  if (!res.ok) throw new Error(`${path}: HTTP ${res.status}`)
-  return (await res.json()) as T
+async function loadJson<T>(path: string, timeoutMs = 25_000): Promise<T> {
+  // タイムアウトを設けて「応答が返らず無限ローディング」を防ぐ。
+  const ctrl = new AbortController()
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs)
+  try {
+    const res = await fetch(path, { signal: ctrl.signal })
+    if (!res.ok) throw new Error(`${path}: HTTP ${res.status}`)
+    return (await res.json()) as T
+  } catch (e) {
+    if (e instanceof DOMException && e.name === 'AbortError') {
+      throw new Error(`${path}: タイムアウト（${timeoutMs / 1000}秒以内に応答なし）`)
+    }
+    throw e
+  } finally {
+    clearTimeout(timer)
+  }
 }
 
 // fetch はモジュールスコープの Promise を1回だけ生成してキャッシュする。
@@ -219,6 +231,9 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         if (!cancelled) dispatch({ type: 'LOAD_CASES', payload: cases })
       })
       .catch((err: unknown) => {
+        // 失敗したキャッシュPromiseを破棄し、再試行（再マウント/再読み込み）で
+        // 必ず再フェッチされるようにする（失敗状態の固着を防ぐ）。
+        casesPromise = null
         if (!cancelled)
           dispatch({
             type: 'LOAD_ERROR',

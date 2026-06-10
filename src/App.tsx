@@ -71,6 +71,13 @@ function DataGate({ children }: { children: ReactNode }) {
           API（/api/cases）への接続を確認してください。多くは DB 接続不可、
           またはセッション切れ（再ログイン）が原因です。
         </p>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="mt-2 rounded bg-slate-800 px-4 py-1.5 text-sm font-semibold text-white hover:bg-slate-700"
+        >
+          再読み込み
+        </button>
       </div>
     )
   }
@@ -80,6 +87,13 @@ function DataGate({ children }: { children: ReactNode }) {
       <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-slate-50">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-600" />
         <p className="text-sm text-slate-500">実データを読み込み中…</p>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="text-xs text-slate-400 underline hover:text-slate-600"
+        >
+          時間がかかる場合は再読み込み
+        </button>
       </div>
     )
   }
