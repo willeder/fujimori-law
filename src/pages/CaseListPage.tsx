@@ -47,51 +47,122 @@ export function CaseListPage() {
     return [...filteredCases].sort((a, b) => (a.id ?? 0) - (b.id ?? 0))
   }, [filteredCases])
 
+  const yen = (n: number | null | undefined) =>
+    n != null ? (
+      <span>
+        {n.toLocaleString()}
+        <span className="text-slate-400 text-[10px] ml-0.5">円</span>
+      </span>
+    ) : (
+      '-'
+    )
+
   const columns: Column<Case>[] = [
+    { key: 'id', header: 'ID', width: '56px', align: 'center', sortable: false },
     {
-      key: 'id',
-      header: 'No',
-      width: '48px',
+      key: 'acceptanceDate',
+      header: '受任日',
+      width: '88px',
+      sortable: false,
+      render: (item) => item.appointmentInfo.acceptanceDate ?? '-',
+    },
+    {
+      key: 'cautionRank',
+      header: '要注意ランク',
+      width: '76px',
       align: 'center',
       sortable: false,
+      render: (item) => <StatusBadge status={item.clientBasicInfo.cautionRank} size="sm" />,
     },
     {
-      key: 'name',
-      header: '依頼者名',
-      width: '100px',
+      key: 'listRegisteredDate',
+      header: 'リスト登録日',
+      width: '92px',
       sortable: false,
-      render: (item) => (
-        <div>
-          <div className="font-medium">{item.clientBasicInfo.name}</div>
-          <div className="text-[10px] text-slate-400">
-            {item.clientBasicInfo.furigana}
-          </div>
-        </div>
-      ),
+      render: (item) => item.metadata.listRegisteredDate ?? '-',
     },
     {
-      key: 'prefecture',
-      header: '都道府県',
-      width: '64px',
+      key: 'listCategory',
+      header: 'リスト区分',
+      width: '88px',
       sortable: false,
-      render: (item) => item.clientBasicInfo.prefecture,
+      render: (item) => item.metadata.listCategory ?? '-',
+    },
+    {
+      key: 'acceptanceRank',
+      header: '受任ランク',
+      width: '76px',
+      align: 'center',
+      sortable: false,
+      render: (item) => <StatusBadge status={item.appointmentInfo.acceptanceRank} size="sm" />,
+    },
+    {
+      key: 'debtAdjustmentType',
+      header: '債務整理区分',
+      width: '88px',
+      sortable: false,
+      render: (item) => item.appointmentInfo.debtAdjustmentType ?? '-',
     },
     {
       key: 'status',
-      header: 'ステータス',
-      width: '120px',
+      header: '受任後ステータス',
+      width: '128px',
       sortable: false,
       render: (item) => <StatusBadge status={item.settlementInfo.status} size="sm" />,
     },
     {
+      key: 'name',
+      header: '名前',
+      width: '96px',
+      sortable: false,
+      render: (item) => <span className="font-medium">{item.clientBasicInfo.name}</span>,
+    },
+    {
+      key: 'furigana',
+      header: 'フリガナ',
+      width: '104px',
+      sortable: false,
+      render: (item) => (
+        <span className="text-slate-500">{item.clientBasicInfo.furigana ?? '-'}</span>
+      ),
+    },
+    {
+      key: 'phone',
+      header: '電話番号',
+      width: '108px',
+      sortable: false,
+      render: (item) => item.clientBasicInfo.phone ?? '-',
+    },
+    {
+      key: 'lineUrl',
+      header: 'LINE@URL',
+      width: '72px',
+      align: 'center',
+      sortable: false,
+      render: (item) =>
+        item.clientBasicInfo.lineUrl ? (
+          <a
+            href={item.clientBasicInfo.lineUrl}
+            target="_blank"
+            rel="noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="text-blue-600 underline"
+          >
+            開く
+          </a>
+        ) : (
+          '-'
+        ),
+    },
+    {
       key: 'creditorCount',
-      header: '社数',
-      width: '56px',
+      header: '債権者数',
+      width: '64px',
       align: 'right',
       sortable: false,
       render: (item) => (
         <span>
-          {item.debtInfo.creditorCount}
+          {item.debtInfo.creditorCount ?? '-'}
           <span className="text-slate-400 text-[10px] ml-0.5">社</span>
         </span>
       ),
@@ -99,57 +170,32 @@ export function CaseListPage() {
     {
       key: 'declaredDebtAmount',
       header: '申告債務額',
-      width: '100px',
+      width: '104px',
       align: 'right',
       sortable: false,
-      render: (item) => (
-        <span>
-          {item.debtInfo.declaredDebtAmount?.toLocaleString()}
-          <span className="text-slate-400 text-[10px] ml-0.5">円</span>
-        </span>
-      ),
+      render: (item) => yen(item.debtInfo.declaredDebtAmount),
     },
     {
-      key: 'acceptanceDate',
-      header: '受任日',
-      width: '88px',
+      key: 'officeFee',
+      header: '事務所報酬',
+      width: '104px',
+      align: 'right',
       sortable: false,
-      render: (item) => item.appointmentInfo.acceptanceDate,
+      render: (item) => yen(item.feeInfo.officeFee),
     },
     {
-      key: 'nextPaymentDate',
-      header: '次回入金日',
-      width: '88px',
-      sortable: false,
-      render: (item) => (
-        <span
-          className={
-            item.paymentInfo.nextPaymentDate &&
-            new Date(item.paymentInfo.nextPaymentDate) <= new Date()
-              ? 'text-red-600 font-medium'
-              : ''
-          }
-        >
-          {item.paymentInfo.nextPaymentDate ?? '-'}
-        </span>
-      ),
-    },
-    {
-      key: 'judicialScrivener',
-      header: '担当',
+      key: 'appointmentStaff',
+      header: 'アポ担当',
       width: '80px',
       sortable: false,
-      render: (item) => item.appointmentInfo.judicialScrivener,
+      render: (item) => item.appointmentInfo.appointmentStaff ?? '-',
     },
     {
-      key: 'acceptanceRank',
-      header: 'ランク',
-      width: '52px',
-      align: 'center',
+      key: 'interviewStaff',
+      header: '面談担当',
+      width: '80px',
       sortable: false,
-      render: (item) => (
-        <StatusBadge status={item.appointmentInfo.acceptanceRank} size="sm" />
-      ),
+      render: (item) => item.appointmentInfo.interviewStaff ?? '-',
     },
   ]
 

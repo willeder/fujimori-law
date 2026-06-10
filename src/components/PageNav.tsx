@@ -1,7 +1,7 @@
 /**
  * 全画面共通のグローバルナビ。各ダッシュボード間を直接移動できるようにする。
+ * 各一覧はボタン（枠囲み）で表示し、現在開いている一覧は背景色を変えて明示する。
  */
-import { Fragment } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 const LINKS: { path: string; label: string }[] = [
@@ -18,25 +18,25 @@ export function PageNav() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   return (
-    <nav className="flex flex-wrap items-center gap-2">
-      {LINKS.map((l, i) => {
+    <nav className="flex flex-wrap items-center gap-1.5">
+      {LINKS.map((l) => {
         const active = pathname === l.path
         return (
-          <Fragment key={l.path}>
-            {i > 0 && <span className="text-slate-300">|</span>}
-            <button
-              type="button"
-              onClick={() => navigate(l.path)}
-              disabled={active}
-              className={
-                active
-                  ? 'text-xs font-semibold text-slate-400'
-                  : 'text-xs text-slate-600 hover:text-slate-900'
-              }
-            >
-              {l.label}
-            </button>
-          </Fragment>
+          <button
+            key={l.path}
+            type="button"
+            onClick={() => navigate(l.path)}
+            disabled={active}
+            aria-current={active ? 'page' : undefined}
+            className={
+              'rounded-md border px-2.5 py-1 text-xs transition-colors ' +
+              (active
+                ? 'cursor-default border-blue-600 bg-blue-600 font-semibold text-white shadow-sm'
+                : 'border-slate-300 bg-white text-slate-600 hover:border-slate-400 hover:bg-slate-100 hover:text-slate-900')
+            }
+          >
+            {l.label}
+          </button>
         )
       })}
     </nav>

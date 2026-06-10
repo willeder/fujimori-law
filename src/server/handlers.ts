@@ -175,6 +175,8 @@ function toCaseSummaryJson(c: Record<string, any>) {
     clientBasicInfo: {
       name: c.name,
       furigana: c.furigana,
+      phone: c.phone,
+      lineUrl: c.lineUrl,
       prefecture: c.prefecture,
       payDay: c.payDay,
       cautionRank: c.cautionRank,
@@ -182,6 +184,7 @@ function toCaseSummaryJson(c: Record<string, any>) {
     appointmentInfo: {
       acceptanceDate: ds(c.acceptanceDate),
       acceptanceRank: c.acceptanceRank,
+      debtAdjustmentType: c.debtAdjustmentType,
       appointmentStaff: c.appointmentStaff,
       interviewStaff: c.interviewStaff,
       judicialScrivener: c.judicialScrivener,
@@ -191,8 +194,12 @@ function toCaseSummaryJson(c: Record<string, any>) {
       declaredDebtAmount: c.declaredDebtAmount,
     },
     settlementInfo: { status: c.settlementStatus },
-    feeInfo: { uncollectedFee: c.uncollectedFee },
+    feeInfo: { officeFee: c.officeFee, uncollectedFee: c.uncollectedFee },
     paymentInfo: { nextPaymentDate: ds(c.nextPaymentDate) },
+    metadata: {
+      listCategory: c.listCategory,
+      listRegisteredDate: ds(c.listRegisteredDate),
+    },
   }
 }
 
@@ -203,19 +210,25 @@ export async function getCasesSummary() {
       id: true,
       name: true,
       furigana: true,
+      phone: true,
+      lineUrl: true,
       prefecture: true,
       payDay: true,
       cautionRank: true,
       acceptanceDate: true,
       acceptanceRank: true,
+      debtAdjustmentType: true,
       appointmentStaff: true,
       interviewStaff: true,
       judicialScrivener: true,
       creditorCount: true,
       declaredDebtAmount: true,
       settlementStatus: true,
+      officeFee: true,
       uncollectedFee: true,
       nextPaymentDate: true,
+      listCategory: true,
+      listRegisteredDate: true,
     },
   })
   return rows.map(toCaseSummaryJson)

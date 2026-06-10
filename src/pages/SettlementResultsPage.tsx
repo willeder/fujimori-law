@@ -18,10 +18,12 @@ export function SettlementResultsPage() {
   const navigate = useNavigate()
   const { cases } = useCaseState()
 
-  // 検索条件
+  // 検索条件（受任日・和解日は期間指定: From〜To）
   const [fCreditor, setFCreditor] = useState('')
-  const [fAcceptance, setFAcceptance] = useState('')
-  const [fSettlement, setFSettlement] = useState('')
+  const [fAccFrom, setFAccFrom] = useState('')
+  const [fAccTo, setFAccTo] = useState('')
+  const [fSetFrom, setFSetFrom] = useState('')
+  const [fSetTo, setFSetTo] = useState('')
   const [fStatus, setFStatus] = useState('')
 
   // 検索が実行されるまで一覧は表示しない
@@ -76,10 +78,28 @@ export function SettlementResultsPage() {
 
   const clear = () => {
     setFCreditor('')
-    setFAcceptance('')
-    setFSettlement('')
+    setFAccFrom('')
+    setFAccTo('')
+    setFSetFrom('')
+    setFSetTo('')
     setFStatus('')
     setSearched(false)
+  }
+
+  /**
+   * 日付（YYYY-MM-DD）が [from, to] の範囲内か判定。
+   * - from/to 両方空 → 制約なし（true）
+   * - from のみ → from 以降
+   * - to のみ → to 以前
+   * - 範囲指定があり日付が無い行は除外
+   */
+  const inRange = (val: string | null, from: string, to: string) => {
+    if (!from && !to) return true
+    const d = (val ?? '').slice(0, 10)
+    if (!d) return false
+    if (from && d < from) return false
+    if (to && d > to) return false
+    return true
   }
 
   const rows = useMemo<Row[]>(() => {
@@ -98,16 +118,15 @@ export function SettlementResultsPage() {
 
   const filtered = useMemo(() => {
     if (!searched) return []
-    const qa = fAcceptance.trim()
-    const qs = fSettlement.trim()
     return rows.filter((r) => {
       if (fCreditor && r.creditorName !== fCreditor) return false
-      if (qa && !(r.acceptanceDate ?? '').startsWith(qa)) return false
-      if (qs && !(r.settlementDate ?? '').startsWith(qs)) return false
+      if (!inRange(r.acceptanceDate, fAccFrom, fAccTo)) return false
+      if (!inRange(r.settlementDate, fSetFrom, fSetTo)) return false
       if (fStatus && r.caseStatus !== fStatus) return false
       return true
     })
-  }, [searched, rows, fCreditor, fAcceptance, fSettlement, fStatus])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searched, rows, fCreditor, fAccFrom, fAccTo, fSetFrom, fSetTo, fStatus])
 
   const columns: Column<Row>[] = [
     { key: 'caseId', header: 'ID', width: '60px', align: 'center' },
@@ -187,24 +206,42 @@ export function SettlementResultsPage() {
               ))}
             </select>
           </label>
-          <label className="flex flex-col gap-0.5 text-[10px] text-slate-500">
-            受任日
-            <input
-              value={fAcceptance}
-              onChange={(e) => setFAcceptance(e.target.value)}
-              placeholder="例: 2026-05"
-              className={`${inputCls} w-28`}
-            />
-          </label>
-          <label className="flex flex-col gap-0.5 text-[10px] text-slate-500">
-            和解日
-            <input
-              value={fSettlement}
-              onChange={(e) => setFSettlement(e.target.value)}
-              placeholder="例: 2026-05"
-              className={`${inputCls} w-28`}
-            />
-          </label>
+          <div className="flex flex-col gap-0.5 text-[10px] text-slate-500">
+            受任日（期間）
+            <div className="flex items-center gap-1">
+              <input
+                type="date"
+                value={fAccFrom}
+                onChange={(e) => setFAccFrom(e.target.value)}
+                className={`${inputCls} w-36`}
+              />
+              <span className="text-slate-400">〜</span>
+              <input
+                type="date"
+                value={fAccTo}
+                onChange={(e) => setFAccTo(e.target.value)}
+                className={`${inputCls} w-36`}
+              />
+            </div>
+          </div>
+          <div className="flex flex-col gap-0.5 text-[10px] text-slate-500">
+            和解日（期間）
+            <div className="flex items-center gap-1">
+              <input
+                type="date"
+                value={fSetFrom}
+                onChange={(e) => setFSetFrom(e.target.value)}
+                className={`${inputCls} w-36`}
+              />
+              <span className="text-slate-400">〜</span>
+              <input
+                type="date"
+                value={fSetTo}
+                onChange={(e) => setFSetTo(e.target.value)}
+                className={`${inputCls} w-36`}
+              />
+            </div>
+          </div>
           <label className="flex flex-col gap-0.5 text-[10px] text-slate-500">
             受任後ステータス
             <select
