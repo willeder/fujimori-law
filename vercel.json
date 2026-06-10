@@ -8,9 +8,15 @@
     }
   ],
   "rewrites": [
-    {
-      "source": "/((?!api/).*)",
-      "destination": "/index.html"
-    }
+    { "source": "/api/cases/:p*", "destination": "/api/data?__path=cases/:p*" },
+    { "source": "/api/creditors/:p*", "destination": "/api/data?__path=creditors/:p*" },
+    { "source": "/api/payments/:p*", "destination": "/api/data?__path=payments/:p*" },
+    { "source": "/api/contact-histories", "destination": "/api/data?__path=contact-histories" },
+    { "source": "/api/changes/:p*", "destination": "/api/data?__path=changes/:p*" },
+    { "source": "/api/line/links/:p*", "destination": "/api/data?__path=line/links/:p*" },
+    { "source": "/api/gmo/:p*", "destination": "/api/data?__path=gmo/:p*" },
+    { "source": "/api/intake/:p*", "destination": "/api/data?__path=intake/:p*" },
+    { "source": "/api/_diag", "destination": "/api/data?__path=_diag" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }

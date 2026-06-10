@@ -1,12 +1,13 @@
 /**
- * Vercel Function（キャッチオール・従来 req/res 形式）: データ系 API の本番提供。
+ * Vercel Function（具体名・従来 req/res 形式）: データ系 API の本番提供。
  *
- * Web 形式（export GET/POST）のキャッチオールは多階層（例: /api/cases/1）で
- * ルーティングされない事象があったため、マルチセグメントで実績のある
- * 従来の default export（Node req/res）形式で実装し、req.url で振り分ける。
+ * キャッチオール命名（api/[...path].ts）は多階層パス（例: /api/cases/1）が
+ * 関数に割り当たらない事象があったため、具体名 /api/data に集約し、
+ * vercel.json の rewrite で /api/* を本関数へ流す方式に変更。
+ * ルートは rewrite が付与する `__path` クエリ、無ければ req.url から判定する。
  *
- * 専用関数がある auth / members / line/webhook / cron は、より具体的な
- * ファイルが優先されるためここには到達しない。残りのデータルートを捌く。
+ * 専用関数がある auth / members / line/webhook / cron は filesystem 側で
+ * 先にマッチするため rewrite されず、ここには到達しない。
  */
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import {
@@ -40,8 +41,11 @@ export default async function handler(
 ): Promise<void> {
   const method = req.method ?? 'GET'
   const rawUrl = req.url ?? '/'
-  const path = rawUrl.split('?')[0]
   const query = new URLSearchParams(rawUrl.split('?')[1] ?? '')
+  // 論理パス: rewrite が付与する __path を優先、無ければ req.url から
+  const fromRewrite = query.get('__path')
+  const seg = (fromRewrite ?? '').replace(/^\/+/, '').replace(/\/+$/, '')
+  const path = fromRewrite ? '/api/' + seg : rawUrl.split('?')[0]
 
   const json = (data: unknown, status = 200) => {
     res.statusCode = status
@@ -49,7 +53,7 @@ export default async function handler(
     res.end(JSON.stringify(data))
   }
 
-  // ── 診断（認証不要）: 実行リージョンと DB 往復ms ──
+  // ── 診断（認証不要） ──
   if (path === '/api/_diag') {
     const pings: number[] = []
     let dbError: string | null = null
@@ -80,6 +84,7 @@ export default async function handler(
       warmRttMs: pings.slice(1),
       dbError,
       db,
+      resolvedPath: path,
       now: new Date().toISOString(),
     })
     return
@@ -186,7 +191,7 @@ export default async function handler(
       }
     }
 
-    json({ error: 'not found' }, 404)
+    json({ error: 'not found', resolvedPath: path }, 404)
   } catch (e) {
     json({ error: e instanceof Error ? e.message : String(e) }, 500)
   }
