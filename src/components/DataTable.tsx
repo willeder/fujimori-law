@@ -142,7 +142,7 @@ export function DataTable<T>({
     : isCompact
       ? tight
         ? 'px-px py-px'
-        : 'px-1 py-1'
+        : 'px-1 py-1.5'
       : tight
         ? 'px-1 py-0.5'
         : 'px-2 py-1'
