@@ -388,7 +388,7 @@ export function CaseListPage() {
                   </button>
                 )}
                 <span className="text-[10px] text-slate-400">
-                  すべての条件に一致（AND）。日付は「2026」「2026-05」等で範囲指定可
+                  すべての条件に一致（AND）・部分一致（含む）。日付は「2026」「2026-05」等でも可
                 </span>
               </div>
             </div>
