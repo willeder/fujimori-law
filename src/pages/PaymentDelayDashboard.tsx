@@ -32,6 +32,7 @@ export function PaymentDelayDashboard() {
   const [loading, setLoading] = useState(true)
   const [filterRisk, setFilterRisk] = useState<'all' | RiskLevel>('all')
   const [filterConsecutive, setFilterConsecutive] = useState<number>(0)
+  const [q, setQ] = useState('')
 
   useEffect(() => {
     void loadDelayedCases()
@@ -52,12 +53,21 @@ export function PaymentDelayDashboard() {
   }
 
   const filteredCases = useMemo(() => {
-    return delayedCases.filter(({ stats }) => {
+    const query = q.trim().toLowerCase()
+    return delayedCases.filter(({ case: c, stats }) => {
       if (filterRisk !== 'all' && stats.riskLevel !== filterRisk) return false
       if (filterConsecutive > 0 && stats.consecutiveDelays < filterConsecutive) return false
+      if (
+        query &&
+        !(
+          c.clientBasicInfo.name?.toLowerCase().includes(query) ||
+          c.metadata?.externalId?.toLowerCase().includes(query)
+        )
+      )
+        return false
       return true
     })
-  }, [delayedCases, filterRisk, filterConsecutive])
+  }, [delayedCases, filterRisk, filterConsecutive, q])
 
   const summary = useMemo(() => {
     return {
@@ -166,6 +176,13 @@ export function PaymentDelayDashboard() {
     <div className="min-h-screen bg-slate-100">
       <AppHeader title="入金遅延モニタリング">
         <div className="flex flex-wrap items-center gap-3">
+          <input
+            type="text"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="依頼者名・IDで検索"
+            className="w-56 rounded border border-slate-300 px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
           <label className="flex items-center gap-1.5 text-sm text-slate-600">
             リスク:
             <select

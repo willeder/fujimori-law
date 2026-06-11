@@ -34,6 +34,8 @@ interface ServerDiscrepancy {
 export function PaymentDiscrepancyPage() {
   const navigate = useNavigate()
   const [sortKey, setSortKey] = useState<SortKey>('difference')
+  const [q, setQ] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'less' | 'more'>('all')
   // 差異行はサーバ集計から取得（全 payments のロードを回避）
   const [data, setData] = useState<ServerDiscrepancy[] | null>(null)
 
@@ -53,18 +55,33 @@ export function PaymentDiscrepancyPage() {
   }, [])
 
   const rows = useMemo(() => {
-    const discrepancies: DiscrepancyRow[] = (data ?? []).map((d) => ({
-      paymentId: d.id,
-      caseId: d.caseId,
-      externalId: d.externalId,
-      caseName: d.caseName ?? '-',
-      plannedDate: d.plannedDate,
-      plannedAmount: d.plannedAmount,
-      actualDate: d.actualDate,
-      actualAmount: d.actualAmount,
-      difference: d.actualAmount - d.plannedAmount,
-      isLess: d.actualAmount < d.plannedAmount,
-    }))
+    const query = q.trim().toLowerCase()
+    const discrepancies: DiscrepancyRow[] = (data ?? [])
+      .map((d) => ({
+        paymentId: d.id,
+        caseId: d.caseId,
+        externalId: d.externalId,
+        caseName: d.caseName ?? '-',
+        plannedDate: d.plannedDate,
+        plannedAmount: d.plannedAmount,
+        actualDate: d.actualDate,
+        actualAmount: d.actualAmount,
+        difference: d.actualAmount - d.plannedAmount,
+        isLess: d.actualAmount < d.plannedAmount,
+      }))
+      .filter((r) => {
+        if (statusFilter === 'less' && !r.isLess) return false
+        if (statusFilter === 'more' && r.isLess) return false
+        if (
+          query &&
+          !(
+            r.caseName.toLowerCase().includes(query) ||
+            r.externalId?.toLowerCase().includes(query)
+          )
+        )
+          return false
+        return true
+      })
 
     // ソート
     return discrepancies.sort((a, b) => {
@@ -81,7 +98,7 @@ export function PaymentDiscrepancyPage() {
           return (b.actualDate ?? '').localeCompare(a.actualDate ?? '')
       }
     })
-  }, [data, sortKey])
+  }, [data, sortKey, q, statusFilter])
 
   const columns: Column<DiscrepancyRow>[] = [
     {
@@ -154,16 +171,35 @@ export function PaymentDiscrepancyPage() {
     },
   ]
 
-  const lessCount = rows.filter((r) => r.isLess).length
-  const moreCount = rows.filter((r) => !r.isLess).length
+  // 総数は全データから（フィルターに左右されない）
+  const lessCount = (data ?? []).filter((d) => d.actualAmount < d.plannedAmount).length
+  const moreCount = (data ?? []).filter((d) => d.actualAmount > d.plannedAmount).length
 
   return (
     <div className="min-h-screen bg-slate-100">
       <AppHeader title="入金額相違一覧">
         <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
-          <span>
-            {data === null ? '読み込み中…' : `全${rows.length}件`}
-          </span>
+          <input
+            type="text"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="依頼者名・IDで検索"
+            className="w-52 rounded border border-slate-300 px-2 py-1 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <label className="flex items-center gap-1.5">
+            <span className="text-slate-600">状態:</span>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as 'all' | 'less' | 'more')}
+              className="rounded border border-slate-300 bg-white px-2 py-0.5 text-xs"
+            >
+              <option value="all">すべて</option>
+              <option value="less">不足</option>
+              <option value="more">超過</option>
+            </select>
+          </label>
+          <span className="text-slate-300">|</span>
+          <span>{data === null ? '読み込み中…' : `${rows.length}件`}</span>
           <span className="text-red-600">不足: {lessCount}件</span>
           <span className="text-blue-600">超過: {moreCount}件</span>
           <span className="text-slate-300">|</span>

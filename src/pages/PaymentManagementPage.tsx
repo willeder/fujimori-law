@@ -16,6 +16,7 @@ export function PaymentManagementPage() {
   const navigate = useNavigate()
   const { cases } = useCaseState()
   const [onlyUnpaid, setOnlyUnpaid] = useState(true)
+  const [q, setQ] = useState('')
   // 未入金案件IDはサーバ集計から取得（全 payments のロードを回避）
   const [unpaidIds, setUnpaidIds] = useState<Set<number> | null>(null)
 
@@ -35,13 +36,26 @@ export function PaymentManagementPage() {
   }, [])
 
   const rows = useMemo(() => {
-    const filtered = onlyUnpaid
+    const query = q.trim().toLowerCase()
+    const base = onlyUnpaid
       ? cases.filter((c) => unpaidIds?.has(c.id) ?? false)
       : cases
+    const filtered = !query
+      ? base
+      : base.filter((c) =>
+          [
+            c.metadata.externalId,
+            c.clientBasicInfo.name,
+            c.clientBasicInfo.furigana,
+            c.settlementInfo.status,
+            c.appointmentInfo.appointmentStaff,
+            c.appointmentInfo.interviewStaff,
+          ].some((f) => f?.toLowerCase().includes(query))
+        )
     return [...filtered].sort((a, b) =>
       compareDateAsc(a.paymentInfo.nextPaymentDate, b.paymentInfo.nextPaymentDate)
     )
-  }, [cases, onlyUnpaid, unpaidIds])
+  }, [cases, onlyUnpaid, unpaidIds, q])
 
   const columns: Column<Case>[] = [
     { key: 'id', header: 'ID', width: '76px', align: 'center', render: (c) => c.metadata.externalId ?? '-' },
@@ -94,7 +108,19 @@ export function PaymentManagementPage() {
   return (
     <div className="min-h-screen bg-slate-100">
       <AppHeader title="入金管理一覧">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <input
+            type="text"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="名前・フリガナ・ID・ステータス・担当で検索"
+            className="w-72 rounded border border-slate-300 px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          {q && (
+            <button onClick={() => setQ('')} className="text-xs text-slate-500 hover:text-slate-700">
+              クリア
+            </button>
+          )}
           <label className="flex items-center gap-2 text-sm text-slate-600">
             <input
               type="checkbox"

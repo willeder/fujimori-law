@@ -21,6 +21,7 @@ export function SettlementResultsPage() {
 
   // 検索条件（受任日・和解日は期間指定: From〜To）
   const [fCreditor, setFCreditor] = useState('')
+  const [fName, setFName] = useState('')
   const [fAccFrom, setFAccFrom] = useState('')
   const [fAccTo, setFAccTo] = useState('')
   const [fSetFrom, setFSetFrom] = useState('')
@@ -79,6 +80,7 @@ export function SettlementResultsPage() {
 
   const clear = () => {
     setFCreditor('')
+    setFName('')
     setFAccFrom('')
     setFAccTo('')
     setFSetFrom('')
@@ -120,15 +122,25 @@ export function SettlementResultsPage() {
 
   const filtered = useMemo(() => {
     if (!searched) return []
+    const query = fName.trim().toLowerCase()
     return rows.filter((r) => {
       if (fCreditor && r.creditorName !== fCreditor) return false
       if (!inRange(r.acceptanceDate, fAccFrom, fAccTo)) return false
       if (!inRange(r.settlementDate, fSetFrom, fSetTo)) return false
       if (fStatus && r.caseStatus !== fStatus) return false
+      if (
+        query &&
+        !(
+          r.name?.toLowerCase().includes(query) ||
+          r.furigana?.toLowerCase().includes(query) ||
+          r.externalId?.toLowerCase().includes(query)
+        )
+      )
+        return false
       return true
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searched, rows, fCreditor, fAccFrom, fAccTo, fSetFrom, fSetTo, fStatus])
+  }, [searched, rows, fCreditor, fAccFrom, fAccTo, fSetFrom, fSetTo, fStatus, fName])
 
   const columns: Column<Row>[] = [
     { key: 'caseId', header: 'ID', width: '76px', align: 'center', render: (r) => r.externalId ?? '-' },
@@ -193,6 +205,15 @@ export function SettlementResultsPage() {
           }}
           className="flex flex-wrap items-end gap-2"
         >
+          <label className="flex flex-col gap-0.5 text-[10px] text-slate-500">
+            名前・フリガナ・ID
+            <input
+              value={fName}
+              onChange={(e) => setFName(e.target.value)}
+              placeholder="部分一致"
+              className={`${inputCls} w-40`}
+            />
+          </label>
           <label className="flex flex-col gap-0.5 text-[10px] text-slate-500">
             債権者
             <select
