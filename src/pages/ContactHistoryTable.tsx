@@ -23,6 +23,8 @@ export function ContactHistoryTable({
   const { accountName } = useUserSettings()
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editData, setEditData] = useState<Partial<ContactHistory>>({})
+  // まだDB保存していない新規行（合成ID）。保存時にPOST→実IDへ差替え
+  const [newIds, setNewIds] = useState<Set<number>>(() => new Set())
   const wrapperRef = useRef<HTMLDivElement>(null)
 
   /** 追加直後に最下段（新規行）まで縦スクロール */
@@ -64,20 +66,45 @@ export function ContactHistoryTable({
   }
 
   const handleSave = (h: ContactHistory) => {
-    dispatch({
-      type: 'UPDATE_CONTACT_HISTORY',
-      payload: {
-        ...h,
-        contactDate: editData.contactDate ?? null,
-        contactTime: editData.contactTime ?? null,
-        staff: editData.staff ?? null,
-        tool: editData.tool ?? null,
-        creditorName: targetType === '債権者' ? (editData.creditorName ?? null) : null,
-        comment: editData.comment ?? null,
-      },
-    })
+    const payload = {
+      contactDate: editData.contactDate ?? null,
+      contactTime: editData.contactTime ?? null,
+      staff: editData.staff ?? null,
+      tool: editData.tool ?? null,
+      creditorName: targetType === '債権者' ? (editData.creditorName ?? null) : null,
+      comment: editData.comment ?? null,
+    }
+    // 楽観的にローカル反映
+    dispatch({ type: 'UPDATE_CONTACT_HISTORY', payload: { ...h, ...payload } })
     setEditingId(null)
     setEditData({})
+    if (newIds.has(h.id)) {
+      // 新規行 → サーバに作成し、合成IDを実IDへ差し替え
+      void fetch('/api/contact-histories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ caseId, targetType, ...payload }),
+      })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((res: { row?: ContactHistory } | null) => {
+          if (res?.row) {
+            dispatch({ type: 'DELETE_CONTACT_HISTORY', payload: h.id })
+            dispatch({ type: 'ADD_CONTACT_HISTORY', payload: res.row })
+          }
+        })
+        .catch((e) => console.error('接触履歴の作成に失敗:', e))
+      setNewIds((prev) => {
+        const n = new Set(prev)
+        n.delete(h.id)
+        return n
+      })
+    } else {
+      void fetch(`/api/contact-histories/${h.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      }).catch((e) => console.error('接触履歴の更新に失敗:', e))
+    }
   }
 
   const handleCancel = () => {
@@ -91,6 +118,18 @@ export function ContactHistoryTable({
     )
     if (!ok) return
     dispatch({ type: 'DELETE_CONTACT_HISTORY', payload: h.id })
+    if (newIds.has(h.id)) {
+      // 未保存の新規行はローカル削除のみ
+      setNewIds((prev) => {
+        const n = new Set(prev)
+        n.delete(h.id)
+        return n
+      })
+    } else {
+      void fetch(`/api/contact-histories/${h.id}`, { method: 'DELETE' }).catch((e) =>
+        console.error('接触履歴の削除に失敗:', e)
+      )
+    }
   }
 
   const cellIn = 'w-full rounded border border-blue-300 px-1.5 py-0.5 text-xs leading-tight'
@@ -310,6 +349,7 @@ export function ContactHistoryTable({
               const staffName = accountName || null
 
               const newId = Math.max(0, ...contactHistories.map((h) => h.id)) + 1
+              setNewIds((prev) => new Set(prev).add(newId))
               dispatch({
                 type: 'ADD_CONTACT_HISTORY',
                 payload: {

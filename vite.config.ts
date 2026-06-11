@@ -54,6 +54,39 @@ function dbApiPlugin(): Plugin {
               changeLogId: string,
               meta: { ip?: string | null; userAgent?: string | null }
             ) => Promise<{ status: number; body: unknown }>
+            updateCreditorField: (
+              actor: { id: string; email: string },
+              id: number,
+              raw: string,
+              meta: { ip?: string | null; userAgent?: string | null }
+            ) => Promise<{ status: number; body: unknown }>
+            updatePaymentField: (
+              actor: { id: string; email: string },
+              id: number,
+              raw: string,
+              meta: { ip?: string | null; userAgent?: string | null }
+            ) => Promise<{ status: number; body: unknown }>
+            createPayment: (
+              actor: { id: string; email: string },
+              raw: string,
+              meta: { ip?: string | null; userAgent?: string | null }
+            ) => Promise<{ status: number; body: unknown }>
+            createContactHistory: (
+              actor: { id: string; email: string },
+              raw: string,
+              meta: { ip?: string | null; userAgent?: string | null }
+            ) => Promise<{ status: number; body: unknown }>
+            updateContactHistoryField: (
+              actor: { id: string; email: string },
+              id: number,
+              raw: string,
+              meta: { ip?: string | null; userAgent?: string | null }
+            ) => Promise<{ status: number; body: unknown }>
+            deleteContactHistory: (
+              actor: { id: string; email: string },
+              id: number,
+              meta: { ip?: string | null; userAgent?: string | null }
+            ) => Promise<{ status: number; body: unknown }>
           }
 
           const fwd = req.headers['x-forwarded-for']
@@ -204,6 +237,66 @@ function dbApiPlugin(): Plugin {
             }
             if (revertMatch && req.method === 'POST') {
               const r = await mod.revertChange(editActor, revertMatch[1], meta)
+              res.statusCode = r.status
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify(r.body))
+              return
+            }
+            const creditorEdit = url.match(/^\/api\/creditors\/(\d+)$/)
+            if (creditorEdit && req.method === 'PATCH') {
+              const r = await mod.updateCreditorField(
+                editActor,
+                Number(creditorEdit[1]),
+                await readRawBody(req),
+                meta
+              )
+              res.statusCode = r.status
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify(r.body))
+              return
+            }
+            const paymentEdit = url.match(/^\/api\/payments\/(\d+)$/)
+            if (paymentEdit && req.method === 'PATCH') {
+              const r = await mod.updatePaymentField(
+                editActor,
+                Number(paymentEdit[1]),
+                await readRawBody(req),
+                meta
+              )
+              res.statusCode = r.status
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify(r.body))
+              return
+            }
+            if (url === '/api/payments' && req.method === 'POST') {
+              const r = await mod.createPayment(editActor, await readRawBody(req), meta)
+              res.statusCode = r.status
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify(r.body))
+              return
+            }
+            if (url === '/api/contact-histories' && req.method === 'POST') {
+              const r = await mod.createContactHistory(editActor, await readRawBody(req), meta)
+              res.statusCode = r.status
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify(r.body))
+              return
+            }
+            const contactEdit = url.match(/^\/api\/contact-histories\/(\d+)$/)
+            if (contactEdit && req.method === 'PATCH') {
+              const r = await mod.updateContactHistoryField(
+                editActor,
+                Number(contactEdit[1]),
+                await readRawBody(req),
+                meta
+              )
+              res.statusCode = r.status
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify(r.body))
+              return
+            }
+            if (contactEdit && req.method === 'DELETE') {
+              const r = await mod.deleteContactHistory(editActor, Number(contactEdit[1]), meta)
               res.statusCode = r.status
               res.setHeader('Content-Type', 'application/json; charset=utf-8')
               res.end(JSON.stringify(r.body))

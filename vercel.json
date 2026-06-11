@@ -11,7 +11,7 @@
     { "source": "/api/cases/:p*", "destination": "/api/data?__path=cases/:p*" },
     { "source": "/api/creditors/:p*", "destination": "/api/data?__path=creditors/:p*" },
     { "source": "/api/payments/:p*", "destination": "/api/data?__path=payments/:p*" },
-    { "source": "/api/contact-histories", "destination": "/api/data?__path=contact-histories" },
+    { "source": "/api/contact-histories/:p*", "destination": "/api/data?__path=contact-histories/:p*" },
     { "source": "/api/changes/:p*", "destination": "/api/data?__path=changes/:p*" },
     { "source": "/api/line/links/:p*", "destination": "/api/data?__path=line/links/:p*" },
     { "source": "/api/gmo/:p*", "destination": "/api/data?__path=gmo/:p*" },

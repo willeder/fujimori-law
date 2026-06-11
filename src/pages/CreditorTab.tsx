@@ -12,10 +12,19 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
   const dispatch = useCaseDispatch()
 
   const updateCreditor = (creditor: Creditor, updates: Partial<Creditor>) => {
+    // 楽観的にローカル反映
     dispatch({
       type: 'UPDATE_CREDITOR',
       payload: { ...creditor, ...updates },
     })
+    // サーバへ永続化（差分判定・変更履歴/監査はサーバ側）
+    if (creditor.id != null) {
+      void fetch(`/api/creditors/${creditor.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      }).catch((e) => console.error('債権者更新の保存に失敗:', e))
+    }
   }
 
   if (view === 'summary') {

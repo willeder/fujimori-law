@@ -260,6 +260,30 @@ if (caseModel) {
   }
 }
 
+/** 任意モデルの「編集可能なスカラー列 → 型」を DMMF から取得（FK・PK・時刻は除外） */
+function buildFieldType(modelName: string, exclude: string[]): Record<string, string> {
+  const m = Prisma.dmmf.datamodel.models.find((x) => x.name === modelName)
+  const out: Record<string, string> = {}
+  if (m) {
+    for (const f of m.fields) {
+      if (
+        f.kind === 'scalar' &&
+        !f.isId &&
+        !f.isList &&
+        f.name !== 'createdAt' &&
+        f.name !== 'updatedAt' &&
+        !exclude.includes(f.name)
+      ) {
+        out[f.name] = f.type
+      }
+    }
+  }
+  return out
+}
+const CREDITOR_FIELD_TYPE = buildFieldType('Creditor', ['caseId'])
+const PAYMENT_FIELD_TYPE = buildFieldType('Payment', ['caseId', 'creditorId'])
+const CONTACT_FIELD_TYPE = buildFieldType('ContactHistory', ['caseId'])
+
 /** 表示値（文字列等）→ DB 値に型変換 */
 function caseToDb(type: string, value: unknown): unknown {
   if (value === '' || value === null || value === undefined) return null
@@ -342,16 +366,196 @@ export async function updateCaseField(
   return { status: 200, body: { case: toCaseJson(updated), changed: true } }
 }
 
-/** 案件の変更履歴（新しい順） */
+// ── 子テーブル（Creditor / Payment / ContactHistory）の汎用CRUD ──
+type RowModel = 'Creditor' | 'Payment' | 'ContactHistory'
+type RowDelegate = {
+  findUnique: (a: unknown) => Promise<Record<string, unknown> | null>
+  create: (a: unknown) => Promise<Record<string, unknown>>
+  update: (a: unknown) => Promise<Record<string, unknown>>
+  delete: (a: unknown) => Promise<Record<string, unknown>>
+}
+function rowDelegate(model: RowModel): RowDelegate {
+  return (
+    model === 'Creditor'
+      ? prisma.creditor
+      : model === 'Payment'
+        ? prisma.payment
+        : prisma.contactHistory
+  ) as unknown as RowDelegate
+}
+const rowLabel = (m: RowModel) => (m === 'Creditor' ? '債権者' : m === 'Payment' ? '入金' : '接触履歴')
+function rowToJson(m: RowModel, r: Record<string, unknown>): unknown {
+  return m === 'Creditor' ? toCreditorJson(r) : m === 'Payment' ? toPaymentJson(r) : toContactJson(r)
+}
+
+/** 子テーブル行のフィールド更新を永続化し、変更履歴・監査に記録 */
+async function updateRowField(
+  model: RowModel,
+  fieldType: Record<string, string>,
+  actor: EditActor,
+  id: number,
+  raw: string,
+  meta: EditMeta
+) {
+  let body: Record<string, unknown>
+  try {
+    body = JSON.parse(raw || '{}') as Record<string, unknown>
+  } catch {
+    return { status: 400, body: { error: 'bad request' } }
+  }
+  const delegate = rowDelegate(model)
+  const existing = await delegate.findUnique({ where: { id } })
+  if (!existing) return { status: 404, body: { error: '対象が見つかりません' } }
+
+  const before: Record<string, unknown> = {}
+  const after: Record<string, unknown> = {}
+  const updateData: Record<string, unknown> = {}
+  for (const [col, val] of Object.entries(body)) {
+    const type = fieldType[col]
+    if (!type) continue
+    const dbVal = caseToDb(type, val)
+    const beforeDisp = caseDisplay(type, existing[col])
+    const afterDisp = caseDisplay(type, dbVal)
+    if (JSON.stringify(beforeDisp) !== JSON.stringify(afterDisp)) {
+      before[col] = beforeDisp
+      after[col] = afterDisp
+      updateData[col] = dbVal
+    }
+  }
+  if (Object.keys(updateData).length === 0) return { status: 200, body: { changed: false } }
+  const updated = await delegate.update({ where: { id }, data: updateData })
+  await writeChange({ actor, entity: model, entityId: String(id), action: 'UPDATE', before, after })
+  await writeAudit({
+    actor,
+    action: 'UPDATE',
+    entity: model,
+    entityId: String(id),
+    summary: `${rowLabel(model)}編集（${Object.keys(after).join(', ')}）`,
+    metadata: { before, after, caseId: existing.caseId },
+    ip: meta.ip,
+    userAgent: meta.userAgent,
+  })
+  return { status: 200, body: { changed: true, row: rowToJson(model, updated) } }
+}
+
+/** 子テーブル行の追加（変更履歴 CREATE ＋監査） */
+async function createRow(
+  model: RowModel,
+  fieldType: Record<string, string>,
+  actor: EditActor,
+  raw: string,
+  meta: EditMeta
+) {
+  let body: Record<string, unknown>
+  try {
+    body = JSON.parse(raw || '{}') as Record<string, unknown>
+  } catch {
+    return { status: 400, body: { error: 'bad request' } }
+  }
+  const caseId = Number(body.caseId)
+  if (!Number.isFinite(caseId)) return { status: 400, body: { error: 'caseId が必要です' } }
+  const data: Record<string, unknown> = { caseId }
+  for (const [col, val] of Object.entries(body)) {
+    const type = fieldType[col]
+    if (!type) continue
+    data[col] = caseToDb(type, val)
+  }
+  // enum / FK の特別扱い
+  if (model === 'ContactHistory') {
+    data.targetType =
+      body.targetType === '債権者' || body.targetType === 'CREDITOR' ? 'CREDITOR' : 'CLIENT'
+  }
+  if (model === 'Payment') {
+    if (body.creditorId != null && body.creditorId !== '') data.creditorId = Number(body.creditorId)
+    if (body.creditorInstallmentIndex != null && body.creditorInstallmentIndex !== '')
+      data.creditorInstallmentIndex = Number(body.creditorInstallmentIndex)
+  }
+  const created = await rowDelegate(model).create({ data })
+  const after: Record<string, unknown> = {}
+  for (const col of Object.keys(fieldType)) {
+    const v = caseDisplay(fieldType[col], created[col])
+    if (v != null && v !== '') after[col] = v
+  }
+  await writeChange({ actor, entity: model, entityId: String(created.id), action: 'CREATE', before: null, after })
+  await writeAudit({
+    actor,
+    action: 'CREATE',
+    entity: model,
+    entityId: String(created.id),
+    summary: `${rowLabel(model)}追加`,
+    metadata: { after, caseId },
+    ip: meta.ip,
+    userAgent: meta.userAgent,
+  })
+  return { status: 200, body: { row: rowToJson(model, created) } }
+}
+
+/** 子テーブル行の削除（変更履歴 DELETE ＋監査） */
+async function deleteRow(
+  model: RowModel,
+  fieldType: Record<string, string>,
+  actor: EditActor,
+  id: number,
+  meta: EditMeta
+) {
+  const existing = await rowDelegate(model).findUnique({ where: { id } })
+  if (!existing) return { status: 404, body: { error: '対象が見つかりません' } }
+  const before: Record<string, unknown> = {}
+  for (const col of Object.keys(fieldType)) {
+    const v = caseDisplay(fieldType[col], existing[col])
+    if (v != null && v !== '') before[col] = v
+  }
+  await rowDelegate(model).delete({ where: { id } })
+  await writeChange({ actor, entity: model, entityId: String(id), action: 'DELETE', before, after: null })
+  await writeAudit({
+    actor,
+    action: 'DELETE',
+    entity: model,
+    entityId: String(id),
+    summary: `${rowLabel(model)}削除`,
+    metadata: { before, caseId: existing.caseId },
+    ip: meta.ip,
+    userAgent: meta.userAgent,
+  })
+  return { status: 200, body: { ok: true } }
+}
+
+export const updateCreditorField = (actor: EditActor, id: number, raw: string, meta: EditMeta) =>
+  updateRowField('Creditor', CREDITOR_FIELD_TYPE, actor, id, raw, meta)
+export const updatePaymentField = (actor: EditActor, id: number, raw: string, meta: EditMeta) =>
+  updateRowField('Payment', PAYMENT_FIELD_TYPE, actor, id, raw, meta)
+export const createPayment = (actor: EditActor, raw: string, meta: EditMeta) =>
+  createRow('Payment', PAYMENT_FIELD_TYPE, actor, raw, meta)
+export const updateContactHistoryField = (actor: EditActor, id: number, raw: string, meta: EditMeta) =>
+  updateRowField('ContactHistory', CONTACT_FIELD_TYPE, actor, id, raw, meta)
+export const createContactHistory = (actor: EditActor, raw: string, meta: EditMeta) =>
+  createRow('ContactHistory', CONTACT_FIELD_TYPE, actor, raw, meta)
+export const deleteContactHistory = (actor: EditActor, id: number, meta: EditMeta) =>
+  deleteRow('ContactHistory', CONTACT_FIELD_TYPE, actor, id, meta)
+
+/** 案件の変更履歴（本体＋その案件の債権者・入金の変更も含む。新しい順） */
 export async function getCaseChanges(id: number) {
+  const [creditors, payments, contacts] = await Promise.all([
+    prisma.creditor.findMany({ where: { caseId: id }, select: { id: true } }),
+    prisma.payment.findMany({ where: { caseId: id }, select: { id: true } }),
+    prisma.contactHistory.findMany({ where: { caseId: id }, select: { id: true } }),
+  ])
+  const credIds = creditors.map((c) => String(c.id))
+  const payIds = payments.map((p) => String(p.id))
+  const contactIds = contacts.map((c) => String(c.id))
+  const or: Prisma.ChangeLogWhereInput[] = [{ entity: 'Case', entityId: String(id) }]
+  if (credIds.length) or.push({ entity: 'Creditor', entityId: { in: credIds } })
+  if (payIds.length) or.push({ entity: 'Payment', entityId: { in: payIds } })
+  if (contactIds.length) or.push({ entity: 'ContactHistory', entityId: { in: contactIds } })
   const rows = await prisma.changeLog.findMany({
-    where: { entity: 'Case', entityId: String(id) },
+    where: { OR: or },
     orderBy: { id: 'desc' },
-    take: 100,
+    take: 200,
     include: { actor: { select: { name: true, email: true } } },
   })
   return rows.map((r) => ({
     id: r.id.toString(),
+    entity: r.entity,
     action: r.action,
     actor: r.actor?.name ?? r.actorEmail ?? '—',
     before: r.before,
@@ -376,17 +580,30 @@ export async function revertChange(
   const cl = await prisma.changeLog.findUnique({ where: { id: clId } })
   if (!cl) return { status: 404, body: { error: '変更が見つかりません' } }
   if (cl.reverted) return { status: 400, body: { error: '既に元に戻されています' } }
-  if (cl.entity !== 'Case') {
+  if (cl.action !== 'UPDATE') {
+    return { status: 400, body: { error: '追加・削除の変更は元に戻せません' } }
+  }
+  const fieldType =
+    cl.entity === 'Case'
+      ? CASE_FIELD_TYPE
+      : cl.entity === 'Creditor'
+        ? CREDITOR_FIELD_TYPE
+        : cl.entity === 'Payment'
+          ? PAYMENT_FIELD_TYPE
+          : cl.entity === 'ContactHistory'
+            ? CONTACT_FIELD_TYPE
+            : null
+  if (!fieldType) {
     return { status: 400, body: { error: 'この種別は元に戻せません' } }
   }
   const before = (cl.before ?? {}) as Record<string, unknown>
   const after = (cl.after ?? {}) as Record<string, unknown>
-  const caseId = Number(cl.entityId)
+  const rowId = Number(cl.entityId)
   const updateData: Record<string, unknown> = {}
   const revBefore: Record<string, unknown> = {}
   const revAfter: Record<string, unknown> = {}
   for (const col of Object.keys(after)) {
-    const type = CASE_FIELD_TYPE[col]
+    const type = fieldType[col]
     if (!type) continue
     updateData[col] = caseToDb(type, before[col])
     revBefore[col] = after[col]
@@ -395,15 +612,24 @@ export async function revertChange(
   if (Object.keys(updateData).length === 0) {
     return { status: 400, body: { error: '戻せる項目がありません' } }
   }
-  updateData.updatedBy = actor.email
-  await prisma.case.update({ where: { id: caseId }, data: updateData })
+  if (cl.entity === 'Case') updateData.updatedBy = actor.email
+  const delegate = (
+    cl.entity === 'Case'
+      ? prisma.case
+      : cl.entity === 'Creditor'
+        ? prisma.creditor
+        : cl.entity === 'Payment'
+          ? prisma.payment
+          : prisma.contactHistory
+  ) as { update: (a: unknown) => Promise<unknown> }
+  await delegate.update({ where: { id: rowId }, data: updateData })
   await prisma.changeLog.update({
     where: { id: clId },
     data: { reverted: true, revertedAt: new Date(), revertedById: actor.id },
   })
   await writeChange({
     actor,
-    entity: 'Case',
+    entity: cl.entity,
     entityId: cl.entityId,
     action: 'UPDATE',
     before: revBefore,
@@ -412,7 +638,7 @@ export async function revertChange(
   await writeAudit({
     actor,
     action: 'UPDATE',
-    entity: 'Case',
+    entity: cl.entity,
     entityId: cl.entityId,
     summary: `変更を元に戻す（${Object.keys(revAfter).join(', ')}）`,
     metadata: { revertedChangeId: changeLogId },

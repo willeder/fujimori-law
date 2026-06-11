@@ -14,6 +14,12 @@ import {
   apiRoutes,
   getCaseById,
   updateCaseField,
+  updateCreditorField,
+  updatePaymentField,
+  createPayment,
+  createContactHistory,
+  updateContactHistoryField,
+  deleteContactHistory,
   getCaseChanges,
   revertChange,
   getLineLink,
@@ -181,6 +187,48 @@ export default async function handler(
     const revertMatch = path.match(/^\/api\/changes\/(\d+)\/revert$/)
     if (revertMatch && method === 'POST') {
       const r = await revertChange(editActor, revertMatch[1], meta)
+      json(r.body, r.status)
+      return
+    }
+
+    // ── 債権者・入金の行編集（永続化＋変更履歴） ──
+    const creditorEdit = path.match(/^\/api\/creditors\/(\d+)$/)
+    if (creditorEdit && method === 'PATCH') {
+      const raw = (await getRawBody(req)).toString('utf8')
+      const r = await updateCreditorField(editActor, Number(creditorEdit[1]), raw, meta)
+      json(r.body, r.status)
+      return
+    }
+    const paymentEdit = path.match(/^\/api\/payments\/(\d+)$/)
+    if (paymentEdit && method === 'PATCH') {
+      const raw = (await getRawBody(req)).toString('utf8')
+      const r = await updatePaymentField(editActor, Number(paymentEdit[1]), raw, meta)
+      json(r.body, r.status)
+      return
+    }
+    if (path === '/api/payments' && method === 'POST') {
+      const raw = (await getRawBody(req)).toString('utf8')
+      const r = await createPayment(editActor, raw, meta)
+      json(r.body, r.status)
+      return
+    }
+
+    // ── 接触履歴の追加・編集・削除 ──
+    if (path === '/api/contact-histories' && method === 'POST') {
+      const raw = (await getRawBody(req)).toString('utf8')
+      const r = await createContactHistory(editActor, raw, meta)
+      json(r.body, r.status)
+      return
+    }
+    const contactEdit = path.match(/^\/api\/contact-histories\/(\d+)$/)
+    if (contactEdit && method === 'PATCH') {
+      const raw = (await getRawBody(req)).toString('utf8')
+      const r = await updateContactHistoryField(editActor, Number(contactEdit[1]), raw, meta)
+      json(r.body, r.status)
+      return
+    }
+    if (contactEdit && method === 'DELETE') {
+      const r = await deleteContactHistory(editActor, Number(contactEdit[1]), meta)
       json(r.body, r.status)
       return
     }

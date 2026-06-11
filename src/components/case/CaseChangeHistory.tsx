@@ -6,12 +6,19 @@ import { useCallback, useEffect, useState } from 'react'
 
 type ChangeEntry = {
   id: string
+  entity?: string
   action: string
   actor: string
   before: Record<string, unknown> | null
   after: Record<string, unknown> | null
   reverted: boolean
   createdAt: string
+}
+
+const ENTITY_LABEL: Record<string, { label: string; cls: string }> = {
+  Case: { label: '案件', cls: 'bg-slate-100 text-slate-600' },
+  Creditor: { label: '債権者', cls: 'bg-indigo-100 text-indigo-700' },
+  Payment: { label: '入金', cls: 'bg-emerald-100 text-emerald-700' },
 }
 
 const FIELD_LABEL: Record<string, string> = {
@@ -60,6 +67,47 @@ const FIELD_LABEL: Record<string, string> = {
   listCategory: 'リスト区分',
   acceptanceDocs: '受任書類',
   updatedBy: '更新者',
+  // 債権者（Creditor）
+  creditorName: '債権者名',
+  negotiationPartner: '交渉相手',
+  declaredAmount: '申告額',
+  debtAmount: '債務額',
+  expectedSettlement: '想定和解',
+  status: 'ステータス',
+  acceptanceNoticeSentDate: '受任通知送付日',
+  debtInquiryArrivalDate: '債権調査到着日',
+  customerCode: '顧客コード',
+  contractDate: '契約日',
+  settlementProposal: '和解提案',
+  responseStatus: '回答状況',
+  settlementDate: '和解日',
+  settlementAmount: '和解額',
+  settlementDebtAmount: '和解時債務額',
+  settlementContentComment: '和解内容',
+  nextProcessDate: '次回処理日時',
+  memo: 'メモ',
+  paymentStartMonth: '支払開始月',
+  paymentDay: '支払日',
+  firstPaymentAmount: '初回支払額',
+  subsequentPaymentAmount: '2回目以降額',
+  bankName: '銀行',
+  branchName: '支店',
+  accountType: '口座種別',
+  accountNumber: '口座番号',
+  accountHolder: '口座名義',
+  // 入金（Payment）
+  plannedDate: '予定日',
+  plannedAmount: '予定額',
+  actualDate: '実入金日',
+  actualAmount: '実入金額',
+  plannedFeeAllocation: '予定報酬充当',
+  actualFeeAllocation: '報酬充当',
+  plannedPoolAllocation: '予定プール充当',
+  actualPoolAllocation: 'プール充当',
+  plannedRepaymentAllocation: '予定弁済充当',
+  actualRepaymentAllocation: '弁済充当',
+  handlingFee: '手数料',
+  repaymentCount: '弁済回数',
 }
 
 const fmt = (v: unknown) =>
@@ -117,7 +165,16 @@ export function CaseChangeHistory({
         return (
           <li key={c.id} className="flex items-start justify-between gap-2 px-3 py-2 text-xs">
             <div className="min-w-0">
-              <div className="text-[10px] text-slate-400">
+              <div className="flex items-center gap-1 text-[10px] text-slate-400">
+                <span
+                  className={`rounded px-1 py-0.5 font-medium ${
+                    ENTITY_LABEL[c.entity ?? 'Case']?.cls ?? 'bg-slate-100 text-slate-600'
+                  }`}
+                >
+                  {ENTITY_LABEL[c.entity ?? 'Case']?.label ?? c.entity}
+                </span>
+                {c.action === 'CREATE' && <span className="text-emerald-600">追加</span>}
+                {c.action === 'DELETE' && <span className="text-red-600">削除</span>}
                 {c.createdAt.slice(0, 16).replace('T', ' ')} ・ {c.actor}
                 {c.reverted && <span className="ml-1 text-amber-600">（取消済）</span>}
               </div>
@@ -132,7 +189,7 @@ export function CaseChangeHistory({
                 ))}
               </div>
             </div>
-            {!c.reverted && (
+            {!c.reverted && c.action === 'UPDATE' && (
               <button
                 type="button"
                 disabled={busy === c.id}

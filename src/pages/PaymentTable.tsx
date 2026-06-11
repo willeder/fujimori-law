@@ -200,31 +200,28 @@ export function PaymentTable({
           supplementDate = currentDate.toISOString().split('T')[0]
         }
 
-        // 新しい補充レコードを追加
+        // 新しい補充レコードを追加（サーバへも作成）
         const newId = Math.max(0, ...allCasePayments.map((p) => p.id)) + 1
-        dispatch({
-          type: 'ADD_PAYMENT',
-          payload: {
-            id: newId,
-            caseId,
-            creditorId: payment.creditorId,
-            creditorInstallmentIndex: null,
-            plannedDate: supplementDate,
-            plannedAmount: shortage,
-            plannedFeeAllocation: null,
-            plannedAgentFeeAllocation: null,
-            plannedPoolAllocation: null,
-            plannedRepaymentAllocation: null,
-            actualDate: null,
-            actualAmount: null,
-            actualFeeAllocation: null,
-            actualAgentFeeAllocation: null,
-            actualPoolAllocation: null,
-            actualRepaymentAllocation: null,
-            handlingFee: null,
-            repaymentCount: null,
-            cumulativePool: null,
-          },
+        createPaymentRow({
+          id: newId,
+          caseId,
+          creditorId: payment.creditorId,
+          creditorInstallmentIndex: null,
+          plannedDate: supplementDate,
+          plannedAmount: shortage,
+          plannedFeeAllocation: null,
+          plannedAgentFeeAllocation: null,
+          plannedPoolAllocation: null,
+          plannedRepaymentAllocation: null,
+          actualDate: null,
+          actualAmount: null,
+          actualFeeAllocation: null,
+          actualAgentFeeAllocation: null,
+          actualPoolAllocation: null,
+          actualRepaymentAllocation: null,
+          handlingFee: null,
+          repaymentCount: null,
+          cumulativePool: null,
         })
       }
     }
@@ -236,6 +233,15 @@ export function PaymentTable({
         ...finalData,
       },
     })
+    // 既存入金レコードはサーバへ永続化（変更履歴/監査はサーバ側）。
+    // 自動補充で追加されたローカル行（DB未登録）は対象外（404は握りつぶす）。
+    if (payment.id != null) {
+      void fetch(`/api/payments/${payment.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(finalData),
+      }).catch((e) => console.error('入金更新の保存に失敗:', e))
+    }
     setEditingId(null)
     setEditData({})
   }
@@ -243,6 +249,24 @@ export function PaymentTable({
   const handleCancel = () => {
     setEditingId(null)
     setEditData({})
+  }
+
+  // 新規入金行を楽観的に追加しつつサーバへ作成。成功したら合成IDを実IDへ差し替える。
+  const createPaymentRow = (record: PaymentRecord) => {
+    dispatch({ type: 'ADD_PAYMENT', payload: record })
+    void fetch('/api/payments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(record),
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((res: { row?: PaymentRecord } | null) => {
+        if (res?.row && res.row.id !== record.id) {
+          dispatch({ type: 'DELETE_PAYMENT', payload: record.id })
+          dispatch({ type: 'ADD_PAYMENT', payload: res.row })
+        }
+      })
+      .catch((e) => console.error('入金の作成に失敗:', e))
   }
 
   const inputCls =
@@ -709,29 +733,26 @@ export function PaymentTable({
           )
           const creditorInstallmentIndex =
             scopeCreditorId != null ? prevInstallmentMax + 1 : null
-          dispatch({
-            type: 'ADD_PAYMENT',
-            payload: {
-              id: newId,
-              caseId,
-              creditorId: scopeCreditorId,
-              creditorInstallmentIndex,
-              plannedDate: null,
-              plannedAmount: lastPayment?.plannedAmount ?? null,
-              plannedFeeAllocation: lastPayment?.plannedFeeAllocation ?? null,
-              plannedAgentFeeAllocation: lastPayment?.plannedAgentFeeAllocation ?? null,
-              plannedPoolAllocation: lastPayment?.plannedPoolAllocation ?? null,
-              plannedRepaymentAllocation: lastPayment?.plannedRepaymentAllocation ?? null,
-              actualDate: null,
-              actualAmount: null,
-              actualFeeAllocation: null,
-              actualAgentFeeAllocation: null,
-              actualPoolAllocation: null,
-              actualRepaymentAllocation: null,
-              handlingFee: null,
-              repaymentCount: null,
-              cumulativePool: null,
-            },
+          createPaymentRow({
+            id: newId,
+            caseId,
+            creditorId: scopeCreditorId,
+            creditorInstallmentIndex,
+            plannedDate: null,
+            plannedAmount: lastPayment?.plannedAmount ?? null,
+            plannedFeeAllocation: lastPayment?.plannedFeeAllocation ?? null,
+            plannedAgentFeeAllocation: lastPayment?.plannedAgentFeeAllocation ?? null,
+            plannedPoolAllocation: lastPayment?.plannedPoolAllocation ?? null,
+            plannedRepaymentAllocation: lastPayment?.plannedRepaymentAllocation ?? null,
+            actualDate: null,
+            actualAmount: null,
+            actualFeeAllocation: null,
+            actualAgentFeeAllocation: null,
+            actualPoolAllocation: null,
+            actualRepaymentAllocation: null,
+            handlingFee: null,
+            repaymentCount: null,
+            cumulativePool: null,
           })
         }}
         className="w-full rounded border border-dashed border-blue-300 py-1 text-[11px] text-blue-600 transition-colors hover:bg-blue-50"
