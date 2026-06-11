@@ -44,16 +44,7 @@ export function PaymentManagementPage() {
   }, [cases, onlyUnpaid, unpaidIds])
 
   const columns: Column<Case>[] = [
-    { key: 'nextPaymentDate', header: '次回入金日', width: '100px', render: (c) => c.paymentInfo.nextPaymentDate ?? '-' },
-    { key: 'payDay', header: '給与日', width: '80px', render: (c) => c.clientBasicInfo.payDay ?? '-' },
-    {
-      key: 'uncollectedFee',
-      header: '報酬未回収額',
-      width: '110px',
-      align: 'right',
-      render: (c) => (c.feeInfo.uncollectedFee != null ? `${c.feeInfo.uncollectedFee.toLocaleString()}円` : '-'),
-    },
-    { key: 'id', header: 'ID', width: '60px', align: 'center' },
+    { key: 'id', header: 'ID', width: '76px', align: 'center', render: (c) => c.metadata.externalId ?? '-' },
     {
       key: 'name',
       header: '名前',
@@ -73,6 +64,15 @@ export function PaymentManagementPage() {
       render: (c) => <StatusBadge status={c.settlementInfo.status} />,
     },
     { key: 'acceptanceDate', header: '受任日', width: '100px', render: (c) => c.appointmentInfo.acceptanceDate ?? '-' },
+    { key: 'nextPaymentDate', header: '次回入金日', width: '100px', render: (c) => c.paymentInfo.nextPaymentDate ?? '-' },
+    { key: 'payDay', header: '給与日', width: '80px', render: (c) => c.clientBasicInfo.payDay ?? '-' },
+    {
+      key: 'uncollectedFee',
+      header: '報酬未回収額',
+      width: '110px',
+      align: 'right',
+      render: (c) => (c.feeInfo.uncollectedFee != null ? `${c.feeInfo.uncollectedFee.toLocaleString()}円` : '-'),
+    },
     {
       key: 'acceptanceRank',
       header: '受任ランク',

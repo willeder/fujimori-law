@@ -9,6 +9,7 @@ type SortKey = 'date' | 'difference' | 'amount'
 interface DiscrepancyRow {
   paymentId: number
   caseId: number
+  externalId: string | null
   caseName: string
   plannedDate: string | null
   plannedAmount: number
@@ -22,6 +23,7 @@ interface DiscrepancyRow {
 interface ServerDiscrepancy {
   id: number
   caseId: number
+  externalId: string | null
   caseName: string | null
   plannedDate: string | null
   plannedAmount: number
@@ -54,6 +56,7 @@ export function PaymentDiscrepancyPage() {
     const discrepancies: DiscrepancyRow[] = (data ?? []).map((d) => ({
       paymentId: d.id,
       caseId: d.caseId,
+      externalId: d.externalId,
       caseName: d.caseName ?? '-',
       plannedDate: d.plannedDate,
       plannedAmount: d.plannedAmount,
@@ -82,21 +85,16 @@ export function PaymentDiscrepancyPage() {
 
   const columns: Column<DiscrepancyRow>[] = [
     {
-      key: 'actualDate',
-      header: '実入金日',
-      width: '100px',
-      render: (r) => r.actualDate ?? '-',
+      key: 'caseId',
+      header: 'ID',
+      width: '76px',
+      align: 'center',
+      render: (r) => r.externalId ?? '-',
     },
     {
       key: 'caseName',
       header: '依頼者名',
       width: '120px',
-    },
-    {
-      key: 'caseId',
-      header: 'ID',
-      width: '60px',
-      align: 'center',
     },
     {
       key: 'plannedDate',
@@ -110,6 +108,12 @@ export function PaymentDiscrepancyPage() {
       width: '100px',
       align: 'right',
       render: (r) => `${r.plannedAmount.toLocaleString()}円`,
+    },
+    {
+      key: 'actualDate',
+      header: '実入金日',
+      width: '100px',
+      render: (r) => r.actualDate ?? '-',
     },
     {
       key: 'actualAmount',

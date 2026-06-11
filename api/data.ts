@@ -26,8 +26,20 @@ import { prisma } from '../src/server/db.js'
 
 export const config = { runtime: 'nodejs' }
 
-function readRawBuffer(req: IncomingMessage): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
+/**
+ * リクエストボディを Buffer で取得。
+ * Vercel の Node 関数はボディを事前パースして req.body に載せ、生ストリームを
+ * 消費済みにする。そのため req.body を最優先で使い、無い時だけストリームを読む。
+ *   - Buffer       → そのまま（CSVアップロード等のバイナリ）
+ *   - string       → UTF-8 として Buffer 化
+ *   - object       → JSON 文字列化（application/json の PATCH 等）
+ */
+async function getRawBody(req: IncomingMessage): Promise<Buffer> {
+  const b = (req as IncomingMessage & { body?: unknown }).body
+  if (Buffer.isBuffer(b)) return b
+  if (typeof b === 'string') return Buffer.from(b, 'utf8')
+  if (b && typeof b === 'object') return Buffer.from(JSON.stringify(b), 'utf8')
+  return await new Promise((resolve, reject) => {
     const chunks: Buffer[] = []
     req.on('data', (c: Buffer) => chunks.push(c))
     req.on('end', () => resolve(Buffer.concat(chunks)))
@@ -114,11 +126,11 @@ export default async function handler(
       return
     }
     if (path === '/api/intake/preview' && method === 'POST') {
-      json(await intake.previewIntake(await readRawBuffer(req)))
+      json(await intake.previewIntake(await getRawBody(req)))
       return
     }
     if (path === '/api/intake/commit' && method === 'POST') {
-      const r = await intake.commitIntake(editActor, await readRawBuffer(req))
+      const r = await intake.commitIntake(editActor, await getRawBody(req))
       json(r.body, r.status)
       return
     }
@@ -155,7 +167,7 @@ export default async function handler(
         return
       }
       if (method === 'PATCH') {
-        const raw = (await readRawBuffer(req)).toString('utf8')
+        const raw = (await getRawBody(req)).toString('utf8')
         const r = await updateCaseField(editActor, Number(caseById[1]), raw, meta)
         json(r.body, r.status)
         return

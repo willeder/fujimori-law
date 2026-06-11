@@ -197,6 +197,7 @@ function toCaseSummaryJson(c: Record<string, any>) {
     feeInfo: { officeFee: c.officeFee, uncollectedFee: c.uncollectedFee },
     paymentInfo: { nextPaymentDate: ds(c.nextPaymentDate) },
     metadata: {
+      externalId: c.externalId,
       listCategory: c.listCategory,
       listRegisteredDate: ds(c.listRegisteredDate),
     },
@@ -208,6 +209,7 @@ export async function getCasesSummary() {
     orderBy: { id: 'asc' },
     select: {
       id: true,
+      externalId: true,
       name: true,
       furigana: true,
       phone: true,
@@ -458,6 +460,7 @@ export async function getPaymentDiscrepancies() {
     {
       id: number
       caseId: number
+      externalId: string | null
       caseName: string | null
       plannedDate: Date | null
       plannedAmount: number | null
@@ -465,7 +468,7 @@ export async function getPaymentDiscrepancies() {
       actualAmount: number | null
     }[]
   >(
-    `SELECT p.id, p."caseId", c.name AS "caseName",
+    `SELECT p.id, p."caseId", c."externalId", c.name AS "caseName",
             p."plannedDate", p."plannedAmount", p."actualDate", p."actualAmount"
      FROM payments p JOIN cases c ON c.id = p."caseId"
      WHERE p."actualDate" IS NOT NULL AND p."plannedDate" IS NOT NULL
@@ -474,6 +477,7 @@ export async function getPaymentDiscrepancies() {
   return rows.map((r) => ({
     id: r.id,
     caseId: r.caseId,
+    externalId: r.externalId,
     caseName: r.caseName,
     plannedDate: ds(r.plannedDate),
     plannedAmount: r.plannedAmount ?? 0,
@@ -499,7 +503,7 @@ export async function getUnpaidCaseIds() {
 /** 入金遅延モニタリング: 遅延/リスク案件をサーバ側で算出して返す（全 payments 転送を回避） */
 export async function getPaymentDelays() {
   const [cases, payments] = await Promise.all([
-    prisma.case.findMany({ select: { id: true, name: true } }),
+    prisma.case.findMany({ select: { id: true, externalId: true, name: true } }),
     prisma.payment.findMany({
       select: { id: true, caseId: true, plannedDate: true, actualDate: true },
     }),
@@ -523,7 +527,15 @@ export async function getPaymentDelays() {
       const casePayments = (byCase.get(c.id) ?? []) as SvcPayments
       const stats = calculateDelayStats(c.id, casePayments)
       const overduePayments = detectPaymentDelays(casePayments)
-      return { case: { id: c.id, clientBasicInfo: { name: c.name } }, stats, overduePayments }
+      return {
+        case: {
+          id: c.id,
+          metadata: { externalId: c.externalId },
+          clientBasicInfo: { name: c.name },
+        },
+        stats,
+        overduePayments,
+      }
     })
     .filter(
       (r) =>

@@ -22,15 +22,12 @@ export function AppHeader({
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white px-4 py-2 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <h1 className="whitespace-nowrap text-base font-bold text-slate-800">
-            受任案件管理
-            {title ? (
-              <span className="ml-2 text-xs font-normal text-slate-500">{title}</span>
-            ) : null}
-          </h1>
-          <PageNav />
-        </div>
+        <h1 className="whitespace-nowrap text-base font-bold text-slate-800">
+          受任案件管理
+          {title ? (
+            <span className="ml-2 text-xs font-normal text-slate-500">{title}</span>
+          ) : null}
+        </h1>
 
         <div className="flex shrink-0 items-center gap-2">
           <UiFontScaleControl variant="select" />
@@ -60,6 +57,10 @@ export function AppHeader({
             </>
           )}
         </div>
+      </div>
+      {/* メニューは専用行に固定。サブタイトル長に左右されず常に同じ位置 */}
+      <div className="mt-2">
+        <PageNav />
       </div>
       {children ? <div className="mt-2">{children}</div> : null}
     </header>

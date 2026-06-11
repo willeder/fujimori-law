@@ -169,11 +169,12 @@ export function DataTable<T>({
         : slimHeader
           ? 'px-2 py-0.5'
           : 'px-2 py-1'
-  const tableText = isDense ? 'text-[10px] leading-tight' : isCompact ? 'text-[11px] leading-tight' : 'text-xs'
+  // 一覧（compact）の文字を約1pt拡大（本文 11→12px / ヘッダ 10→11px）
+  const tableText = isDense ? 'text-[10px] leading-tight' : isCompact ? 'text-[12px] leading-tight' : 'text-xs'
   const headText = isDense
     ? 'text-[9px] font-semibold leading-tight'
     : isCompact
-      ? 'text-[10px] font-semibold leading-tight'
+      ? 'text-[11px] font-semibold leading-tight'
       : slimHeader
         ? 'text-[11px] font-semibold leading-tight'
         : 'text-[11px] font-semibold'

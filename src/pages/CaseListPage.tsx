@@ -5,7 +5,7 @@ import { DataTable, type Column, StatusBadge } from '../components'
 import { AppHeader } from '../components/AppHeader'
 import type { Case } from '../types'
 
-type SearchField = 'all' | 'name' | 'prefecture' | 'status' | 'staff'
+type SearchField = 'all' | 'name' | 'phone' | 'prefecture' | 'status' | 'staff'
 
 export function CaseListPage() {
   const navigate = useNavigate()
@@ -17,10 +17,20 @@ export function CaseListPage() {
     if (!searchValue.trim()) return cases
 
     const query = searchValue.toLowerCase()
+    // 電話番号は数字だけに正規化して部分一致（例: 下4桁「5678」で 090-1234-5678 が一致）
+    const digits = (s: string | null | undefined) => (s ?? '').replace(/\D/g, '')
+    const qDigits = digits(searchValue)
     return cases.filter((c) => {
+      const phoneMatch =
+        qDigits !== '' && digits(c.clientBasicInfo.phone).includes(qDigits)
       switch (searchField) {
         case 'name':
-          return c.clientBasicInfo.name?.toLowerCase().includes(query)
+          return (
+            c.clientBasicInfo.name?.toLowerCase().includes(query) ||
+            c.clientBasicInfo.furigana?.toLowerCase().includes(query)
+          )
+        case 'phone':
+          return phoneMatch
         case 'prefecture':
           return c.clientBasicInfo.prefecture?.toLowerCase().includes(query)
         case 'status':
@@ -34,9 +44,11 @@ export function CaseListPage() {
         default:
           return (
             c.clientBasicInfo.name?.toLowerCase().includes(query) ||
+            c.clientBasicInfo.furigana?.toLowerCase().includes(query) ||
             c.clientBasicInfo.prefecture?.toLowerCase().includes(query) ||
             c.settlementInfo.status?.toLowerCase().includes(query) ||
-            c.appointmentInfo.judicialScrivener?.toLowerCase().includes(query)
+            c.appointmentInfo.judicialScrivener?.toLowerCase().includes(query) ||
+            phoneMatch
           )
       }
     })
@@ -58,7 +70,14 @@ export function CaseListPage() {
     )
 
   const columns: Column<Case>[] = [
-    { key: 'id', header: 'ID', width: '56px', align: 'center', sortable: false },
+    {
+      key: 'id',
+      header: 'ID',
+      width: '76px',
+      align: 'center',
+      sortable: false,
+      render: (item) => item.metadata.externalId ?? '-',
+    },
     {
       key: 'acceptanceDate',
       header: '受任日',
@@ -210,6 +229,7 @@ export function CaseListPage() {
           >
             <option value="all">すべて</option>
             <option value="name">依頼者名</option>
+            <option value="phone">電話番号</option>
             <option value="prefecture">都道府県</option>
             <option value="status">ステータス</option>
             <option value="staff">担当者</option>

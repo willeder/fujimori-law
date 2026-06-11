@@ -8,6 +8,7 @@ import type { Creditor } from '../types'
 
 type Row = {
   caseId: number
+  externalId: string | null
   name: string | null
   furigana: string | null
   caseStatus: string | null
@@ -108,6 +109,7 @@ export function SettlementResultsPage() {
       return {
         ...cr,
         caseId: cr.caseId,
+        externalId: c?.metadata.externalId ?? null,
         name: c?.clientBasicInfo.name ?? null,
         furigana: c?.clientBasicInfo.furigana ?? null,
         caseStatus: c?.settlementInfo.status ?? null,
@@ -129,7 +131,7 @@ export function SettlementResultsPage() {
   }, [searched, rows, fCreditor, fAccFrom, fAccTo, fSetFrom, fSetTo, fStatus])
 
   const columns: Column<Row>[] = [
-    { key: 'caseId', header: 'ID', width: '60px', align: 'center' },
+    { key: 'caseId', header: 'ID', width: '76px', align: 'center', render: (r) => r.externalId ?? '-' },
     { key: 'name', header: '名前', width: '120px', render: (r) => r.name ?? '-' },
     { key: 'furigana', header: 'フリガナ', width: '140px', render: (r) => r.furigana ?? '-' },
     {

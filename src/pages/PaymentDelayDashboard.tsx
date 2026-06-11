@@ -14,6 +14,7 @@ type RiskLevel = 'low' | 'medium' | 'high'
 
 type DelayRow = {
   caseId: number
+  externalId: string | null
   name: string | null
   delayedPayments: number
   totalPayments: number
@@ -71,6 +72,7 @@ export function PaymentDelayDashboard() {
     today.setHours(0, 0, 0, 0)
     return filteredCases.map(({ case: c, stats, overduePayments }) => ({
       caseId: c.id,
+      externalId: c.metadata?.externalId ?? null,
       name: c.clientBasicInfo.name,
       delayedPayments: stats.delayedPayments,
       totalPayments: stats.totalPayments,
@@ -94,7 +96,7 @@ export function PaymentDelayDashboard() {
   }, [filteredCases])
 
   const columns: Column<DelayRow>[] = [
-    { key: 'caseId', header: 'ID', width: '56px', align: 'center', sortable: false },
+    { key: 'caseId', header: 'ID', width: '76px', align: 'center', sortable: false, render: (r) => r.externalId ?? '-' },
     { key: 'name', header: '依頼者名', width: '120px', render: (r) => r.name ?? '-' },
     {
       key: 'delayedPayments',
