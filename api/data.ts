@@ -13,6 +13,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import {
   apiRoutes,
   getCaseById,
+  searchCases,
   updateCaseField,
   updateCreditorField,
   updatePaymentField,
@@ -162,6 +163,13 @@ export default async function handler(
         return
       }
       json(result)
+      return
+    }
+
+    // ── 横断検索（複数条件AND） ──
+    if (path === '/api/cases/search' && method === 'POST') {
+      const raw = (await getRawBody(req)).toString('utf8')
+      json(await searchCases(raw))
       return
     }
 

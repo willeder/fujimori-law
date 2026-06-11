@@ -204,34 +204,104 @@ function toCaseSummaryJson(c: Record<string, any>) {
   }
 }
 
+const CASE_SUMMARY_SELECT = {
+  id: true,
+  externalId: true,
+  name: true,
+  furigana: true,
+  phone: true,
+  lineUrl: true,
+  prefecture: true,
+  payDay: true,
+  cautionRank: true,
+  acceptanceDate: true,
+  acceptanceRank: true,
+  debtAdjustmentType: true,
+  appointmentStaff: true,
+  interviewStaff: true,
+  judicialScrivener: true,
+  creditorCount: true,
+  declaredDebtAmount: true,
+  settlementStatus: true,
+  officeFee: true,
+  uncollectedFee: true,
+  nextPaymentDate: true,
+  listCategory: true,
+  listRegisteredDate: true,
+} as const
+
 export async function getCasesSummary() {
   const rows = await prisma.case.findMany({
     orderBy: { id: 'asc' },
-    select: {
-      id: true,
-      externalId: true,
-      name: true,
-      furigana: true,
-      phone: true,
-      lineUrl: true,
-      prefecture: true,
-      payDay: true,
-      cautionRank: true,
-      acceptanceDate: true,
-      acceptanceRank: true,
-      debtAdjustmentType: true,
-      appointmentStaff: true,
-      interviewStaff: true,
-      judicialScrivener: true,
-      creditorCount: true,
-      declaredDebtAmount: true,
-      settlementStatus: true,
-      officeFee: true,
-      uncollectedFee: true,
-      nextPaymentDate: true,
-      listCategory: true,
-      listRegisteredDate: true,
-    },
+    select: CASE_SUMMARY_SELECT,
+  })
+  return rows.map(toCaseSummaryJson)
+}
+
+// ── 横断検索（複数条件AND・ほぼ全フィールド） ───────────────────
+const CASE_SEARCH_TYPE = buildFieldType('Case', [])
+
+/** "2026" / "2026-05" / "2026-05-01" を [from, to) の日付範囲に */
+function dateRange(v: string): { from: Date; to: Date } | null {
+  let m = v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/)
+  if (m) {
+    const from = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]))
+    return { from, to: new Date(from.getTime() + 86400000) }
+  }
+  m = v.match(/^(\d{4})-(\d{1,2})$/)
+  if (m) {
+    const from = new Date(Date.UTC(+m[1], +m[2] - 1, 1))
+    return { from, to: new Date(Date.UTC(+m[1], +m[2], 1)) }
+  }
+  m = v.match(/^(\d{4})$/)
+  if (m) return { from: new Date(Date.UTC(+m[1], 0, 1)), to: new Date(Date.UTC(+m[1] + 1, 0, 1)) }
+  return null
+}
+
+/**
+ * 複数条件（AND）の横断検索。条件: { field, value }[]。
+ *   - String列  → 部分一致（大小無視）
+ *   - Int列     → 数値一致
+ *   - Date列    → 年/年月/年月日のいずれかで範囲一致
+ *   - creditorName → 債権者リレーションの部分一致
+ */
+export async function searchCases(raw: string) {
+  let conditions: { field: string; value: string }[] = []
+  try {
+    const body = JSON.parse(raw || '{}') as { conditions?: { field: string; value: string }[] }
+    conditions = body.conditions ?? []
+  } catch {
+    return { error: 'bad request' }
+  }
+  const AND: Prisma.CaseWhereInput[] = []
+  for (const cond of conditions) {
+    const v = (cond?.value ?? '').trim()
+    if (!v) continue
+    if (cond.field === 'creditorName') {
+      AND.push({ creditors: { some: { creditorName: { contains: v, mode: 'insensitive' } } } })
+      continue
+    }
+    if (cond.field === 'phone') {
+      AND.push({ phone: { contains: v } })
+      continue
+    }
+    const type = CASE_SEARCH_TYPE[cond.field]
+    if (!type) continue
+    if (type === 'String') {
+      AND.push({ [cond.field]: { contains: v, mode: 'insensitive' } } as Prisma.CaseWhereInput)
+    } else if (type === 'Int') {
+      const n = parseInt(v.replace(/[^\d-]/g, ''), 10)
+      if (Number.isFinite(n)) AND.push({ [cond.field]: n } as Prisma.CaseWhereInput)
+    } else if (type === 'DateTime') {
+      const r = dateRange(v)
+      if (r) AND.push({ [cond.field]: { gte: r.from, lt: r.to } } as Prisma.CaseWhereInput)
+    }
+  }
+  const rows = await prisma.case.findMany({
+    where: AND.length ? { AND } : undefined,
+    orderBy: { id: 'asc' },
+    select: CASE_SUMMARY_SELECT,
+    take: 5000,
   })
   return rows.map(toCaseSummaryJson)
 }

@@ -1,17 +1,66 @@
-import { useState, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState, useMemo } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useCaseState } from '../store/useCaseStore'
 import { DataTable, type Column, StatusBadge } from '../components'
 import { AppHeader } from '../components/AppHeader'
+import { SEARCH_FIELDS, type Condition } from './searchFields'
 import type { Case } from '../types'
 
 type SearchField = 'all' | 'name' | 'phone' | 'prefecture' | 'status' | 'staff'
 
 export function CaseListPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { cases } = useCaseState()
   const [searchField, setSearchField] = useState<SearchField>('all')
   const [searchValue, setSearchValue] = useState('')
+  // 詳細検索（サーバ横断検索・複数条件AND）
+  const [showAdv, setShowAdv] = useState(false)
+  const [conditions, setConditions] = useState<Condition[]>([{ field: 'name', value: '' }])
+  const [results, setResults] = useState<Case[] | null>(null)
+  const [searching, setSearching] = useState(false)
+
+  const setCond = (i: number, patch: Partial<Condition>) =>
+    setConditions((cs) => cs.map((c, idx) => (idx === i ? { ...c, ...patch } : c)))
+  const addCond = () => setConditions((cs) => [...cs, { field: 'name', value: '' }])
+  const removeCond = (i: number) =>
+    setConditions((cs) => (cs.length > 1 ? cs.filter((_, idx) => idx !== i) : cs))
+  const runSearch = async (conds?: Condition[]) => {
+    const active = (conds ?? conditions).filter((c) => c.value.trim())
+    if (active.length === 0) {
+      setResults(null)
+      return
+    }
+    setSearching(true)
+    try {
+      const r = await fetch('/api/cases/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ conditions: active }),
+      })
+      setResults(r.ok ? ((await r.json()) as Case[]) : [])
+    } catch {
+      setResults([])
+    } finally {
+      setSearching(false)
+    }
+  }
+  const clearSearch = () => {
+    setResults(null)
+    setConditions([{ field: 'name', value: '' }])
+  }
+
+  // FileMaker風「検索モード」（詳細レコードでCtrl+F）から渡された条件で自動検索
+  useEffect(() => {
+    const st = location.state as { conditions?: Condition[] } | null
+    if (st?.conditions && st.conditions.length > 0) {
+      setShowAdv(true)
+      setConditions(st.conditions)
+      void runSearch(st.conditions)
+      navigate(location.pathname, { replace: true, state: null })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.key])
 
   const filteredCases = useMemo(() => {
     if (!searchValue.trim()) return cases
@@ -59,6 +108,12 @@ export function CaseListPage() {
     return [...filteredCases].sort((a, b) => (a.id ?? 0) - (b.id ?? 0))
   }, [filteredCases])
 
+  // 詳細検索の結果があればそれを優先表示、無ければクイック検索の結果
+  const displayed = useMemo(() => {
+    if (results != null) return [...results].sort((a, b) => (a.id ?? 0) - (b.id ?? 0))
+    return sortedCases
+  }, [results, sortedCases])
+
   const yen = (n: number | null | undefined) =>
     n != null ? (
       <span>
@@ -96,14 +151,14 @@ export function CaseListPage() {
     {
       key: 'listRegisteredDate',
       header: 'リスト登録日',
-      width: '92px',
+      width: '104px',
       sortable: false,
       render: (item) => item.metadata.listRegisteredDate ?? '-',
     },
     {
       key: 'listCategory',
       header: 'リスト区分',
-      width: '88px',
+      width: '116px',
       sortable: false,
       render: (item) => item.metadata.listCategory ?? '-',
     },
@@ -221,38 +276,123 @@ export function CaseListPage() {
   return (
     <div className="min-h-screen bg-slate-100">
       <AppHeader title="司法書士法人 第一法務事務所">
-        <div className="flex items-center gap-2">
-          <select
-            value={searchField}
-            onChange={(e) => setSearchField(e.target.value as SearchField)}
-            className="text-xs border border-slate-300 rounded px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">すべて</option>
-            <option value="name">依頼者名</option>
-            <option value="phone">電話番号</option>
-            <option value="prefecture">都道府県</option>
-            <option value="status">ステータス</option>
-            <option value="staff">担当者</option>
-          </select>
-          <input
-            type="text"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            placeholder="検索..."
-            className="flex-1 max-w-md text-xs border border-slate-300 rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          {searchValue && (
-            <button
-              onClick={() => setSearchValue('')}
-              className="text-xs text-slate-500 hover:text-slate-700"
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <select
+              value={searchField}
+              onChange={(e) => setSearchField(e.target.value as SearchField)}
+              disabled={results != null}
+              className="text-xs border border-slate-300 rounded px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-40"
             >
-              クリア
+              <option value="all">すべて</option>
+              <option value="name">依頼者名</option>
+              <option value="phone">電話番号</option>
+              <option value="prefecture">都道府県</option>
+              <option value="status">ステータス</option>
+              <option value="staff">担当者</option>
+            </select>
+            <input
+              type="text"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              placeholder="クイック検索..."
+              disabled={results != null}
+              className="flex-1 max-w-xs text-xs border border-slate-300 rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-40"
+            />
+            {searchValue && (
+              <button
+                onClick={() => setSearchValue('')}
+                className="text-xs text-slate-500 hover:text-slate-700"
+              >
+                クリア
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setShowAdv((v) => !v)}
+              className={`rounded border px-2 py-1.5 text-xs font-medium ${
+                showAdv || results != null
+                  ? 'border-blue-600 bg-blue-600 text-white'
+                  : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              詳細検索 {showAdv ? '▲' : '▼'}
             </button>
+            <div className="flex-1" />
+            <span className="text-xs text-slate-500">
+              {results != null
+                ? `${displayed.length}件（詳細検索）`
+                : `${filteredCases.length} / 全${cases.length}件`}
+            </span>
+          </div>
+
+          {showAdv && (
+            <div className="rounded border border-slate-200 bg-slate-50 p-2">
+              <div className="space-y-1.5">
+                {conditions.map((c, i) => (
+                  <div key={i} className="flex items-center gap-1.5">
+                    <select
+                      value={c.field}
+                      onChange={(e) => setCond(i, { field: e.target.value })}
+                      className="w-44 rounded border border-slate-300 bg-white px-2 py-1 text-xs"
+                    >
+                      {SEARCH_FIELDS.map((f) => (
+                        <option key={f.field} value={f.field}>
+                          {f.label}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      value={c.value}
+                      onChange={(e) => setCond(i, { value: e.target.value })}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') void runSearch()
+                      }}
+                      placeholder="値（部分一致）"
+                      className="w-56 rounded border border-slate-300 px-2 py-1 text-xs"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeCond(i)}
+                      className="rounded px-1.5 py-1 text-xs text-slate-400 hover:bg-slate-200 hover:text-slate-700"
+                      title="この条件を削除"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-2 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={addCond}
+                  className="rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-600 hover:bg-slate-100"
+                >
+                  ＋ 条件を追加
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void runSearch()}
+                  disabled={searching}
+                  className="rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {searching ? '検索中…' : '検索'}
+                </button>
+                {results != null && (
+                  <button
+                    type="button"
+                    onClick={clearSearch}
+                    className="rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-600 hover:bg-slate-100"
+                  >
+                    解除
+                  </button>
+                )}
+                <span className="text-[10px] text-slate-400">
+                  すべての条件に一致（AND）。日付は「2026」「2026-05」等で範囲指定可
+                </span>
+              </div>
+            </div>
           )}
-          <div className="flex-1" />
-          <span className="text-xs text-slate-500">
-            {filteredCases.length} / 全{cases.length}件
-          </span>
         </div>
       </AppHeader>
 
@@ -260,7 +400,7 @@ export function CaseListPage() {
       <div className="p-3">
         <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
           <DataTable
-            data={sortedCases}
+            data={displayed}
             columns={columns}
             keyField="id"
             onRowClick={(item) => navigate(`/cases/${item.id}`)}

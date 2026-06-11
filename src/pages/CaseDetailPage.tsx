@@ -21,6 +21,8 @@ import { SettlementFiles } from "../components/case/SettlementFiles";
 import { LineUrlQuickEdit } from "../components/case/LineUrlQuickEdit";
 import { LineLinkControl } from "../components/case/LineLinkControl";
 import { CaseChangeHistory } from "../components/case/CaseChangeHistory";
+import { FindModeModal } from "../components/case/FindModeModal";
+import type { Condition } from "./searchFields";
 import type { Case } from "../types";
 import {
   creditorTabAccentSummary,
@@ -281,6 +283,22 @@ function CaseDetailBody({
 
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   const [showHistory, setShowHistory] = useState(false);
+  // FileMaker風「検索モード」: Ctrl+F（⌘+F）で起動
+  const [findOpen, setFindOpen] = useState(false);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === "f" || e.key === "F")) {
+        e.preventDefault();
+        setFindOpen(true);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+  const runFind = (conditions: Condition[]) => {
+    setFindOpen(false);
+    navigate("/", { state: { conditions } });
+  };
   /** 和解対象債権と入金予定履歴で共有（同じ id・同じ並び） */
   const [creditorScopeTabId, setCreditorScopeTabId] = useState("all");
   /** 入金スケジュール / 和解状況 の上段タブ（カード高さの切り替えに使用） */
@@ -611,6 +629,7 @@ function CaseDetailBody({
       : null;
   return (
     <div className="flex min-h-screen min-h-0 flex-col bg-slate-200">
+      <FindModeModal open={findOpen} onClose={() => setFindOpen(false)} onSearch={runFind} />
       {/* Header（スクロール時に固定） */}
       <header className="sticky top-0 z-40 shrink-0 border-b border-slate-200 bg-white shadow-sm">
         {/* 1行目：一覧に戻る（左）、LINE@（右） */}
@@ -622,6 +641,14 @@ function CaseDetailBody({
             ← 一覧に戻る
           </button>
           <span className="flex shrink-0 items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setFindOpen(true)}
+              title="検索モード（Ctrl+F）"
+              className="rounded border border-slate-300 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50"
+            >
+              🔍 検索モード
+            </button>
             <div className="relative">
               <button
                 type="button"

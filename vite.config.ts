@@ -42,6 +42,7 @@ function dbApiPlugin(): Plugin {
             getLineLink: (caseId: number) => Promise<unknown>
             issueLineCode: (caseId: number) => Promise<unknown>
             getCaseById: (id: number) => Promise<unknown>
+            searchCases: (raw: string) => Promise<unknown>
             updateCaseField: (
               actor: { id: string; email: string },
               id: number,
@@ -208,6 +209,14 @@ function dbApiPlugin(): Plugin {
             res.statusCode = result.status
             res.setHeader('Content-Type', 'application/json; charset=utf-8')
             res.end(JSON.stringify(result.body))
+            return
+          }
+
+          // ── 横断検索（複数条件AND） ──
+          if (url === '/api/cases/search' && req.method === 'POST') {
+            const out = await mod.searchCases(await readRawBody(req))
+            res.setHeader('Content-Type', 'application/json; charset=utf-8')
+            res.end(JSON.stringify(out))
             return
           }
 
