@@ -29,6 +29,7 @@ import {
 import * as gmo from '../src/server/gmoTransfer.js'
 import * as intake from '../src/server/intakeImport.js'
 import { getSessionToken, getSessionUser } from '../src/server/auth.js'
+import { sendLineBroadcast, getLineBroadcastHistory } from '../src/server/lineBroadcast.js'
 import { prisma } from '../src/server/db.js'
 
 export const config = { runtime: 'nodejs' }
@@ -246,6 +247,17 @@ export default async function handler(
     if (lineLinks) {
       const cid = Number(lineLinks[1])
       json(method === 'POST' ? await issueLineCode(cid) : await getLineLink(cid))
+      return
+    }
+
+    // ── LINE 一斉送信・送信履歴 ──
+    if (path === '/api/line/broadcast' && method === 'POST') {
+      const r = await sendLineBroadcast(editActor, (await getRawBody(req)).toString('utf8'), meta)
+      json(r.body, r.status)
+      return
+    }
+    if (path === '/api/line/broadcast-history' && method === 'GET') {
+      json(await getLineBroadcastHistory())
       return
     }
 

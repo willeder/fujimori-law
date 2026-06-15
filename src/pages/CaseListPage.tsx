@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useCaseState } from '../store/useCaseStore'
 import { DataTable, type Column, StatusBadge } from '../components'
 import { AppHeader } from '../components/AppHeader'
+import { LineBroadcastModal, LineHistoryModal } from '../components/case/LineBroadcastModal'
 import { SEARCH_FIELDS, type Condition } from './searchFields'
 import type { Case } from '../types'
 
@@ -114,6 +115,40 @@ export function CaseListPage() {
     return sortedCases
   }, [results, sortedCases])
 
+  // ── LINE一斉送信: 行選択 ──
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(() => new Set())
+  const [broadcastOpen, setBroadcastOpen] = useState(false)
+  const [historyOpen, setHistoryOpen] = useState(false)
+  const caseById = useMemo(() => new Map(cases.map((c) => [c.id, c])), [cases])
+  const recipients = useMemo(
+    () =>
+      [...selectedIds]
+        .map((id) => caseById.get(id))
+        .filter((c): c is Case => !!c)
+        .map((c) => ({
+          id: c.id,
+          name: c.clientBasicInfo.name,
+          lineLinked: !!c.metadata.lineLinked,
+        })),
+    [selectedIds, caseById]
+  )
+  const toggleSel = (id: number) =>
+    setSelectedIds((prev) => {
+      const n = new Set(prev)
+      if (n.has(id)) n.delete(id)
+      else n.add(id)
+      return n
+    })
+  const allDisplayedSelected =
+    displayed.length > 0 && displayed.every((c) => selectedIds.has(c.id))
+  const toggleAllDisplayed = () =>
+    setSelectedIds((prev) => {
+      const n = new Set(prev)
+      if (allDisplayedSelected) displayed.forEach((c) => n.delete(c.id))
+      else displayed.forEach((c) => n.add(c.id))
+      return n
+    })
+
   const yen = (n: number | null | undefined) =>
     n != null ? (
       <span>
@@ -126,12 +161,40 @@ export function CaseListPage() {
 
   const columns: Column<Case>[] = [
     {
+      key: '_sel',
+      header: '選択',
+      width: '40px',
+      align: 'center',
+      sortable: false,
+      render: (item) => (
+        <input
+          type="checkbox"
+          checked={selectedIds.has(item.id)}
+          onClick={(e) => e.stopPropagation()}
+          onChange={() => toggleSel(item.id)}
+        />
+      ),
+    },
+    {
       key: 'id',
       header: 'ID',
       width: '76px',
       align: 'center',
       sortable: false,
       render: (item) => item.metadata.externalId ?? '-',
+    },
+    {
+      key: '_line',
+      header: 'LINE',
+      width: '48px',
+      align: 'center',
+      sortable: false,
+      render: (item) =>
+        item.metadata.lineLinked ? (
+          <span className="rounded bg-emerald-100 px-1 text-[10px] text-emerald-700">済</span>
+        ) : (
+          <span className="rounded bg-slate-100 px-1 text-[10px] text-slate-400">未</span>
+        ),
     },
     {
       key: 'acceptanceDate',
@@ -275,6 +338,12 @@ export function CaseListPage() {
 
   return (
     <div className="min-h-screen bg-slate-100">
+      <LineBroadcastModal
+        open={broadcastOpen}
+        onClose={() => setBroadcastOpen(false)}
+        recipients={recipients}
+      />
+      <LineHistoryModal open={historyOpen} onClose={() => setHistoryOpen(false)} />
       <AppHeader title="司法書士法人 第一法務事務所">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
@@ -317,6 +386,29 @@ export function CaseListPage() {
               }`}
             >
               詳細検索 {showAdv ? '▲' : '▼'}
+            </button>
+            <span className="mx-1 h-4 w-px bg-slate-300" />
+            <button
+              type="button"
+              onClick={toggleAllDisplayed}
+              className="rounded border border-slate-300 bg-white px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100"
+            >
+              {allDisplayedSelected ? '選択解除' : '表示中を全選択'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setBroadcastOpen(true)}
+              disabled={selectedIds.size === 0}
+              className="rounded bg-emerald-700 px-2.5 py-1.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-40"
+            >
+              LINE送信{selectedIds.size > 0 ? `（${selectedIds.size}）` : ''}
+            </button>
+            <button
+              type="button"
+              onClick={() => setHistoryOpen(true)}
+              className="rounded border border-slate-300 bg-white px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100"
+            >
+              送信履歴
             </button>
             <div className="flex-1" />
             <span className="text-xs text-slate-500">

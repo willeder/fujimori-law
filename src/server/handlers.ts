@@ -200,6 +200,7 @@ function toCaseSummaryJson(c: Record<string, any>) {
       externalId: c.externalId,
       listCategory: c.listCategory,
       listRegisteredDate: ds(c.listRegisteredDate),
+      lineLinked: c.lineLink?.status === 'LINKED',
     },
   }
 }
@@ -228,6 +229,7 @@ const CASE_SUMMARY_SELECT = {
   nextPaymentDate: true,
   listCategory: true,
   listRegisteredDate: true,
+  lineLink: { select: { status: true } },
 } as const
 
 export async function getCasesSummary() {

@@ -14,6 +14,8 @@
     { "source": "/api/contact-histories/:p*", "destination": "/api/data?__path=contact-histories/:p*" },
     { "source": "/api/changes/:p*", "destination": "/api/data?__path=changes/:p*" },
     { "source": "/api/line/links/:p*", "destination": "/api/data?__path=line/links/:p*" },
+    { "source": "/api/line/broadcast", "destination": "/api/data?__path=line/broadcast" },
+    { "source": "/api/line/broadcast-history", "destination": "/api/data?__path=line/broadcast-history" },
     { "source": "/api/gmo/:p*", "destination": "/api/data?__path=gmo/:p*" },
     { "source": "/api/intake/:p*", "destination": "/api/data?__path=intake/:p*" },
     { "source": "/api/_diag", "destination": "/api/data?__path=_diag" },

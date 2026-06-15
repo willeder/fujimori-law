@@ -156,6 +156,7 @@ export interface CaseMetadata {
   listCategory?: string | null // リスト区分
   listRegisteredDate?: string | null // リスト登録日
   acceptanceDocs?: string | null // 受任資料（リンク/ファイル名のメモ）
+  lineLinked?: boolean // LINE連携済み（サマリ用・LINKEDなら true）
 }
 
 /** 案件（統合データ） */
