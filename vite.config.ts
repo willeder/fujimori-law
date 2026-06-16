@@ -151,16 +151,19 @@ function dbApiPlugin(): Plugin {
                 return
               }
             }
-            const { runPaymentReminder, DEFAULT_DAYS_BEFORE } =
-              (await server.ssrLoadModule(
-                '/src/server/paymentReminder.ts'
-              )) as typeof import('./src/server/paymentReminder')
-            const daysParam = new URLSearchParams(
-              req.url?.split('?')[1] ?? ''
-            ).get('days')
-            const daysBefore =
-              daysParam !== null ? Number(daysParam) : DEFAULT_DAYS_BEFORE
-            const summary = await runPaymentReminder(daysBefore)
+            const pr = (await server.ssrLoadModule(
+              '/src/server/paymentReminder.ts'
+            )) as typeof import('./src/server/paymentReminder')
+            const params = new URLSearchParams(req.url?.split('?')[1] ?? '')
+            const timing = params.get('timing')
+            const summary =
+              timing && pr.getTimingDef(timing)
+                ? await pr.runReminderTiming(timing)
+                : await pr.runPaymentReminder(
+                    params.get('days') !== null
+                      ? Number(params.get('days'))
+                      : pr.DEFAULT_DAYS_BEFORE
+                  )
             res.setHeader('Content-Type', 'application/json; charset=utf-8')
             res.end(JSON.stringify(summary))
             return
@@ -238,6 +241,29 @@ function dbApiPlugin(): Plugin {
             }
             res.setHeader('Content-Type', 'application/json; charset=utf-8')
             res.end(JSON.stringify(await lb.getLineBroadcastHistory()))
+            return
+          }
+
+          // ── 入金催促通知（候補抽出・手動送信） ──
+          if (
+            (url === '/api/reminders/candidates' && req.method === 'GET') ||
+            (url === '/api/reminders/send' && req.method === 'POST')
+          ) {
+            const pr = (await server.ssrLoadModule(
+              '/src/server/paymentReminder.ts'
+            )) as typeof import('./src/server/paymentReminder')
+            if (url === '/api/reminders/candidates') {
+              const timing =
+                new URLSearchParams(req.url?.split('?')[1] ?? '').get('timing') ?? ''
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify(await pr.getReminderCandidates(timing)))
+              return
+            }
+            const editActor = { id: sessionUser.id, email: sessionUser.email }
+            const r = await pr.sendReminders(editActor, await readRawBody(req), meta)
+            res.statusCode = r.status
+            res.setHeader('Content-Type', 'application/json; charset=utf-8')
+            res.end(JSON.stringify(r.body))
             return
           }
 

@@ -11,6 +11,7 @@ import {
   SettlementResultsPage,
   PaymentManagementPage,
   PaymentDiscrepancyPage,
+  PaymentReminderPage,
 } from './pages'
 import { LoginPage } from './pages/LoginPage'
 import { MembersPage } from './pages/MembersPage'
@@ -34,6 +35,10 @@ const router = createBrowserRouter([
   {
     path: '/payment-discrepancy',
     element: <PaymentDiscrepancyPage />,
+  },
+  {
+    path: '/payment-reminder',
+    element: <PaymentReminderPage />,
   },
   {
     path: '/payment-delay',

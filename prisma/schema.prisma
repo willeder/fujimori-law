@@ -304,7 +304,11 @@ model LineLink {
 // LINE 通知ログ（push 配信の履歴・冪等性）
 // ============================================================
 enum NotificationType {
-  PAYMENT_REMINDER // 入金予定リマインド
+  PAYMENT_REMINDER // 入金予定リマインド（旧・汎用。後方互換のため残置）
+  PAYMENT_REMINDER_3D // 入金催促：支払期日の3日前
+  PAYMENT_REMINDER_1D // 入金催促：支払期日の前日
+  PAYMENT_REMINDER_0D_1 // 入金催促：当日1回目
+  PAYMENT_REMINDER_0D_2 // 入金催促：当日2回目（16:00時点で未入金）
   DEPOSIT_CONFIRM // 入金確認
   DEADLINE_ALERT // 期限アラート
 }

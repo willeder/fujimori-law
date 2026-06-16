@@ -250,9 +250,11 @@ export function CaseListPage() {
     {
       key: 'name',
       header: '名前',
-      width: '96px',
+      width: '148px',
       sortable: false,
-      render: (item) => <span className="font-medium">{item.clientBasicInfo.name}</span>,
+      render: (item) => (
+        <span className="whitespace-nowrap font-medium">{item.clientBasicInfo.name}</span>
+      ),
     },
     {
       key: 'furigana',

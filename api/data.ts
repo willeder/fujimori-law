@@ -30,6 +30,7 @@ import * as gmo from '../src/server/gmoTransfer.js'
 import * as intake from '../src/server/intakeImport.js'
 import { getSessionToken, getSessionUser } from '../src/server/auth.js'
 import { sendLineBroadcast, getLineBroadcastHistory } from '../src/server/lineBroadcast.js'
+import { getReminderCandidates, sendReminders } from '../src/server/paymentReminder.js'
 import { prisma } from '../src/server/db.js'
 
 export const config = { runtime: 'nodejs' }
@@ -258,6 +259,17 @@ export default async function handler(
     }
     if (path === '/api/line/broadcast-history' && method === 'GET') {
       json(await getLineBroadcastHistory())
+      return
+    }
+
+    // ── 入金催促通知（候補抽出・手動送信） ──
+    if (path === '/api/reminders/candidates' && method === 'GET') {
+      json(await getReminderCandidates(query.get('timing') ?? ''))
+      return
+    }
+    if (path === '/api/reminders/send' && method === 'POST') {
+      const r = await sendReminders(editActor, (await getRawBody(req)).toString('utf8'), meta)
+      json(r.body, r.status)
       return
     }
 

@@ -8,6 +8,7 @@ const LINKS: { path: string; label: string }[] = [
   { path: '/', label: '案件一覧' },
   { path: '/payment-management', label: '入金管理一覧' },
   { path: '/payment-delay', label: '入金遅延モニタリング' },
+  { path: '/payment-reminder', label: '入金催促' },
   { path: '/settlement-results', label: '和解実績一覧' },
   { path: '/payment-discrepancy', label: '入金額相違一覧' },
   { path: '/gmo-transfer', label: 'GMO振込出力' },
