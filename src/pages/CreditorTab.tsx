@@ -237,6 +237,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           type="select"
           options={[
             { value: '受任通知発送待ち', label: '受任通知発送待ち' },
+            { value: '受任対象外', label: '受任対象外' },
             { value: '受任通知発送済', label: '受任通知発送済' },
             { value: '債権調査中', label: '債権調査中' },
             { value: '和解提案中', label: '和解提案中' },
@@ -320,7 +321,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
             updateCreditor(creditor, { expectedSettlement: Number(v) || null })
           }
           type="number"
-          suffix="%"
+          suffix="回"
           compact
           compactLayout="inline"
           bordered
@@ -445,7 +446,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
             updateCreditor(creditor, { settlementProposal: Number(v) || null })
           }
           type="number"
-          suffix="円"
+          suffix="回"
           compact
           compactLayout="inline"
           bordered
@@ -493,7 +494,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
             updateCreditor(creditor, { settlementAmount: Number(v) || null })
           }
           type="number"
-          suffix="円"
+          suffix="回"
           compact
           compactLayout="inline"
           bordered

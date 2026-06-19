@@ -332,6 +332,7 @@ function CaseDetailBody({
         id: "all",
         label: "すべて合算",
         accent: creditorTabAccentSummary(),
+        fixed: true,
         content: (
           <CreditorTab
             caseId={caseData.id}
@@ -382,6 +383,50 @@ function CaseDetailBody({
       })),
     ];
   }, [caseData, caseLevelPayments, creditors, payments, creditorFullyRepaid]);
+
+  /**
+   * 債権者タブのドラッグ並べ替え確定。
+   * グループ制約: 受任(=「受任対象外」以外)を先・「受任対象外」を後ろに固定し、各グループ内は
+   * ドラッグ順を維持。store を即時並べ替えし（合算一覧・入金タブも連動）、displayOrder を永続化。
+   */
+  const handleReorderCreditors = (orderedIds: string[]) => {
+    if (!caseData) return;
+    const caseId = caseData.id;
+    const ids = orderedIds
+      .map((s) => Number(s))
+      .filter((n) => Number.isFinite(n));
+    const byId = new Map(creditors.map((c) => [c.id, c]));
+    const accepted = ids.filter((id) => byId.get(id)?.status !== "受任対象外");
+    const excluded = ids.filter((id) => byId.get(id)?.status === "受任対象外");
+    const includedSet = new Set(ids);
+    const rest = creditors
+      .filter((c) => !includedSet.has(c.id))
+      .map((c) => c.id);
+    const finalIds = [...accepted, ...excluded, ...rest];
+    const currentIds = creditors.map((c) => c.id);
+    if (
+      finalIds.length === currentIds.length &&
+      finalIds.every((v, i) => v === currentIds[i])
+    ) {
+      return; // 並びに変化なし
+    }
+    dispatch({
+      type: "REORDER_CREDITORS",
+      payload: { caseId, orderedIds: finalIds },
+    });
+    // displayOrder が変わる債権者のみサーバへ保存
+    finalIds.forEach((cid, i) => {
+      const order = i + 1;
+      const prev = byId.get(cid);
+      if (prev && prev.displayOrder !== order) {
+        void fetch(`/api/creditors/${cid}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ displayOrder: order }),
+        }).catch((e) => console.error("債権者並び順の保存に失敗:", e));
+      }
+    });
+  };
 
   if (!caseData) {
     return (
@@ -1104,6 +1149,8 @@ function CaseDetailBody({
                           density="dense"
                           tabBodyScroll="guest"
                           guestExpandToParent={(id) => id === "all"}
+                          reorderable
+                          onReorder={handleReorderCreditors}
                         />
                       ),
                     },

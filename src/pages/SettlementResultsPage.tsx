@@ -144,7 +144,7 @@ export function SettlementResultsPage() {
 
   const columns: Column<Row>[] = [
     { key: 'caseId', header: 'ID', width: '76px', align: 'center', render: (r) => r.externalId ?? '-' },
-    { key: 'name', header: '名前', width: '120px', render: (r) => r.name ?? '-' },
+    { key: 'name', header: '名前', width: '120px', render: (r) => <span className="whitespace-nowrap">{r.name ?? '-'}</span> },
     { key: 'furigana', header: 'フリガナ', width: '140px', render: (r) => r.furigana ?? '-' },
     {
       key: 'caseStatus',

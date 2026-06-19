@@ -175,6 +175,7 @@ export interface Case {
 /** 債権者別ステータス */
 export type CreditorStatus =
   | '受任通知発送待ち'
+  | '受任対象外'
   | '受任通知発送済'
   | '債権調査中'
   | '和解提案中'
@@ -198,6 +199,7 @@ export interface Creditor {
   expectedPaymentCount: number | null // 和解予定回数
   expectedFutureInterest: string | null // 和解予定利息
   status: CreditorStatus
+  displayOrder?: number | null // タブ/一覧の表示順（受任→受任対象外）
   repaymentExcluded: RepaymentExcludedStatus // 弁済除外（停止・終了）
   check?: string | null // CHECK
   nextProcessDate: string | null // 次回処理日時

@@ -8,6 +8,8 @@ export interface TabItem {
   content: ReactNode
   /** 左ストライプ・背景でタブを識別（和解対象債権など） */
   accent?: CreditorTabAccent
+  /** true のとき並べ替え対象外（ドラッグ不可・位置固定。例: 「すべて合算」） */
+  fixed?: boolean
 }
 
 /**
@@ -46,6 +48,13 @@ interface TabsProps {
    * false のときは内容の高さに寄せ、長い内容はルートでスクロール（和解状況の個別債権者タブ向け）。
    */
   guestExpandToParent?: boolean | ((activeTabId: string) => boolean)
+  /** true のとき fixed でないタブをドラッグで並べ替え可能にする */
+  reorderable?: boolean
+  /**
+   * 並べ替え確定時に呼ばれる。引数は fixed を除いたタブ id の新しい並び順。
+   * 実際の並び順（グループ制約・永続化）は呼び出し側で決定する。
+   */
+  onReorder?: (orderedIds: string[]) => void
 }
 
 export function Tabs({
@@ -62,8 +71,26 @@ export function Tabs({
   beforeActivePanelContent,
   guestExpandToParent = true,
   hostBodyNaturalHeight = false,
+  reorderable = false,
+  onReorder,
 }: TabsProps) {
   const [internalTab, setInternalTab] = useState(defaultTab ?? tabs[0]?.id)
+  // ドラッグ並べ替え（HTML5 DnD）。dragId=つかんでいるタブ, overId=ドロップ先候補
+  const [dragId, setDragId] = useState<string | null>(null)
+  const [overId, setOverId] = useState<string | null>(null)
+  const canReorder = reorderable && onReorder != null
+
+  const commitReorder = (targetId: string) => {
+    if (!canReorder || dragId == null || targetId === dragId) return
+    const nonFixed = tabs.filter((t) => !t.fixed).map((t) => t.id)
+    const from = nonFixed.indexOf(dragId)
+    const to = nonFixed.indexOf(targetId)
+    if (from < 0 || to < 0) return
+    const next = [...nonFixed]
+    const [moved] = next.splice(from, 1)
+    next.splice(to, 0, moved)
+    onReorder?.(next)
+  }
   const controlled =
     controlledActiveId !== undefined && onActiveTabChange !== undefined
   const activeTab = controlled ? controlledActiveId : internalTab
@@ -133,12 +160,54 @@ export function Tabs({
             isSplit && tab.id !== tabs[tabs.length - 1]?.id
               ? 'border-r border-slate-100'
               : ''
+          const draggable = canReorder && !tab.fixed
+          const isDragging = draggable && dragId === tab.id
+          const isOver =
+            draggable && overId === tab.id && dragId != null && dragId !== tab.id
+          const dndClass = draggable
+            ? `cursor-grab active:cursor-grabbing ${isDragging ? 'opacity-50' : ''} ${isOver ? 'ring-2 ring-blue-400' : ''}`
+            : ''
           return (
             <button
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`${base} ${state} ${splitDivider}`}
+              draggable={draggable || undefined}
+              onDragStart={
+                draggable
+                  ? (e) => {
+                      setDragId(tab.id)
+                      e.dataTransfer.effectAllowed = 'move'
+                    }
+                  : undefined
+              }
+              onDragOver={
+                draggable
+                  ? (e) => {
+                      e.preventDefault()
+                      if (overId !== tab.id) setOverId(tab.id)
+                    }
+                  : undefined
+              }
+              onDrop={
+                draggable
+                  ? (e) => {
+                      e.preventDefault()
+                      commitReorder(tab.id)
+                      setDragId(null)
+                      setOverId(null)
+                    }
+                  : undefined
+              }
+              onDragEnd={
+                canReorder
+                  ? () => {
+                      setDragId(null)
+                      setOverId(null)
+                    }
+                  : undefined
+              }
+              className={`${base} ${state} ${splitDivider} ${dndClass}`}
             >
               {tab.label}
               {tab.badge !== undefined && (

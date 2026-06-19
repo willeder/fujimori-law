@@ -63,7 +63,7 @@ export function PaymentManagementPage() {
       key: 'name',
       header: '名前',
       width: '120px',
-      render: (c) => c.clientBasicInfo.name ?? '-',
+      render: (c) => <span className="whitespace-nowrap">{c.clientBasicInfo.name ?? '-'}</span>,
     },
     {
       key: 'furigana',

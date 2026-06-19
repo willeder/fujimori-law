@@ -41,6 +41,7 @@ type CaseAction =
   | { type: 'UPDATE_CREDITOR'; payload: Creditor }
   | { type: 'ADD_CREDITOR'; payload: Creditor }
   | { type: 'DELETE_CREDITOR'; payload: number }
+  | { type: 'REORDER_CREDITORS'; payload: { caseId: number; orderedIds: number[] } }
   | { type: 'UPDATE_CONTACT_HISTORY'; payload: ContactHistory }
   | { type: 'ADD_CONTACT_HISTORY'; payload: ContactHistory }
   | { type: 'DELETE_CONTACT_HISTORY'; payload: number }
@@ -127,6 +128,21 @@ function caseReducer(state: CaseState, action: CaseAction): CaseState {
         ...state,
         creditors: state.creditors.filter((c) => c.id !== action.payload),
       }
+    case 'REORDER_CREDITORS': {
+      // 当該案件の債権者を orderedIds の順に並べ替え、displayOrder を 1 から振り直す。
+      // 他案件の債権者・orderedIds に含まれない行（取りこぼし）は温存する。
+      const { caseId, orderedIds } = action.payload
+      const others = state.creditors.filter((c) => c.caseId !== caseId)
+      const mine = state.creditors.filter((c) => c.caseId === caseId)
+      const byId = new Map(mine.map((c) => [c.id, c]))
+      const reordered: Creditor[] = []
+      orderedIds.forEach((id, i) => {
+        const c = byId.get(id)
+        if (c) reordered.push({ ...c, displayOrder: i + 1 })
+      })
+      const missing = mine.filter((c) => !orderedIds.includes(c.id))
+      return { ...state, creditors: [...others, ...reordered, ...missing] }
+    }
     case 'UPDATE_CONTACT_HISTORY':
       return {
         ...state,

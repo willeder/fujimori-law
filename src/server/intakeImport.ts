@@ -26,6 +26,7 @@ const CASE_COLUMNS: ColMap[] = [
   { header: 'メールアドレス', field: 'email', type: 'string' },
   { header: '居住形態', field: 'residenceType', type: 'string' },
   { header: '家賃', field: 'rent', type: 'int' },
+  { header: '郵便番号', field: 'postalCode', type: 'string' },
   { header: '都道府県', field: 'prefecture', type: 'string' },
   { header: '住所', field: 'address', type: 'string' },
   { header: '旧住所', field: 'previousAddress', type: 'string' },
@@ -101,6 +102,8 @@ const CREDITOR_COLUMNS: ColMap[] = [
 
 const RECORD_START_HEADER = 'レコードの開始行'
 const DEFAULT_CREDITOR_STATUS = '受任通知発送待ち'
+/** 受任対象外（タブ/一覧で常に末尾に並べる） */
+const EXCLUDED_CREDITOR_STATUS = '受任対象外'
 
 /** テンプレCSVのヘッダー（A列マーカー＋全項目） */
 export const INTAKE_HEADERS: string[] = [
@@ -295,6 +298,18 @@ export function parseIntake(buf: Buffer): ParseResult {
       cur.creditors.push(cr)
     }
   })
+
+  // 債権者の並び順を確定（受任を先、受任対象外を後ろ。各グループ内はCSV出現順を維持）し
+  // displayOrder を 1 から採番。タブは左→右、合算一覧は上→下にこの順で並ぶ。
+  for (const rec of records) {
+    const accepted = rec.creditors.filter((c) => c.status !== EXCLUDED_CREDITOR_STATUS)
+    const excluded = rec.creditors.filter((c) => c.status === EXCLUDED_CREDITOR_STATUS)
+    const ordered = [...accepted, ...excluded]
+    ordered.forEach((c, i) => {
+      c.displayOrder = i + 1
+    })
+    rec.creditors = ordered
+  }
 
   // 検証（ファイル内）
   const seenIds = new Map<string, number>()

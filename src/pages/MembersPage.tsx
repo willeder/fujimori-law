@@ -124,7 +124,7 @@ export function MembersPage() {
       header: '氏名',
       width: '140px',
       render: (m) => (
-        <span className="font-medium text-slate-800">
+        <span className="whitespace-nowrap font-medium text-slate-800">
           {m.name ?? '—'}
           {m.id === user?.id && <span className="ml-1 text-[10px] text-slate-400">(自分)</span>}
         </span>

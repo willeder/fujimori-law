@@ -12,6 +12,7 @@ const statusColors: Record<string, string> = {
   '辞任': 'bg-slate-100 text-slate-600',
   // 債権者ステータス
   '受任通知発送待ち': 'bg-slate-100 text-slate-600',
+  '受任対象外': 'bg-black text-white',
   '受任通知発送済': 'bg-blue-100 text-blue-700',
   '債権調査中': 'bg-amber-100 text-amber-700',
   '和解提案中': 'bg-purple-100 text-purple-700',

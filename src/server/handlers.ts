@@ -720,7 +720,12 @@ export async function getCreditorNames() {
 export async function getCreditors(caseId?: number) {
   const rows = await prisma.creditor.findMany({
     where: caseId ? { caseId } : undefined,
-    orderBy: { id: 'asc' },
+    // 表示順: displayOrder 昇順（未設定は末尾）→ id 昇順。
+    // 受任→受任対象外の並びとUIのドラッグ並べ替え結果を反映する。
+    orderBy: [
+      { displayOrder: { sort: 'asc', nulls: 'last' } },
+      { id: 'asc' },
+    ] as never,
   })
   return rows.map(toCreditorJson)
 }

@@ -170,7 +170,8 @@ model Creditor {
   expectedSettlementAmount Int?
   expectedPaymentCount     Int?
   expectedFutureInterest   String?
-  status                   String // 受任通知発送待ち / 和解済 / 弁済中 ...
+  status                   String // 受任通知発送待ち / 受任対象外 / 和解済 / 弁済中 ...
+  displayOrder             Int? // タブ/一覧の表示順（小さいほど左/上。受任→受任対象外の順で採番）
   repaymentExcluded        String? // 停止 / 終了 / null
   check                    String?
   nextProcessDate          DateTime? @db.Date
@@ -208,6 +209,7 @@ model Creditor {
 
   @@index([caseId])
   @@index([status])
+  @@index([caseId, displayOrder])
   @@map("creditors")
 }
 
