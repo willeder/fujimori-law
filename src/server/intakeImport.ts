@@ -2,9 +2,12 @@
  * 相談票 CSV 取込（新規依頼者の一括登録）。
  *
  * 入力は相談票Excelの「新kintone-取込」シートを書き出したCSV。
+ *   - 取込は「1ファイル1顧客」が前提（複数顧客＝*複数 はエラーで中止）
  *   - 1レコード = 依頼者1名（Case）＋ 債権者明細（最大20社・Creditor）
  *   - レコードの開始: 「レコードの開始行」列が `*`、または 名前/ID 列が非空の行
  *   - 続く行（名前・IDが空）は、直前レコードの債権者サブ行として追加
+ *   - 債権者は受任対象・受任対象外の両方を保持。集計（債権社数・申告債務額）は
+ *     受任対象（status≠受任対象外）のみで突き合わせ、不一致はエラーで中止
  *
  * 文字コードは UTF-8 / UTF-8(BOM) / Shift-JIS を自動判定。
  * preview は検証のみ（無書込）、commit はトランザクションで Case+Creditor を作成し監査ログを残す。
@@ -312,6 +315,13 @@ export function parseIntake(buf: Buffer): ParseResult {
   }
 
   // 検証（ファイル内）
+  // 取込は「1ファイル1顧客」が前提。複数顧客（*が複数 / 名前・IDが複数）はエラーで中止する。
+  if (records.length > 1) {
+    records[0].errors.push(
+      `1ファイルに複数顧客(${records.length}件)が含まれています。取込は1ファイル1顧客です`,
+    )
+  }
+
   const seenIds = new Map<string, number>()
   let totalCreditors = 0
   for (const rec of records) {
@@ -322,9 +332,28 @@ export function parseIntake(buf: Buffer): ParseResult {
       if (seenIds.has(ext)) rec.errors.push(`ID「${ext}」がファイル内で重複（行${seenIds.get(ext)}）`)
       else seenIds.set(ext, rec.rowNo)
     }
+
+    // 集計（債権社数・申告債務額）は「受任対象のみ」で突き合わせる。
+    // 受任対象外は記録として保持するが、集計対象には含めない。
+    const acceptedCreditors = rec.creditors.filter((c) => c.status !== EXCLUDED_CREDITOR_STATUS)
+
     const cc = rec.case.creditorCount as number | undefined
-    if (cc != null && cc !== rec.creditors.length)
-      rec.warnings.push(`債権社数(${cc})と債権者明細(${rec.creditors.length}件)が不一致`)
+    if (cc != null && cc !== acceptedCreditors.length)
+      rec.errors.push(
+        `債権社数(${cc})と受任対象の債権者明細(${acceptedCreditors.length}件)が不一致です`,
+      )
+
+    const declaredDebt = rec.case.declaredDebtAmount as number | undefined
+    if (declaredDebt != null) {
+      const sum = acceptedCreditors.reduce(
+        (s, c) => s + ((c.declaredAmount as number | null) ?? 0),
+        0,
+      )
+      if (sum !== declaredDebt)
+        rec.errors.push(
+          `申告債務額(${declaredDebt.toLocaleString()}円)と受任対象の申告額合計(${sum.toLocaleString()}円)が不一致です`,
+        )
+    }
   }
 
   const errorCount = records.reduce((s, r) => s + r.errors.length, 0)
