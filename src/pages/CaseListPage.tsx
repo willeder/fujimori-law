@@ -93,6 +93,7 @@ export function CaseListPage() {
           )
         default:
           return (
+            c.metadata?.externalId?.toLowerCase().includes(query) ||
             c.clientBasicInfo.name?.toLowerCase().includes(query) ||
             c.clientBasicInfo.furigana?.toLowerCase().includes(query) ||
             c.clientBasicInfo.prefecture?.toLowerCase().includes(query) ||
