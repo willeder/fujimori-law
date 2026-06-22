@@ -18,6 +18,7 @@
     { "source": "/api/line/broadcast-history", "destination": "/api/data?__path=line/broadcast-history" },
     { "source": "/api/gmo/:p*", "destination": "/api/data?__path=gmo/:p*" },
     { "source": "/api/intake/:p*", "destination": "/api/data?__path=intake/:p*" },
+    { "source": "/api/reminders/:p*", "destination": "/api/data?__path=reminders/:p*" },
     { "source": "/api/_diag", "destination": "/api/data?__path=_diag" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
