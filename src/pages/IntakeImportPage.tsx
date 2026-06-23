@@ -7,6 +7,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { AppHeader } from '../components/AppHeader'
 import { PageLoading } from '../components/PageLoading'
+import { useRefreshCases } from '../store/CaseStore'
 
 type IntakeRecord = {
   rowNo: number
@@ -33,6 +34,7 @@ export function IntakeImportPage() {
   const [loading, setLoading] = useState(false)
   const [committing, setCommitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const refreshCases = useRefreshCases()
 
   const reset = () => {
     setResult(null)
@@ -70,6 +72,8 @@ export function IntakeImportPage() {
       }
       setCreated(body.created as Created[])
       setResult(null)
+      // 取込で増えた案件を一覧/検索へ即時反映（モジュールキャッシュを差し替え）
+      void refreshCases()
     } catch (e) {
       setError(`登録に失敗しました: ${e instanceof Error ? e.message : String(e)}`)
     } finally {
@@ -93,12 +97,12 @@ export function IntakeImportPage() {
 
   return (
     <div className="min-h-screen bg-slate-100">
-      <AppHeader title="相談票CSV取込（新規依頼者の登録）">
+      <AppHeader title="相談票取込（CSV/Excel・新規依頼者の登録）">
         <div className="flex flex-wrap items-center gap-2">
           <input
             ref={fileRef}
             type="file"
-            accept=".csv,text/csv"
+            accept=".csv,text/csv,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             className="hidden"
             onChange={(e) => {
               const f = e.target.files?.[0]
@@ -110,7 +114,7 @@ export function IntakeImportPage() {
             onClick={() => fileRef.current?.click()}
             className="rounded bg-slate-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700"
           >
-            CSVを選択
+            CSV/Excelを選択
           </button>
           {fileName && <span className="text-xs text-slate-600">{fileName}</span>}
           <a
@@ -138,7 +142,7 @@ export function IntakeImportPage() {
         )}
 
         {loading ? (
-          <PageLoading message="CSVを解析中…" />
+          <PageLoading message="ファイルを解析中…" />
         ) : created ? (
           <div className="rounded-lg border border-emerald-200 bg-white p-4 shadow-sm">
             <p className="mb-3 text-sm font-semibold text-emerald-700">
@@ -171,9 +175,9 @@ export function IntakeImportPage() {
           </div>
         ) : !result ? (
           <div className="rounded-lg border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
-            相談票Excelの「新kintone-取込」シートを書き出したCSVを選択してください。
+            相談票Excelの「新kintone-取込」シートを、CSV または Excel(.xlsx) のまま選択してください。
             <br />
-            文字コード（UTF-8 / Shift-JIS）は自動判定します。フォーマットは「テンプレートDL」で確認できます。
+            形式（CSV/Excel）と文字コード（UTF-8 / Shift-JIS）は自動判定します。フォーマットは「テンプレートDL」で確認できます。
           </div>
         ) : (
           <>

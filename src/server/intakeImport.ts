@@ -14,6 +14,7 @@
  */
 import { prisma } from './db.js'
 import { writeAudit, type Actor } from './audit.js'
+import { isXlsx, parseXlsxToRows } from './xlsxLite.js'
 
 // ── 列マッピング（新kintone-取込のヘッダー名 → DBフィールド） ──────────
 type FieldType = 'string' | 'int' | 'date'
@@ -249,8 +250,18 @@ function buildIndex(headerRow: string[]): {
 }
 
 export function parseIntake(buf: Buffer): ParseResult {
-  const { text, encoding } = decodeCsvBytes(buf)
-  const rows = parseCsv(text).filter((r) => r.some((c) => (c ?? '').trim() !== ''))
+  // 入力は CSV / Excel(.xlsx) のどちらでも可。先頭バイトで判別する。
+  let allRows: string[][]
+  let encoding: string
+  if (isXlsx(buf)) {
+    allRows = parseXlsxToRows(buf)
+    encoding = 'xlsx'
+  } else {
+    const dec = decodeCsvBytes(buf)
+    allRows = parseCsv(dec.text)
+    encoding = dec.encoding
+  }
+  const rows = allRows.filter((r) => r.some((c) => (c ?? '').trim() !== ''))
   if (rows.length === 0)
     return { encoding, headerFound: false, records: [], totalCreditors: 0, errorCount: 0 }
 
@@ -433,8 +444,8 @@ export async function commitIntake(actor: Actor, buf: Buffer): Promise<CommitRes
       action: 'CREATE',
       entity: 'Case',
       entityId: String(c.id),
-      summary: `相談票CSV取込: ${c.name}（債権者${rec.creditors.length}件）`,
-      metadata: { externalId: c.externalId, source: 'intake-csv' },
+      summary: `相談票取込[${result.encoding}]: ${c.name}（債権者${rec.creditors.length}件）`,
+      metadata: { externalId: c.externalId, source: `intake-${result.encoding}` },
     })
   }
 

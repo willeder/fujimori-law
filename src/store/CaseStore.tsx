@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useReducer,
@@ -285,4 +286,28 @@ export function useCaseDispatchContext() {
   if (!context)
     throw new Error('useCaseDispatch must be used within CaseProvider')
   return context
+}
+
+/**
+ * 案件一覧（cases サマリ）を再取得して store に反映する。
+ * 一覧はモジュールキャッシュ（casesPromise）で起動時に1回だけ読むため、
+ * 取込など一覧を増減させる操作の直後にこれを呼んでキャッシュを差し替える。
+ * 返り値の関数は完了を await でき、失敗時はキャッシュを破棄して次回再取得させる。
+ */
+export function useRefreshCases() {
+  const dispatch = useCaseDispatchContext()
+  return useCallback(async () => {
+    const p = loadJson<Case[]>('/api/cases')
+    casesPromise = p
+    try {
+      const cases = await p
+      dispatch({ type: 'LOAD_CASES', payload: cases })
+    } catch (err) {
+      casesPromise = null
+      dispatch({
+        type: 'LOAD_ERROR',
+        payload: err instanceof Error ? err.message : String(err),
+      })
+    }
+  }, [dispatch])
 }
