@@ -263,7 +263,9 @@ export function CaseListPage() {
       width: '104px',
       sortable: false,
       render: (item) => (
-        <span className="text-slate-500">{item.clientBasicInfo.furigana ?? '-'}</span>
+        <span className="whitespace-nowrap text-slate-500">
+          {item.clientBasicInfo.furigana ?? '-'}
+        </span>
       ),
     },
     {
