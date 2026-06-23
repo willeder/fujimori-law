@@ -102,11 +102,14 @@ export function IntakeImportPage() {
           <input
             ref={fileRef}
             type="file"
-            accept=".csv,text/csv,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            accept=".xlsx,.xls,.csv"
             className="hidden"
             onChange={(e) => {
-              const f = e.target.files?.[0]
+              const input = e.target
+              const f = input.files?.[0]
               if (f) void onPick(f)
+              // 同じファイル名を再選択しても onChange が再発火するよう値をクリア
+              input.value = ''
             }}
           />
           <button
@@ -114,7 +117,7 @@ export function IntakeImportPage() {
             onClick={() => fileRef.current?.click()}
             className="rounded bg-slate-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700"
           >
-            CSV/Excelを選択
+            ファイル選択
           </button>
           {fileName && <span className="text-xs text-slate-600">{fileName}</span>}
           <a
