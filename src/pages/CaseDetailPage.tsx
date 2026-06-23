@@ -346,6 +346,7 @@ function CaseDetailBody({
         label: c.creditorName,
         badge: creditorFullyRepaid.get(c.id) ? "済" : undefined,
         accent: creditorTabAccentForName(c.creditorName, c.id),
+        muted: c.status === "受任対象外",
         content: (
           <CreditorTab caseId={caseData.id} creditors={[c]} view="detail" />
         ),
@@ -373,6 +374,7 @@ function CaseDetailBody({
         label: c.creditorName,
         badge: creditorFullyRepaid.get(c.id) ? "済" : undefined,
         accent: creditorTabAccentForName(c.creditorName, c.id),
+        muted: c.status === "受任対象外",
         content: (
           <CreditorPaymentTable
             caseId={caseData.id}

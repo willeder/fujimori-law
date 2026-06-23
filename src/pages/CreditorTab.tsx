@@ -28,19 +28,21 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
   }
 
   if (view === 'summary') {
-    // 合算ビュー
-    const settledCount = creditors.filter((c) =>
+    // 合算ビュー。集計（社数・各金額）は受任対象（=「受任対象外」以外）のみで行う。
+    // 受任対象外は明細テーブルには表示するが、サマリの件数・合計には含めない。
+    const accepted = creditors.filter((c) => c.status !== '受任対象外')
+    const settledCount = accepted.filter((c) =>
       ['和解済', '弁済中', '完済'].includes(c.status)
     ).length
-    const totalDeclared = creditors.reduce(
+    const totalDeclared = accepted.reduce(
       (sum, c) => sum + (c.declaredAmount ?? 0),
       0
     )
-    const totalDebt = creditors.reduce(
+    const totalDebt = accepted.reduce(
       (sum, c) => sum + (c.debtAmount ?? 0),
       0
     )
-    const totalSettlement = creditors.reduce(
+    const totalSettlement = accepted.reduce(
       (sum, c) => sum + (c.settlementAmount ?? 0),
       0
     )
@@ -175,14 +177,18 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
     return (
       <div className="min-h-0 space-y-3">
         <div className="text-xs leading-snug text-slate-600">
-          債権者数：{creditors.length}社（うち和解済：{settledCount}社）・案件ID: {caseId}
+          債権者数：{accepted.length}社
+          {creditors.length !== accepted.length && (
+            <span className="text-slate-400">（受任対象外{creditors.length - accepted.length}社を除く）</span>
+          )}
+          （うち和解済：{settledCount}社）・案件ID: {caseId}
         </div>
         {/* 合計サマリ（入金スケジュールのサマリ相当の読みやすさ） */}
         <div className="grid grid-cols-2 gap-2 rounded bg-slate-50 p-2 sm:grid-cols-4">
           <div>
             <div className="text-xs font-medium leading-tight text-slate-500">債権者数</div>
             <div className="text-sm font-bold tabular-nums text-slate-800">
-              {creditors.length}社
+              {accepted.length}社
             </div>
           </div>
           <div>
@@ -245,6 +251,15 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
             { value: '弁済中', label: '弁済中' },
             { value: '完済', label: '完済' },
           ]}
+          renderValue={(v) =>
+            v === '受任対象外' ? (
+              <span className="inline-block rounded bg-black px-1 py-px font-medium text-white">
+                {v}
+              </span>
+            ) : (
+              (v as string) || '-'
+            )
+          }
           compact
           compactLayout="inline"
           bordered

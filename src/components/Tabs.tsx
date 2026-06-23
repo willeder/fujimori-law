@@ -10,6 +10,8 @@ export interface TabItem {
   accent?: CreditorTabAccent
   /** true のとき並べ替え対象外（ドラッグ不可・位置固定。例: 「すべて合算」） */
   fixed?: boolean
+  /** true のときグレーアウト表示（受任対象外の債権者タブなど）。accent より優先 */
+  muted?: boolean
 }
 
 /**
@@ -147,14 +149,19 @@ export function Tabs({
               ? `rounded-t-md border-l-2 ${isDense ? 'inline-flex h-7 shrink-0 items-center py-0 pl-1.5 pr-1.5 text-[10px] leading-none' : 'py-1 pl-2 pr-2 text-xs leading-tight'} font-normal whitespace-nowrap transition-colors`
               : `rounded-t-md border-b-2 border-b-transparent ${isDense ? 'inline-flex h-7 shrink-0 items-center px-2 py-0 text-[10px] leading-none' : 'px-2 py-1 text-xs leading-tight'} font-normal whitespace-nowrap transition-colors`
 
+          const muted = tab.muted
           const state = isSplit
             ? active
               ? 'bg-white font-semibold text-slate-900 shadow-sm'
               : 'bg-slate-100 text-slate-500 hover:bg-slate-50 hover:text-slate-700'
-            : active
-              ? accent?.active ?? 'border-b-2 border-b-slate-700 font-medium text-slate-900'
-              : accent?.inactive ??
-                'border-transparent text-slate-500 hover:border-slate-200 hover:bg-slate-100/40 hover:text-slate-700'
+            : muted
+              ? active
+                ? 'border-l-slate-500 border-b-slate-500 bg-slate-200 font-medium text-slate-600 shadow-sm'
+                : 'border-l-slate-300 border-b-transparent bg-slate-100 text-slate-400 hover:bg-slate-200/70 hover:text-slate-600'
+              : active
+                ? accent?.active ?? 'border-b-2 border-b-slate-700 font-medium text-slate-900'
+                : accent?.inactive ??
+                  'border-transparent text-slate-500 hover:border-slate-200 hover:bg-slate-100/40 hover:text-slate-700'
 
           const splitDivider =
             isSplit && tab.id !== tabs[tabs.length - 1]?.id
@@ -213,9 +220,11 @@ export function Tabs({
               {tab.badge !== undefined && (
                 <span
                   className={`ml-1 rounded-full ${isDense ? 'px-0.5 py-px text-[8px] leading-none' : 'px-1 py-0.5 text-[9px] leading-none'} ${
-                    active
-                      ? accent?.badgeActive ?? 'bg-blue-100 text-blue-600'
-                      : accent?.badgeInactive ?? 'bg-slate-100 text-slate-500'
+                    muted
+                      ? 'bg-slate-200 text-slate-500'
+                      : active
+                        ? accent?.badgeActive ?? 'bg-blue-100 text-blue-600'
+                        : accent?.badgeInactive ?? 'bg-slate-100 text-slate-500'
                   }`}
                 >
                   {tab.badge}

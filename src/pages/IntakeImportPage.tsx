@@ -114,7 +114,11 @@ export function IntakeImportPage() {
           />
           <button
             type="button"
-            onClick={() => fileRef.current?.click()}
+            onClick={() => {
+              // 開く前にも値をクリアし、同じファイルの再選択で必ず onChange を発火させる
+              if (fileRef.current) fileRef.current.value = ''
+              fileRef.current?.click()
+            }}
             className="rounded bg-slate-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700"
           >
             ファイル選択
