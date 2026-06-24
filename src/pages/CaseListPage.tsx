@@ -10,12 +10,12 @@ import type { Case } from '../types'
 type SearchField = 'all' | 'name' | 'phone' | 'prefecture' | 'status' | 'staff'
 
 /**
- * 一覧の文字列セルを「空白含む6文字まで」に切り詰める。
- * 7文字以上は先頭6文字のみ表示（…は付けない）。全文は title 属性で確認可能。
+ * 一覧の文字列セルを「空白含む n 文字まで」に切り詰める。
+ * n+1 文字以上は先頭 n 文字のみ表示（…は付けない）。全文は title 属性で確認可能。
  */
-function clip6(s: string | null | undefined): string {
+function clip(s: string | null | undefined, n: number): string {
   const v = s ?? '-'
-  return v.length > 6 ? v.slice(0, 6) : v
+  return v.length > n ? v.slice(0, n) : v
 }
 
 export function CaseListPage() {
@@ -215,8 +215,8 @@ export function CaseListPage() {
     },
     {
       key: 'cautionRank',
-      header: '要注意ランク',
-      width: '76px',
+      header: '要注意',
+      width: '52px',
       align: 'center',
       sortable: false,
       render: (item) => <StatusBadge status={item.clientBasicInfo.cautionRank} size="sm" />,
@@ -269,13 +269,13 @@ export function CaseListPage() {
     {
       key: 'furigana',
       header: 'フリガナ',
-      width: '88px',
+      width: '112px',
       sortable: false,
       render: (item) => {
         const full = item.clientBasicInfo.furigana ?? '-'
         return (
           <span className="whitespace-nowrap text-slate-500" title={full}>
-            {clip6(item.clientBasicInfo.furigana)}
+            {clip(item.clientBasicInfo.furigana, 8)}
           </span>
         )
       },
@@ -310,8 +310,8 @@ export function CaseListPage() {
     },
     {
       key: 'creditorCount',
-      header: '債権者数',
-      width: '64px',
+      header: '債権者',
+      width: '52px',
       align: 'right',
       sortable: false,
       render: (item) => (
@@ -347,7 +347,7 @@ export function CaseListPage() {
           className="whitespace-nowrap"
           title={item.appointmentInfo.appointmentStaff ?? '-'}
         >
-          {clip6(item.appointmentInfo.appointmentStaff)}
+          {clip(item.appointmentInfo.appointmentStaff, 6)}
         </span>
       ),
     },
@@ -361,7 +361,7 @@ export function CaseListPage() {
           className="whitespace-nowrap"
           title={item.appointmentInfo.interviewStaff ?? '-'}
         >
-          {clip6(item.appointmentInfo.interviewStaff)}
+          {clip(item.appointmentInfo.interviewStaff, 6)}
         </span>
       ),
     },
