@@ -31,7 +31,7 @@ export function LineLinkControl({ caseId, clientName }: Props) {
   const [open, setOpen] = useState(false)
   const [link, setLink] = useState<LineLink | null>(null)
   const [busy, setBusy] = useState(false)
-  const [copied, setCopied] = useState(false)
+  const [copied, setCopied] = useState<'guide' | 'code' | null>(null)
   const ref = useRef<HTMLDivElement>(null)
 
   const load = async () => {
@@ -66,14 +66,21 @@ export function LineLinkControl({ caseId, clientName }: Props) {
     }
   }
 
-  const guidanceText = (code: string) =>
-    `【ご案内】LINEで手続き状況や入金予定をお知らせします。\n\n①下記から友だち追加してください\n${ADD_FRIEND_URL}\n\n②追加後、トークに次のコードを送信してください\n${code}`
+  // 案内文には「コード」を含めない（受信者がコードだけ切り出す手間をなくすため、コードは別送）
+  const guidanceText = () =>
+    `【ご案内】LINEで手続き状況や入金予定をお知らせします。\n\n①下記から友だち追加してください\n${ADD_FRIEND_URL}\n\n②追加後、トークに「登録コード」をそのまま送信してください\n（登録コードは別途お送りします）`
 
   const copyGuidance = async () => {
+    await navigator.clipboard.writeText(guidanceText())
+    setCopied('guide')
+    setTimeout(() => setCopied(null), 1500)
+  }
+
+  const copyCode = async () => {
     if (!link?.registrationCode) return
-    await navigator.clipboard.writeText(guidanceText(link.registrationCode))
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1500)
+    await navigator.clipboard.writeText(link.registrationCode)
+    setCopied('code')
+    setTimeout(() => setCopied(null), 1500)
   }
 
   const status = link?.status ?? 'NONE'
@@ -121,27 +128,34 @@ export function LineLinkControl({ caseId, clientName }: Props) {
                   </div>
                 </div>
               )}
-              <div className="flex gap-1.5">
-                <button
-                  type="button"
-                  onClick={issue}
-                  disabled={busy}
-                  className="flex-1 rounded bg-[#06C755] px-2 py-1 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50"
-                >
-                  {busy ? '発行中…' : code ? 'コードを再発行' : '登録コードを発行'}
-                </button>
-                {code && (
+              <button
+                type="button"
+                onClick={issue}
+                disabled={busy}
+                className="w-full rounded bg-[#06C755] px-2 py-1 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50"
+              >
+                {busy ? '発行中…' : code ? 'コードを再発行' : '登録コードを発行'}
+              </button>
+              {code && (
+                <div className="mt-1.5 flex gap-1.5">
                   <button
                     type="button"
                     onClick={copyGuidance}
                     className="flex-1 rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
                   >
-                    {copied ? 'コピーしました' : '案内文をコピー'}
+                    {copied === 'guide' ? 'コピーしました' : '案内文をコピー'}
                   </button>
-                )}
-              </div>
+                  <button
+                    type="button"
+                    onClick={copyCode}
+                    className="flex-1 rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                  >
+                    {copied === 'code' ? 'コピーしました' : 'コードをコピー'}
+                  </button>
+                </div>
+              )}
               <p className="mt-2 text-[10px] leading-snug text-slate-400">
-                「案内文をコピー」で、友だち追加URL＋コードの依頼文がそのままコピーされます。依頼者へメール/SMS等で送付してください。
+                「案内文をコピー」はコードを含みません（友だち追加URLと手順のみ）。コードは「コードをコピー」で別送すると、依頼者はコードだけをそのままトークに貼り付けられます。
               </p>
             </>
           )}
