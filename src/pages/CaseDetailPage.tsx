@@ -12,6 +12,8 @@ import {
   useEnsureCreditors,
   useEnsureFullCase,
 } from "../store/useCaseStore";
+import { useRefreshCases } from "../store/CaseStore";
+import { useAuth } from "../context/AuthContext";
 import { SectionCard, EditableField, StatusBadge, Tabs } from "../components";
 import { CreditorTab } from "./CreditorTab";
 import { ContactHistoryTable } from "./ContactHistoryTable";
@@ -280,9 +282,37 @@ function CaseDetailBody({
     return unpaidPayments[0]?.plannedDate ?? null;
   }, [caseLevelPayments]);
   const dispatch = useCaseDispatch();
+  const { user } = useAuth();
+  const refreshCases = useRefreshCases();
+  const isAdmin = user?.role === "ADMIN";
 
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   const [showHistory, setShowHistory] = useState(false);
+  // 案件削除（ADMIN のみ）。確認モーダル→「はい」で実行→一覧へ戻る。
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const handleDeleteCase = async () => {
+    if (!caseData) return;
+    setDeleting(true);
+    try {
+      const r = await fetch(`/api/cases/${caseData.id}`, { method: "DELETE" });
+      const body = (await r.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+      };
+      if (!r.ok || !body.ok) {
+        alert(body.error ?? `削除に失敗しました（HTTP ${r.status}）`);
+        setDeleting(false);
+        return;
+      }
+      setConfirmDelete(false);
+      await refreshCases(); // 一覧キャッシュを更新（削除案件を除去）
+      navigate("/");
+    } catch (e) {
+      alert(`削除に失敗しました: ${e instanceof Error ? e.message : String(e)}`);
+      setDeleting(false);
+    }
+  };
   // FileMaker風「検索モード」: Ctrl+F（⌘+F）で起動
   const [findOpen, setFindOpen] = useState(false);
   useEffect(() => {
@@ -677,6 +707,49 @@ function CaseDetailBody({
   return (
     <div className="flex min-h-screen min-h-0 flex-col bg-slate-200">
       <FindModeModal open={findOpen} onClose={() => setFindOpen(false)} onSearch={runFind} />
+      {/* 案件削除の確認ダイアログ */}
+      {confirmDelete && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40"
+          onClick={() => !deleting && setConfirmDelete(false)}
+        >
+          <div
+            className="w-[22rem] max-w-[90vw] rounded-lg bg-white p-4 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-sm font-semibold text-slate-800">
+              本当に削除しますか？
+            </div>
+            <div className="mt-2 text-xs leading-relaxed text-slate-600">
+              「{caseData.clientBasicInfo.name ?? "(無名)"}」（ID:{" "}
+              {caseData.metadata?.externalId ?? caseData.id}）を削除します。
+              <br />
+              紐づく債権者・入金スケジュール・接触履歴・LINE連携も全て削除され、
+              <span className="font-semibold text-red-600">
+                この操作は取り消せません。
+              </span>
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                disabled={deleting}
+                onClick={() => setConfirmDelete(false)}
+                className="rounded border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+              >
+                いいえ
+              </button>
+              <button
+                type="button"
+                disabled={deleting}
+                onClick={() => void handleDeleteCase()}
+                className="rounded bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                {deleting ? "削除中…" : "はい、削除する"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Header（スクロール時に固定） */}
       <header className="sticky top-0 z-40 shrink-0 border-b border-slate-200 bg-white shadow-sm">
         {/* 1行目：一覧に戻る（左）、LINE@（右） */}
@@ -758,6 +831,16 @@ function CaseDetailBody({
                 )
               }
             />
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(true)}
+                title="この案件を削除（管理者のみ）"
+                className="ml-1 rounded border border-red-300 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+              >
+                削除
+              </button>
+            )}
           </span>
         </div>
         {/* 2行目：基本情報（8カラムグリッド） */}

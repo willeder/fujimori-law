@@ -21,6 +21,7 @@ import {
   createContactHistory,
   updateContactHistoryField,
   deleteContactHistory,
+  deleteCase,
   getCaseChanges,
   revertChange,
   getLineLink,
@@ -123,7 +124,7 @@ export default async function handler(
     ip: (Array.isArray(fwd) ? fwd[0] : fwd)?.split(',')[0]?.trim() ?? null,
     userAgent: (req.headers['user-agent'] as string | undefined) ?? null,
   }
-  const editActor = { id: sessionUser.id, email: sessionUser.email }
+  const editActor = { id: sessionUser.id, email: sessionUser.email, role: sessionUser.role }
 
   try {
     // ── 相談票CSV取込 ──
@@ -185,6 +186,11 @@ export default async function handler(
       if (method === 'PATCH') {
         const raw = (await getRawBody(req)).toString('utf8')
         const r = await updateCaseField(editActor, Number(caseById[1]), raw, meta)
+        json(r.body, r.status)
+        return
+      }
+      if (method === 'DELETE') {
+        const r = await deleteCase(editActor, Number(caseById[1]), meta)
         json(r.body, r.status)
         return
       }

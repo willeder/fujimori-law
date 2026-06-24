@@ -592,6 +592,39 @@ export const createContactHistory = (actor: EditActor, raw: string, meta: EditMe
 export const deleteContactHistory = (actor: EditActor, id: number, meta: EditMeta) =>
   deleteRow('ContactHistory', CONTACT_FIELD_TYPE, actor, id, meta)
 
+/**
+ * 案件（Case）の削除。ADMIN ロール限定。
+ * 子テーブル（債権者・入金・接触履歴・LINE連携・通知ログ）は
+ * schema の onDelete: Cascade により連動して削除される。
+ * 監査ログに削除内容（外部ID・氏名）を残す。
+ */
+export async function deleteCase(
+  actor: EditActor & { role?: string | null },
+  id: number,
+  meta: EditMeta
+) {
+  if (actor.role !== 'ADMIN')
+    return { status: 403, body: { error: '案件の削除には管理者権限が必要です' } }
+  const existing = await prisma.case.findUnique({
+    where: { id },
+    select: { id: true, name: true, externalId: true },
+  })
+  if (!existing) return { status: 404, body: { error: '対象の案件が見つかりません' } }
+
+  await prisma.case.delete({ where: { id } })
+  await writeAudit({
+    actor,
+    action: 'DELETE',
+    entity: 'Case',
+    entityId: String(id),
+    summary: `案件削除: ${existing.name ?? '(無名)'}（ID:${existing.externalId ?? id}）`,
+    metadata: { externalId: existing.externalId, name: existing.name },
+    ip: meta.ip,
+    userAgent: meta.userAgent,
+  })
+  return { status: 200, body: { ok: true } }
+}
+
 /** 案件の変更履歴（本体＋その案件の債権者・入金の変更も含む。新しい順） */
 export async function getCaseChanges(id: number) {
   const [creditors, payments, contacts] = await Promise.all([

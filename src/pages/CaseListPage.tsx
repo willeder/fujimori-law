@@ -9,6 +9,15 @@ import type { Case } from '../types'
 
 type SearchField = 'all' | 'name' | 'phone' | 'prefecture' | 'status' | 'staff'
 
+/**
+ * 一覧の文字列セルを「空白含む6文字まで」に切り詰める。
+ * 7文字以上は先頭6文字のみ表示（…は付けない）。全文は title 属性で確認可能。
+ */
+function clip6(s: string | null | undefined): string {
+  const v = s ?? '-'
+  return v.length > 6 ? v.slice(0, 6) : v
+}
+
 export function CaseListPage() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -260,13 +269,16 @@ export function CaseListPage() {
     {
       key: 'furigana',
       header: 'フリガナ',
-      width: '104px',
+      width: '88px',
       sortable: false,
-      render: (item) => (
-        <span className="whitespace-nowrap text-slate-500">
-          {item.clientBasicInfo.furigana ?? '-'}
-        </span>
-      ),
+      render: (item) => {
+        const full = item.clientBasicInfo.furigana ?? '-'
+        return (
+          <span className="whitespace-nowrap text-slate-500" title={full}>
+            {clip6(item.clientBasicInfo.furigana)}
+          </span>
+        )
+      },
     },
     {
       key: 'phone',
@@ -328,16 +340,30 @@ export function CaseListPage() {
     {
       key: 'appointmentStaff',
       header: 'アポ担当',
-      width: '80px',
+      width: '72px',
       sortable: false,
-      render: (item) => item.appointmentInfo.appointmentStaff ?? '-',
+      render: (item) => (
+        <span
+          className="whitespace-nowrap"
+          title={item.appointmentInfo.appointmentStaff ?? '-'}
+        >
+          {clip6(item.appointmentInfo.appointmentStaff)}
+        </span>
+      ),
     },
     {
       key: 'interviewStaff',
       header: '面談担当',
-      width: '80px',
+      width: '72px',
       sortable: false,
-      render: (item) => item.appointmentInfo.interviewStaff ?? '-',
+      render: (item) => (
+        <span
+          className="whitespace-nowrap"
+          title={item.appointmentInfo.interviewStaff ?? '-'}
+        >
+          {clip6(item.appointmentInfo.interviewStaff)}
+        </span>
+      ),
     },
   ]
 
