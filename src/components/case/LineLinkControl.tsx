@@ -56,13 +56,27 @@ export function LineLinkControl({ caseId, clientName }: Props) {
     return () => document.removeEventListener('mousedown', onDoc)
   }, [])
 
-  const issue = async () => {
+  // force=false: 既存コードがあればそのまま返す（冪等）。force=true: 新コードを再発行
+  const issue = async (force = false) => {
     setBusy(true)
     try {
-      const res = await fetch(`/api/line/links/${caseId}`, { method: 'POST' })
+      const res = await fetch(
+        `/api/line/links/${caseId}${force ? '?force=1' : ''}`,
+        { method: 'POST' }
+      )
       setLink((await res.json()) as LineLink)
     } finally {
       setBusy(false)
+    }
+  }
+
+  const reissue = () => {
+    if (
+      window.confirm(
+        '現在のコードは無効になります。依頼者には新しいコードを送り直す必要があります。再発行しますか？'
+      )
+    ) {
+      void issue(true)
     }
   }
 
@@ -128,34 +142,45 @@ export function LineLinkControl({ caseId, clientName }: Props) {
                   </div>
                 </div>
               )}
-              <button
-                type="button"
-                onClick={issue}
-                disabled={busy}
-                className="w-full rounded bg-[#06C755] px-2 py-1 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50"
-              >
-                {busy ? '発行中…' : code ? 'コードを再発行' : '登録コードを発行'}
-              </button>
-              {code && (
-                <div className="mt-1.5 flex gap-1.5">
+              {!code ? (
+                <button
+                  type="button"
+                  onClick={() => void issue(false)}
+                  disabled={busy}
+                  className="w-full rounded bg-[#06C755] px-2 py-1 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50"
+                >
+                  {busy ? '発行中…' : '登録コードを発行'}
+                </button>
+              ) : (
+                <>
+                  <div className="flex gap-1.5">
+                    <button
+                      type="button"
+                      onClick={copyGuidance}
+                      className="flex-1 rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                    >
+                      {copied === 'guide' ? 'コピーしました' : '案内文をコピー'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={copyCode}
+                      className="flex-1 rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                    >
+                      {copied === 'code' ? 'コピーしました' : 'コードをコピー'}
+                    </button>
+                  </div>
                   <button
                     type="button"
-                    onClick={copyGuidance}
-                    className="flex-1 rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                    onClick={reissue}
+                    disabled={busy}
+                    className="mt-1.5 w-full text-[11px] text-slate-500 underline hover:text-slate-700 disabled:opacity-50"
                   >
-                    {copied === 'guide' ? 'コピーしました' : '案内文をコピー'}
+                    {busy ? '処理中…' : 'コードを再発行（現在のコードは無効になります）'}
                   </button>
-                  <button
-                    type="button"
-                    onClick={copyCode}
-                    className="flex-1 rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
-                  >
-                    {copied === 'code' ? 'コピーしました' : 'コードをコピー'}
-                  </button>
-                </div>
+                </>
               )}
               <p className="mt-2 text-[10px] leading-snug text-slate-400">
-                「案内文をコピー」はコードを含みません（友だち追加URLと手順のみ）。コードは「コードをコピー」で別送すると、依頼者はコードだけをそのままトークに貼り付けられます。
+                「案内文をコピー」はコードを含みません（友だち追加URLと手順のみ）。コードは「コードをコピー」で別送すると、依頼者はコードだけをそのままトークに貼り付けられます。コードは一度発行すると固定です（再発行すると旧コードは使えなくなります）。
               </p>
             </>
           )}

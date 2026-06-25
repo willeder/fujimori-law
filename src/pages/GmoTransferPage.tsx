@@ -4,6 +4,7 @@
  * 既存 Excel「GMO一括振込ファイル変換マシン」の判定・整形ロジックをサーバ移植。
  */
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { DataTable, type Column } from '../components'
 import { AppHeader } from '../components/AppHeader'
 import { PageLoading } from '../components/PageLoading'
@@ -16,6 +17,7 @@ type GmoRow = {
   payeeName: string
   amount: number | null
   payerName: string
+  caseId: number
   externalId: string | null
   clientName: string | null
   creditorName: string
@@ -35,6 +37,7 @@ type GmoResult = {
 type Row = GmoRow & { _i: number }
 
 export function GmoTransferPage() {
+  const navigate = useNavigate()
   const today = new Date().toISOString().slice(0, 10)
   const [start, setStart] = useState(today)
   const [end, setEnd] = useState(today)
@@ -60,10 +63,11 @@ export function GmoTransferPage() {
     window.location.href = `/api/gmo/transfers/file?start=${start}&end=${end}&ref=${ref}`
   }
 
-  const rows = useMemo<Row[]>(
-    () => (result?.rows ?? []).map((r, i) => ({ ...r, _i: i })),
-    [result]
-  )
+  const rows = useMemo<Row[]>(() => {
+    const base = (result?.rows ?? []).map((r, i) => ({ ...r, _i: i }))
+    // 「口座情報不足」を先頭に。OK は後ろ。同状態内は元の並びを維持（安定ソート）
+    return base.sort((a, b) => Number(b.incomplete) - Number(a.incomplete))
+  }, [result])
 
   const yen = (n: number | null) => (n != null ? `${n.toLocaleString()}円` : '-')
   const columns: Column<Row>[] = [
@@ -161,6 +165,7 @@ export function GmoTransferPage() {
                 keyField="_i"
                 density="compact"
                 paginated
+                onRowClick={(r) => navigate(`/cases/${r.caseId}`)}
                 emptyMessage="対象となる振込はありません"
               />
             </div>

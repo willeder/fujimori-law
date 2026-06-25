@@ -40,7 +40,7 @@ function dbApiPlugin(): Plugin {
           const mod = (await server.ssrLoadModule('/src/server/handlers.ts')) as {
             apiRoutes: Record<string, (caseId?: number) => Promise<unknown>>
             getLineLink: (caseId: number) => Promise<unknown>
-            issueLineCode: (caseId: number) => Promise<unknown>
+            issueLineCode: (caseId: number, force?: boolean) => Promise<unknown>
             getCaseById: (id: number) => Promise<unknown>
             searchCases: (raw: string) => Promise<unknown>
             updateCaseField: (
@@ -456,9 +456,11 @@ function dbApiPlugin(): Plugin {
             data = await mod.getCaseById(Number(caseByIdMatch[1]))
           } else if (lineMatch) {
             const caseId = Number(lineMatch[1])
+            const force =
+              new URLSearchParams(req.url?.split('?')[1] ?? '').get('force') === '1'
             data =
               req.method === 'POST'
-                ? await mod.issueLineCode(caseId)
+                ? await mod.issueLineCode(caseId, force)
                 : await mod.getLineLink(caseId)
           } else {
             const handler = mod.apiRoutes[url]

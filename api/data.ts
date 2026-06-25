@@ -253,7 +253,11 @@ export default async function handler(
     const lineLinks = path.match(/^\/api\/line\/links\/(\d+)$/)
     if (lineLinks) {
       const cid = Number(lineLinks[1])
-      json(method === 'POST' ? await issueLineCode(cid) : await getLineLink(cid))
+      json(
+        method === 'POST'
+          ? await issueLineCode(cid, query.get('force') === '1')
+          : await getLineLink(cid)
+      )
       return
     }
 

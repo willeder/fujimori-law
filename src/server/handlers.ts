@@ -901,12 +901,18 @@ export async function getLineLink(caseId: number) {
   return link ?? { caseId, status: 'NONE' }
 }
 
-export async function issueLineCode(caseId: number) {
+export async function issueLineCode(caseId: number, force = false) {
   const exists = await prisma.case.findUnique({
     where: { id: caseId },
     select: { id: true },
   })
   if (!exists) return { error: 'case not found' }
+
+  // 冪等化: 既にコードがあり force でなければ、既存コードをそのまま返す。
+  // （「発行」や画面表示のたびにコードが変わり、依頼者に渡した旧コードが
+  //  無効化される事故を防ぐ。LINKED の場合も連携を解除しない）
+  const current = await prisma.lineLink.findUnique({ where: { caseId } })
+  if (current && !force) return current
 
   let code = generateRegistrationCode()
   for (let i = 0; i < 5; i++) {

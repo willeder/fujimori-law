@@ -41,12 +41,34 @@ async function handleUnfollow(ev: LineEvent): Promise<void> {
   })
 }
 
+/**
+ * 受信テキストを登録コードへ正規化する。
+ * 全角英数字→半角・大文字化し、英数字以外（空白・改行・記号・ゼロ幅文字等）を除去。
+ * 依頼者のコピペや全角入力・余分なスペースによる不一致を吸収する。
+ */
+function normalizeCode(s: string): string {
+  return s
+    .replace(/[Ａ-Ｚａ-ｚ０-９]/g, (c) =>
+      String.fromCharCode(c.charCodeAt(0) - 0xfee0)
+    )
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '')
+}
+
 /** message(text): 登録コードとして照合し、案件に userId を紐付け */
 async function handleText(ev: LineEvent): Promise<void> {
   const userId = ev.source?.userId
-  const code = ev.message?.text?.trim().toUpperCase()
-  if (!ev.replyToken) return
-  if (!userId || !code) {
+  if (!ev.replyToken || !userId) return
+
+  // 既に連携済みのユーザーは、以降の通常トークをコード照合の対象にしない。
+  // （連携後にメッセージを送るたびエラーが返る問題を防ぐため、ここでは何も返信しない）
+  const myLink = await prisma.lineLink.findUnique({
+    where: { lineUserId: userId },
+  })
+  if (myLink && myLink.status === 'LINKED') return
+
+  const code = normalizeCode(ev.message?.text ?? '')
+  if (!code) {
     await replyText(ev.replyToken, '登録コードを送信してください。')
     return
   }
@@ -72,10 +94,7 @@ async function handleText(ev: LineEvent): Promise<void> {
   }
 
   // 既に別ユーザーで連携済みの userId か（1ユーザー=1案件想定）
-  const existing = await prisma.lineLink.findUnique({
-    where: { lineUserId: userId },
-  })
-  if (existing && existing.id !== link.id) {
+  if (myLink && myLink.id !== link.id) {
     await replyText(
       ev.replyToken,
       'このLINEアカウントは既に別の登録に使われています。事務所までお問い合わせください。'
