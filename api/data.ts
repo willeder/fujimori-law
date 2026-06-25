@@ -145,6 +145,12 @@ export default async function handler(
       return
     }
 
+    // ── GMO: 未整備（支払条件・振込先 未入力）検知 ──
+    if (path === '/api/gmo/incomplete' && method === 'GET') {
+      json(await gmo.buildIncompleteRepayments())
+      return
+    }
+
     // ── GMO 一括振込ファイル ──
     if (path === '/api/gmo/transfers' || path === '/api/gmo/transfers/file') {
       const today = new Date().toISOString().slice(0, 10)

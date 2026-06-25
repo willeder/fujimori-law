@@ -3,11 +3,29 @@
  * 対象期間を指定 → プレビュー → Shift-JIS CSV ダウンロード。
  * 既存 Excel「GMO一括振込ファイル変換マシン」の判定・整形ロジックをサーバ移植。
  */
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { DataTable, type Column } from '../components'
 import { AppHeader } from '../components/AppHeader'
 import { PageLoading } from '../components/PageLoading'
+
+type IncompleteRow = {
+  creditorId: number
+  caseId: number
+  externalId: string | null
+  clientName: string | null
+  creditorName: string
+  status: string
+  settlementDate: string | null
+  scheduleMissing: boolean
+  accountMissing: boolean
+}
+type IncompleteResult = {
+  rows: IncompleteRow[]
+  count: number
+  scheduleMissingCount: number
+  accountMissingCount: number
+}
 
 type GmoRow = {
   bankCode: string
@@ -44,6 +62,45 @@ export function GmoTransferPage() {
   const [ref, setRef] = useState(today)
   const [result, setResult] = useState<GmoResult | null>(null)
   const [loading, setLoading] = useState(false)
+
+  // 要対応（弁済対象なのに支払条件・振込先が未入力）の検知。ページ表示時に取得。
+  const [incomplete, setIncomplete] = useState<IncompleteResult | null>(null)
+  const [showIncomplete, setShowIncomplete] = useState(false)
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/gmo/incomplete')
+      .then((r) => (r.ok ? (r.json() as Promise<IncompleteResult>) : null))
+      .then((d) => {
+        if (!cancelled) setIncomplete(d)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const incompleteColumns: Column<IncompleteRow>[] = [
+    { key: 'externalId', header: 'ID', width: '72px', render: (r) => r.externalId ?? '-' },
+    { key: 'clientName', header: '依頼者', width: '110px', render: (r) => r.clientName ?? '-' },
+    { key: 'creditorName', header: '債権者', width: '150px' },
+    { key: 'status', header: 'ステータス', width: '96px' },
+    { key: 'settlementDate', header: '和解日', width: '92px', render: (r) => r.settlementDate ?? '-' },
+    {
+      key: 'scheduleMissing',
+      header: '不足',
+      width: '150px',
+      render: (r) => (
+        <span className="flex flex-wrap gap-1">
+          {r.scheduleMissing && (
+            <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] text-amber-800">支払条件</span>
+          )}
+          {r.accountMissing && (
+            <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] text-red-700">振込先口座</span>
+          )}
+        </span>
+      ),
+    },
+  ]
 
   const preview = async () => {
     setLoading(true)
@@ -137,6 +194,46 @@ export function GmoTransferPage() {
       </AppHeader>
 
       <div className="p-3">
+        {/* 要対応：弁済対象なのに支払条件・振込先が未入力（GMO対象から漏れる原因） */}
+        {incomplete && incomplete.count > 0 && (
+          <div className="mb-3 rounded-lg border border-amber-300 bg-amber-50 shadow-sm">
+            <button
+              type="button"
+              onClick={() => setShowIncomplete((v) => !v)}
+              className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left"
+            >
+              <span className="text-sm font-semibold text-amber-900">
+                ⚠ 要対応：弁済対象なのに支払条件・振込先が未入力{' '}
+                <b className="tabular-nums">{incomplete.count}</b> 件
+                <span className="ml-2 text-xs font-normal text-amber-700">
+                  （支払条件不足 {incomplete.scheduleMissingCount} / 振込先不足 {incomplete.accountMissingCount}）
+                </span>
+              </span>
+              <span className="shrink-0 text-xs text-amber-700">
+                {showIncomplete ? '閉じる ▲' : '一覧を開く ▼'}
+              </span>
+            </button>
+            {showIncomplete && (
+              <div className="border-t border-amber-200 p-2">
+                <p className="mb-2 px-1 text-[11px] text-amber-700">
+                  これらは「停止/終了」以外の弁済対象なのに支払条件（支払開始月・支払日・金額）か振込先口座が未入力のため、GMO振込の対象になりません。行をクリックすると案件詳細を開いて入力できます。
+                </p>
+                <div className="overflow-hidden rounded border border-amber-200 bg-white">
+                  <DataTable
+                    data={incomplete.rows}
+                    columns={incompleteColumns}
+                    keyField="creditorId"
+                    density="compact"
+                    paginated
+                    onRowClick={(r) => navigate(`/cases/${r.caseId}`)}
+                    emptyMessage="未整備の弁済対象はありません"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {loading ? (
           <PageLoading message="対象を集計中…" />
         ) : !result ? (

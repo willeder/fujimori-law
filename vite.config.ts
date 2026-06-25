@@ -411,6 +411,17 @@ function dbApiPlugin(): Plugin {
             return
           }
 
+          // ── GMO: 未整備（支払条件・振込先 未入力）検知 ──
+          if (url === '/api/gmo/incomplete' && req.method === 'GET') {
+            const gmo = (await server.ssrLoadModule(
+              '/src/server/gmoTransfer.ts'
+            )) as typeof import('./src/server/gmoTransfer')
+            const result = await gmo.buildIncompleteRepayments()
+            res.setHeader('Content-Type', 'application/json; charset=utf-8')
+            res.end(JSON.stringify(result))
+            return
+          }
+
           // ── GMO 一括振込ファイル ──
           if (url === '/api/gmo/transfers' || url === '/api/gmo/transfers/file') {
             const gmo = (await server.ssrLoadModule(

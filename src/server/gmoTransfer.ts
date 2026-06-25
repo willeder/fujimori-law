@@ -244,6 +244,101 @@ export async function buildGmoTransfers(
   }
 }
 
+// ============================================================
+// 未整備検知（弁済対象なのに支払条件・振込先が未入力の債権者）
+// GMO対象から漏れる原因を能動的に検知して、案件詳細で補完できるようにする。
+// 対象: 停止/終了でない（repaymentTarget=null）かつ「弁済対象」＝和解済/弁済中/完済
+//       または和解日ありの債権者で、支払条件 or 振込先口座のいずれかが欠損。
+// ============================================================
+export type IncompleteRow = {
+  creditorId: number
+  caseId: number
+  externalId: string | null
+  clientName: string | null
+  creditorName: string
+  status: string
+  settlementDate: string | null
+  scheduleMissing: boolean // 支払開始月/支払日/金額のいずれか欠損
+  accountMissing: boolean // 振込先（銀行/支店/種別/口座番号/名義）のいずれか欠損
+}
+export type IncompleteResult = {
+  rows: IncompleteRow[]
+  count: number
+  scheduleMissingCount: number
+  accountMissingCount: number
+}
+
+export async function buildIncompleteRepayments(): Promise<IncompleteResult> {
+  const creditors = await prisma.creditor.findMany({
+    where: {
+      repaymentTarget: null, // 停止/終了は除外
+      OR: [
+        { settlementDate: { not: null } },
+        { status: { in: ['和解済', '弁済中', '完済'] } },
+      ],
+    },
+    select: {
+      id: true,
+      caseId: true,
+      creditorName: true,
+      status: true,
+      settlementDate: true,
+      paymentStartMonth: true,
+      paymentDay: true,
+      firstPaymentAmount: true,
+      subsequentPaymentAmount: true,
+      financialInstitutionCode: true,
+      branchCode: true,
+      accountType: true,
+      accountNumber: true,
+      accountHolder: true,
+      case: { select: { externalId: true, name: true } },
+    },
+  })
+
+  const empty = (v: unknown) =>
+    v == null || (typeof v === 'string' && v.trim() === '')
+
+  const rows: IncompleteRow[] = []
+  for (const c of creditors) {
+    const scheduleMissing =
+      empty(c.paymentStartMonth) ||
+      c.paymentDay == null ||
+      (c.firstPaymentAmount == null && c.subsequentPaymentAmount == null)
+    const accountMissing =
+      empty(c.financialInstitutionCode) ||
+      empty(c.branchCode) ||
+      empty(c.accountType) ||
+      empty(c.accountNumber) ||
+      empty(c.accountHolder)
+    if (!scheduleMissing && !accountMissing) continue
+    rows.push({
+      creditorId: c.id,
+      caseId: c.caseId,
+      externalId: c.case.externalId,
+      clientName: c.case.name,
+      creditorName: c.creditorName,
+      status: c.status,
+      settlementDate: c.settlementDate
+        ? c.settlementDate.toISOString().slice(0, 10)
+        : null,
+      scheduleMissing,
+      accountMissing,
+    })
+  }
+  rows.sort(
+    (a, b) =>
+      (a.externalId ?? '').localeCompare(b.externalId ?? '') ||
+      a.creditorName.localeCompare(b.creditorName)
+  )
+  return {
+    rows,
+    count: rows.length,
+    scheduleMissingCount: rows.filter((r) => r.scheduleMissing).length,
+    accountMissingCount: rows.filter((r) => r.accountMissing).length,
+  }
+}
+
 function rowToCsvLine(r: GmoRow): string {
   return [
     r.bankCode,
