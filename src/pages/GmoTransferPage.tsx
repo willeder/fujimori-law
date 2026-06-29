@@ -59,16 +59,19 @@ export function GmoTransferPage() {
   const today = new Date().toISOString().slice(0, 10)
   const [start, setStart] = useState(today)
   const [end, setEnd] = useState(today)
-  const [ref, setRef] = useState(today)
   const [result, setResult] = useState<GmoResult | null>(null)
   const [loading, setLoading] = useState(false)
 
-  // 要対応（弁済対象なのに支払条件・振込先が未入力）の検知。ページ表示時に取得。
+  // 当月判定の対象月（YYYY-MM）＝対象期間（開始日）の年月
+  const month = start.slice(0, 7)
+
+  // 要対応（その月に支払いが必要なのに支払条件・振込先が未入力）の検知。
+  // 対象月に連動して取得する（対象期間の開始月を変えると再取得）。
   const [incomplete, setIncomplete] = useState<IncompleteResult | null>(null)
   const [showIncomplete, setShowIncomplete] = useState(false)
   useEffect(() => {
     let cancelled = false
-    fetch('/api/gmo/incomplete')
+    fetch(`/api/gmo/incomplete?month=${month}`)
       .then((r) => (r.ok ? (r.json() as Promise<IncompleteResult>) : null))
       .then((d) => {
         if (!cancelled) setIncomplete(d)
@@ -77,7 +80,7 @@ export function GmoTransferPage() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [month])
 
   const incompleteColumns: Column<IncompleteRow>[] = [
     { key: 'externalId', header: 'ID', width: '72px', render: (r) => r.externalId ?? '-' },
@@ -106,7 +109,7 @@ export function GmoTransferPage() {
     setLoading(true)
     try {
       const r = await fetch(
-        `/api/gmo/transfers?start=${start}&end=${end}&ref=${ref}`
+        `/api/gmo/transfers?start=${start}&end=${end}`
       )
       setResult(r.ok ? ((await r.json()) as GmoResult) : null)
     } catch {
@@ -117,7 +120,7 @@ export function GmoTransferPage() {
   }
 
   const download = () => {
-    window.location.href = `/api/gmo/transfers/file?start=${start}&end=${end}&ref=${ref}`
+    window.location.href = `/api/gmo/transfers/file?start=${start}&end=${end}`
   }
 
   const rows = useMemo<Row[]>(() => {
@@ -169,10 +172,6 @@ export function GmoTransferPage() {
             〜（終了）
             <input type="date" value={end} onChange={(e) => setEnd(e.target.value)} className="rounded border border-slate-300 bg-white px-2 py-1 text-xs" />
           </label>
-          <label className="flex flex-col gap-0.5 text-[10px] text-slate-500">
-            基準日（当月判定）
-            <input type="date" value={ref} onChange={(e) => setRef(e.target.value)} className="rounded border border-slate-300 bg-white px-2 py-1 text-xs" />
-          </label>
           <button
             type="button"
             onClick={() => void preview()}
@@ -203,7 +202,7 @@ export function GmoTransferPage() {
               className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left"
             >
               <span className="text-sm font-semibold text-amber-900">
-                ⚠ 要対応：弁済対象なのに支払条件・振込先が未入力{' '}
+                ⚠ 要対応：{month} に支払いが必要なのに支払条件・振込先が未入力{' '}
                 <b className="tabular-nums">{incomplete.count}</b> 件
                 <span className="ml-2 text-xs font-normal text-amber-700">
                   （支払条件不足 {incomplete.scheduleMissingCount} / 振込先不足 {incomplete.accountMissingCount}）
@@ -216,7 +215,7 @@ export function GmoTransferPage() {
             {showIncomplete && (
               <div className="border-t border-amber-200 p-2">
                 <p className="mb-2 px-1 text-[11px] text-amber-700">
-                  これらは「停止/終了」以外の弁済対象なのに支払条件（支払開始月・支払日・金額）か振込先口座が未入力のため、GMO振込の対象になりません。行をクリックすると案件詳細を開いて入力できます。
+                  これらは {month} に支払いが必要（支払開始月 ≤ {month} ≤ 最終支払月）な弁済対象なのに、支払日・金額か振込先口座が未入力のため、GMO振込の対象になりません。行をクリックすると案件詳細を開いて入力できます。※支払開始月そのものが未入力の債権者は対象月を判定できないためここには表示されません。
                 </p>
                 <div className="overflow-hidden rounded border border-amber-200 bg-white">
                   <DataTable

@@ -142,16 +142,18 @@ export type GmoResult = {
  * 対象期間の振込対象を算出。
  * @param start 期間開始(YYYY-MM-DD)
  * @param end   期間終了(YYYY-MM-DD)
- * @param ref   基準日(YYYY-MM-DD, Excel TODAY 相当)
+ *
+ * 継続案件の「当月判定」は対象期間（開始日）の年月を用いる。
+ * （旧・基準日 ref は対象期間と同じ月を二重指定していたため廃止し、開始月から導出する）
  */
 export async function buildGmoTransfers(
   start: string,
-  end: string,
-  ref: string
+  end: string
 ): Promise<GmoResult> {
   const startD = new Date(`${start}T00:00:00Z`)
   const endD = new Date(`${end}T00:00:00Z`)
-  const refD = new Date(`${ref}T00:00:00Z`)
+  // 当月判定の基準＝対象期間の開始月（継続案件の振込日をこの月の支払日に置く）
+  const refD = startD
 
   const creditors = await prisma.creditor.findMany({
     where: {
@@ -236,7 +238,7 @@ export async function buildGmoTransfers(
   return {
     periodStart: start,
     periodEnd: end,
-    refDate: ref,
+    refDate: start.slice(0, 7), // 当月判定に用いた年月(YYYY-MM)
     rows,
     count: rows.length,
     incompleteCount: rows.filter((r) => r.incomplete).length,
@@ -249,6 +251,10 @@ export async function buildGmoTransfers(
 // GMO対象から漏れる原因を能動的に検知して、案件詳細で補完できるようにする。
 // 対象: 停止/終了でない（repaymentTarget=null）かつ「弁済対象」＝和解済/弁済中/完済
 //       または和解日ありの債権者で、支払条件 or 振込先口座のいずれかが欠損。
+//
+// targetMonth(YYYY-MM) を渡すと「その月に支払いが必要な債権者のみ」に絞る。
+//   判定: 支払開始月 ≤ 対象月 ≤ 最終支払月（最終支払月が空なら上限なし）。
+//   支払開始月が未入力で対象月を判定できない債権者は対象外（無視）。
 // ============================================================
 export type IncompleteRow = {
   creditorId: number
@@ -268,13 +274,29 @@ export type IncompleteResult = {
   accountMissingCount: number
 }
 
-export async function buildIncompleteRepayments(): Promise<IncompleteResult> {
+export async function buildIncompleteRepayments(
+  targetMonth: string
+): Promise<IncompleteResult> {
   const creditors = await prisma.creditor.findMany({
     where: {
       repaymentTarget: null, // 停止/終了は除外
-      OR: [
-        { settlementDate: { not: null } },
-        { status: { in: ['和解済', '弁済中', '完済'] } },
+      // 対象月に支払いが必要なもののみ（支払開始月 ≤ 対象月 ≤ 最終支払月）。
+      // 支払開始月が未入力＝対象月を判定できないものは除外。
+      paymentStartMonth: { not: null, lte: targetMonth },
+      AND: [
+        {
+          OR: [
+            { settlementDate: { not: null } },
+            { status: { in: ['和解済', '弁済中', '完済'] } },
+          ],
+        },
+        {
+          // 最終支払月が未入力なら上限なし、入力ありなら対象月以降まで継続中のもの
+          OR: [
+            { finalPaymentMonth: null },
+            { finalPaymentMonth: { gte: targetMonth } },
+          ],
+        },
       ],
     },
     select: {

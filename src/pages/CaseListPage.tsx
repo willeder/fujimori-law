@@ -76,39 +76,36 @@ export function CaseListPage() {
     if (!searchValue.trim()) return cases
 
     const query = searchValue.toLowerCase()
-    // 電話番号は数字だけに正規化して部分一致（例: 下4桁「5678」で 090-1234-5678 が一致）
-    const digits = (s: string | null | undefined) => (s ?? '').replace(/\D/g, '')
-    const qDigits = digits(searchValue)
+    // 入力した「文字列そのもの」が含まれるかで判定（大文字小文字のみ無視）。
+    // 電話番号も数字抜き出し等の正規化はせず、ハイフン込みの文字列のまま照合する。
+    // （以前は数字だけに正規化していたため「90169E」が電話番号の「90169」に化けて
+    //   別案件を巻き込んでいた。その挙動を廃止。）
+    const inc = (s: string | null | undefined) => (s ?? '').toLowerCase().includes(query)
     return cases.filter((c) => {
-      const phoneMatch =
-        qDigits !== '' && digits(c.clientBasicInfo.phone).includes(qDigits)
       switch (searchField) {
         case 'name':
-          return (
-            c.clientBasicInfo.name?.toLowerCase().includes(query) ||
-            c.clientBasicInfo.furigana?.toLowerCase().includes(query)
-          )
+          return inc(c.clientBasicInfo.name) || inc(c.clientBasicInfo.furigana)
         case 'phone':
-          return phoneMatch
+          return inc(c.clientBasicInfo.phone)
         case 'prefecture':
-          return c.clientBasicInfo.prefecture?.toLowerCase().includes(query)
+          return inc(c.clientBasicInfo.prefecture)
         case 'status':
-          return c.settlementInfo.status?.toLowerCase().includes(query)
+          return inc(c.settlementInfo.status)
         case 'staff':
           return (
-            c.appointmentInfo.appointmentStaff?.toLowerCase().includes(query) ||
-            c.appointmentInfo.interviewStaff?.toLowerCase().includes(query) ||
-            c.appointmentInfo.judicialScrivener?.toLowerCase().includes(query)
+            inc(c.appointmentInfo.appointmentStaff) ||
+            inc(c.appointmentInfo.interviewStaff) ||
+            inc(c.appointmentInfo.judicialScrivener)
           )
         default:
           return (
-            c.metadata?.externalId?.toLowerCase().includes(query) ||
-            c.clientBasicInfo.name?.toLowerCase().includes(query) ||
-            c.clientBasicInfo.furigana?.toLowerCase().includes(query) ||
-            c.clientBasicInfo.prefecture?.toLowerCase().includes(query) ||
-            c.settlementInfo.status?.toLowerCase().includes(query) ||
-            c.appointmentInfo.judicialScrivener?.toLowerCase().includes(query) ||
-            phoneMatch
+            inc(c.metadata?.externalId) ||
+            inc(c.clientBasicInfo.name) ||
+            inc(c.clientBasicInfo.furigana) ||
+            inc(c.clientBasicInfo.prefecture) ||
+            inc(c.settlementInfo.status) ||
+            inc(c.appointmentInfo.judicialScrivener) ||
+            inc(c.clientBasicInfo.phone)
           )
       }
     })

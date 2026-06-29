@@ -416,7 +416,9 @@ function dbApiPlugin(): Plugin {
             const gmo = (await server.ssrLoadModule(
               '/src/server/gmoTransfer.ts'
             )) as typeof import('./src/server/gmoTransfer')
-            const result = await gmo.buildIncompleteRepayments()
+            const q = new URLSearchParams(req.url?.split('?')[1] ?? '')
+            const month = q.get('month') ?? new Date().toISOString().slice(0, 7)
+            const result = await gmo.buildIncompleteRepayments(month)
             res.setHeader('Content-Type', 'application/json; charset=utf-8')
             res.end(JSON.stringify(result))
             return
@@ -431,8 +433,7 @@ function dbApiPlugin(): Plugin {
             const today = new Date().toISOString().slice(0, 10)
             const start = q.get('start') ?? today
             const end = q.get('end') ?? today
-            const ref = q.get('ref') ?? today
-            const result = await gmo.buildGmoTransfers(start, end, ref)
+            const result = await gmo.buildGmoTransfers(start, end)
             if (url === '/api/gmo/transfers/file') {
               const outputCount = result.count - result.incompleteCount
               if (outputCount > 999) {

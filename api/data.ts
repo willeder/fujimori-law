@@ -147,7 +147,9 @@ export default async function handler(
 
     // ── GMO: 未整備（支払条件・振込先 未入力）検知 ──
     if (path === '/api/gmo/incomplete' && method === 'GET') {
-      json(await gmo.buildIncompleteRepayments())
+      // month(YYYY-MM)＝対象月。未指定なら当月。その月に支払いが必要な未整備のみ返す
+      const month = query.get('month') ?? new Date().toISOString().slice(0, 7)
+      json(await gmo.buildIncompleteRepayments(month))
       return
     }
 
@@ -156,8 +158,7 @@ export default async function handler(
       const today = new Date().toISOString().slice(0, 10)
       const start = query.get('start') ?? today
       const end = query.get('end') ?? today
-      const ref = query.get('ref') ?? today
-      const result = await gmo.buildGmoTransfers(start, end, ref)
+      const result = await gmo.buildGmoTransfers(start, end)
       if (path === '/api/gmo/transfers/file') {
         const outputCount = result.count - result.incompleteCount
         if (outputCount > 999) {
