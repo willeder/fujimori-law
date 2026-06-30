@@ -6,6 +6,40 @@ import { useEffect, useRef, useState } from 'react'
 let __activeFindTable: number | null = null
 let __findTableSeq = 0
 
+// 検索条件の数値比較パーサ。 ">=1000000" / "<50000" / "=0" / "10000..50000" 等。
+// カンマ・「円」・空白・全角符号(≥≤)を許容。数値比較でなければ null（→部分一致にフォールバック）。
+type NumCriterion =
+  | { op: '>' | '<' | '>=' | '<=' | '='; n: number }
+  | { op: 'range'; n: number; n2: number }
+function parseNumericCriterion(v: string): NumCriterion | null {
+  const t = v
+    .replace(/[,，\s円]/g, '')
+    .replace(/≥/g, '>=')
+    .replace(/≤/g, '<=')
+    .replace(/[〜～]/g, '..')
+  let m = t.match(/^(-?\d+(?:\.\d+)?)\.\.(-?\d+(?:\.\d+)?)$/)
+  if (m) return { op: 'range', n: Number(m[1]), n2: Number(m[2]) }
+  m = t.match(/^(>=|<=|>|<|=)(-?\d+(?:\.\d+)?)$/)
+  if (m) return { op: m[1] as '>' | '<' | '>=' | '<=' | '=', n: Number(m[2]) }
+  return null
+}
+function numericMatch(cv: number, c: NumCriterion): boolean {
+  switch (c.op) {
+    case '>':
+      return cv > c.n
+    case '<':
+      return cv < c.n
+    case '>=':
+      return cv >= c.n
+    case '<=':
+      return cv <= c.n
+    case '=':
+      return cv === c.n
+    case 'range':
+      return cv >= Math.min(c.n, c.n2) && cv <= Math.max(c.n, c.n2)
+  }
+}
+
 export interface Column<T> {
   key: keyof T | string
   header: string
@@ -24,6 +58,11 @@ export interface Column<T> {
    * 空文字 '' を返すと、その列は検索入力を出さない（検索対象外）。
    */
   filterValue?: (item: T) => string
+  /**
+   * 検索モードで数値比較（>=, <=, >, <, =, 範囲 a..b）を行うための数値を返す。
+   * 金額・件数などの列に指定する。未指定でも filterValue/生値が純粋な数値文字列なら比較可能。
+   */
+  filterNumber?: (item: T) => number | null | undefined
   /**
    * cellSingleLine 時のみ。false の列は … で切らない（操作列など）
    * 未指定は省略する
@@ -141,6 +180,28 @@ export function DataTable<T>({
     if (raw === null || raw === undefined) return ''
     return String(raw)
   }
+  // この列の数値（filterNumber 優先 → 生値が数値 → 検索文字列が純数値なら解釈）
+  const colNumber = (col: Column<T>, item: T): number | null => {
+    if (col.filterNumber) {
+      const x = col.filterNumber(item)
+      return x == null || Number.isNaN(x) ? null : x
+    }
+    const raw = (item as Record<string, unknown>)[String(col.key)]
+    if (typeof raw === 'number') return raw
+    const txt = cellSearchText(col, item).replace(/[,，\s円]/g, '')
+    return /^-?\d+(\.\d+)?$/.test(txt) ? Number(txt) : null
+  }
+
+  // 1条件のマッチ判定：数値比較条件なら数値で、そうでなければ部分一致で判定
+  const matchOne = (col: Column<T>, item: T, value: string): boolean => {
+    const num = parseNumericCriterion(value)
+    if (num) {
+      const cv = colNumber(col, item)
+      return cv != null && numericMatch(cv, num)
+    }
+    return cellSearchText(col, item).toLowerCase().includes(value.trim().toLowerCase())
+  }
+
   // その列が検索可能か（filterValue 明示、または生値が文字列/数値で取れる）
   const colSearchable = (col: Column<T>): boolean => {
     if (col.filterValue) return data.some((it) => col.filterValue!(it) !== '')
@@ -209,7 +270,7 @@ export function DataTable<T>({
           activeApplied.every(([k, v]) => {
             const col = columns.find((c) => String(c.key) === k)
             if (!col) return true
-            return cellSearchText(col, item).toLowerCase().includes(v.trim().toLowerCase())
+            return matchOne(col, item, v)
           })
         )
 
@@ -423,7 +484,9 @@ export function DataTable<T>({
         >
           取消（Esc）
         </button>
-        <span className="text-[10px] text-blue-400">複数列はAND・部分一致</span>
+        <span className="text-[10px] text-blue-400">
+          複数列はAND・部分一致。金額/件数は {'>=1000000'}・{'<50000'}・{'=0'}・範囲 {'10000..50000'} で絞込可
+        </span>
       </div>
     ) : activeApplied.length > 0 ? (
       // 検索実行後（該当セット表示中）

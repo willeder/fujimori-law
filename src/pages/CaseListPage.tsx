@@ -328,6 +328,8 @@ export function CaseListPage() {
           <span className="text-slate-400 text-[10px] ml-0.5">社</span>
         </span>
       ),
+      filterValue: (item) => (item.debtInfo.creditorCount != null ? String(item.debtInfo.creditorCount) : ''),
+      filterNumber: (item) => item.debtInfo.creditorCount,
     },
     {
       key: 'declaredDebtAmount',
@@ -336,6 +338,8 @@ export function CaseListPage() {
       align: 'right',
       sortable: false,
       render: (item) => yen(item.debtInfo.declaredDebtAmount),
+      filterValue: (item) => (item.debtInfo.declaredDebtAmount != null ? String(item.debtInfo.declaredDebtAmount) : ''),
+      filterNumber: (item) => item.debtInfo.declaredDebtAmount,
     },
     {
       key: 'officeFee',
@@ -344,6 +348,8 @@ export function CaseListPage() {
       align: 'right',
       sortable: false,
       render: (item) => yen(item.feeInfo.officeFee),
+      filterValue: (item) => (item.feeInfo.officeFee != null ? String(item.feeInfo.officeFee) : ''),
+      filterNumber: (item) => item.feeInfo.officeFee,
     },
     {
       key: 'appointmentStaff',
