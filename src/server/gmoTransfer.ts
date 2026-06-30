@@ -2,7 +2,7 @@
  * GMO 一括振込ファイルの生成（弁済代行）。
  * 既存 Excel「GMO一括振込ファイル変換マシン」の判定・整形ロジックを忠実に移植。
  *   - 対象判定: repaymentTarget が空（停止/終了でない）かつ「対象振込日」が期間内
- *   - 対象振込日: 初回=支払開始月(+支払日)、継続=基準日の当月の支払日（EOMONTH(基準日,-1)+支払日 相当）
+ *   - 対象振込日: 初回=支払開始日(年月日そのもの)、継続=当月の約定日（支払開始日の"日"／月末開始は毎月末）
  *   - 金額: 1回目=初回支払額 / 2回目以降=2回目以降額
  *   - 整形: コードのゼロ埋め(金融機関4/支店3/口座7)、預金種目(普通1/当座2/他4)、ASC半角化、振込依頼人名
  */
@@ -95,17 +95,35 @@ function depositType(accountType: string | null): string {
   return '4'
 }
 
-/** "YYYY-MM" + 支払日 → 初回支払日(UTC) */
-function firstPaymentDate(paymentStartMonth: string | null, paymentDay: number | null): Date | null {
-  if (!paymentStartMonth || paymentDay == null) return null
-  const m = paymentStartMonth.match(/^(\d{4})-(\d{2})/)
+/** 支払開始日(YYYY-MM-DD) → 初回支払日(UTC)。支払開始日は和解詳細の実値（月末調整済み）。 */
+function parseStartDate(paymentStartDate: string | null): Date | null {
+  if (!paymentStartDate) return null
+  const m = paymentStartDate.match(/^(\d{4})-(\d{2})-(\d{2})/)
   if (!m) return null
-  return new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, paymentDay))
+  return new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])))
 }
 
-/** EOMONTH(基準日,-1)+支払日 相当 = 基準日当月の支払日 */
-function continuingDate(refDate: Date, paymentDay: number): Date {
-  return new Date(Date.UTC(refDate.getUTCFullYear(), refDate.getUTCMonth(), paymentDay))
+/** その月(0-based)の末日 */
+function lastDayOfMonth(year: number, monthZeroBased: number): number {
+  return new Date(Date.UTC(year, monthZeroBased + 1, 0)).getUTCDate()
+}
+
+/**
+ * 継続案件の「当月の振込日」。支払日項目を廃止したため支払開始日から約定日を導出する。
+ * 月末約定対策: 支払開始日がその月の末日なら毎月「末日」扱い（例 9/30開始→10/31, 11/30…）。
+ * それ以外はその"日"（月の日数が足りなければ末日にクランプ）。
+ */
+function continuingDate(refDate: Date, startDate: Date): Date {
+  const sy = startDate.getUTCFullYear()
+  const sm = startDate.getUTCMonth()
+  const sd = startDate.getUTCDate()
+  const isEndOfMonth = sd === lastDayOfMonth(sy, sm)
+  const ry = refDate.getUTCFullYear()
+  const rm = refDate.getUTCMonth()
+  const day = isEndOfMonth
+    ? lastDayOfMonth(ry, rm)
+    : Math.min(sd, lastDayOfMonth(ry, rm))
+  return new Date(Date.UTC(ry, rm, day))
 }
 
 export type GmoRow = {
@@ -158,8 +176,7 @@ export async function buildGmoTransfers(
   const creditors = await prisma.creditor.findMany({
     where: {
       repaymentTarget: null, // 停止/終了は対象外
-      paymentStartMonth: { not: null },
-      paymentDay: { not: null },
+      paymentStartMonth: { not: null }, // 支払開始日(年月日)を保持
     },
     select: {
       caseId: true,
@@ -182,12 +199,12 @@ export async function buildGmoTransfers(
 
   const rows: GmoRow[] = []
   for (const c of creditors) {
-    const first = firstPaymentDate(c.paymentStartMonth, c.paymentDay)
+    const first = parseStartDate(c.paymentStartMonth) // 支払開始日(年月日)
     if (!first) continue
     // 対象振込日 M
     let M: Date
     if (first >= startD && first <= endD) M = first
-    else if (first <= startD) M = continuingDate(refD, c.paymentDay as number)
+    else if (first <= startD) M = continuingDate(refD, first)
     else M = first
     // 対象判定 L
     if (!(M >= startD && M <= endD)) continue
@@ -253,8 +270,8 @@ export async function buildGmoTransfers(
 //       または和解日ありの債権者で、支払条件 or 振込先口座のいずれかが欠損。
 //
 // targetMonth(YYYY-MM) を渡すと「その月に支払いが必要な債権者のみ」に絞る。
-//   判定: 支払開始月 ≤ 対象月 ≤ 最終支払月（最終支払月が空なら上限なし）。
-//   支払開始月が未入力で対象月を判定できない債権者は対象外（無視）。
+//   判定: 支払開始日の年月 ≤ 対象月 ≤ 最終支払日の年月（最終支払日が空なら上限なし）。
+//   支払開始日が未入力で対象月を判定できない債権者は対象外（無視）。
 // ============================================================
 export type IncompleteRow = {
   creditorId: number
@@ -264,7 +281,7 @@ export type IncompleteRow = {
   creditorName: string
   status: string
   settlementDate: string | null
-  scheduleMissing: boolean // 支払開始月/支払日/金額のいずれか欠損
+  scheduleMissing: boolean // 支払開始日/金額のいずれか欠損
   accountMissing: boolean // 振込先（銀行/支店/種別/口座番号/名義）のいずれか欠損
 }
 export type IncompleteResult = {
@@ -280,9 +297,10 @@ export async function buildIncompleteRepayments(
   const creditors = await prisma.creditor.findMany({
     where: {
       repaymentTarget: null, // 停止/終了は除外
-      // 対象月に支払いが必要なもののみ（支払開始月 ≤ 対象月 ≤ 最終支払月）。
-      // 支払開始月が未入力＝対象月を判定できないものは除外。
-      paymentStartMonth: { not: null, lte: targetMonth },
+      // 対象月に支払いが必要なもののみ（支払開始日 ≤ 対象月末 ≤ … ≤ 最終支払日）。
+      // 支払開始日/最終支払日は年月日(YYYY-MM-DD)で保持しているため、対象月(YYYY-MM)を
+      // 月初(-01)・月末(-31)の境界文字列に展開して比較する。支払開始日が未入力なら除外。
+      paymentStartMonth: { not: null, lte: `${targetMonth}-31` },
       AND: [
         {
           OR: [
@@ -291,10 +309,10 @@ export async function buildIncompleteRepayments(
           ],
         },
         {
-          // 最終支払月が未入力なら上限なし、入力ありなら対象月以降まで継続中のもの
+          // 最終支払日が未入力なら上限なし、入力ありなら対象月以降まで継続中のもの
           OR: [
             { finalPaymentMonth: null },
-            { finalPaymentMonth: { gte: targetMonth } },
+            { finalPaymentMonth: { gte: `${targetMonth}-01` } },
           ],
         },
       ],
@@ -323,9 +341,10 @@ export async function buildIncompleteRepayments(
 
   const rows: IncompleteRow[] = []
   for (const c of creditors) {
+    // 支払日項目は廃止（支払開始日から約定日を導出）。支払条件の欠損は
+    // 支払開始日が空、または初回/2回目以降の金額がいずれも空、で判定する。
     const scheduleMissing =
       empty(c.paymentStartMonth) ||
-      c.paymentDay == null ||
       (c.firstPaymentAmount == null && c.subsequentPaymentAmount == null)
     const accountMissing =
       empty(c.financialInstitutionCode) ||

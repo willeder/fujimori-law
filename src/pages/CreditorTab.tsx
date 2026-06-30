@@ -554,27 +554,12 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       </div>
       <div className="min-w-0 col-span-1">
         <EditableField
-          label="支払開始月"
+          label="支払開始日"
           value={creditor.paymentStartMonth}
           onChange={(v) =>
             updateCreditor(creditor, { paymentStartMonth: v || null })
           }
-          compact
-          compactLayout="inline"
-          bordered
-          truncateValue
-          fillWidth
-        />
-      </div>
-      <div className="min-w-0 col-span-1">
-        <EditableField
-          label="支払日"
-          value={creditor.paymentDay}
-          onChange={(v) =>
-            updateCreditor(creditor, { paymentDay: Number(v) || null })
-          }
-          type="number"
-          suffix="日"
+          type="date"
           compact
           compactLayout="inline"
           bordered
@@ -650,11 +635,12 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       </div>
       <div className="min-w-0 col-span-1">
         <EditableField
-          label="最終支払月"
+          label="最終支払日"
           value={creditor.finalPaymentMonth}
           onChange={(v) =>
             updateCreditor(creditor, { finalPaymentMonth: v || null })
           }
+          type="date"
           compact
           compactLayout="inline"
           bordered

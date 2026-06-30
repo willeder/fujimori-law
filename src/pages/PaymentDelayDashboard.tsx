@@ -243,6 +243,7 @@ export function PaymentDelayDashboard() {
                 emptyMessage="遅延案件はありません"
                 density="compact"
                 paginated
+                enableFind
                 bodyMaxHeightClassName="max-h-[calc(100vh-21rem)]"
               />
             </div>

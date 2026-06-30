@@ -23,8 +23,6 @@ import { SettlementFiles } from "../components/case/SettlementFiles";
 import { LineUrlQuickEdit } from "../components/case/LineUrlQuickEdit";
 import { LineLinkControl } from "../components/case/LineLinkControl";
 import { CaseChangeHistory } from "../components/case/CaseChangeHistory";
-import { FindModeModal } from "../components/case/FindModeModal";
-import type { Condition } from "./searchFields";
 import type { Case } from "../types";
 import {
   creditorTabAccentSummary,
@@ -312,22 +310,6 @@ function CaseDetailBody({
       alert(`削除に失敗しました: ${e instanceof Error ? e.message : String(e)}`);
       setDeleting(false);
     }
-  };
-  // FileMaker風「検索モード」: Ctrl+F（⌘+F）で起動
-  const [findOpen, setFindOpen] = useState(false);
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && (e.key === "f" || e.key === "F")) {
-        e.preventDefault();
-        setFindOpen(true);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
-  const runFind = (conditions: Condition[]) => {
-    setFindOpen(false);
-    navigate("/", { state: { conditions } });
   };
   /** 和解対象債権と入金予定履歴で共有（同じ id・同じ並び） */
   const [creditorScopeTabId, setCreditorScopeTabId] = useState("all");
@@ -706,7 +688,6 @@ function CaseDetailBody({
       : null;
   return (
     <div className="flex min-h-screen min-h-0 flex-col bg-slate-200">
-      <FindModeModal open={findOpen} onClose={() => setFindOpen(false)} onSearch={runFind} />
       {/* 案件削除の確認ダイアログ */}
       {confirmDelete && (
         <div
@@ -761,14 +742,6 @@ function CaseDetailBody({
             ← 一覧に戻る
           </button>
           <span className="flex shrink-0 items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => setFindOpen(true)}
-              title="検索モード（Ctrl+F）"
-              className="rounded border border-slate-300 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50"
-            >
-              🔍 検索モード
-            </button>
             <div className="relative">
               <button
                 type="button"

@@ -13,6 +13,12 @@ export interface Column<T> {
   sortable?: boolean
   render?: (item: T, index: number) => React.ReactNode
   /**
+   * 検索モード（FileMaker風インライン検索）で、この列の検索対象文字列を返す。
+   * 未指定の場合は item[key] の生値を文字列化して検索する（ネスト構造の列では明示推奨）。
+   * 空文字 '' を返すと、その列は検索入力を出さない（検索対象外）。
+   */
+  filterValue?: (item: T) => string
+  /**
    * cellSingleLine 時のみ。false の列は … で切らない（操作列など）
    * 未指定は省略する
    */
@@ -65,6 +71,12 @@ interface DataTableProps<T> {
   paginated?: boolean
   /** ページネーション時の初期表示件数（既定 50） */
   defaultPageSize?: number
+  /**
+   * true のとき FileMaker風「検索モード」を有効化（一覧・テーブル系ページ向け）。
+   * Shift+F でトグルし、ヘッダー直下に列ごとの条件入力行を表示。
+   * 入力した全列に部分一致（AND）するレコードだけを表示中テーブルで絞り込む。
+   */
+  enableFind?: boolean
 }
 
 export function DataTable<T>({
@@ -84,9 +96,95 @@ export function DataTable<T>({
   slimHeader = false,
   paginated = false,
   defaultPageSize = 50,
+  enableFind = false,
 }: DataTableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+
+  // ── 検索モード（FileMaker風: 検索リクエストに条件入力 → Enter で実行 → 該当セット表示） ──
+  // findOn   : 検索モード中（空の検索リクエストに条件入力中。データ行は隠す）
+  // criteria : 入力中の条件（列key→値）
+  // applied  : 実行済み（確定）の絞り込み条件。これが一覧を絞る。
+  const [findOn, setFindOn] = useState(false)
+  const [criteria, setCriteria] = useState<Record<string, string>>({})
+  const [applied, setApplied] = useState<Record<string, string>>({})
+
+  // この列の検索対象文字列（filterValue 優先、無ければ生値を文字列化）
+  const cellSearchText = (col: Column<T>, item: T): string => {
+    if (col.filterValue) return col.filterValue(item)
+    const raw = (item as Record<string, unknown>)[String(col.key)]
+    if (raw === null || raw === undefined) return ''
+    return String(raw)
+  }
+  // その列が検索可能か（filterValue 明示、または生値が文字列/数値で取れる）
+  const colSearchable = (col: Column<T>): boolean => {
+    if (col.filterValue) return data.some((it) => col.filterValue!(it) !== '')
+    return data.some((it) => {
+      const raw = (it as Record<string, unknown>)[String(col.key)]
+      return typeof raw === 'string' || typeof raw === 'number'
+    })
+  }
+
+  // 検索の実行・取消・解除
+  const enterFind = () => {
+    setCriteria(applied) // 既存の絞り込みを編集できるよう初期化
+    setFindOn(true)
+  }
+  const performFind = () => {
+    setApplied(criteria)
+    setFindOn(false)
+  }
+  const cancelFind = () => setFindOn(false)
+  const clearFind = () => {
+    setApplied({})
+    setCriteria({})
+    setFindOn(false)
+  }
+
+  // Shift+F で検索モードに入る/抜ける。入力フィールドにフォーカス中は無視
+  // （条件入力中の Enter=実行 / Esc=取消 は各入力欄側で処理し、文字入力と衝突させない）。
+  useEffect(() => {
+    if (!enableFind) return
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null
+      const typing =
+        !!t &&
+        (t.tagName === 'INPUT' ||
+          t.tagName === 'TEXTAREA' ||
+          t.tagName === 'SELECT' ||
+          t.isContentEditable)
+      if (typing) return
+      if (e.shiftKey && (e.key === 'F' || e.key === 'f')) {
+        e.preventDefault()
+        setFindOn((v) => {
+          if (!v) setCriteria((c) => (Object.keys(c).length ? c : applied))
+          return !v
+        })
+        return
+      }
+      if (findOn && e.key === 'Escape') {
+        e.preventDefault()
+        setFindOn(false)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [enableFind, findOn, applied])
+
+  // 確定済み条件で絞り込み（入力のある全列に部分一致＝AND・大文字小文字無視）
+  const activeApplied = enableFind
+    ? Object.entries(applied).filter(([, v]) => v.trim() !== '')
+    : []
+  const findData =
+    activeApplied.length === 0
+      ? data
+      : data.filter((item) =>
+          activeApplied.every(([k, v]) => {
+            const col = columns.find((c) => String(c.key) === k)
+            if (!col) return true
+            return cellSearchText(col, item).toLowerCase().includes(v.trim().toLowerCase())
+          })
+        )
 
   const handleSort = (key: string) => {
     if (sortKey === key) {
@@ -97,7 +195,7 @@ export function DataTable<T>({
     }
   }
 
-  const sortedData = [...data].sort((a, b) => {
+  const sortedData = [...findData].sort((a, b) => {
     if (!sortKey) return 0
     const aVal = (a as Record<string, unknown>)[sortKey]
     const bVal = (b as Record<string, unknown>)[sortKey]
@@ -276,8 +374,73 @@ export function DataTable<T>({
     ? `min-w-0 overflow-auto isolate ${bodyMaxHeightClassName ?? 'max-h-[calc(100vh-13rem)]'}`
     : scrollWrapClass
 
+  const findBar = enableFind ? (
+    findOn ? (
+      // 検索モード中（FileMaker の Find Mode 相当）
+      <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-blue-300 bg-blue-50 px-3 py-1.5 text-xs">
+        <span className="rounded bg-blue-600 px-2 py-0.5 text-[11px] font-semibold text-white">
+          🔍 検索モード
+        </span>
+        <span className="text-blue-900">各列に条件を入力 → Enter で検索</span>
+        <button
+          type="button"
+          onClick={performFind}
+          className="rounded bg-blue-600 px-3 py-0.5 text-[11px] font-semibold text-white hover:bg-blue-700"
+        >
+          検索実行
+        </button>
+        <button
+          type="button"
+          onClick={cancelFind}
+          className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[11px] text-slate-600 hover:bg-slate-100"
+        >
+          取消（Esc）
+        </button>
+        <span className="text-[10px] text-blue-400">複数列はAND・部分一致</span>
+      </div>
+    ) : activeApplied.length > 0 ? (
+      // 検索実行後（該当セット表示中）
+      <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-amber-300 bg-amber-50 px-3 py-1.5 text-xs">
+        <span className="font-semibold text-amber-900">
+          🔍 検索結果 {total} 件
+          <span className="ml-1 font-normal text-amber-700">／ 全 {data.length} 件</span>
+        </span>
+        <span className="text-[10px] text-amber-700">
+          条件: {activeApplied.map(([k, v]) => `${columns.find((c) => String(c.key) === k)?.header ?? k}=${v}`).join(' / ')}
+        </span>
+        <button
+          type="button"
+          onClick={enterFind}
+          className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[11px] text-slate-600 hover:bg-slate-100"
+        >
+          条件を編集
+        </button>
+        <button
+          type="button"
+          onClick={clearFind}
+          className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[11px] text-slate-600 hover:bg-slate-100"
+        >
+          解除（全件表示）
+        </button>
+      </div>
+    ) : (
+      // 通常
+      <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-slate-200 bg-slate-50 px-3 py-1 text-xs">
+        <button
+          type="button"
+          onClick={enterFind}
+          title="検索モード（Shift+F）"
+          className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[11px] font-semibold text-slate-600 hover:bg-slate-100"
+        >
+          🔍 検索モード（Shift+F）
+        </button>
+      </div>
+    )
+  ) : null
+
   return (
     <div className={paginated ? 'flex min-h-0 flex-col' : ''}>
+      {findBar}
       {pager}
     <div className={bodyScrollClass}>
       <table className={`${tableWidthClass} ${tableText}${tableLayoutClass}${tableMinW}${tableBorder}`}>
@@ -322,9 +485,52 @@ export function DataTable<T>({
               )
             })}
           </tr>
+          {enableFind && findOn && (
+            <tr className="border-b-2 border-blue-300 bg-blue-50">
+              {columns.map((col, ci) => (
+                <th
+                  key={String(col.key)}
+                  className={`${headPad} ${col.headerClassName ?? ''}`}
+                  style={{ width: col.width }}
+                >
+                  {colSearchable(col) ? (
+                    <input
+                      // 先頭の検索可能列に自動フォーカス
+                      autoFocus={ci === columns.findIndex((c) => colSearchable(c))}
+                      value={criteria[String(col.key)] ?? ''}
+                      onChange={(e) =>
+                        setCriteria((c) => ({ ...c, [String(col.key)]: e.target.value }))
+                      }
+                      onClick={(e) => e.stopPropagation()}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          performFind()
+                        } else if (e.key === 'Escape') {
+                          e.preventDefault()
+                          cancelFind()
+                        }
+                      }}
+                      placeholder="条件"
+                      className="w-full min-w-0 rounded border border-blue-300 bg-white px-1 py-0.5 text-[11px] font-normal text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  ) : null}
+                </th>
+              ))}
+            </tr>
+          )}
         </thead>
         <tbody>
-          {sortedData.length === 0 ? (
+          {enableFind && findOn ? (
+            <tr>
+              <td
+                colSpan={columns.length}
+                className={`${emptyPad} text-center text-blue-500 ${cellNoWrap || cellSingleLine ? '' : 'max-w-none whitespace-normal'}`}
+              >
+                検索条件を入力して Enter キーで検索（Esc で取消）
+              </td>
+            </tr>
+          ) : sortedData.length === 0 ? (
             <tr>
               <td
                 colSpan={columns.length}

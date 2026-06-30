@@ -115,17 +115,10 @@ export function CreditorDetail({ creditor, onChange, readonly = false }: Credito
               disabled={readonly}
             />
             <EditableField
-              label="支払開始月"
+              label="支払開始日"
               value={creditor.paymentStartMonth}
               onChange={(v) => onChange('paymentStartMonth', v || null)}
-              disabled={readonly}
-            />
-            <EditableField
-              label="支払日"
-              value={creditor.paymentDay}
-              onChange={(v) => onChange('paymentDay', Number(v) || null)}
-              type="number"
-              suffix="日"
+              type="date"
               disabled={readonly}
             />
             <EditableField

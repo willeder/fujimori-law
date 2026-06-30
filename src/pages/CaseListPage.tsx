@@ -189,6 +189,7 @@ export function CaseListPage() {
       align: 'center',
       sortable: false,
       render: (item) => item.metadata.externalId ?? '-',
+      filterValue: (item) => item.metadata.externalId ?? '',
     },
     {
       key: '_line',
@@ -209,6 +210,7 @@ export function CaseListPage() {
       width: '88px',
       sortable: false,
       render: (item) => item.appointmentInfo.acceptanceDate ?? '-',
+      filterValue: (item) => item.appointmentInfo.acceptanceDate ?? '',
     },
     {
       key: 'cautionRank',
@@ -217,6 +219,7 @@ export function CaseListPage() {
       align: 'center',
       sortable: false,
       render: (item) => <StatusBadge status={item.clientBasicInfo.cautionRank} size="sm" />,
+      filterValue: (item) => item.clientBasicInfo.cautionRank ?? '',
     },
     {
       key: 'listRegisteredDate',
@@ -224,6 +227,7 @@ export function CaseListPage() {
       width: '104px',
       sortable: false,
       render: (item) => item.metadata.listRegisteredDate ?? '-',
+      filterValue: (item) => item.metadata.listRegisteredDate ?? '',
     },
     {
       key: 'listCategory',
@@ -231,6 +235,7 @@ export function CaseListPage() {
       width: '116px',
       sortable: false,
       render: (item) => item.metadata.listCategory ?? '-',
+      filterValue: (item) => item.metadata.listCategory ?? '',
     },
     {
       key: 'acceptanceRank',
@@ -239,6 +244,7 @@ export function CaseListPage() {
       align: 'center',
       sortable: false,
       render: (item) => <StatusBadge status={item.appointmentInfo.acceptanceRank} size="sm" />,
+      filterValue: (item) => item.appointmentInfo.acceptanceRank ?? '',
     },
     {
       key: 'debtAdjustmentType',
@@ -246,6 +252,7 @@ export function CaseListPage() {
       width: '88px',
       sortable: false,
       render: (item) => item.appointmentInfo.debtAdjustmentType ?? '-',
+      filterValue: (item) => item.appointmentInfo.debtAdjustmentType ?? '',
     },
     {
       key: 'status',
@@ -253,6 +260,7 @@ export function CaseListPage() {
       width: '128px',
       sortable: false,
       render: (item) => <StatusBadge status={item.settlementInfo.status} size="sm" />,
+      filterValue: (item) => item.settlementInfo.status ?? '',
     },
     {
       key: 'name',
@@ -262,6 +270,7 @@ export function CaseListPage() {
       render: (item) => (
         <span className="whitespace-nowrap font-medium">{item.clientBasicInfo.name}</span>
       ),
+      filterValue: (item) => item.clientBasicInfo.name ?? '',
     },
     {
       key: 'furigana',
@@ -276,6 +285,7 @@ export function CaseListPage() {
           </span>
         )
       },
+      filterValue: (item) => item.clientBasicInfo.furigana ?? '',
     },
     {
       key: 'phone',
@@ -283,6 +293,7 @@ export function CaseListPage() {
       width: '108px',
       sortable: false,
       render: (item) => item.clientBasicInfo.phone ?? '-',
+      filterValue: (item) => item.clientBasicInfo.phone ?? '',
     },
     {
       key: 'lineUrl',
@@ -347,6 +358,7 @@ export function CaseListPage() {
           {clip(item.appointmentInfo.appointmentStaff, 6)}
         </span>
       ),
+      filterValue: (item) => item.appointmentInfo.appointmentStaff ?? '',
     },
     {
       key: 'interviewStaff',
@@ -361,6 +373,7 @@ export function CaseListPage() {
           {clip(item.appointmentInfo.interviewStaff, 6)}
         </span>
       ),
+      filterValue: (item) => item.appointmentInfo.interviewStaff ?? '',
     },
   ]
 
@@ -528,6 +541,7 @@ export function CaseListPage() {
             density="compact"
             paginated
             stickyHeader
+            enableFind
           />
         </div>
       </div>

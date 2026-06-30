@@ -215,7 +215,7 @@ export function GmoTransferPage() {
             {showIncomplete && (
               <div className="border-t border-amber-200 p-2">
                 <p className="mb-2 px-1 text-[11px] text-amber-700">
-                  これらは {month} に支払いが必要（支払開始月 ≤ {month} ≤ 最終支払月）な弁済対象なのに、支払日・金額か振込先口座が未入力のため、GMO振込の対象になりません。行をクリックすると案件詳細を開いて入力できます。※支払開始月そのものが未入力の債権者は対象月を判定できないためここには表示されません。
+                  これらは {month} に支払いが必要（支払開始日 ≤ {month} ≤ 最終支払日）な弁済対象なのに、金額か振込先口座が未入力のため、GMO振込の対象になりません。行をクリックすると案件詳細を開いて入力できます。※支払開始日そのものが未入力の債権者は対象月を判定できないためここには表示されません。
                 </p>
                 <div className="overflow-hidden rounded border border-amber-200 bg-white">
                   <DataTable

@@ -147,6 +147,7 @@ export function PaymentManagementPage() {
               onRowClick={(item) => navigate(`/cases/${item.id}`)}
               density="compact"
               paginated
+              enableFind
               emptyMessage="該当する案件がありません"
             />
           </div>

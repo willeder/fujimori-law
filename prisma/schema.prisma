@@ -187,13 +187,13 @@ model Creditor {
   settlementDebtAmount     Int?
   settlementContentComment String?
   reminder                 String?
-  paymentStartMonth        String? // YYYY-MM
-  paymentDay               Int?
+  paymentStartMonth        String? // 支払開始日 YYYY-MM-DD（列名は従来踏襲・中身は年月日）
+  paymentDay               Int? // 支払日（廃止予定。約定日は支払開始日から導出。互換のため残置）
   paymentCount             Int?
   firstPaymentAmount       Int?
   subsequentPaymentAmount  Int?
   finalPaymentAmount       Int?
-  finalPaymentMonth        String? // YYYY-MM
+  finalPaymentMonth        String? // 最終支払日 YYYY-MM-DD（列名は従来踏襲・中身は年月日）
   futureInterest           String?
   bankName                 String?
   financialInstitutionCode String?

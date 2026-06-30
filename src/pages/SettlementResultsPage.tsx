@@ -315,6 +315,7 @@ export function SettlementResultsPage() {
               onRowClick={(item) => navigate(`/cases/${item.caseId}`)}
               density="compact"
               paginated
+              enableFind
               emptyMessage="該当する和解実績がありません"
             />
           </div>

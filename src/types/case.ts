@@ -216,13 +216,13 @@ export interface Creditor {
   settlementContentComment?: string | null // 和解内容コメント
   reminder?: string | null // リマインド
   creditorDocuments?: string | null // 債権者資料（リンク/ファイル名のメモ）
-  paymentStartMonth: string | null // 支払開始月
-  paymentDay: number | null // 支払日
+  paymentStartMonth: string | null // 支払開始日（YYYY-MM-DD。列名は従来踏襲だが中身は年月日）
+  paymentDay: number | null // 支払日（廃止予定。約定日は支払開始日から導出。データ互換のため列は残置）
   paymentCount: number | null // 支払回数
   firstPaymentAmount: number | null // 初回支払額
   subsequentPaymentAmount: number | null // ２回目以降支払額
   finalPaymentAmount: number | null // 最終支払額
-  finalPaymentMonth: string | null // 最終支払月
+  finalPaymentMonth: string | null // 最終支払日（YYYY-MM-DD。列名は従来踏襲だが中身は年月日）
   futureInterest: string | null // 将来利息
   bankName: string | null // 振込先銀行名
   financialInstitutionCode?: string | null // 金融機関コード

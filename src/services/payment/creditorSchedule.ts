@@ -16,12 +16,6 @@ function pad2(n: number): string {
   return String(n).padStart(2, '0')
 }
 
-function parseYearMonth(ym: string): { y: number; m: number } | null {
-  const [y, m] = ym.split('-').map((x) => Number(x))
-  if (!y || !m) return null
-  return { y, m }
-}
-
 function addCalendarMonths(y: number, m: number, add: number): { y: number; m: number } {
   const idx = y * 12 + (m - 1) + add
   return { y: Math.floor(idx / 12), m: (idx % 12) + 1 }
@@ -60,18 +54,24 @@ interface PlannedInstallment {
 }
 
 function plannedInstallmentsForCreditor(c: Creditor): PlannedInstallment[] {
-  if (!c.paymentStartMonth || c.paymentDay == null || !c.paymentCount) return []
-  const ym = parseYearMonth(c.paymentStartMonth)
-  if (!ym) return []
+  // 支払開始日（年月日 YYYY-MM-DD）と支払回数から毎月の予定日を生成する。
+  // 支払日項目は廃止したため約定日は支払開始日から導出する。
+  if (!c.paymentStartMonth || !c.paymentCount) return []
+  const [y0, m0, d0] = c.paymentStartMonth.split('-').map((x) => Number(x))
+  if (!y0 || !m0) return []
+  // 月末約定対策: 支払開始日がその月の末日なら毎月「末日」、それ以外はその"日"。
+  const startDay = d0 || 1
+  const startIsEom = !!d0 && d0 === daysInMonth(y0, m0)
   const out: PlannedInstallment[] = []
   // 暴走防止の上限（実データ最大は 120 回程度）
   const n = Math.min(c.paymentCount, 600)
   for (let i = 0; i < n; i++) {
-    const { y, m } = addCalendarMonths(ym.y, ym.m, i)
+    const { y, m } = addCalendarMonths(y0, m0, i)
+    // startIsEom のときは大きな日(31)を渡し formatYmd 側で各月の末日にクランプ
     out.push({
       creditorId: c.id,
       installmentNo: i + 1,
-      plannedDate: formatYmd(y, m, c.paymentDay),
+      plannedDate: formatYmd(y, m, startIsEom ? 31 : startDay),
       plannedAmount: installmentAmount(c, i),
     })
   }

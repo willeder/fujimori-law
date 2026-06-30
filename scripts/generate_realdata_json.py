@@ -308,72 +308,107 @@ def emit_payments(id_to_case):
     return out
 
 
+def _build_creditor(cid, case_id, name, r, d):
+    """1債権者レコードを生成。r=和解対象債権者一覧 行（補助情報）, d=和解内容詳細 行（弁済スケジュール）。
+    どちらか一方が {} でも可。"""
+    settlement_amount = i(d.get("和解金額"))
+    if settlement_amount is None:
+        settlement_amount = i(r.get("和解"))
+    status = creditor_status(r.get("債権者別ステータス"))
+    # 一覧にステータスが無く、和解詳細にスケジュール/和解日があれば弁済中扱い
+    if not status and (s(d.get("支払開始月")) or s(d.get("和解日"))):
+        status = "弁済中"
+    return {
+        "id": cid,
+        "caseId": case_id,
+        "creditorName": name,
+        "negotiationPartner": negotiation_partner(r.get("交渉相手")),
+        "declaredAmount": i(r.get("申告額")),
+        "debtAmount": i(r.get("債務額")),
+        "expectedSettlement": i(r.get("想定和解")),
+        "expectedSettlementAmount": None,
+        "expectedPaymentCount": None,
+        "expectedFutureInterest": None,
+        "status": status,
+        "repaymentExcluded": None,
+        "check": s(r.get("CHECK[CHECK]")),
+        "nextProcessDate": iso_date(r.get("次回処理日時")),
+        "acceptanceNoticeSentDate": iso_date(r.get("受任通知送付日")),
+        "debtInquiryArrivalDate": iso_date(r.get("債権調査到着日")),
+        "customerCode": s(r.get("顧客コード")),
+        "contractDate": iso_date(r.get("調査票_契約日")),
+        "settlementProposalDate": iso_date(r.get("和解提案日")),
+        "settlementProposal": i(r.get("和解提案")),
+        "responseStatus": s(r.get("回答状況")),
+        "settlementDate": iso_date(r.get("和解日") or d.get("和解日")),
+        "settlementAmount": settlement_amount,
+        "settlementDebtAmount": i(r.get("和解時債務金額")),
+        "settlementContentComment": s(r.get("和解内容コメント")),
+        "reminder": s(r.get("リマインド")),
+        # 支払開始月／最終支払月の列には実際は年月日(例 2026/09/27)が入っているため、
+        # ym()で月に切り詰めず iso_date() で「支払開始日／最終支払日」を年月日のまま保持する。
+        "paymentStartMonth": iso_date(d.get("支払開始月")),
+        "paymentDay": i(d.get("支払日")),
+        "paymentCount": i(d.get("支払回数")),
+        "firstPaymentAmount": i(d.get("初回支払額")),
+        "subsequentPaymentAmount": i(d.get("２回目以降支払額")),
+        "finalPaymentAmount": i(d.get("最終支払額")),
+        "finalPaymentMonth": iso_date(d.get("最終支払月")),
+        "futureInterest": future_interest(d.get("将来利息")),
+        "bankName": s(d.get("振込先銀行名")),
+        "financialInstitutionCode": s(d.get("金融機関コード")),
+        "branchName": s(d.get("振込先支店名")),
+        "branchCode": s(d.get("支店コード")),
+        "accountType": s(d.get("振込先口座種別")),
+        "accountNumber": s(d.get("振込先口座番号")),
+        "accountHolder": s(d.get("振込先口座名義")),
+        "designatedCode": s(d.get("指定コード")),
+        "repaymentTarget": s(d.get("弁済対象")),
+    }
+
+
 def emit_creditors(id_to_case):
-    detail = {}
-    for r in read_csv("和解内容詳細.csv"):
+    """和解詳細（弁済スケジュール）を「弁済の正」として全件取り込む。
+    和解対象債権者一覧とは債権者の括り方が異なり(合算/求償分/回数分割/債権回収会社)、
+    (ID,債権者名)では結合できない行が多いため、和解詳細の各行を必ず弁済プランとして出力し、
+    一覧側の補助情報(申告額/債務額/ステータス等)は名前一致した場合のみ付加する。
+    和解詳細に現れない一覧債権者(スケジュール未確定)は表示用に別途出力する。"""
+    # 一覧を (ID,債権者名) -> 行 でインデックス（補助情報・最初の出現を採用）
+    listidx = {}
+    for r in read_csv("和解対象債権者一覧.csv"):
+        eid = r["ID"].strip()
         name = s(r.get("債権者"))
         if not name:
             continue
-        detail[(r["ID"].strip(), name)] = r
+        listidx.setdefault((eid, name), r)
 
     out = []
     cid_seq = 1
-    for r in read_csv("和解対象債権者一覧.csv"):
-        eid = r["ID"].strip()
+    matched = set()
+
+    # 1) 和解詳細の各行＝弁済プランを必ず出力（弁済の正）
+    for d in read_csv("和解内容詳細.csv"):
+        eid = d["ID"].strip()
+        name = s(d.get("債権者"))
         case_id = id_to_case.get(eid)
-        name = s(r.get("債権者"))
         if case_id is None or not name or name.startswith("★") or name == "債権者":
             continue
-        d = detail.get((eid, name), {})
-        settlement_amount = i(d.get("和解金額"))
-        if settlement_amount is None:
-            settlement_amount = i(r.get("和解"))
-        out.append({
-            "id": cid_seq,
-            "caseId": case_id,
-            "creditorName": name,
-            "negotiationPartner": negotiation_partner(r.get("交渉相手")),
-            "declaredAmount": i(r.get("申告額")),
-            "debtAmount": i(r.get("債務額")),
-            "expectedSettlement": i(r.get("想定和解")),
-            "expectedSettlementAmount": None,
-            "expectedPaymentCount": None,
-            "expectedFutureInterest": None,
-            "status": creditor_status(r.get("債権者別ステータス")),
-            "repaymentExcluded": None,
-            "check": s(r.get("CHECK[CHECK]")),
-            "nextProcessDate": iso_date(r.get("次回処理日時")),
-            "acceptanceNoticeSentDate": iso_date(r.get("受任通知送付日")),
-            "debtInquiryArrivalDate": iso_date(r.get("債権調査到着日")),
-            "customerCode": s(r.get("顧客コード")),
-            "contractDate": iso_date(r.get("調査票_契約日")),
-            "settlementProposalDate": iso_date(r.get("和解提案日")),
-            "settlementProposal": i(r.get("和解提案")),
-            "responseStatus": s(r.get("回答状況")),
-            "settlementDate": iso_date(r.get("和解日") or d.get("和解日")),
-            "settlementAmount": settlement_amount,
-            "settlementDebtAmount": i(r.get("和解時債務金額")),
-            "settlementContentComment": s(r.get("和解内容コメント")),
-            "reminder": s(r.get("リマインド")),
-            "paymentStartMonth": ym(d.get("支払開始月")),
-            "paymentDay": i(d.get("支払日")),
-            "paymentCount": i(d.get("支払回数")),
-            "firstPaymentAmount": i(d.get("初回支払額")),
-            "subsequentPaymentAmount": i(d.get("２回目以降支払額")),
-            "finalPaymentAmount": i(d.get("最終支払額")),
-            "finalPaymentMonth": ym(d.get("最終支払月")),
-            "futureInterest": future_interest(d.get("将来利息")),
-            "bankName": s(d.get("振込先銀行名")),
-            "financialInstitutionCode": s(d.get("金融機関コード")),
-            "branchName": s(d.get("振込先支店名")),
-            "branchCode": s(d.get("支店コード")),
-            "accountType": s(d.get("振込先口座種別")),
-            "accountNumber": s(d.get("振込先口座番号")),
-            "accountHolder": s(d.get("振込先口座名義")),
-            "designatedCode": s(d.get("指定コード")),
-            "repaymentTarget": s(d.get("弁済対象")),
-        })
+        r = listidx.get((eid, name))
+        if r is not None:
+            matched.add((eid, name))
+        out.append(_build_creditor(cid_seq, case_id, name, r or {}, d))
         cid_seq += 1
+
+    # 2) 和解詳細に無い一覧債権者（スケジュール未確定）も表示用に出力
+    for (eid, name), r in listidx.items():
+        if (eid, name) in matched:
+            continue
+        case_id = id_to_case.get(eid)
+        if case_id is None or name.startswith("★") or name == "債権者":
+            continue
+        out.append(_build_creditor(cid_seq, case_id, name, r, {}))
+        cid_seq += 1
+
     return out
 
 

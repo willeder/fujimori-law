@@ -254,6 +254,7 @@ export function MembersPage() {
             keyField="id"
             density="compact"
             paginated
+            enableFind
             emptyMessage="メンバーがいません"
           />
         </div>

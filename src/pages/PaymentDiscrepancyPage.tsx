@@ -230,6 +230,7 @@ export function PaymentDiscrepancyPage() {
               onRowClick={(item) => navigate(`/cases/${item.caseId}`)}
               density="compact"
               paginated
+              enableFind
               emptyMessage="入金額の相違はありません"
               getRowClassName={(item) => item.isLess ? 'bg-red-50' : 'bg-blue-50'}
             />
