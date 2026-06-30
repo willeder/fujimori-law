@@ -1,6 +1,6 @@
-import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useCaseDispatch, useCaseState } from '../store/useCaseStore'
+import { useCaseDispatch } from '../store/useCaseStore'
+import { useFoundSet } from '../store/FoundSet'
 import { EditableField, StatusBadge, DataTable, type Column } from '../components'
 import type { Creditor } from '../types'
 
@@ -13,25 +13,36 @@ interface CreditorTabProps {
 export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
   const dispatch = useCaseDispatch()
   const navigate = useNavigate()
-  const { cases } = useCaseState()
-  // caseId → 依頼者名（DB全体の債権者検索結果でどの依頼者かを示すため）
-  const clientNameByCase = useMemo(
-    () => new Map(cases.map((c) => [c.id, c.clientBasicInfo?.name ?? ''])),
-    [cases]
-  )
-  // 債権者をDB全体から横断検索（案件をまたぐ）。条件はそのままサーバへ
-  const globalCreditorFind = async (
+  const { setFoundSet } = useFoundSet()
+
+  // 債権者検索を実行：DB全体を横断検索し、該当する案件群を「検索結果セット」にして
+  // 1件目の案件詳細へ移動する。以降は詳細ページの左右ナビ（◀ ▶）で渡り歩ける。
+  const runCreditorFind = async (
     conditions: { field: string; value: string }[]
-  ): Promise<Creditor[]> => {
+  ) => {
     try {
       const r = await fetch('/api/creditors/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ conditions }),
       })
-      return r.ok ? ((await r.json()) as Creditor[]) : []
+      const rows = (r.ok ? ((await r.json()) as Creditor[]) : []) ?? []
+      if (rows.length === 0) {
+        alert('該当する債権者が見つかりませんでした')
+        return
+      }
+      const items = rows.map((c) => ({
+        caseId: c.caseId,
+        creditorId: c.id,
+        label: c.creditorName,
+      }))
+      const desc = conditions.map((c) => `${c.field}=${c.value}`).join(' / ')
+      setFoundSet(items, desc)
+      navigate(`/cases/${items[0].caseId}`, {
+        state: { focusCreditorId: items[0].creditorId },
+      })
     } catch {
-      return []
+      alert('検索に失敗しました')
     }
   }
 
@@ -73,30 +84,6 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
 
     const columns: Column<Creditor>[] = [
       {
-        key: '_client',
-        header: '依頼者',
-        width: '110px',
-        sortable: false,
-        // DB全体検索の結果でどの依頼者の債権者かを示し、クリックでその案件へ移動。
-        render: (item) => {
-          const name = clientNameByCase.get(item.caseId) ?? '-'
-          return (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation()
-                navigate(`/cases/${item.caseId}`)
-              }}
-              className="truncate text-left text-blue-600 underline hover:text-blue-800"
-              title={name}
-            >
-              {name}
-            </button>
-          )
-        },
-        filterValue: (item) => clientNameByCase.get(item.caseId) ?? '',
-      },
-      {
         key: 'status',
         header: 'ステータス',
         width: '120px',
@@ -133,18 +120,22 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       {
         key: 'creditorName',
         header: '債権者',
-        width: '120px',
+        // 合算/求償分などの長い債権者名を省略せず全表示（最大50文字は折り返して表示）。
+        width: '13rem',
+        cellTruncate: false,
+        cellMultiline: true,
+        render: (item) => (item.creditorName ?? '').slice(0, 50),
       },
       {
         key: 'acceptanceNoticeSentDate',
         header: '受任通知送付日',
-        width: '120px',
+        width: '100px',
         render: (item) => item.acceptanceNoticeSentDate ?? '-',
       },
       {
         key: 'settlementProposalDate',
         header: '和解提案日',
-        width: '110px',
+        width: '96px',
         render: (item) => item.settlementProposalDate ?? '-',
       },
       {
@@ -270,7 +261,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           bodyMaxHeightClassName="max-h-[min(72vh,40rem)]"
           cellSingleLine
           enableFind
-          onGlobalFind={globalCreditorFind}
+          onFindNavigate={runCreditorFind}
         />
       </div>
     )

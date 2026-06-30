@@ -124,7 +124,7 @@ export function SettlementResultsPage() {
     if (!searched) return []
     const query = fName.trim().toLowerCase()
     return rows.filter((r) => {
-      if (fCreditor && r.creditorName !== fCreditor) return false
+      if (fCreditor && !(r.creditorName ?? '').toLowerCase().includes(fCreditor.trim().toLowerCase())) return false
       if (!inRange(r.acceptanceDate, fAccFrom, fAccTo)) return false
       if (!inRange(r.settlementDate, fSetFrom, fSetTo)) return false
       if (fStatus && r.caseStatus !== fStatus) return false
@@ -215,19 +215,20 @@ export function SettlementResultsPage() {
             />
           </label>
           <label className="flex flex-col gap-0.5 text-[10px] text-slate-500">
-            債権者
-            <select
+            債権者（部分一致）
+            <input
+              type="text"
               value={fCreditor}
               onChange={(e) => setFCreditor(e.target.value)}
+              list="settlement-creditor-names"
+              placeholder="例: ポケット"
               className={`${inputCls} w-44`}
-            >
-              <option value="">すべて</option>
+            />
+            <datalist id="settlement-creditor-names">
               {creditorNames.map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
+                <option key={n} value={n} />
               ))}
-            </select>
+            </datalist>
           </label>
           <div className="flex flex-col gap-0.5 text-[10px] text-slate-500">
             受任日（期間）

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import type { NavigateFunction } from "react-router-dom";
 import {
   useCase,
@@ -13,6 +13,7 @@ import {
   useEnsureFullCase,
 } from "../store/useCaseStore";
 import { useRefreshCases } from "../store/CaseStore";
+import { useFoundSet } from "../store/FoundSet";
 import { useAuth } from "../context/AuthContext";
 import { SectionCard, EditableField, StatusBadge, Tabs } from "../components";
 import { CreditorTab } from "./CreditorTab";
@@ -317,6 +318,30 @@ function CaseDetailBody({
   const [paymentScheduleSectionTab, setPaymentScheduleSectionTab] = useState<
     "payments" | "settlement"
   >("payments");
+
+  // 検索結果セット（左右ナビで案件を渡り歩く）
+  const foundSet = useFoundSet();
+  const gotoFound = (i: number) => {
+    const item = foundSet.items[i];
+    if (!item) return;
+    foundSet.setIndex(i);
+    navigate(`/cases/${item.caseId}`, {
+      state: { focusCreditorId: item.creditorId },
+    });
+  };
+
+  // 他画面（GMO要対応など）から focusCreditorId 付きで遷移したら、
+  // 和解状況の該当債権者タブを初期選択して表示する。
+  const location = useLocation();
+  useEffect(() => {
+    const st = location.state as { focusCreditorId?: number } | null;
+    if (st?.focusCreditorId != null) {
+      setCreditorScopeTabId(String(st.focusCreditorId));
+      setPaymentScheduleSectionTab("settlement");
+      navigate(location.pathname, { replace: true, state: null });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.key]);
   const displayCreditorScopeTabId =
     creditorScopeTabId === "all" ||
     creditors.some((c) => String(c.id) === creditorScopeTabId)
@@ -741,6 +766,42 @@ function CaseDetailBody({
           >
             ← 一覧に戻る
           </button>
+          {foundSet.items.length > 0 && (
+            <span className="flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs">
+              <button
+                type="button"
+                onClick={() => gotoFound(foundSet.index - 1)}
+                disabled={foundSet.index <= 0}
+                className="rounded px-1.5 font-bold text-blue-700 hover:bg-blue-100 disabled:opacity-30"
+                title="前の該当案件"
+              >
+                ◀
+              </button>
+              <span className="text-blue-900">
+                検索結果 {foundSet.index + 1} / {foundSet.items.length}
+                {foundSet.description && (
+                  <span className="ml-1 text-blue-500">（{foundSet.description}）</span>
+                )}
+              </span>
+              <button
+                type="button"
+                onClick={() => gotoFound(foundSet.index + 1)}
+                disabled={foundSet.index >= foundSet.items.length - 1}
+                className="rounded px-1.5 font-bold text-blue-700 hover:bg-blue-100 disabled:opacity-30"
+                title="次の該当案件"
+              >
+                ▶
+              </button>
+              <button
+                type="button"
+                onClick={() => foundSet.clear()}
+                className="rounded px-1.5 text-blue-500 hover:bg-blue-100"
+                title="検索結果を解除"
+              >
+                ✕
+              </button>
+            </span>
+          )}
           <span className="flex shrink-0 items-center gap-1.5">
             <div className="relative">
               <button

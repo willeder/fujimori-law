@@ -224,7 +224,11 @@ export function GmoTransferPage() {
                     keyField="creditorId"
                     density="compact"
                     paginated
-                    onRowClick={(r) => navigate(`/cases/${r.caseId}`)}
+                    onRowClick={(r) =>
+                      navigate(`/cases/${r.caseId}`, {
+                        state: { focusCreditorId: r.creditorId },
+                      })
+                    }
                     emptyMessage="未整備の弁済対象はありません"
                   />
                 </div>

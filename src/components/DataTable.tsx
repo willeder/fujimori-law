@@ -128,6 +128,11 @@ interface DataTableProps<T> {
    * 返った該当セットをそのままこのテーブルに表示する（FileMaker の Find 相当）。
    */
   onGlobalFind?: (conditions: { field: string; value: string }[]) => Promise<T[]>
+  /**
+   * 指定すると、検索実行時に「表示中テーブルの絞り込み/一覧表示」を行わず、条件を親へ渡す。
+   * 親はDB全体を検索して該当セットを作り、案件詳細を1件ずつ左右ナビで渡り歩く等に使う。
+   */
+  onFindNavigate?: (conditions: { field: string; value: string }[]) => void
 }
 
 export function DataTable<T>({
@@ -149,6 +154,7 @@ export function DataTable<T>({
   defaultPageSize = 50,
   enableFind = false,
   onGlobalFind,
+  onFindNavigate,
 }: DataTableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
@@ -230,6 +236,12 @@ export function DataTable<T>({
     const active = Object.entries(criteria)
       .map(([field, value]) => ({ field, value: value.trim() }))
       .filter((c) => c.value !== '')
+    // 検索結果を左右ナビで渡り歩くモード：条件を親へ渡してテーブル自体は変えない
+    if (onFindNavigate) {
+      setFindOn(false)
+      if (active.length > 0) onFindNavigate(active)
+      return
+    }
     setApplied(criteria)
     setFindOn(false)
     if (onGlobalFind) {

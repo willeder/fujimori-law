@@ -140,8 +140,9 @@ export function ContactHistoryTable({
           {
             key: 'creditorName',
             header: '債権者',
-            width: '5rem',
+            width: '12rem',
             sortable: false,
+            cellTruncate: false,
             render: (h) =>
               editingId === h.id ? (
                 <input
@@ -165,7 +166,7 @@ export function ContactHistoryTable({
     {
       key: 'contactDate',
       header: '日付',
-      width: '8.5rem',
+      width: '7rem',
       sortable: false,
       render: (h) =>
         editingId === h.id ? (

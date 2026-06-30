@@ -4,6 +4,7 @@ import { UiFontScaleProvider } from './context/UiFontScaleContext'
 import { UserSettingsProvider } from './context/UserSettingsContext'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { CaseProvider } from './store/CaseStore'
+import { FoundSetProvider } from './store/FoundSet'
 import { useCaseLoading } from './store/useCaseStore'
 import {
   CaseListPage,
@@ -132,7 +133,9 @@ export default function App() {
           <UserSettingsProvider>
             <CaseProvider>
               <DataGate>
-                <RouterProvider router={router} />
+                <FoundSetProvider>
+                  <RouterProvider router={router} />
+                </FoundSetProvider>
               </DataGate>
             </CaseProvider>
           </UserSettingsProvider>
