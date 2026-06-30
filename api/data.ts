@@ -14,6 +14,7 @@ import {
   apiRoutes,
   getCaseById,
   searchCases,
+  searchCreditors,
   updateCaseField,
   updateCreditorField,
   updatePaymentField,
@@ -180,6 +181,13 @@ export default async function handler(
     if (path === '/api/cases/search' && method === 'POST') {
       const raw = (await getRawBody(req)).toString('utf8')
       json(await searchCases(raw))
+      return
+    }
+
+    // ── 債権者のDB全体横断検索（案件をまたぐ） ──
+    if (path === '/api/creditors/search' && method === 'POST') {
+      const raw = (await getRawBody(req)).toString('utf8')
+      json(await searchCreditors(raw))
       return
     }
 

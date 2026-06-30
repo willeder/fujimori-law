@@ -295,6 +295,41 @@ export async function searchCases(raw: string) {
   return rows.map(toCaseSummaryJson)
 }
 
+/**
+ * 債権者をDB全体から横断検索（案件をまたいで該当する債権者一覧を返す）。
+ * 案件詳細の債権者タブで「ポケット」等を検索すると、全クライアントの該当債権者を返す用途。
+ * 条件は { field, value }[]。field は Creditor のスカラー列（creditorName 等）をホワイトリスト検証。
+ */
+export async function searchCreditors(raw: string) {
+  let conditions: { field: string; value: string }[] = []
+  try {
+    const body = JSON.parse(raw || '{}') as { conditions?: { field: string; value: string }[] }
+    conditions = body.conditions ?? []
+  } catch {
+    return { error: 'bad request' }
+  }
+  const wheres: string[] = []
+  const params: string[] = []
+  for (const cond of conditions) {
+    const v = (cond?.value ?? '').trim()
+    if (!v) continue
+    // Creditor のスカラー列のみ許可（列名の検証）
+    if (!CREDITOR_FIELD_TYPE[cond.field]) continue
+    params.push(`%${v}%`)
+    wheres.push(`CAST(cr."${cond.field}" AS TEXT) ILIKE $${params.length}`)
+  }
+  if (wheres.length === 0) return []
+  const sql = `SELECT cr.id FROM creditors cr WHERE ${wheres.join(' AND ')} ORDER BY cr.id ASC LIMIT 5000`
+  const idRows = await prisma.$queryRawUnsafe<{ id: number }[]>(sql, ...params)
+  const ids = idRows.map((r) => r.id)
+  if (ids.length === 0) return []
+  const rows = await prisma.creditor.findMany({
+    where: { id: { in: ids } },
+    orderBy: { id: 'asc' },
+  })
+  return rows.map(toCreditorJson)
+}
+
 /** 案件1件のフルデータ（詳細ページ用） */
 export async function getCaseById(id: number) {
   const c = await prisma.case.findUnique({ where: { id } })

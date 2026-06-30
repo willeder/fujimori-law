@@ -122,6 +122,12 @@ interface DataTableProps<T> {
    * 入力した全列に部分一致（AND）するレコードだけを表示中テーブルで絞り込む。
    */
   enableFind?: boolean
+  /**
+   * 指定すると、検索実行時に「表示中データの絞り込み」ではなく DB 全体を横断検索する。
+   * 条件(列key=field, 値=value)を受け取り、該当行（案件をまたぐ）を返す。
+   * 返った該当セットをそのままこのテーブルに表示する（FileMaker の Find 相当）。
+   */
+  onGlobalFind?: (conditions: { field: string; value: string }[]) => Promise<T[]>
 }
 
 export function DataTable<T>({
@@ -142,6 +148,7 @@ export function DataTable<T>({
   paginated = false,
   defaultPageSize = 50,
   enableFind = false,
+  onGlobalFind,
 }: DataTableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
@@ -153,6 +160,9 @@ export function DataTable<T>({
   const [findOn, setFindOn] = useState(false)
   const [criteria, setCriteria] = useState<Record<string, string>>({})
   const [applied, setApplied] = useState<Record<string, string>>({})
+  // DB全体検索の該当セット（onGlobalFind 使用時）。null=未実行
+  const [globalRows, setGlobalRows] = useState<T[] | null>(null)
+  const [globalLoading, setGlobalLoading] = useState(false)
 
   // このテーブル固有のID（Shift+F の対象を1テーブルに限定するため）
   const findIdRef = useRef<number>(0)
@@ -217,14 +227,30 @@ export function DataTable<T>({
     setFindOn(true)
   }
   const performFind = () => {
+    const active = Object.entries(criteria)
+      .map(([field, value]) => ({ field, value: value.trim() }))
+      .filter((c) => c.value !== '')
     setApplied(criteria)
     setFindOn(false)
+    if (onGlobalFind) {
+      // DB全体検索：条件をサーバへ送り、該当セットをこのテーブルに表示
+      if (active.length === 0) {
+        setGlobalRows(null)
+        return
+      }
+      setGlobalLoading(true)
+      Promise.resolve(onGlobalFind(active))
+        .then((rows) => setGlobalRows(rows))
+        .catch(() => setGlobalRows([]))
+        .finally(() => setGlobalLoading(false))
+    }
   }
   const cancelFind = () => setFindOn(false)
   const clearFind = () => {
     setApplied({})
     setCriteria({})
     setFindOn(false)
+    setGlobalRows(null)
   }
 
   // Shift+F で検索モードに入る/抜ける。入力フィールドにフォーカス中は無視
@@ -264,15 +290,17 @@ export function DataTable<T>({
     ? Object.entries(applied).filter(([, v]) => v.trim() !== '')
     : []
   const findData =
-    activeApplied.length === 0
-      ? data
-      : data.filter((item) =>
-          activeApplied.every(([k, v]) => {
-            const col = columns.find((c) => String(c.key) === k)
-            if (!col) return true
-            return matchOne(col, item, v)
-          })
-        )
+    globalRows != null
+      ? globalRows // DB全体検索の該当セット（サーバ側で絞込済み）
+      : activeApplied.length === 0
+        ? data
+        : data.filter((item) =>
+            activeApplied.every(([k, v]) => {
+              const col = columns.find((c) => String(c.key) === k)
+              if (!col) return true
+              return matchOne(col, item, v)
+            })
+          )
 
   const handleSort = (key: string) => {
     if (sortKey === key) {
@@ -488,12 +516,18 @@ export function DataTable<T>({
           複数列はAND・部分一致。金額/件数は {'>=1000000'}・{'<50000'}・{'=0'}・範囲 {'10000..50000'} で絞込可
         </span>
       </div>
-    ) : activeApplied.length > 0 ? (
+    ) : globalLoading ? (
+      <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-amber-300 bg-amber-50 px-3 py-1.5 text-xs">
+        <span className="font-semibold text-amber-900">🔍 DB全体を検索中…</span>
+      </div>
+    ) : activeApplied.length > 0 || globalRows != null ? (
       // 検索実行後（該当セット表示中）
       <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-amber-300 bg-amber-50 px-3 py-1.5 text-xs">
         <span className="font-semibold text-amber-900">
-          🔍 検索結果 {total} 件
-          <span className="ml-1 font-normal text-amber-700">／ 全 {data.length} 件</span>
+          🔍 {globalRows != null ? 'DB全体の検索結果' : '検索結果'} {total} 件
+          {globalRows == null && (
+            <span className="ml-1 font-normal text-amber-700">／ 全 {data.length} 件</span>
+          )}
         </span>
         <span className="text-[10px] text-amber-700">
           条件: {activeApplied.map(([k, v]) => `${columns.find((c) => String(c.key) === k)?.header ?? k}=${v}`).join(' / ')}

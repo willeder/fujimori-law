@@ -1,4 +1,6 @@
-import { useCaseDispatch } from '../store/useCaseStore'
+import { useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useCaseDispatch, useCaseState } from '../store/useCaseStore'
 import { EditableField, StatusBadge, DataTable, type Column } from '../components'
 import type { Creditor } from '../types'
 
@@ -10,6 +12,28 @@ interface CreditorTabProps {
 
 export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
   const dispatch = useCaseDispatch()
+  const navigate = useNavigate()
+  const { cases } = useCaseState()
+  // caseId → 依頼者名（DB全体の債権者検索結果でどの依頼者かを示すため）
+  const clientNameByCase = useMemo(
+    () => new Map(cases.map((c) => [c.id, c.clientBasicInfo?.name ?? ''])),
+    [cases]
+  )
+  // 債権者をDB全体から横断検索（案件をまたぐ）。条件はそのままサーバへ
+  const globalCreditorFind = async (
+    conditions: { field: string; value: string }[]
+  ): Promise<Creditor[]> => {
+    try {
+      const r = await fetch('/api/creditors/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ conditions }),
+      })
+      return r.ok ? ((await r.json()) as Creditor[]) : []
+    } catch {
+      return []
+    }
+  }
 
   const updateCreditor = (creditor: Creditor, updates: Partial<Creditor>) => {
     // 楽観的にローカル反映
@@ -48,6 +72,30 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
     )
 
     const columns: Column<Creditor>[] = [
+      {
+        key: '_client',
+        header: '依頼者',
+        width: '110px',
+        sortable: false,
+        // DB全体検索の結果でどの依頼者の債権者かを示し、クリックでその案件へ移動。
+        render: (item) => {
+          const name = clientNameByCase.get(item.caseId) ?? '-'
+          return (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                navigate(`/cases/${item.caseId}`)
+              }}
+              className="truncate text-left text-blue-600 underline hover:text-blue-800"
+              title={name}
+            >
+              {name}
+            </button>
+          )
+        },
+        filterValue: (item) => clientNameByCase.get(item.caseId) ?? '',
+      },
       {
         key: 'status',
         header: 'ステータス',
@@ -222,6 +270,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           bodyMaxHeightClassName="max-h-[min(72vh,40rem)]"
           cellSingleLine
           enableFind
+          onGlobalFind={globalCreditorFind}
         />
       </div>
     )
