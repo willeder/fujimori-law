@@ -336,6 +336,7 @@ export function ContactHistoryTable({
             cellSingleLine
             suspendTruncate={editingId !== null}
             bodyMaxHeightClassName="max-h-[min(55vh,32rem)]"
+            enableFind
           />
         </div>
       </div>

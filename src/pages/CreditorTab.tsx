@@ -221,6 +221,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           density="dense"
           bodyMaxHeightClassName="max-h-[min(72vh,40rem)]"
           cellSingleLine
+          enableFind
         />
       </div>
     )

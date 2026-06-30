@@ -337,6 +337,7 @@ export function CreditorPaymentTable({
         stickyHeader
         cellSingleLine
         suspendTruncate={editingId !== null}
+        enableFind
         getRowClassName={(item) => {
           if (!item.actualDate) return ''
           const planned = item.plannedAmount ?? 0

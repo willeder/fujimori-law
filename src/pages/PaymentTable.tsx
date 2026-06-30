@@ -707,6 +707,7 @@ export function PaymentTable({
         stickyHeader
         cellSingleLine
         suspendTruncate={editingId !== null}
+        enableFind
         getRowClassName={(item) => {
           // 実入金日がない場合はデフォルト
           if (!item.actualDate) return ''

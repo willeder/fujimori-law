@@ -1,4 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+
+// 1画面に複数のテーブルがある場合（案件詳細など）に Shift+F が全テーブルを
+// 同時にトグルしないよう、「いま操作対象のテーブル」を1つだけ保持する簡易レジストリ。
+// 直近にホバー/フォーカスしたテーブルがアクティブになり、Shift+F はそのテーブルだけに効く。
+let __activeFindTable: number | null = null
+let __findTableSeq = 0
 
 export interface Column<T> {
   key: keyof T | string
@@ -109,6 +115,25 @@ export function DataTable<T>({
   const [criteria, setCriteria] = useState<Record<string, string>>({})
   const [applied, setApplied] = useState<Record<string, string>>({})
 
+  // このテーブル固有のID（Shift+F の対象を1テーブルに限定するため）
+  const findIdRef = useRef<number>(0)
+  if (findIdRef.current === 0) {
+    __findTableSeq += 1
+    findIdRef.current = __findTableSeq
+  }
+  // マウント時、まだアクティブが無ければ自分をアクティブに（単一テーブル画面で即使える）
+  useEffect(() => {
+    if (!enableFind) return
+    if (__activeFindTable === null) __activeFindTable = findIdRef.current
+    return () => {
+      if (__activeFindTable === findIdRef.current) __activeFindTable = null
+    }
+  }, [enableFind])
+  // ホバー/フォーカスで自分をアクティブにする
+  const claimActive = () => {
+    if (enableFind) __activeFindTable = findIdRef.current
+  }
+
   // この列の検索対象文字列（filterValue 優先、無ければ生値を文字列化）
   const cellSearchText = (col: Column<T>, item: T): string => {
     if (col.filterValue) return col.filterValue(item)
@@ -154,6 +179,8 @@ export function DataTable<T>({
           t.tagName === 'SELECT' ||
           t.isContentEditable)
       if (typing) return
+      // 複数テーブル画面では、アクティブ（直近に触れた）テーブルだけが Shift+F に反応
+      if (__activeFindTable !== null && __activeFindTable !== findIdRef.current) return
       if (e.shiftKey && (e.key === 'F' || e.key === 'f')) {
         e.preventDefault()
         setFindOn((v) => {
@@ -439,7 +466,11 @@ export function DataTable<T>({
   ) : null
 
   return (
-    <div className={paginated ? 'flex min-h-0 flex-col' : ''}>
+    <div
+      className={paginated ? 'flex min-h-0 flex-col' : ''}
+      onMouseEnter={claimActive}
+      onFocusCapture={claimActive}
+    >
       {findBar}
       {pager}
     <div className={bodyScrollClass}>
