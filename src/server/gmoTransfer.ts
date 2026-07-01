@@ -173,10 +173,23 @@ export async function buildGmoTransfers(
   // 当月判定の基準＝対象期間の開始月（継続案件の振込日をこの月の支払日に置く）
   const refD = startD
 
+  // 当月入金フィルタ：対象期間の月に「実際に入金があった案件(クライアント)」だけを弁済対象にする。
+  // 弁済代行は当月の入金分を原資に債権者へ振り込むため、当月入金が無い案件には振り込まない。
+  // （kintone実データとの照合で確定したルール。これが無いと未入金クライアントの債権者まで過剰計上される）
+  const monthStart = new Date(Date.UTC(startD.getUTCFullYear(), startD.getUTCMonth(), 1))
+  const monthEnd = new Date(Date.UTC(startD.getUTCFullYear(), startD.getUTCMonth() + 1, 1))
+  const paidRows = await prisma.payment.findMany({
+    where: { actualDate: { gte: monthStart, lt: monthEnd } },
+    select: { caseId: true },
+    distinct: ['caseId'],
+  })
+  const paidCaseIds = new Set(paidRows.map((p) => p.caseId))
+
   const creditors = await prisma.creditor.findMany({
     where: {
       repaymentTarget: null, // 停止/終了は対象外
       paymentStartMonth: { not: null }, // 支払開始日(年月日)を保持
+      caseId: { in: [...paidCaseIds] }, // 当月入金のある案件のみ
     },
     select: {
       caseId: true,

@@ -127,14 +127,47 @@ def future_interest(val):
     return t
 
 
-def read_csv(name):
-    path = SRC / name
-    with open(path, "r", encoding="utf-8", newline="") as f:
+def _read_path(path):
+    # 文字コード自動判定: UTF-8(BOM可) を優先し、失敗したら CP932(Shift-JIS)。
+    for enc in ("utf-8-sig", "cp932"):
+        try:
+            with open(path, "r", encoding=enc, newline="") as f:
+                return list(csv.DictReader(f))
+        except UnicodeDecodeError:
+            continue
+    with open(path, "r", encoding="utf-8", errors="replace", newline="") as f:
         return list(csv.DictReader(f))
+
+
+def read_csv(*names):
+    # 複数の候補名を順に試し、最初に存在したファイルを読む（新旧の名称差を吸収）。
+    for name in names:
+        p = SRC / name
+        if p.exists():
+            return _read_path(p)
+    return _read_path(SRC / names[0])
 
 
 # ---------- マスタ読み込み・caseId 採番 ----------
 def build_master():
+    # 新形式: 「基本情報.csv」1本に全列が入っている。あれば優先。
+    # 旧形式: 1st/2nd/3rd.csv を ID で横結合（後方互換で残す）。
+    if (SRC / "基本情報.csv").exists():
+        d1 = read_csv("基本情報.csv")
+        id_to_case = {}
+        master = {}
+        n = 0
+        rows = []
+        for r1 in d1:
+            eid = (r1.get("ID") or "").strip()
+            if not eid or eid in id_to_case:
+                continue  # 空ID・重複IDはスキップ
+            n += 1
+            id_to_case[eid] = n
+            master[eid] = dict(r1)
+            rows.append(r1)
+        return rows, master, id_to_case
+
     d1 = read_csv("1st.csv")
     d2 = {r["ID"]: r for r in read_csv("2nd.csv")}
     d3 = {r["ID"]: r for r in read_csv("3rd.csv")}
@@ -375,7 +408,7 @@ def emit_creditors(id_to_case):
     和解詳細に現れない一覧債権者(スケジュール未確定)は表示用に別途出力する。"""
     # 一覧を (ID,債権者名) -> 行 でインデックス（補助情報・最初の出現を採用）
     listidx = {}
-    for r in read_csv("和解対象債権者一覧.csv"):
+    for r in read_csv("和解対象債権一覧.csv", "和解対象債権者一覧.csv"):
         eid = r["ID"].strip()
         name = s(r.get("債権者"))
         if not name:
@@ -415,7 +448,7 @@ def emit_creditors(id_to_case):
 def emit_contacts(id_to_case):
     out = []
     hid = 1
-    for r in read_csv("依頼者　接触履歴.csv"):
+    for r in read_csv("依頼者接触履歴.csv", "依頼者　接触履歴.csv"):
         cid = id_to_case.get(r["ID"].strip())
         if cid is None:
             continue
@@ -429,7 +462,7 @@ def emit_contacts(id_to_case):
             "comment": s(r.get("コメント")),
         })
         hid += 1
-    for r in read_csv("債権者　接触履歴.csv"):
+    for r in read_csv("債権者接触履歴.csv", "債権者　接触履歴.csv"):
         cid = id_to_case.get(r["ID"].strip())
         if cid is None:
             continue
