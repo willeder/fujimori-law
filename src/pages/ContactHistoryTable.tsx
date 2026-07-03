@@ -25,6 +25,15 @@ export function ContactHistoryTable({
   const [editData, setEditData] = useState<Partial<ContactHistory>>({})
   // まだDB保存していない新規行（合成ID）。保存時にPOST→実IDへ差替え
   const [newIds, setNewIds] = useState<Set<number>>(() => new Set())
+  // コメント全行表示のトグル（通常は2行まで、クリックで全行）
+  const [expandedComments, setExpandedComments] = useState<Set<number>>(() => new Set())
+  const toggleComment = (id: number) =>
+    setExpandedComments((prev) => {
+      const n = new Set(prev)
+      if (n.has(id)) n.delete(id)
+      else n.add(id)
+      return n
+    })
   const wrapperRef = useRef<HTMLDivElement>(null)
 
   /** 追加直後に最下段（新規行）まで縦スクロール */
@@ -264,7 +273,14 @@ export function ContactHistoryTable({
           />
         ) : (
           <div
-            className={`whitespace-pre-wrap break-words leading-snug ${!h.comment ? 'text-slate-300' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation()
+              if (h.comment) toggleComment(h.id)
+            }}
+            title={expandedComments.has(h.id) ? 'クリックで折りたたむ' : '全行表示'}
+            className={`whitespace-pre-wrap break-words leading-snug ${
+              h.comment ? 'cursor-pointer' : 'text-slate-300'
+            } ${expandedComments.has(h.id) ? '' : 'line-clamp-2'}`}
           >
             {h.comment ?? '-'}
           </div>

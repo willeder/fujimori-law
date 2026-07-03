@@ -146,8 +146,8 @@ export function Tabs({
           const base = isSplit
             ? `w-full px-2 ${isDense ? 'py-0.5 text-[10px] leading-none' : 'py-1.5 text-[11px] leading-tight'} font-medium transition-colors text-center`
             : accent
-              ? `rounded-t-md border-l-2 ${isDense ? 'inline-flex h-7 shrink-0 items-center py-0 pl-1.5 pr-1.5 text-[10px] leading-none' : 'py-1 pl-2 pr-2 text-xs leading-tight'} font-normal whitespace-nowrap transition-colors`
-              : `rounded-t-md border-b-2 border-b-transparent ${isDense ? 'inline-flex h-7 shrink-0 items-center px-2 py-0 text-[10px] leading-none' : 'px-2 py-1 text-xs leading-tight'} font-normal whitespace-nowrap transition-colors`
+              ? `rounded-t-md border-l-2 ${isDense ? 'inline-flex h-[2.6rem] shrink-0 items-center py-0 pl-2 pr-2 text-[12px] leading-tight' : 'py-1 pl-2 pr-2 text-xs leading-tight'} font-normal whitespace-nowrap transition-colors`
+              : `rounded-t-md border-b-2 border-b-transparent ${isDense ? 'inline-flex h-[2.6rem] shrink-0 items-center px-2.5 py-0 text-[12px] leading-tight' : 'px-2 py-1 text-xs leading-tight'} font-normal whitespace-nowrap transition-colors`
 
           const muted = tab.muted
           const state = isSplit

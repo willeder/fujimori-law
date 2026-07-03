@@ -19,6 +19,8 @@ import { MembersPage } from './pages/MembersPage'
 import { GmoTransferPage } from './pages/GmoTransferPage'
 import { IntakeImportPage } from './pages/IntakeImportPage'
 import { PaymentDelayDashboard } from './pages/PaymentDelayDashboard'
+import { ClientReminderPage } from './pages/ClientReminderPage'
+import { CreditorReminderPage } from './pages/CreditorReminderPage'
 
 const router = createBrowserRouter([
   {
@@ -48,6 +50,14 @@ const router = createBrowserRouter([
   {
     path: '/cases/:id',
     element: <CaseDetailPage />,
+  },
+  {
+    path: '/reminder-client',
+    element: <ClientReminderPage />,
+  },
+  {
+    path: '/reminder-creditor',
+    element: <CreditorReminderPage />,
   },
   {
     path: '/members',

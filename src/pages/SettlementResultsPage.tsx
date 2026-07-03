@@ -21,7 +21,8 @@ export function SettlementResultsPage() {
 
   // 検索条件（受任日・和解日は期間指定: From〜To）
   const [fCreditor, setFCreditor] = useState('')
-  const [fName, setFName] = useState('')
+  const [fNoticeFrom, setFNoticeFrom] = useState('')
+  const [fNoticeTo, setFNoticeTo] = useState('')
   const [fAccFrom, setFAccFrom] = useState('')
   const [fAccTo, setFAccTo] = useState('')
   const [fSetFrom, setFSetFrom] = useState('')
@@ -80,7 +81,8 @@ export function SettlementResultsPage() {
 
   const clear = () => {
     setFCreditor('')
-    setFName('')
+    setFNoticeFrom('')
+    setFNoticeTo('')
     setFAccFrom('')
     setFAccTo('')
     setFSetFrom('')
@@ -122,25 +124,16 @@ export function SettlementResultsPage() {
 
   const filtered = useMemo(() => {
     if (!searched) return []
-    const query = fName.trim().toLowerCase()
     return rows.filter((r) => {
       if (fCreditor && !(r.creditorName ?? '').toLowerCase().includes(fCreditor.trim().toLowerCase())) return false
+      if (!inRange(r.acceptanceNoticeSentDate, fNoticeFrom, fNoticeTo)) return false
       if (!inRange(r.acceptanceDate, fAccFrom, fAccTo)) return false
       if (!inRange(r.settlementDate, fSetFrom, fSetTo)) return false
       if (fStatus && r.caseStatus !== fStatus) return false
-      if (
-        query &&
-        !(
-          r.name?.toLowerCase().includes(query) ||
-          r.furigana?.toLowerCase().includes(query) ||
-          r.externalId?.toLowerCase().includes(query)
-        )
-      )
-        return false
       return true
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searched, rows, fCreditor, fAccFrom, fAccTo, fSetFrom, fSetTo, fStatus, fName])
+  }, [searched, rows, fCreditor, fNoticeFrom, fNoticeTo, fAccFrom, fAccTo, fSetFrom, fSetTo, fStatus])
 
   const columns: Column<Row>[] = [
     { key: 'caseId', header: 'ID', width: '76px', align: 'center', render: (r) => r.externalId ?? '-' },
@@ -205,15 +198,24 @@ export function SettlementResultsPage() {
           }}
           className="flex flex-wrap items-end gap-2"
         >
-          <label className="flex flex-col gap-0.5 text-[10px] text-slate-500">
-            名前・フリガナ・ID
-            <input
-              value={fName}
-              onChange={(e) => setFName(e.target.value)}
-              placeholder="部分一致"
-              className={`${inputCls} w-40`}
-            />
-          </label>
+          <div className="flex flex-col gap-0.5 text-[10px] text-slate-500">
+            受任通知送付日（期間）
+            <div className="flex items-center gap-1">
+              <input
+                type="date"
+                value={fNoticeFrom}
+                onChange={(e) => setFNoticeFrom(e.target.value)}
+                className={`${inputCls} w-36`}
+              />
+              <span className="text-slate-400">〜</span>
+              <input
+                type="date"
+                value={fNoticeTo}
+                onChange={(e) => setFNoticeTo(e.target.value)}
+                className={`${inputCls} w-36`}
+              />
+            </div>
+          </div>
           <label className="flex flex-col gap-0.5 text-[10px] text-slate-500">
             債権者（部分一致）
             <input
@@ -317,6 +319,7 @@ export function SettlementResultsPage() {
               density="compact"
               paginated
               enableFind
+              persistKey="settlementResults"
               emptyMessage="該当する和解実績がありません"
             />
           </div>

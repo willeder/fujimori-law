@@ -638,6 +638,18 @@ function CaseDetailBody({
     });
   };
 
+  const updateReminderInfo = (
+    field: keyof Case["reminderInfo"],
+    value: string,
+  ) => {
+    updateCase({
+      reminderInfo: {
+        ...caseData.reminderInfo,
+        [field]: value || null,
+      },
+    });
+  };
+
   const updateFeeInfo = (field: keyof Case["feeInfo"], value: string) => {
     const numericFields: (keyof Case["feeInfo"])[] = [
       "normalFee",
@@ -938,18 +950,6 @@ function CaseDetailBody({
             truncateValue
             fillWidth
           />
-          <div className="col-span-2">
-            <EditableField
-              label="メール"
-              value={caseData.clientBasicInfo.email}
-              onChange={(v) => updateClientBasicInfo("email", v)}
-              compact
-              compactLayout="inline"
-              bordered
-              truncateValue
-              fillWidth
-            />
-          </div>
           <EditableField
             label="要注意"
             value={caseData.clientBasicInfo.cautionRank}
@@ -960,6 +960,27 @@ function CaseDetailBody({
               { value: "B", label: "B" },
               { value: "C", label: "C" },
             ]}
+            compact
+            compactLayout="inline"
+            bordered
+            truncateValue
+            fillWidth
+          />
+          <EditableField
+            label="メール"
+            value={caseData.clientBasicInfo.email}
+            onChange={(v) => updateClientBasicInfo("email", v)}
+            compact
+            compactLayout="inline"
+            bordered
+            truncateValue
+            fillWidth
+          />
+          <EditableField
+            label="リマインド日"
+            value={caseData.reminderInfo.reminderDate}
+            onChange={(v) => updateReminderInfo("reminderDate", v)}
+            type="date"
             compact
             compactLayout="inline"
             bordered

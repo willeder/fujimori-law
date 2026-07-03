@@ -148,6 +148,7 @@ export function PaymentManagementPage() {
               density="compact"
               paginated
               enableFind
+              persistKey="paymentManagement"
               emptyMessage="該当する案件がありません"
             />
           </div>

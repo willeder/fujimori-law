@@ -231,6 +231,7 @@ export function PaymentDiscrepancyPage() {
               density="compact"
               paginated
               enableFind
+              persistKey="paymentDiscrepancy"
               emptyMessage="入金額の相違はありません"
               getRowClassName={(item) => item.isLess ? 'bg-red-50' : 'bg-blue-50'}
             />

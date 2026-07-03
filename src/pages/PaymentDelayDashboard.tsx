@@ -244,6 +244,7 @@ export function PaymentDelayDashboard() {
                 density="compact"
                 paginated
                 enableFind
+                persistKey="paymentDelay"
                 bodyMaxHeightClassName="max-h-[calc(100vh-21rem)]"
               />
             </div>

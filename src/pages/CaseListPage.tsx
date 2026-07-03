@@ -5,6 +5,7 @@ import { DataTable, type Column, StatusBadge } from '../components'
 import { AppHeader } from '../components/AppHeader'
 import { LineBroadcastModal, LineHistoryModal } from '../components/case/LineBroadcastModal'
 import { SEARCH_FIELDS, type Condition } from './searchFields'
+import { useSessionState } from '../hooks/useSessionState'
 import type { Case } from '../types'
 
 type SearchField = 'all' | 'name' | 'phone' | 'prefecture' | 'status' | 'staff'
@@ -22,11 +23,14 @@ export function CaseListPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { cases } = useCaseState()
-  const [searchField, setSearchField] = useState<SearchField>('all')
-  const [searchValue, setSearchValue] = useState('')
+  // 絞り込み条件は sessionStorage に保持し、詳細から戻っても復元する
+  const [searchField, setSearchField] = useSessionState<SearchField>('caseList.field', 'all')
+  const [searchValue, setSearchValue] = useSessionState('caseList.value', '')
   // 詳細検索（サーバ横断検索・複数条件AND）
-  const [showAdv, setShowAdv] = useState(false)
-  const [conditions, setConditions] = useState<Condition[]>([{ field: 'name', value: '' }])
+  const [showAdv, setShowAdv] = useSessionState('caseList.showAdv', false)
+  const [conditions, setConditions] = useSessionState<Condition[]>('caseList.conditions', [
+    { field: 'name', value: '' },
+  ])
   const [results, setResults] = useState<Case[] | null>(null)
   const [searching, setSearching] = useState(false)
 
@@ -548,6 +552,7 @@ export function CaseListPage() {
             paginated
             stickyHeader
             enableFind
+            persistKey="caseList"
           />
         </div>
       </div>

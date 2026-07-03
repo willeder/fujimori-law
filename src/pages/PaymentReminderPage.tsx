@@ -154,10 +154,25 @@ export function PaymentReminderPage() {
   const toggleAll = () =>
     setSelected(allSelected ? new Set() : new Set(sendableIds))
 
+  // 一覧で案件をクリックしたら、その案件をプレビュー対象にする（手動送信用にコピーできる）
+  const [pickedId, setPickedId] = useState<number | null>(null)
   const previewCandidate =
+    (pickedId != null ? candidates.find((c) => c.caseId === pickedId) : undefined) ??
     candidates.find((c) => selectedSendable.includes(c.caseId)) ??
     candidates.find((c) => c.lineLinked) ??
     candidates[0]
+
+  const [copied, setCopied] = useState(false)
+  const copyPreview = async () => {
+    if (!previewCandidate) return
+    try {
+      await navigator.clipboard.writeText(fillTemplate(template, previewCandidate, timing))
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    } catch {
+      /* noop */
+    }
+  }
 
   const send = async () => {
     if (selectedSendable.length === 0 || !template.trim()) return
@@ -266,9 +281,18 @@ export function PaymentReminderPage() {
                     return (
                       <tr
                         key={c.caseId}
+                        onClick={() => {
+                          setPickedId(c.caseId)
+                          setShowPreview(true)
+                        }}
+                        title="クリックでこの案件をプレビューに反映（コピーして手動送信）"
                         className={
-                          'border-t border-slate-100 ' +
-                          (sendable ? 'hover:bg-blue-50/40' : 'bg-slate-50/50 text-slate-400')
+                          'cursor-pointer border-t border-slate-100 ' +
+                          (pickedId === c.caseId
+                            ? 'bg-blue-100/70 '
+                            : sendable
+                              ? 'hover:bg-blue-50/40 '
+                              : 'bg-slate-50/50 text-slate-400 ')
                         }
                       >
                         <td className="px-2 py-1 text-center">
@@ -276,6 +300,7 @@ export function PaymentReminderPage() {
                             type="checkbox"
                             checked={selected.has(c.caseId)}
                             onChange={() => toggle(c.caseId)}
+                            onClick={(e) => e.stopPropagation()}
                             disabled={!sendable}
                             aria-label={`${c.name ?? c.caseId} を選択`}
                           />
@@ -320,13 +345,24 @@ export function PaymentReminderPage() {
           <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
             <div className="mb-1.5 flex items-center justify-between">
               <h2 className="text-sm font-bold text-slate-800">テンプレート</h2>
-              <button
-                type="button"
-                onClick={() => setShowPreview((v) => !v)}
-                className="rounded border border-slate-300 px-2 py-0.5 text-[11px] text-slate-600 hover:bg-slate-50"
-              >
-                {showPreview ? '編集に戻す' : 'プレビュー'}
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={copyPreview}
+                  disabled={!previewCandidate}
+                  className="rounded border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 hover:bg-emerald-100 disabled:opacity-40"
+                  title="プレビュー対象の本文（差し込み済み）をコピー"
+                >
+                  {copied ? 'コピーしました' : '本文をコピー'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowPreview((v) => !v)}
+                  className="rounded border border-slate-300 px-2 py-0.5 text-[11px] text-slate-600 hover:bg-slate-50"
+                >
+                  {showPreview ? '編集に戻す' : 'プレビュー'}
+                </button>
+              </div>
             </div>
 
             {showPreview ? (

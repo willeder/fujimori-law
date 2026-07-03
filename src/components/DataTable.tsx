@@ -129,6 +129,11 @@ interface DataTableProps<T> {
    */
   onGlobalFind?: (conditions: { field: string; value: string }[]) => Promise<T[]>
   /**
+   * 指定すると、ソート状態を sessionStorage に保持し、画面遷移して戻っても復元する。
+   * 画面ごとに一意なキーを渡す（例: "settlementResults"）。
+   */
+  persistKey?: string
+  /**
    * 指定すると、検索実行時に「表示中テーブルの絞り込み/一覧表示」を行わず、条件を親へ渡す。
    * 親はDB全体を検索して該当セットを作り、案件詳細を1件ずつ左右ナビで渡り歩く等に使う。
    */
@@ -153,11 +158,36 @@ export function DataTable<T>({
   paginated = false,
   defaultPageSize = 50,
   enableFind = false,
+  persistKey,
   onGlobalFind,
   onFindNavigate,
 }: DataTableProps<T>) {
-  const [sortKey, setSortKey] = useState<string | null>(null)
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+  const [sortKey, setSortKey] = useState<string | null>(() => {
+    if (!persistKey) return null
+    try {
+      const r = sessionStorage.getItem(`${persistKey}.sortKey`)
+      return r ? (JSON.parse(r) as string | null) : null
+    } catch {
+      return null
+    }
+  })
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(() => {
+    if (!persistKey) return 'asc'
+    try {
+      return sessionStorage.getItem(`${persistKey}.sortOrder`) === 'desc' ? 'desc' : 'asc'
+    } catch {
+      return 'asc'
+    }
+  })
+  useEffect(() => {
+    if (!persistKey) return
+    try {
+      sessionStorage.setItem(`${persistKey}.sortKey`, JSON.stringify(sortKey))
+      sessionStorage.setItem(`${persistKey}.sortOrder`, sortOrder)
+    } catch {
+      /* noop */
+    }
+  }, [persistKey, sortKey, sortOrder])
 
   // ── 検索モード（FileMaker風: 検索リクエストに条件入力 → Enter で実行 → 該当セット表示） ──
   // findOn   : 検索モード中（空の検索リクエストに条件入力中。データ行は隠す）
