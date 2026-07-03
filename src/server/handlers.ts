@@ -815,6 +815,42 @@ export async function getCreditorReminders() {
   }))
 }
 
+/**
+ * 和解実績一覧用：表示・絞り込みに必要な列だけを返す軽量版。
+ * 全債権者を「全フィールド」で転送していた重さ(15〜19MB)を数分の一に抑える。
+ */
+export async function getSettlementCreditors() {
+  const rows = await prisma.creditor.findMany({
+    select: {
+      id: true,
+      caseId: true,
+      creditorName: true,
+      status: true,
+      responseStatus: true,
+      settlementDate: true,
+      settlementAmount: true,
+      settlementDebtAmount: true,
+      settlementContentComment: true,
+      acceptanceNoticeSentDate: true,
+      debtAmount: true,
+    },
+    orderBy: { id: 'asc' },
+  })
+  return rows.map((c) => ({
+    id: c.id,
+    caseId: c.caseId,
+    creditorName: c.creditorName,
+    status: c.status,
+    responseStatus: c.responseStatus,
+    settlementDate: ds(c.settlementDate),
+    settlementAmount: c.settlementAmount,
+    settlementDebtAmount: c.settlementDebtAmount,
+    settlementContentComment: c.settlementContentComment,
+    acceptanceNoticeSentDate: ds(c.acceptanceNoticeSentDate),
+    debtAmount: c.debtAmount,
+  }))
+}
+
 /** caseId 指定時はその案件のみ（案件詳細の遅延読み込み用） */
 export async function getCreditors(caseId?: number) {
   const rows = await prisma.creditor.findMany({

@@ -338,6 +338,7 @@ export function CreditorPaymentTable({
         cellSingleLine
         suspendTruncate={editingId !== null}
         enableFind
+        bodyMaxHeightClassName="max-h-[min(60vh,32rem)]"
         getRowClassName={(item) => {
           if (!item.actualDate) return ''
           const planned = item.plannedAmount ?? 0

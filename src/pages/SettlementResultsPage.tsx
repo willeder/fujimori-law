@@ -4,16 +4,29 @@ import { DataTable, type Column, StatusBadge } from '../components'
 import { AppHeader } from '../components/AppHeader'
 import { PageLoading } from '../components/PageLoading'
 import { useCaseState } from '../store/useCaseStore'
-import type { Creditor } from '../types'
 
-type Row = {
+/** サーバ(getSettlementCreditors)が返す軽量な債権者行（必要列のみ） */
+type LeanCreditor = {
+  id: number
   caseId: number
+  creditorName: string
+  status: string
+  responseStatus: string | null
+  settlementDate: string | null
+  settlementAmount: number | null
+  settlementDebtAmount: number | null
+  settlementContentComment: string | null
+  acceptanceNoticeSentDate: string | null
+  debtAmount: number | null
+}
+
+type Row = LeanCreditor & {
   externalId: string | null
   name: string | null
   furigana: string | null
   caseStatus: string | null
   acceptanceDate: string | null
-} & Creditor
+}
 
 export function SettlementResultsPage() {
   const navigate = useNavigate()
@@ -33,7 +46,7 @@ export function SettlementResultsPage() {
   const [searched, setSearched] = useState(false)
   const [loading, setLoading] = useState(false)
   // 債権者は全件必要。初回検索時にのみ取得（起動時・ページ表示時には読み込まない）
-  const [creditors, setCreditors] = useState<Creditor[] | null>(null)
+  const [creditors, setCreditors] = useState<LeanCreditor[] | null>(null)
   // 債権者ドロップダウン用の候補（重複なし・軽量。ページ表示時に取得）
   const [creditorNames, setCreditorNames] = useState<string[]>([])
 
@@ -68,8 +81,8 @@ export function SettlementResultsPage() {
     if (creditors === null) {
       setLoading(true)
       try {
-        const res = await fetch('/api/creditors')
-        const data = res.ok ? ((await res.json()) as Creditor[]) : []
+        const res = await fetch('/api/creditors/settlement')
+        const data = res.ok ? ((await res.json()) as LeanCreditor[]) : []
         setCreditors(data)
       } catch {
         setCreditors([])
@@ -108,8 +121,10 @@ export function SettlementResultsPage() {
   }
 
   const rows = useMemo<Row[]>(() => {
+    // caseId→案件のMapを一度だけ作成（.find の O(n×m) を回避）
+    const caseById = new Map(cases.map((c) => [c.id, c]))
     return (creditors ?? []).map((cr) => {
-      const c = cases.find((x) => x.id === cr.caseId)
+      const c = caseById.get(cr.caseId)
       return {
         ...cr,
         caseId: cr.caseId,

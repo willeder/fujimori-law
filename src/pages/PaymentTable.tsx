@@ -708,6 +708,7 @@ export function PaymentTable({
         cellSingleLine
         suspendTruncate={editingId !== null}
         enableFind
+        bodyMaxHeightClassName="max-h-[min(60vh,32rem)]"
         getRowClassName={(item) => {
           // 実入金日がない場合はデフォルト
           if (!item.actualDate) return ''

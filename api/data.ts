@@ -16,6 +16,7 @@ import {
   searchCases,
   searchCreditors,
   getCreditorReminders,
+  getSettlementCreditors,
   updateCaseField,
   updateCreditorField,
   updatePaymentField,
@@ -195,6 +196,12 @@ export default async function handler(
     // ── 債権者リマインド一覧（次回処理日ありのみ・軽量） ──
     if (path === '/api/creditors/reminders' && method === 'GET') {
       json(await getCreditorReminders())
+      return
+    }
+
+    // ── 和解実績一覧用（必要列のみ・軽量） ──
+    if (path === '/api/creditors/settlement' && method === 'GET') {
+      json(await getSettlementCreditors())
       return
     }
 

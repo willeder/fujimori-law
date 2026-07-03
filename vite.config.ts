@@ -45,6 +45,7 @@ function dbApiPlugin(): Plugin {
             searchCases: (raw: string) => Promise<unknown>
             searchCreditors: (raw: string) => Promise<unknown>
             getCreditorReminders: () => Promise<unknown>
+            getSettlementCreditors: () => Promise<unknown>
             updateCaseField: (
               actor: { id: string; email: string },
               id: number,
@@ -231,6 +232,12 @@ function dbApiPlugin(): Plugin {
           }
           if (url === '/api/creditors/reminders' && req.method === 'GET') {
             const out = await mod.getCreditorReminders()
+            res.setHeader('Content-Type', 'application/json; charset=utf-8')
+            res.end(JSON.stringify(out))
+            return
+          }
+          if (url === '/api/creditors/settlement' && req.method === 'GET') {
+            const out = await mod.getSettlementCreditors()
             res.setHeader('Content-Type', 'application/json; charset=utf-8')
             res.end(JSON.stringify(out))
             return
