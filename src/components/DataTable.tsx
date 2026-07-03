@@ -249,13 +249,16 @@ export function DataTable<T>({
   }
 
   // その列が検索可能か（filterValue 明示、または生値が文字列/数値で取れる）
-  const colSearchable = (col: Column<T>): boolean => {
+  const colSearchableFn = (col: Column<T>): boolean => {
     if (col.filterValue) return data.some((it) => col.filterValue!(it) !== '')
     return data.some((it) => {
       const raw = (it as Record<string, unknown>)[String(col.key)]
       return typeof raw === 'string' || typeof raw === 'number'
     })
   }
+  // 検索モード中のみ、列ごとの検索可否・先頭検索可能列を一度だけ算出（大量行での二重ループ回避）
+  const searchableFlags = enableFind && findOn ? columns.map(colSearchableFn) : []
+  const firstSearchableIdx = searchableFlags.indexOf(true)
 
   // 検索の実行・取消・解除
   const enterFind = () => {
@@ -663,10 +666,10 @@ export function DataTable<T>({
                   className={`${headPad} ${col.headerClassName ?? ''}`}
                   style={{ width: col.width }}
                 >
-                  {colSearchable(col) ? (
+                  {searchableFlags[ci] ? (
                     <input
                       // 先頭の検索可能列に自動フォーカス
-                      autoFocus={ci === columns.findIndex((c) => colSearchable(c))}
+                      autoFocus={ci === firstSearchableIdx}
                       value={criteria[String(col.key)] ?? ''}
                       onChange={(e) =>
                         setCriteria((c) => ({ ...c, [String(col.key)]: e.target.value }))

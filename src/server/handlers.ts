@@ -786,6 +786,35 @@ export async function getCreditorNames() {
   return { names: rows.map((r) => r.creditorName).filter((n): n is string => !!n) }
 }
 
+/**
+ * 債権者リマインド一覧用：次回処理日ありの債権者のみ、必要列だけを軽量に返す。
+ * 全債権者(1.6万件)を転送しないことでパフォーマンスを確保する。
+ */
+export async function getCreditorReminders() {
+  const rows = await prisma.creditor.findMany({
+    where: { nextProcessDate: { not: null } },
+    select: {
+      id: true,
+      caseId: true,
+      creditorName: true,
+      status: true,
+      settlementDate: true,
+      settlementAmount: true,
+      nextProcessDate: true,
+    },
+    orderBy: [{ nextProcessDate: 'asc' }, { id: 'asc' }],
+  })
+  return rows.map((c) => ({
+    id: c.id,
+    caseId: c.caseId,
+    creditorName: c.creditorName,
+    status: c.status,
+    settlementDate: ds(c.settlementDate),
+    settlementAmount: c.settlementAmount,
+    nextProcessDate: ds(c.nextProcessDate),
+  }))
+}
+
 /** caseId 指定時はその案件のみ（案件詳細の遅延読み込み用） */
 export async function getCreditors(caseId?: number) {
   const rows = await prisma.creditor.findMany({

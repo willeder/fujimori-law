@@ -10,26 +10,36 @@ import { DataTable, type Column, StatusBadge } from '../components'
 import { AppHeader } from '../components/AppHeader'
 import { PageLoading } from '../components/PageLoading'
 import { useCaseState } from '../store/useCaseStore'
-import type { Creditor } from '../types'
 
-type Row = {
+/** サーバ(getCreditorReminders)が返す軽量な債権者行 */
+type LeanCreditor = {
+  id: number
   caseId: number
+  creditorName: string
+  status: string
+  settlementDate: string | null
+  settlementAmount: number | null
+  nextProcessDate: string | null
+}
+
+type Row = LeanCreditor & {
   externalId: string | null
   name: string | null
   furigana: string | null
   caseStatus: string | null
-} & Creditor
+}
 
 export function CreditorReminderPage() {
   const navigate = useNavigate()
   const { cases } = useCaseState()
-  const [creditors, setCreditors] = useState<Creditor[] | null>(null)
+  const [creditors, setCreditors] = useState<LeanCreditor[] | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     let cancelled = false
-    fetch('/api/creditors')
-      .then((r) => (r.ok ? (r.json() as Promise<Creditor[]>) : []))
+    // 次回処理日ありのみ・必要列だけを返す軽量API（全1.6万件を転送しない）
+    fetch('/api/creditors/reminders')
+      .then((r) => (r.ok ? (r.json() as Promise<LeanCreditor[]>) : []))
       .then((d) => {
         if (!cancelled) setCreditors(d)
       })
@@ -44,23 +54,19 @@ export function CreditorReminderPage() {
     }
   }, [])
 
-  // 次回処理日時ありのみ、昇順（古い順）。各債権者=1行。
+  // 案件情報を付与（サーバ側で次回処理日昇順・フィルタ済み）。各債権者=1行。
   const rows = useMemo<Row[]>(() => {
     const caseById = new Map(cases.map((c) => [c.id, c]))
-    return (creditors ?? [])
-      .filter((cr) => !!cr.nextProcessDate)
-      .map((cr) => {
-        const c = caseById.get(cr.caseId)
-        return {
-          ...cr,
-          caseId: cr.caseId,
-          externalId: c?.metadata.externalId ?? null,
-          name: c?.clientBasicInfo.name ?? null,
-          furigana: c?.clientBasicInfo.furigana ?? null,
-          caseStatus: c?.settlementInfo.status ?? null,
-        }
-      })
-      .sort((a, b) => (a.nextProcessDate ?? '').localeCompare(b.nextProcessDate ?? ''))
+    return (creditors ?? []).map((cr) => {
+      const c = caseById.get(cr.caseId)
+      return {
+        ...cr,
+        externalId: c?.metadata.externalId ?? null,
+        name: c?.clientBasicInfo.name ?? null,
+        furigana: c?.clientBasicInfo.furigana ?? null,
+        caseStatus: c?.settlementInfo.status ?? null,
+      }
+    })
   }, [creditors, cases])
 
   const columns: Column<Row>[] = [

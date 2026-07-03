@@ -44,6 +44,7 @@ function dbApiPlugin(): Plugin {
             getCaseById: (id: number) => Promise<unknown>
             searchCases: (raw: string) => Promise<unknown>
             searchCreditors: (raw: string) => Promise<unknown>
+            getCreditorReminders: () => Promise<unknown>
             updateCaseField: (
               actor: { id: string; email: string },
               id: number,
@@ -224,6 +225,12 @@ function dbApiPlugin(): Plugin {
           // ── 横断検索（複数条件AND） ──
           if (url === '/api/creditors/search' && req.method === 'POST') {
             const out = await mod.searchCreditors(await readRawBody(req))
+            res.setHeader('Content-Type', 'application/json; charset=utf-8')
+            res.end(JSON.stringify(out))
+            return
+          }
+          if (url === '/api/creditors/reminders' && req.method === 'GET') {
+            const out = await mod.getCreditorReminders()
             res.setHeader('Content-Type', 'application/json; charset=utf-8')
             res.end(JSON.stringify(out))
             return

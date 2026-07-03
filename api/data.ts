@@ -15,6 +15,7 @@ import {
   getCaseById,
   searchCases,
   searchCreditors,
+  getCreditorReminders,
   updateCaseField,
   updateCreditorField,
   updatePaymentField,
@@ -188,6 +189,12 @@ export default async function handler(
     if (path === '/api/creditors/search' && method === 'POST') {
       const raw = (await getRawBody(req)).toString('utf8')
       json(await searchCreditors(raw))
+      return
+    }
+
+    // ── 債権者リマインド一覧（次回処理日ありのみ・軽量） ──
+    if (path === '/api/creditors/reminders' && method === 'GET') {
+      json(await getCreditorReminders())
       return
     }
 
