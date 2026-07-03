@@ -18,7 +18,7 @@ export function ClientReminderPage() {
   const rows = useMemo(
     () =>
       cases
-        .filter((c) => !!c.reminderInfo.reminderDate)
+        .filter((c) => !!c.reminderInfo?.reminderDate)
         .sort((a, b) =>
           (a.reminderInfo.reminderDate ?? '').localeCompare(b.reminderInfo.reminderDate ?? '')
         ),
@@ -33,10 +33,10 @@ export function ClientReminderPage() {
       sortable: false,
       render: (c) => (
         <span className="font-semibold tabular-nums text-slate-800">
-          {c.reminderInfo.reminderDate ?? '-'}
+          {c.reminderInfo?.reminderDate ?? '-'}
         </span>
       ),
-      filterValue: (c) => c.reminderInfo.reminderDate ?? '',
+      filterValue: (c) => c.reminderInfo?.reminderDate ?? '',
     },
     {
       key: 'id',

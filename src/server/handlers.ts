@@ -196,6 +196,7 @@ function toCaseSummaryJson(c: Record<string, any>) {
     settlementInfo: { status: c.settlementStatus },
     feeInfo: { officeFee: c.officeFee, uncollectedFee: c.uncollectedFee },
     paymentInfo: { nextPaymentDate: ds(c.nextPaymentDate) },
+    reminderInfo: { reminderDate: ds(c.reminderDate) },
     metadata: {
       externalId: c.externalId,
       listCategory: c.listCategory,
@@ -227,6 +228,7 @@ const CASE_SUMMARY_SELECT = {
   officeFee: true,
   uncollectedFee: true,
   nextPaymentDate: true,
+  reminderDate: true,
   listCategory: true,
   listRegisteredDate: true,
   lineLink: { select: { status: true } },

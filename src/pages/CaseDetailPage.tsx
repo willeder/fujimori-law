@@ -978,7 +978,7 @@ function CaseDetailBody({
           />
           <EditableField
             label="リマインド日"
-            value={caseData.reminderInfo.reminderDate}
+            value={caseData.reminderInfo?.reminderDate ?? null}
             onChange={(v) => updateReminderInfo("reminderDate", v)}
             type="date"
             compact
