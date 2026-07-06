@@ -96,6 +96,14 @@ function dbApiPlugin(): Plugin {
               id: number,
               meta: { ip?: string | null; userAgent?: string | null }
             ) => Promise<{ status: number; body: unknown }>
+            presenceHeartbeat: (
+              actor: { id: string; email: string; name?: string | null },
+              raw: string
+            ) => Promise<{ status: number; body: unknown }>
+            presenceLeave: (
+              actor: { id: string; email: string },
+              raw: string
+            ) => Promise<{ status: number; body: unknown }>
           }
 
           const fwd = req.headers['x-forwarded-for']
@@ -246,6 +254,28 @@ function dbApiPlugin(): Plugin {
             const out = await mod.searchCases(await readRawBody(req))
             res.setHeader('Content-Type', 'application/json; charset=utf-8')
             res.end(JSON.stringify(out))
+            return
+          }
+
+          // ── 編集中プレゼンス（同時編集の検知） ──
+          if (url === '/api/presence/heartbeat' && req.method === 'POST') {
+            const r = await mod.presenceHeartbeat(
+              { id: sessionUser.id, email: sessionUser.email, name: sessionUser.name ?? null },
+              await readRawBody(req)
+            )
+            res.statusCode = r.status
+            res.setHeader('Content-Type', 'application/json; charset=utf-8')
+            res.end(JSON.stringify(r.body))
+            return
+          }
+          if (url === '/api/presence/leave' && req.method === 'POST') {
+            const r = await mod.presenceLeave(
+              { id: sessionUser.id, email: sessionUser.email },
+              await readRawBody(req)
+            )
+            res.statusCode = r.status
+            res.setHeader('Content-Type', 'application/json; charset=utf-8')
+            res.end(JSON.stringify(r.body))
             return
           }
 

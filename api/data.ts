@@ -29,6 +29,8 @@ import {
   revertChange,
   getLineLink,
   issueLineCode,
+  presenceHeartbeat,
+  presenceLeave,
 } from '../src/server/handlers.js'
 import * as gmo from '../src/server/gmoTransfer.js'
 import * as intake from '../src/server/intakeImport.js'
@@ -176,6 +178,23 @@ export default async function handler(
         return
       }
       json(result)
+      return
+    }
+
+    // ── 編集中プレゼンス（同時編集の検知） ──
+    if (path === '/api/presence/heartbeat' && method === 'POST') {
+      const raw = (await getRawBody(req)).toString('utf8')
+      const r = await presenceHeartbeat(
+        { ...editActor, name: sessionUser.name ?? null },
+        raw
+      )
+      json(r.body, r.status)
+      return
+    }
+    if (path === '/api/presence/leave' && method === 'POST') {
+      const raw = (await getRawBody(req)).toString('utf8')
+      const r = await presenceLeave(editActor, raw)
+      json(r.body, r.status)
       return
     }
 

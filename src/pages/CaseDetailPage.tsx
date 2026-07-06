@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import type { NavigateFunction } from "react-router-dom";
 import {
@@ -287,6 +287,77 @@ function CaseDetailBody({
 
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   const [showHistory, setShowHistory] = useState(false);
+
+  // ── 同時編集の検知（編集中ポップアップ）＋先勝ち保存（後発は保存不可） ──
+  // otherEditors: 同じレコードを開いている他ユーザー（プレゼンスTTL内）
+  // showEditingPopup: 他ユーザー検知時に一度だけ出すポップアップ
+  // conflictBy: 保存競合（409）した相手（表示用）。null 以外でポップアップ表示
+  const [otherEditors, setOtherEditors] = useState<
+    { email: string; name: string }[]
+  >([]);
+  const [showEditingPopup, setShowEditingPopup] = useState(false);
+  const [conflictBy, setConflictBy] = useState<string | null>(null);
+  // 読み込み時点の updatedAt（ISO・ミリ秒）。保存時に __baseUpdatedAt として送り先勝ち判定に使う
+  const baseUpdatedAtRef = useRef<string | null>(null);
+  const prevOthersCountRef = useRef(0);
+  useEffect(() => {
+    baseUpdatedAtRef.current = caseData?.metadata?.updatedAtExact ?? null;
+  }, [caseData?.metadata?.updatedAtExact]);
+
+  // 滞在中のハートビート送信と他ユーザーの検知（20秒間隔・離脱時に削除）
+  useEffect(() => {
+    const caseId = Number(id);
+    if (!Number.isInteger(caseId) || caseId <= 0) return;
+    let stopped = false;
+    const beat = async () => {
+      try {
+        const r = await fetch("/api/presence/heartbeat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            entity: "Case",
+            entityId: caseId,
+            name: user?.name ?? user?.email ?? "",
+          }),
+        });
+        if (!r.ok) return;
+        const d = (await r.json()) as {
+          others?: { email: string; name: string }[];
+        };
+        if (stopped) return;
+        const others = d.others ?? [];
+        setOtherEditors(others);
+        // 0人→1人以上 になった瞬間だけポップアップ（以降はバナーで常時表示）
+        if (others.length > 0 && prevOthersCountRef.current === 0) {
+          setShowEditingPopup(true);
+        }
+        prevOthersCountRef.current = others.length;
+      } catch {
+        /* 通信失敗時は次回ハートビートで回復 */
+      }
+    };
+    void beat();
+    const iv = setInterval(() => void beat(), 20000);
+    const leave = () => {
+      try {
+        navigator.sendBeacon?.(
+          "/api/presence/leave",
+          new Blob([JSON.stringify({ entity: "Case", entityId: caseId })], {
+            type: "application/json",
+          }),
+        );
+      } catch {
+        /* noop */
+      }
+    };
+    window.addEventListener("beforeunload", leave);
+    return () => {
+      stopped = true;
+      clearInterval(iv);
+      window.removeEventListener("beforeunload", leave);
+      leave();
+    };
+  }, [id, user?.name, user?.email]);
   // 案件削除（ADMIN のみ）。確認モーダル→「はい」で実行→一覧へ戻る。
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -499,18 +570,43 @@ function CaseDetailBody({
       payload: { ...caseData, ...updates },
     });
     // 変更フィールドをサーバへ永続化（サーバ側で差分判定・変更履歴/監査に記録）
+    // __baseUpdatedAt: 読み込み時点の更新時刻。他ユーザーが先に保存していた場合は
+    // サーバが 409 を返し、この保存は反映されない（先勝ち）。
     const cols = flattenCaseUpdate(updates);
     if (Object.keys(cols).length > 0) {
       fetch(`/api/cases/${caseData.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(cols),
+        body: JSON.stringify({
+          ...cols,
+          __baseUpdatedAt: baseUpdatedAtRef.current,
+        }),
       })
-        .then((r) => {
+        .then(async (r) => {
+          if (r.status === 409) {
+            // 保存競合：先に保存した側が優先。最新を取り直してローカル変更を破棄
+            const d = (await r.json().catch(() => ({}))) as {
+              editedBy?: string;
+            };
+            setConflictBy(d.editedBy ?? "他のユーザー");
+            fetch(`/api/cases/${caseData.id}`)
+              .then((rr) => (rr.ok ? rr.json() : null))
+              .then((full) => {
+                if (full) dispatch({ type: "MERGE_FULL_CASE", payload: full });
+              })
+              .catch(() => {});
+            return;
+          }
           if (!r.ok) {
             console.error("案件更新の保存に失敗:", r.status);
             return;
           }
+          // 保存成功：次回保存の基準時刻を更新（自分の連続保存が競合扱いにならないように）
+          const d = (await r.json().catch(() => null)) as {
+            case?: { metadata?: { updatedAtExact?: string | null } };
+          } | null;
+          const exact = d?.case?.metadata?.updatedAtExact;
+          if (exact) baseUpdatedAtRef.current = exact;
           setHistoryRefreshKey((k) => k + 1);
         })
         .catch((e) => console.error("案件更新の通信エラー:", e));
@@ -766,6 +862,79 @@ function CaseDetailBody({
               </button>
             </div>
           </div>
+        </div>
+      )}
+      {/* 同時編集の通知ポップアップ（他ユーザーがこのレコードを開いた/開いていたら一度表示） */}
+      {showEditingPopup && otherEditors.length > 0 && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40"
+          onClick={() => setShowEditingPopup(false)}
+        >
+          <div
+            className="w-[24rem] max-w-[90vw] rounded-lg bg-white p-4 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-sm font-semibold text-amber-700">
+              このレコードは他のユーザーも編集中です
+            </div>
+            <div className="mt-2 text-xs leading-relaxed text-slate-600">
+              {otherEditors.map((o) => o.name).join("、")}
+              さんが同じレコードを開いています。
+              <br />
+              同じ項目を編集した場合、
+              <span className="font-semibold">先に保存された内容が優先</span>
+              され、後からの保存は反映されません。
+            </div>
+            <div className="mt-4 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowEditingPopup(false)}
+                className="rounded bg-blue-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* 保存競合（先勝ち）ポップアップ：後からの保存は反映されない */}
+      {conflictBy != null && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40"
+          onClick={() => setConflictBy(null)}
+        >
+          <div
+            className="w-[24rem] max-w-[90vw] rounded-lg bg-white p-4 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-sm font-semibold text-red-600">
+              保存できませんでした（他のユーザーが先に保存）
+            </div>
+            <div className="mt-2 text-xs leading-relaxed text-slate-600">
+              {conflictBy} さんが先にこのレコードを保存したため、
+              いま入力した変更は保存されていません。
+              <br />
+              最新の内容を再読み込みしました。内容を確認のうえ、
+              必要であればもう一度入力してください。
+            </div>
+            <div className="mt-4 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setConflictBy(null)}
+                className="rounded bg-blue-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* 同時編集中の常時バナー（ポップアップを閉じた後も注意喚起） */}
+      {otherEditors.length > 0 && (
+        <div className="sticky top-0 z-50 flex items-center gap-2 bg-amber-100 px-4 py-1 text-xs text-amber-800">
+          <span className="inline-block h-2 w-2 rounded-full bg-amber-500" />
+          {otherEditors.map((o) => o.name).join("、")}
+          さんもこのレコードを編集中です（先に保存された内容が優先されます）
         </div>
       )}
       {/* Header（スクロール時に固定） */}

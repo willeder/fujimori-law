@@ -150,6 +150,7 @@ export interface ReminderInfo {
 export interface CaseMetadata {
   createdAt: string | null
   updatedAt: string | null
+  updatedAtExact?: string | null // 楽観ロック（先勝ち保存）用の厳密な更新時刻（ISO・ミリ秒）
   createdBy: string | null
   updatedBy: string | null
   externalId?: string | null // ID（kintone等の外部ID想定）

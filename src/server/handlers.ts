@@ -11,6 +11,7 @@ import {
   detectPaymentDelays,
 } from '../services/payment/delayDetection.js'
 import { writeAudit, writeChange } from './audit.js'
+import { parseFindCriterion } from '../utils/findCriterion.js'
 
 const g = globalThis as unknown as { __prisma?: PrismaClient }
 const prisma = g.__prisma ?? new PrismaClient()
@@ -128,6 +129,8 @@ function toCaseJson(c: Record<string, any>) {
     metadata: {
       createdAt: ds(c.createdAt),
       updatedAt: ds(c.updatedAt),
+      // 楽観ロック（先勝ち保存）用の厳密な更新時刻（ミリ秒までのISO）
+      updatedAtExact: c.updatedAt ? new Date(c.updatedAt).toISOString() : null,
       createdBy: c.createdBy,
       updatedBy: c.updatedBy,
       externalId: c.externalId,
@@ -246,9 +249,45 @@ export async function getCasesSummary() {
 const CASE_SEARCH_TYPE = buildFieldType('Case', [])
 
 /**
+ * 比較式（>=, <=, >, <, =, a..b）対応の WHERE 句を組み立てる共通処理。
+ * 列の型（DMMF）に合う比較式のときだけ比較SQLを返し、それ以外は null（→ILIKE部分一致へ）。
+ * 列名はホワイトリスト検証済みの前提。値はすべてパラメータ化。
+ */
+function buildCompareWhere(
+  colExpr: string,
+  fieldType: string,
+  value: string,
+  params: (string | number)[]
+): string | null {
+  const crit = parseFindCriterion(value)
+  if (!crit) return null
+  const isNum = fieldType === 'Int' || fieldType === 'Float' || fieldType === 'Decimal' || fieldType === 'BigInt'
+  const isDate = fieldType === 'DateTime'
+  if ((crit.kind === 'num' || crit.kind === 'num-range') && isNum) {
+    if (crit.kind === 'num-range') {
+      params.push(crit.n, crit.n2)
+      return `${colExpr} BETWEEN $${params.length - 1} AND $${params.length}`
+    }
+    params.push(crit.n)
+    return `${colExpr} ${crit.op} $${params.length}`
+  }
+  if ((crit.kind === 'date' || crit.kind === 'date-range') && isDate) {
+    if (crit.kind === 'date-range') {
+      params.push(crit.d, crit.d2)
+      return `CAST(${colExpr} AS DATE) BETWEEN $${params.length - 1}::date AND $${params.length}::date`
+    }
+    params.push(crit.d)
+    return `CAST(${colExpr} AS DATE) ${crit.op} $${params.length}::date`
+  }
+  return null
+}
+
+/**
  * 複数条件（AND）の横断検索。条件: { field, value }[]。
- * すべての列をテキスト化して **部分一致（ILIKE・大小無視）** で検索する。
- *   - 文字列/数値/日付  → CAST(列 AS TEXT) に対する含む検索（例: 申告債務額"200"・受任日"2026-05"）
+ *   - 比較式（>=100000 / <=2026-06-30 / 100000..200000 / 2026-04-01..2026-06-30 等）
+ *     → 数値列・日付列は型に合わせた比較で検索（検索モードのインライン検索と同一記法）
+ *   - それ以外はすべての列をテキスト化して **部分一致（ILIKE・大小無視）** で検索
+ *     （例: 申告債務額"200"・受任日"2026-05"）
  *   - 電話番号          → 数字のみ正規化して含む検索（ハイフン無視・下4桁可）
  *   - creditorName      → 債権者リレーションの含む検索
  * 列名はホワイトリスト（DMMF由来）済みのみ使用し、値はパラメータ化（インジェクション対策）。
@@ -262,7 +301,7 @@ export async function searchCases(raw: string) {
     return { error: 'bad request' }
   }
   const wheres: string[] = []
-  const params: string[] = []
+  const params: (string | number)[] = []
   for (const cond of conditions) {
     const v = (cond?.value ?? '').trim()
     if (!v) continue
@@ -278,7 +317,13 @@ export async function searchCases(raw: string) {
       wheres.push(`regexp_replace(COALESCE(c."phone", ''), '[^0-9]', '', 'g') ILIKE $${params.length}`)
       continue
     }
-    if (!CASE_SEARCH_TYPE[cond.field]) continue // ホワイトリスト外は無視（列名はここで検証）
+    const type = CASE_SEARCH_TYPE[cond.field]
+    if (!type) continue // ホワイトリスト外は無視（列名はここで検証）
+    const compared = buildCompareWhere(`c."${cond.field}"`, type, v, params)
+    if (compared) {
+      wheres.push(compared)
+      continue
+    }
     params.push(`%${v}%`)
     wheres.push(`CAST(c."${cond.field}" AS TEXT) ILIKE $${params.length}`)
   }
@@ -311,12 +356,18 @@ export async function searchCreditors(raw: string) {
     return { error: 'bad request' }
   }
   const wheres: string[] = []
-  const params: string[] = []
+  const params: (string | number)[] = []
   for (const cond of conditions) {
     const v = (cond?.value ?? '').trim()
     if (!v) continue
     // Creditor のスカラー列のみ許可（列名の検証）
-    if (!CREDITOR_FIELD_TYPE[cond.field]) continue
+    const type = CREDITOR_FIELD_TYPE[cond.field]
+    if (!type) continue
+    const compared = buildCompareWhere(`cr."${cond.field}"`, type, v, params)
+    if (compared) {
+      wheres.push(compared)
+      continue
+    }
     params.push(`%${v}%`)
     wheres.push(`CAST(cr."${cond.field}" AS TEXT) ILIKE $${params.length}`)
   }
@@ -420,6 +471,27 @@ export async function updateCaseField(
   }
   const existing = await prisma.case.findUnique({ where: { id } })
   if (!existing) return { status: 404, body: { error: '案件が見つかりません' } }
+
+  // ── 楽観ロック（先勝ち）──
+  // クライアントは読み込み時点の updatedAt（ISO・ミリ秒）を __baseUpdatedAt で送る。
+  // 他のユーザーが先に保存していた場合（DB側が新しい ＆ 最終更新者が自分以外）は
+  // 409 を返して保存しない（先に保存した側が優先）。
+  const baseUpdatedAt =
+    typeof body.__baseUpdatedAt === 'string' ? body.__baseUpdatedAt : null
+  delete body.__baseUpdatedAt
+  if (baseUpdatedAt) {
+    const current = existing.updatedAt.toISOString()
+    if (current > baseUpdatedAt && existing.updatedBy && existing.updatedBy !== actor.email) {
+      return {
+        status: 409,
+        body: {
+          conflict: true,
+          editedBy: existing.updatedBy,
+          case: toCaseJson(existing),
+        },
+      }
+    }
+  }
 
   const before: Record<string, unknown> = {}
   const after: Record<string, unknown> = {}
@@ -1043,4 +1115,84 @@ export async function issueLineCode(caseId: number, force = false) {
       linkedAt: null,
     },
   })
+}
+
+// ── 編集中プレゼンス（同時編集の検知・編集中ポップアップ用） ──────────
+// 案件詳細を開いているクライアントが一定間隔でハートビートを送り、
+// 同じレコードを開いている他ユーザー（TTL内）を返す。離脱時は明示削除。
+// Prisma Client の型生成に依存しないよう、パラメータ化した生SQLで操作する
+// （テーブルは migration 20260706000000_add_edit_presence で作成）。
+const PRESENCE_TTL_SECONDS = 45
+
+export async function presenceHeartbeat(actor: EditActor & { name?: string | null }, raw: string) {
+  let body: { entity?: string; entityId?: number; name?: string }
+  try {
+    body = JSON.parse(raw || '{}') as { entity?: string; entityId?: number; name?: string }
+  } catch {
+    return { status: 400, body: { error: 'bad request' } }
+  }
+  const entity = body.entity === 'Case' ? 'Case' : null
+  const entityId = Number(body.entityId)
+  if (!entity || !Number.isInteger(entityId) || entityId <= 0) {
+    return { status: 400, body: { error: 'bad request' } }
+  }
+  const name = (body.name ?? actor.name ?? '').toString().slice(0, 100)
+  // 滞在の記録（upsert）
+  await prisma.$executeRawUnsafe(
+    `INSERT INTO edit_presences ("entity", "entityId", "email", "name", "updatedAt")
+     VALUES ($1, $2, $3, $4, NOW())
+     ON CONFLICT ("entity", "entityId", "email")
+     DO UPDATE SET "name" = EXCLUDED."name", "updatedAt" = NOW()`,
+    entity,
+    entityId,
+    actor.email,
+    name
+  )
+  // ついで掃除（TTL大幅超過の残骸を削除）
+  await prisma.$executeRawUnsafe(
+    `DELETE FROM edit_presences WHERE "updatedAt" < NOW() - INTERVAL '10 minutes'`
+  )
+  // 同じレコードを開いている他ユーザー（TTL内）
+  const others = await prisma.$queryRawUnsafe<
+    { email: string; name: string; startedAt: Date }[]
+  >(
+    `SELECT "email", "name", "startedAt" FROM edit_presences
+     WHERE "entity" = $1 AND "entityId" = $2 AND "email" <> $3
+       AND "updatedAt" > NOW() - INTERVAL '${PRESENCE_TTL_SECONDS} seconds'
+     ORDER BY "startedAt" ASC`,
+    entity,
+    entityId,
+    actor.email
+  )
+  return {
+    status: 200,
+    body: {
+      others: others.map((o) => ({
+        email: o.email,
+        name: o.name || o.email,
+        startedAt: o.startedAt instanceof Date ? o.startedAt.toISOString() : String(o.startedAt),
+      })),
+    },
+  }
+}
+
+export async function presenceLeave(actor: EditActor, raw: string) {
+  let body: { entity?: string; entityId?: number }
+  try {
+    body = JSON.parse(raw || '{}') as { entity?: string; entityId?: number }
+  } catch {
+    return { status: 400, body: { error: 'bad request' } }
+  }
+  const entity = body.entity === 'Case' ? 'Case' : null
+  const entityId = Number(body.entityId)
+  if (!entity || !Number.isInteger(entityId) || entityId <= 0) {
+    return { status: 400, body: { error: 'bad request' } }
+  }
+  await prisma.$executeRawUnsafe(
+    `DELETE FROM edit_presences WHERE "entity" = $1 AND "entityId" = $2 AND "email" = $3`,
+    entity,
+    entityId,
+    actor.email
+  )
+  return { status: 200, body: { ok: true } }
 }

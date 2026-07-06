@@ -485,3 +485,21 @@ model ChangeLog {
   @@index([createdAt])
   @@map("change_logs")
 }
+
+// ============================================================
+// 編集中プレゼンス：同一レコードを開いている他ユーザーの検知（編集中ポップアップ用）
+// クライアントが滞在中にハートビートで upsert し、離脱時に削除。TTL超過は自動掃除。
+// ============================================================
+model EditPresence {
+  id        Int      @id @default(autoincrement())
+  entity    String // 例: "Case"
+  entityId  Int
+  email     String // 編集中ユーザーのメール（アカウント特定）
+  name      String   @default("") // 表示名（アカウント名）
+  startedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([entity, entityId, email])
+  @@index([entity, entityId])
+  @@map("edit_presences")
+}

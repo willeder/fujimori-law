@@ -1,44 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
+// 検索条件の比較パーサ（数値・日付、>= <= > < = と範囲 a..b / a〜b）は共有ユーティリティに集約。
+// 比較式でなければ null（→部分一致にフォールバック）。サーバの横断検索とも同一記法。
+import {
+  parseFindCriterion,
+  matchNumber,
+  matchDate,
+  extractIsoDate,
+} from '../utils/findCriterion'
 
 // 1画面に複数のテーブルがある場合（案件詳細など）に Shift+F が全テーブルを
 // 同時にトグルしないよう、「いま操作対象のテーブル」を1つだけ保持する簡易レジストリ。
 // 直近にホバー/フォーカスしたテーブルがアクティブになり、Shift+F はそのテーブルだけに効く。
 let __activeFindTable: number | null = null
 let __findTableSeq = 0
-
-// 検索条件の数値比較パーサ。 ">=1000000" / "<50000" / "=0" / "10000..50000" 等。
-// カンマ・「円」・空白・全角符号(≥≤)を許容。数値比較でなければ null（→部分一致にフォールバック）。
-type NumCriterion =
-  | { op: '>' | '<' | '>=' | '<=' | '='; n: number }
-  | { op: 'range'; n: number; n2: number }
-function parseNumericCriterion(v: string): NumCriterion | null {
-  const t = v
-    .replace(/[,，\s円]/g, '')
-    .replace(/≥/g, '>=')
-    .replace(/≤/g, '<=')
-    .replace(/[〜～]/g, '..')
-  let m = t.match(/^(-?\d+(?:\.\d+)?)\.\.(-?\d+(?:\.\d+)?)$/)
-  if (m) return { op: 'range', n: Number(m[1]), n2: Number(m[2]) }
-  m = t.match(/^(>=|<=|>|<|=)(-?\d+(?:\.\d+)?)$/)
-  if (m) return { op: m[1] as '>' | '<' | '>=' | '<=' | '=', n: Number(m[2]) }
-  return null
-}
-function numericMatch(cv: number, c: NumCriterion): boolean {
-  switch (c.op) {
-    case '>':
-      return cv > c.n
-    case '<':
-      return cv < c.n
-    case '>=':
-      return cv >= c.n
-    case '<=':
-      return cv <= c.n
-    case '=':
-      return cv === c.n
-    case 'range':
-      return cv >= Math.min(c.n, c.n2) && cv <= Math.max(c.n, c.n2)
-  }
-}
 
 export interface Column<T> {
   key: keyof T | string
@@ -238,12 +212,17 @@ export function DataTable<T>({
     return /^-?\d+(\.\d+)?$/.test(txt) ? Number(txt) : null
   }
 
-  // 1条件のマッチ判定：数値比較条件なら数値で、そうでなければ部分一致で判定
+  // 1条件のマッチ判定：比較式（数値/日付）なら比較で、そうでなければ部分一致で判定
   const matchOne = (col: Column<T>, item: T, value: string): boolean => {
-    const num = parseNumericCriterion(value)
-    if (num) {
-      const cv = colNumber(col, item)
-      return cv != null && numericMatch(cv, num)
+    const crit = parseFindCriterion(value)
+    if (crit) {
+      if (crit.kind === 'num' || crit.kind === 'num-range') {
+        const cv = colNumber(col, item)
+        return cv != null && matchNumber(cv, crit)
+      }
+      // 日付比較：セル文字列から日付を抽出して YYYY-MM-DD で比較
+      const cd = extractIsoDate(cellSearchText(col, item))
+      return cd != null && matchDate(cd, crit)
     }
     return cellSearchText(col, item).toLowerCase().includes(value.trim().toLowerCase())
   }
