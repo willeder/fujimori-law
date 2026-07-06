@@ -9,6 +9,7 @@
 import type { ReactNode } from 'react'
 import { UiFontScaleControl } from './UiFontScaleControl'
 import { PageNav } from './PageNav'
+import { FindModeLauncher } from './case/FindModeLauncher'
 import { useAuth } from '../context/AuthContext'
 
 export function AppHeader({
@@ -30,6 +31,8 @@ export function AppHeader({
         </h1>
 
         <div className="flex shrink-0 items-center gap-2">
+          {/* 全体検索（検索モード）: どのページからでも Ctrl+F またはボタンで起動（No.150） */}
+          <FindModeLauncher />
           <UiFontScaleControl variant="select" />
           {user && (
             <>

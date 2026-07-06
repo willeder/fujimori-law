@@ -6,6 +6,45 @@
 import { useState } from 'react'
 import { SEARCH_FIELDS, type Condition } from '../../pages/searchFields'
 
+// ── 検索履歴（直近10件・localStorage 保存）No.147 ──────────────
+const HISTORY_KEY = 'findMode.history'
+const HISTORY_MAX = 10
+
+function loadHistory(): Condition[][] {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY)
+    const parsed = raw ? (JSON.parse(raw) as Condition[][]) : []
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
+function saveHistory(conditions: Condition[]): Condition[][] {
+  const key = JSON.stringify(conditions)
+  const next = [conditions, ...loadHistory().filter((h) => JSON.stringify(h) !== key)].slice(
+    0,
+    HISTORY_MAX
+  )
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(next))
+  } catch {
+    /* 保存失敗時は履歴なしで続行 */
+  }
+  return next
+}
+
+const FIELD_LABEL: Record<string, string> = Object.fromEntries(
+  SEARCH_FIELDS.map((f) => [f.field, f.label])
+)
+
+/** 履歴1件の表示ラベル（例: 「名前:田中 / 申告債務額:>=100000」） */
+function historyLabel(conditions: Condition[]): string {
+  return conditions
+    .map((c) => `${FIELD_LABEL[c.field] ?? c.field}:${c.value}`)
+    .join(' / ')
+}
+
 export function FindModeModal({
   open,
   onClose,
@@ -16,6 +55,7 @@ export function FindModeModal({
   onSearch: (conditions: Condition[]) => void
 }) {
   const [vals, setVals] = useState<Record<string, string>>({})
+  const [history, setHistory] = useState<Condition[][]>(() => loadHistory())
   if (!open) return null
 
   const submit = () => {
@@ -23,7 +63,17 @@ export function FindModeModal({
       field: f.field,
       value: vals[f.field].trim(),
     }))
-    if (conditions.length > 0) onSearch(conditions)
+    if (conditions.length > 0) {
+      setHistory(saveHistory(conditions))
+      onSearch(conditions)
+    }
+  }
+
+  /** 履歴クリックで各フィールドに条件を復元（そのまま Enter/検索 で再実行できる） */
+  const applyHistory = (conditions: Condition[]) => {
+    const next: Record<string, string> = {}
+    for (const c of conditions) next[c.field] = c.value
+    setVals(next)
   }
 
   return (
@@ -65,6 +115,26 @@ export function FindModeModal({
             </label>
           ))}
         </div>
+        {history.length > 0 && (
+          <div className="border-t border-slate-100 px-4 py-2">
+            <div className="mb-1 text-[10px] font-medium text-slate-400">
+              最近の検索（クリックで条件を復元）
+            </div>
+            <div className="flex max-h-24 flex-wrap gap-1 overflow-auto">
+              {history.map((h, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => applyHistory(h)}
+                  title={historyLabel(h)}
+                  className="max-w-full truncate rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] text-slate-600 hover:border-blue-300 hover:bg-blue-50"
+                >
+                  {historyLabel(h)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="flex items-center gap-2 border-t border-slate-200 px-4 py-2">
           <button
             type="button"

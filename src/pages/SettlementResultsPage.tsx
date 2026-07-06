@@ -49,6 +49,8 @@ export function SettlementResultsPage() {
   const [creditors, setCreditors] = useState<LeanCreditor[] | null>(null)
   // 債権者ドロップダウン用の候補（重複なし・軽量。ページ表示時に取得）
   const [creditorNames, setCreditorNames] = useState<string[]>([])
+  // 和解内容コメントの全文表示中の行ID（通常は1行省略・クリックで全文）No.110
+  const [expandedComments, setExpandedComments] = useState<Set<number>>(new Set())
 
   useEffect(() => {
     let cancelled = false
@@ -196,7 +198,31 @@ export function SettlementResultsPage() {
       key: 'settlementContentComment',
       header: '和解内容コメント',
       width: '220px',
-      render: (r) => r.settlementContentComment ?? '-',
+      // 通常は1行に省略し、セルクリックで全文表示（行クリックの詳細遷移とは分離）
+      render: (r) => {
+        const text = r.settlementContentComment
+        if (!text) return '-'
+        const expanded = expandedComments.has(r.id)
+        return (
+          <span
+            onClick={(e) => {
+              e.stopPropagation()
+              setExpandedComments((prev) => {
+                const next = new Set(prev)
+                if (next.has(r.id)) next.delete(r.id)
+                else next.add(r.id)
+                return next
+              })
+            }}
+            title={expanded ? 'クリックで折りたたむ' : 'クリックで全文表示'}
+            className={`block max-w-[220px] cursor-pointer ${
+              expanded ? 'whitespace-pre-wrap break-words' : 'truncate whitespace-nowrap'
+            }`}
+          >
+            {text}
+          </span>
+        )
+      },
     },
   ]
 
