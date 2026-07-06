@@ -24,6 +24,7 @@ import { SettlementFiles } from "../components/case/SettlementFiles";
 import { LineUrlQuickEdit } from "../components/case/LineUrlQuickEdit";
 import { LineLinkControl } from "../components/case/LineLinkControl";
 import { CaseChangeHistory } from "../components/case/CaseChangeHistory";
+import { LAST_LIST_PATH_KEY } from "../components/AppHeader";
 import type { Case } from "../types";
 import {
   creditorTabAccentSummary,
@@ -251,6 +252,19 @@ export function CaseDetailPage() {
     );
   }
   return <CaseDetailBody key={id} id={id} navigate={navigate} />;
+}
+
+/**
+ * 「一覧に戻る」の戻り先。直近に表示していた一覧ページ（AppHeader が記録）へ戻す。
+ * 未記録（直リンク等）の場合は案件一覧へ。絞り込み・ソートは各一覧側の
+ * sessionStorage 保持により復元される（No.160）。
+ */
+function lastListPath(): string {
+  try {
+    return sessionStorage.getItem(LAST_LIST_PATH_KEY) || "/";
+  } catch {
+    return "/";
+  }
 }
 
 function CaseDetailBody({
@@ -544,7 +558,7 @@ function CaseDetailBody({
         <div className="text-center">
           <p className="text-slate-500 mb-4">案件が見つかりません</p>
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate(lastListPath())}
             className="text-blue-500 hover:text-blue-600"
           >
             一覧に戻る
@@ -942,7 +956,7 @@ function CaseDetailBody({
         {/* 1行目：一覧に戻る（左）、LINE@（右） */}
         <div className="flex w-full items-center justify-between px-4 py-1.5 border-b border-slate-100">
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate(lastListPath())}
             className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
           >
             ← 一覧に戻る

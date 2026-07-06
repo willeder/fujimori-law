@@ -6,11 +6,15 @@
  * ログイン情報をこのヘッダー内（通常フロー）に置くことで、
  * 従来の固定オーバーレイによる本文との重なりを解消する。
  */
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
+import { useLocation } from 'react-router-dom'
 import { UiFontScaleControl } from './UiFontScaleControl'
 import { PageNav } from './PageNav'
 import { FindModeLauncher } from './case/FindModeLauncher'
 import { useAuth } from '../context/AuthContext'
+
+/** 直近に表示した一覧ページのパス（案件詳細の「一覧に戻る」で使用）No.160 */
+export const LAST_LIST_PATH_KEY = 'nav.lastListPath'
 
 export function AppHeader({
   title,
@@ -20,6 +24,17 @@ export function AppHeader({
   children?: ReactNode
 }) {
   const { user, logout } = useAuth()
+  // AppHeader を使う画面＝一覧系ページ。表示のたびに現在のパスを記録し、
+  // 案件詳細の「一覧に戻る」で（デフォルトの案件一覧ではなく）この画面へ戻れるようにする。
+  // 絞り込み・ソート条件は各一覧が sessionStorage で保持しているため、戻れば条件も復元される。
+  const location = useLocation()
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(LAST_LIST_PATH_KEY, location.pathname + location.search)
+    } catch {
+      /* noop */
+    }
+  }, [location.pathname, location.search])
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white px-4 py-2 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
