@@ -496,6 +496,7 @@ model EditPresence {
   entityId  Int
   email     String // 編集中ユーザーのメール（アカウント特定）
   name      String   @default("") // 表示名（アカウント名）
+  editing   Boolean  @default(false) // 編集中フラグ（閲覧のみ=false。trueの間、他ユーザーは編集不可）
   startedAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

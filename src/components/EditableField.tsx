@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useId } from "react";
 
 interface EditableFieldProps {
   label: string;
@@ -27,6 +27,11 @@ interface EditableFieldProps {
   renderValue?: (value: string | number | null | undefined) => React.ReactNode;
   /** 値エリアを親要素の幅いっぱいに広げる */
   fillWidth?: boolean;
+  /**
+   * type="text" のとき、入力候補（datalist）を表示する。
+   * 既存の値からのドロップダウン選択＋自由入力の両方が可能（例: 債権者名の表記ゆれ防止）。
+   */
+  suggestions?: string[];
 }
 
 function parseIsoDateToUtcDate(iso: string): Date | null {
@@ -74,9 +79,24 @@ export function EditableField({
   confirmMessage,
   renderValue,
   fillWidth = false,
+  suggestions,
 }: EditableFieldProps) {
   const labelWithColon =
     label.endsWith("：") || label.endsWith(":") ? label : `${label}：`;
+
+  // 入力候補（datalist）。type="text" かつ候補があるときのみ有効
+  const suggestionsId = useId();
+  const dataListId =
+    type === "text" && suggestions && suggestions.length > 0
+      ? `ef-suggest-${suggestionsId}`
+      : undefined;
+  const dataListEl = dataListId ? (
+    <datalist id={dataListId}>
+      {suggestions!.map((s) => (
+        <option key={s} value={s} />
+      ))}
+    </datalist>
+  ) : null;
 
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(String(value ?? ""));
@@ -392,16 +412,20 @@ export function EditableField({
                 className={`${inputBase} min-h-[2.5rem]`}
               />
             ) : (
-              <input
-                ref={inputRef as React.RefObject<HTMLInputElement>}
-                type={type}
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
-                onBlur={handleSave}
-                onKeyDown={handleKeyDown}
-                placeholder={placeholder}
-                className={inputBase}
-              />
+              <>
+                <input
+                  ref={inputRef as React.RefObject<HTMLInputElement>}
+                  type={type}
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  onBlur={handleSave}
+                  onKeyDown={handleKeyDown}
+                  placeholder={placeholder}
+                  list={dataListId}
+                  className={inputBase}
+                />
+                {dataListEl}
+              </>
             )}
             {suffix && (
               <span
@@ -472,16 +496,20 @@ export function EditableField({
               className={`${inputBase} min-h-[2.5rem]`}
             />
           ) : (
-            <input
-              ref={inputRef as React.RefObject<HTMLInputElement>}
-              type={type}
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
-              onBlur={handleSave}
-              onKeyDown={handleKeyDown}
-              placeholder={placeholder}
-              className={inputBase}
-            />
+            <>
+              <input
+                ref={inputRef as React.RefObject<HTMLInputElement>}
+                type={type}
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onBlur={handleSave}
+                onKeyDown={handleKeyDown}
+                placeholder={placeholder}
+                list={dataListId}
+                className={inputBase}
+              />
+              {dataListEl}
+            </>
           )}
           {suffix && (
             <span
@@ -549,16 +577,20 @@ export function EditableField({
               className="min-h-[2.75rem] max-h-48 min-w-0 grow resize-y text-xs border border-blue-300 rounded px-1.5 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           ) : (
-            <input
-              ref={inputRef as React.RefObject<HTMLInputElement>}
-              type={type}
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
-              onBlur={handleSave}
-              onKeyDown={handleKeyDown}
-              placeholder={placeholder}
-              className="flex-1 text-xs border border-blue-300 rounded px-1.5 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <>
+              <input
+                ref={inputRef as React.RefObject<HTMLInputElement>}
+                type={type}
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onBlur={handleSave}
+                onKeyDown={handleKeyDown}
+                placeholder={placeholder}
+                list={dataListId}
+                className="flex-1 text-xs border border-blue-300 rounded px-1.5 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              {dataListEl}
+            </>
           )}
           {suffix && <span className="text-slate-400 text-xs">{suffix}</span>}
           {type === "textarea" && (

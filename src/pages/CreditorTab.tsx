@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCaseDispatch } from '../store/useCaseStore'
 import { useFoundSet } from '../store/FoundSet'
@@ -10,10 +11,33 @@ interface CreditorTabProps {
   view: 'summary' | 'detail'
 }
 
+// 債権者名の入力候補（DB全体の既存債権者名）。表記ゆれ防止のため
+// ドロップダウン選択＋自由入力の両方を可能にする。取得は1回だけ（モジュール内キャッシュ）。
+let __creditorNameSuggestions: string[] | null = null
+
 export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
   const dispatch = useCaseDispatch()
   const navigate = useNavigate()
   const { setFoundSet } = useFoundSet()
+
+  const [creditorNameSuggestions, setCreditorNameSuggestions] = useState<string[]>(
+    () => __creditorNameSuggestions ?? []
+  )
+  useEffect(() => {
+    if (__creditorNameSuggestions) return
+    let alive = true
+    fetch('/api/creditors/names')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { names?: string[] } | null) => {
+        const names = [...new Set(d?.names ?? [])]
+        __creditorNameSuggestions = names
+        if (alive) setCreditorNameSuggestions(names)
+      })
+      .catch(() => {})
+    return () => {
+      alive = false
+    }
+  }, [])
 
   // 債権者検索を実行：DB全体を横断検索し、該当する案件群を「検索結果セット」にして
   // 1件目の案件詳細へ移動する。以降は詳細ページの左右ナビ（◀ ▶）で渡り歩ける。
@@ -346,6 +370,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           onChange={(v) =>
             updateCreditor(creditor, { creditorName: v || '' })
           }
+          suggestions={creditorNameSuggestions}
           compact
           compactLayout="inline"
           bordered
@@ -581,6 +606,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           onChange={(v) =>
             updateCreditor(creditor, { settlementContentComment: v || null })
           }
+          type="textarea"
           compact
           compactLayout="inline"
           bordered

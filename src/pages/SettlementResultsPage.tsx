@@ -240,24 +240,22 @@ export function SettlementResultsPage() {
           }}
           className="flex flex-wrap items-end gap-2"
         >
-          <div className="flex flex-col gap-0.5 text-[10px] text-slate-500">
-            受任通知送付日（期間）
-            <div className="flex items-center gap-1">
-              <input
-                type="date"
-                value={fNoticeFrom}
-                onChange={(e) => setFNoticeFrom(e.target.value)}
-                className={`${inputCls} w-36`}
-              />
-              <span className="text-slate-400">〜</span>
-              <input
-                type="date"
-                value={fNoticeTo}
-                onChange={(e) => setFNoticeTo(e.target.value)}
-                className={`${inputCls} w-36`}
-              />
-            </div>
-          </div>
+          {/* 検索条件の並び（左から）: 受任後ステータス → 債権者 → 受任日 → 受任通知送付日 → 和解日 */}
+          <label className="flex flex-col gap-0.5 text-[10px] text-slate-500">
+            受任後ステータス
+            <select
+              value={fStatus}
+              onChange={(e) => setFStatus(e.target.value)}
+              className={`${inputCls} w-40`}
+            >
+              <option value="">すべて</option>
+              {statusOptions.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </label>
           <label className="flex flex-col gap-0.5 text-[10px] text-slate-500">
             債権者（部分一致）
             <input
@@ -293,6 +291,24 @@ export function SettlementResultsPage() {
             </div>
           </div>
           <div className="flex flex-col gap-0.5 text-[10px] text-slate-500">
+            受任通知送付日（期間）
+            <div className="flex items-center gap-1">
+              <input
+                type="date"
+                value={fNoticeFrom}
+                onChange={(e) => setFNoticeFrom(e.target.value)}
+                className={`${inputCls} w-36`}
+              />
+              <span className="text-slate-400">〜</span>
+              <input
+                type="date"
+                value={fNoticeTo}
+                onChange={(e) => setFNoticeTo(e.target.value)}
+                className={`${inputCls} w-36`}
+              />
+            </div>
+          </div>
+          <div className="flex flex-col gap-0.5 text-[10px] text-slate-500">
             和解日（期間）
             <div className="flex items-center gap-1">
               <input
@@ -310,21 +326,6 @@ export function SettlementResultsPage() {
               />
             </div>
           </div>
-          <label className="flex flex-col gap-0.5 text-[10px] text-slate-500">
-            受任後ステータス
-            <select
-              value={fStatus}
-              onChange={(e) => setFStatus(e.target.value)}
-              className={`${inputCls} w-40`}
-            >
-              <option value="">すべて</option>
-              {statusOptions.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-          </label>
           <button
             type="submit"
             className="rounded bg-slate-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700"

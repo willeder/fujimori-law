@@ -1123,11 +1123,19 @@ export async function issueLineCode(caseId: number, force = false) {
 // Prisma Client の型生成に依存しないよう、パラメータ化した生SQLで操作する
 // （テーブルは migration 20260706000000_add_edit_presence で作成）。
 const PRESENCE_TTL_SECONDS = 45
+// 編集中フラグの有効期間。編集中クライアントは短い間隔でハートビートを送るため、
+// これを超えて更新が無い editing=true は「切断などで放置されたロック」とみなして無効化する。
+const EDITING_TTL_SECONDS = 25
 
 export async function presenceHeartbeat(actor: EditActor & { name?: string | null }, raw: string) {
-  let body: { entity?: string; entityId?: number; name?: string }
+  let body: { entity?: string; entityId?: number; name?: string; editing?: boolean }
   try {
-    body = JSON.parse(raw || '{}') as { entity?: string; entityId?: number; name?: string }
+    body = JSON.parse(raw || '{}') as {
+      entity?: string
+      entityId?: number
+      name?: string
+      editing?: boolean
+    }
   } catch {
     return { status: 400, body: { error: 'bad request' } }
   }
@@ -1137,26 +1145,30 @@ export async function presenceHeartbeat(actor: EditActor & { name?: string | nul
     return { status: 400, body: { error: 'bad request' } }
   }
   const name = (body.name ?? actor.name ?? '').toString().slice(0, 100)
-  // 滞在の記録（upsert）
+  const editing = body.editing === true
+  // 滞在＋編集状態の記録（upsert）
   await prisma.$executeRawUnsafe(
-    `INSERT INTO edit_presences ("entity", "entityId", "email", "name", "updatedAt")
-     VALUES ($1, $2, $3, $4, NOW())
+    `INSERT INTO edit_presences ("entity", "entityId", "email", "name", "editing", "updatedAt")
+     VALUES ($1, $2, $3, $4, $5, NOW())
      ON CONFLICT ("entity", "entityId", "email")
-     DO UPDATE SET "name" = EXCLUDED."name", "updatedAt" = NOW()`,
+     DO UPDATE SET "name" = EXCLUDED."name", "editing" = EXCLUDED."editing", "updatedAt" = NOW()`,
     entity,
     entityId,
     actor.email,
-    name
+    name,
+    editing
   )
   // ついで掃除（TTL大幅超過の残骸を削除）
   await prisma.$executeRawUnsafe(
     `DELETE FROM edit_presences WHERE "updatedAt" < NOW() - INTERVAL '10 minutes'`
   )
-  // 同じレコードを開いている他ユーザー（TTL内）
+  // 同じレコードを開いている他ユーザー（TTL内）。editing は鮮度切れなら false に落とす
   const others = await prisma.$queryRawUnsafe<
-    { email: string; name: string; startedAt: Date }[]
+    { email: string; name: string; startedAt: Date; editing: boolean }[]
   >(
-    `SELECT "email", "name", "startedAt" FROM edit_presences
+    `SELECT "email", "name", "startedAt",
+            ("editing" AND "updatedAt" > NOW() - INTERVAL '${EDITING_TTL_SECONDS} seconds') AS "editing"
+     FROM edit_presences
      WHERE "entity" = $1 AND "entityId" = $2 AND "email" <> $3
        AND "updatedAt" > NOW() - INTERVAL '${PRESENCE_TTL_SECONDS} seconds'
      ORDER BY "startedAt" ASC`,
@@ -1170,6 +1182,7 @@ export async function presenceHeartbeat(actor: EditActor & { name?: string | nul
       others: others.map((o) => ({
         email: o.email,
         name: o.name || o.email,
+        editing: o.editing === true,
         startedAt: o.startedAt instanceof Date ? o.startedAt.toISOString() : String(o.startedAt),
       })),
     },
