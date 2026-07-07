@@ -220,9 +220,12 @@ export function DataTable<T>({
         const cv = colNumber(col, item)
         return cv != null && matchNumber(cv, crit)
       }
-      // 日付比較：セル文字列から日付を抽出して YYYY-MM-DD で比較
+      // 日付比較：セル文字列から日付を抽出して YYYY-MM-DD で比較。
+      // 日付を持たない列（テキスト等）では従来どおり部分一致にフォールバック
+      // （例: コメント列に「2026/08」と入れた場合は文字として検索）
       const cd = extractIsoDate(cellSearchText(col, item))
-      return cd != null && matchDate(cd, crit)
+      if (cd != null) return matchDate(cd, crit)
+      return cellSearchText(col, item).toLowerCase().includes(value.trim().toLowerCase())
     }
     return cellSearchText(col, item).toLowerCase().includes(value.trim().toLowerCase())
   }
@@ -536,8 +539,8 @@ export function DataTable<T>({
         >
           取消（Esc）
         </button>
-        <span className="text-[10px] text-blue-400">
-          複数列はAND・部分一致。金額/件数は {'>=1000000'}・{'<50000'}・{'=0'}・範囲 {'10000..50000'} で絞込可
+        <span className="basis-full text-xs font-medium leading-snug text-blue-700">
+          各フィールドは部分一致、複数フィールド検索可。以上未満の指定：{'>=1000000'}、{'<50000'}、{'>=2026/07/01'}、{'=0'} など（値の前に等号不等号）。範囲指定：{'10000..50000'}、{'..2026/07'}、{'2026/07..'} など（ドット2つ）で絞込
         </span>
       </div>
     ) : globalLoading ? (
