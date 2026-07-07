@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, useId } from "react";
+import { useState, useEffect, useRef } from "react";
+import { SuggestInput } from "./SuggestInput";
 
 interface EditableFieldProps {
   label: string;
@@ -84,19 +85,10 @@ export function EditableField({
   const labelWithColon =
     label.endsWith("：") || label.endsWith(":") ? label : `${label}：`;
 
-  // 入力候補（datalist）。type="text" かつ候補があるときのみ有効
-  const suggestionsId = useId();
-  const dataListId =
-    type === "text" && suggestions && suggestions.length > 0
-      ? `ef-suggest-${suggestionsId}`
-      : undefined;
-  const dataListEl = dataListId ? (
-    <datalist id={dataListId}>
-      {suggestions!.map((s) => (
-        <option key={s} value={s} />
-      ))}
-    </datalist>
-  ) : null;
+  // 入力候補。type="text" かつ候補があるとき、編集中の入力を SuggestInput
+  // （クリックで全件表示・入力で絞り込み・クリック/Enterで選択確定）に切り替える
+  const hasSuggestions =
+    type === "text" && !!suggestions && suggestions.length > 0;
 
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(String(value ?? ""));
@@ -113,15 +105,17 @@ export function EditableField({
     }
   }, [isEditing]);
 
-  const handleSave = () => {
+  // 値を確定して編集終了（候補選択時は選択値を直接渡す）
+  const commit = (v: string) => {
     if (confirmMessage) {
       if (!window.confirm(confirmMessage)) {
         return;
       }
     }
-    onChange(editValue);
+    onChange(v);
     setIsEditing(false);
   };
+  const handleSave = () => commit(editValue);
 
   const handleCancel = () => {
     setEditValue(String(value ?? ""));
@@ -411,21 +405,29 @@ export function EditableField({
                 rows={2}
                 className={`${inputBase} min-h-[2.5rem]`}
               />
+            ) : hasSuggestions ? (
+              <SuggestInput
+                value={editValue}
+                onValueChange={setEditValue}
+                onSelect={(v) => commit(v)}
+                suggestions={suggestions!}
+                placeholder={placeholder}
+                autoFocus
+                onBlur={handleSave}
+                onKeyDown={handleKeyDown}
+                className={inputBase}
+              />
             ) : (
-              <>
-                <input
-                  ref={inputRef as React.RefObject<HTMLInputElement>}
-                  type={type}
-                  value={editValue}
-                  onChange={(e) => setEditValue(e.target.value)}
-                  onBlur={handleSave}
-                  onKeyDown={handleKeyDown}
-                  placeholder={placeholder}
-                  list={dataListId}
-                  className={inputBase}
-                />
-                {dataListEl}
-              </>
+              <input
+                ref={inputRef as React.RefObject<HTMLInputElement>}
+                type={type}
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onBlur={handleSave}
+                onKeyDown={handleKeyDown}
+                placeholder={placeholder}
+                className={inputBase}
+              />
             )}
             {suffix && (
               <span
@@ -496,7 +498,19 @@ export function EditableField({
               className={`${inputBase} min-h-[2.5rem]`}
             />
           ) : (
-            <>
+            hasSuggestions ? (
+              <SuggestInput
+                value={editValue}
+                onValueChange={setEditValue}
+                onSelect={(v) => commit(v)}
+                suggestions={suggestions!}
+                placeholder={placeholder}
+                autoFocus
+                onBlur={handleSave}
+                onKeyDown={handleKeyDown}
+                className={inputBase}
+              />
+            ) : (
               <input
                 ref={inputRef as React.RefObject<HTMLInputElement>}
                 type={type}
@@ -505,11 +519,9 @@ export function EditableField({
                 onBlur={handleSave}
                 onKeyDown={handleKeyDown}
                 placeholder={placeholder}
-                list={dataListId}
                 className={inputBase}
               />
-              {dataListEl}
-            </>
+            )
           )}
           {suffix && (
             <span
@@ -576,21 +588,29 @@ export function EditableField({
               rows={2}
               className="min-h-[2.75rem] max-h-48 min-w-0 grow resize-y text-xs border border-blue-300 rounded px-1.5 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+          ) : hasSuggestions ? (
+            <SuggestInput
+              value={editValue}
+              onValueChange={setEditValue}
+              onSelect={(v) => commit(v)}
+              suggestions={suggestions!}
+              placeholder={placeholder}
+              autoFocus
+              onBlur={handleSave}
+              onKeyDown={handleKeyDown}
+              className="flex-1 text-xs border border-blue-300 rounded px-1.5 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           ) : (
-            <>
-              <input
-                ref={inputRef as React.RefObject<HTMLInputElement>}
-                type={type}
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
-                onBlur={handleSave}
-                onKeyDown={handleKeyDown}
-                placeholder={placeholder}
-                list={dataListId}
-                className="flex-1 text-xs border border-blue-300 rounded px-1.5 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              {dataListEl}
-            </>
+            <input
+              ref={inputRef as React.RefObject<HTMLInputElement>}
+              type={type}
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onBlur={handleSave}
+              onKeyDown={handleKeyDown}
+              placeholder={placeholder}
+              className="flex-1 text-xs border border-blue-300 rounded px-1.5 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           )}
           {suffix && <span className="text-slate-400 text-xs">{suffix}</span>}
           {type === "textarea" && (

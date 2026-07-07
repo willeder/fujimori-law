@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { DataTable, type Column, StatusBadge } from '../components'
+import { SuggestInput } from '../components/SuggestInput'
 import { AppHeader } from '../components/AppHeader'
 import { PageLoading } from '../components/PageLoading'
 import { useCaseState } from '../store/useCaseStore'
@@ -258,19 +259,13 @@ export function SettlementResultsPage() {
           </label>
           <label className="flex flex-col gap-0.5 text-[10px] text-slate-500">
             債権者（部分一致）
-            <input
-              type="text"
+            <SuggestInput
               value={fCreditor}
-              onChange={(e) => setFCreditor(e.target.value)}
-              list="settlement-creditor-names"
-              placeholder="例: ポケット"
+              onValueChange={setFCreditor}
+              suggestions={creditorNames}
+              placeholder="クリックで一覧・入力で絞込"
               className={`${inputCls} w-44`}
             />
-            <datalist id="settlement-creditor-names">
-              {creditorNames.map((n) => (
-                <option key={n} value={n} />
-              ))}
-            </datalist>
           </label>
           <div className="flex flex-col gap-0.5 text-[10px] text-slate-500">
             受任日（期間）

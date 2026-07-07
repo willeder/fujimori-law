@@ -6,6 +6,11 @@ import { AppHeader } from '../components/AppHeader'
 import { LineBroadcastModal, LineHistoryModal } from '../components/case/LineBroadcastModal'
 import { SEARCH_FIELDS, type Condition } from './searchFields'
 import { useSessionState } from '../hooks/useSessionState'
+import {
+  loadFindHistory,
+  saveFindHistory,
+  findHistoryLabel,
+} from '../utils/findHistory'
 import type { Case } from '../types'
 
 type SearchField = 'all' | 'name' | 'phone' | 'prefecture' | 'status' | 'staff'
@@ -39,12 +44,15 @@ export function CaseListPage() {
   const addCond = () => setConditions((cs) => [...cs, { field: 'name', value: '' }])
   const removeCond = (i: number) =>
     setConditions((cs) => (cs.length > 1 ? cs.filter((_, idx) => idx !== i) : cs))
+  // 検索履歴（直近10件・検索モードモーダルと共有）No.147
+  const [findHistory, setFindHistory] = useState<Condition[][]>(() => loadFindHistory())
   const runSearch = async (conds?: Condition[]) => {
     const active = (conds ?? conditions).filter((c) => c.value.trim())
     if (active.length === 0) {
       setResults(null)
       return
     }
+    setFindHistory(saveFindHistory(active))
     setSearching(true)
     try {
       const r = await fetch('/api/cases/search', {
@@ -533,6 +541,34 @@ export function CaseListPage() {
                 <span className="text-[10px] text-slate-400">
                   すべての条件に一致（AND）・部分一致（含む）。日付は「2026」「2026-05」等でも可
                 </span>
+              </div>
+              {/* 最近の検索（直近10件・クリックで再検索）No.147 */}
+              <div className="mt-2 border-t border-slate-200 pt-1.5">
+                <div className="mb-1 text-[10px] font-medium text-slate-400">
+                  最近の検索（直近10件・クリックで再検索）
+                </div>
+                {findHistory.length > 0 ? (
+                  <div className="flex max-h-20 flex-wrap gap-1 overflow-auto">
+                    {findHistory.map((h, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => {
+                          setConditions(h.map((c) => ({ ...c })))
+                          void runSearch(h)
+                        }}
+                        title={findHistoryLabel(h)}
+                        className="max-w-full truncate rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] text-slate-600 hover:border-blue-300 hover:bg-blue-50"
+                      >
+                        {findHistoryLabel(h)}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-[10px] text-slate-400">
+                    検索を実行すると、ここに履歴が表示されます
+                  </div>
+                )}
               </div>
             </div>
           )}
