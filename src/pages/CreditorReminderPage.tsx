@@ -10,6 +10,7 @@ import { DataTable, type Column, StatusBadge } from '../components'
 import { AppHeader } from '../components/AppHeader'
 import { PageLoading } from '../components/PageLoading'
 import { useCaseState } from '../store/useCaseStore'
+import { useCreditorNames } from '../hooks/useCreditorNames'
 
 /** サーバ(getCreditorReminders)が返す軽量な債権者行 */
 type LeanCreditor = {
@@ -32,6 +33,8 @@ type Row = LeanCreditor & {
 export function CreditorReminderPage() {
   const navigate = useNavigate()
   const { cases } = useCaseState()
+  // 債権者名の候補（検索モードの条件入力用・DB全体）
+  const creditorNames = useCreditorNames()
   const [creditors, setCreditors] = useState<LeanCreditor[] | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -85,7 +88,7 @@ export function CreditorReminderPage() {
     { key: 'externalId', header: 'ID', width: '76px', align: 'center', render: (r) => r.externalId ?? '-', filterValue: (r) => r.externalId ?? '' },
     { key: 'name', header: '名前', width: '120px', render: (r) => <span className="whitespace-nowrap">{r.name ?? '-'}</span>, filterValue: (r) => r.name ?? '' },
     { key: 'furigana', header: 'フリガナ', width: '130px', render: (r) => r.furigana ?? '-', filterValue: (r) => r.furigana ?? '' },
-    { key: 'creditorName', header: '債権者', width: '150px', cellTruncate: false, filterValue: (r) => r.creditorName ?? '' },
+    { key: 'creditorName', header: '債権者', width: '150px', cellTruncate: false, filterValue: (r) => r.creditorName ?? '', filterSuggestions: creditorNames },
     { key: 'status', header: 'ステータス', width: '110px', render: (r) => <StatusBadge status={r.status} size="sm" />, filterValue: (r) => r.status ?? '' },
     { key: 'settlementDate', header: '和解日', width: '100px', render: (r) => r.settlementDate ?? '-', filterValue: (r) => r.settlementDate ?? '' },
     {

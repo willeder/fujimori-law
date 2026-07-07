@@ -154,10 +154,10 @@ export function SettlementResultsPage() {
   }, [searched, rows, fCreditor, fNoticeFrom, fNoticeTo, fAccFrom, fAccTo, fSetFrom, fSetTo, fStatus])
 
   const columns: Column<Row>[] = [
-    // 名前・フリガナ・ID は絞り込み対象から除外（filterValue: '' で検索モードの入力欄も出さない）No.161
-    { key: 'caseId', header: 'ID', width: '76px', align: 'center', render: (r) => r.externalId ?? '-', filterValue: () => '' },
-    { key: 'name', header: '名前', width: '120px', render: (r) => <span className="whitespace-nowrap">{r.name ?? '-'}</span>, filterValue: () => '' },
-    { key: 'furigana', header: 'フリガナ', width: '140px', render: (r) => r.furigana ?? '-', filterValue: () => '' },
+    // 名前・フリガナ・ID は絞り込み対象から除外（filterable: false で検索モードの入力欄も出さない）No.161
+    { key: 'caseId', header: 'ID', width: '76px', align: 'center', render: (r) => r.externalId ?? '-', filterable: false },
+    { key: 'name', header: '名前', width: '120px', render: (r) => <span className="whitespace-nowrap">{r.name ?? '-'}</span>, filterable: false },
+    { key: 'furigana', header: 'フリガナ', width: '140px', render: (r) => r.furigana ?? '-', filterable: false },
     {
       key: 'caseStatus',
       header: '受任後ステータス',

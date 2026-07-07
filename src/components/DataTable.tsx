@@ -44,6 +44,11 @@ export interface Column<T> {
    */
   filterSuggestions?: string[]
   /**
+   * 検索モードの条件入力を出すかどうかの明示指定。
+   * false=常に出さない（操作列・検索対象外の列） / true=常に出す / 未指定=自動判定
+   */
+  filterable?: boolean
+  /**
    * cellSingleLine 時のみ。false の列は … で切らない（操作列など）
    * 未指定は省略する
    */
@@ -236,8 +241,16 @@ export function DataTable<T>({
     return cellSearchText(col, item).toLowerCase().includes(value.trim().toLowerCase())
   }
 
-  // その列が検索可能か（filterValue 明示、または生値が文字列/数値で取れる）
+  // その列が検索可能か。
+  //   1. filterable 明示（false=常に出さない / true=常に出す）
+  //   2. 候補付き列（filterSuggestions）は常に出す
+  //   3. データが0件でも検索ボックスは出す（検索してから表示する一覧・DB全体検索のため）
+  //   4. データがあるときは、値が取れる列だけに絞る（従来どおり）
   const colSearchableFn = (col: Column<T>): boolean => {
+    if (col.filterable === false) return false
+    if (col.filterable === true) return true
+    if (col.filterSuggestions && col.filterSuggestions.length > 0) return true
+    if (data.length === 0) return true
     if (col.filterValue) return data.some((it) => col.filterValue!(it) !== '')
     return data.some((it) => {
       const raw = (it as Record<string, unknown>)[String(col.key)]
