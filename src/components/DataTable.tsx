@@ -7,6 +7,7 @@ import {
   matchDate,
   extractIsoDate,
 } from '../utils/findCriterion'
+import { SuggestInput } from './SuggestInput'
 
 // 1画面に複数のテーブルがある場合（案件詳細など）に Shift+F が全テーブルを
 // 同時にトグルしないよう、「いま操作対象のテーブル」を1つだけ保持する簡易レジストリ。
@@ -37,6 +38,11 @@ export interface Column<T> {
    * 金額・件数などの列に指定する。未指定でも filterValue/生値が純粋な数値文字列なら比較可能。
    */
   filterNumber?: (item: T) => number | null | undefined
+  /**
+   * 検索モードの条件入力に候補ドロップダウンを表示する（クリックで一覧・入力で絞込）。
+   * 債権者名など、既存値から選ばせたい列に指定する。
+   */
+  filterSuggestions?: string[]
   /**
    * cellSingleLine 時のみ。false の列は … で切らない（操作列など）
    * 未指定は省略する
@@ -295,7 +301,8 @@ export function DataTable<T>({
       if (typing) return
       // 複数テーブル画面では、アクティブ（直近に触れた）テーブルだけが Shift+F に反応
       if (__activeFindTable !== null && __activeFindTable !== findIdRef.current) return
-      if (e.shiftKey && (e.key === 'F' || e.key === 'f')) {
+      // Ctrl/Cmd が押されている場合は全体検索（FindModeLauncher）に譲る
+      if (e.shiftKey && !e.ctrlKey && !e.metaKey && (e.key === 'F' || e.key === 'f')) {
         e.preventDefault()
         setFindOn((v) => {
           if (!v) setCriteria((c) => (Object.keys(c).length ? c : applied))
@@ -649,6 +656,30 @@ export function DataTable<T>({
                   style={{ width: col.width }}
                 >
                   {searchableFlags[ci] ? (
+                    col.filterSuggestions && col.filterSuggestions.length > 0 ? (
+                      // 候補付きの条件入力（クリックで一覧表示・入力で絞込。債権者列など）
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <SuggestInput
+                          autoFocus={ci === firstSearchableIdx}
+                          value={criteria[String(col.key)] ?? ''}
+                          onValueChange={(v) =>
+                            setCriteria((c) => ({ ...c, [String(col.key)]: v }))
+                          }
+                          suggestions={col.filterSuggestions}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault()
+                              performFind()
+                            } else if (e.key === 'Escape') {
+                              e.preventDefault()
+                              cancelFind()
+                            }
+                          }}
+                          placeholder="条件"
+                          className="w-full min-w-0 rounded border border-blue-300 bg-white px-1 py-0.5 text-[11px] font-normal text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        />
+                      </div>
+                    ) : (
                     <input
                       // 先頭の検索可能列に自動フォーカス
                       autoFocus={ci === firstSearchableIdx}
@@ -669,6 +700,7 @@ export function DataTable<T>({
                       placeholder="条件"
                       className="w-full min-w-0 rounded border border-blue-300 bg-white px-1 py-0.5 text-[11px] font-normal text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
+                    )
                   ) : null}
                 </th>
               ))}

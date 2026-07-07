@@ -148,6 +148,8 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         width: '13rem',
         cellTruncate: false,
         cellMultiline: true,
+        // 検索モード（Shift+F）の条件入力に債権者候補ドロップダウンを表示
+        filterSuggestions: creditorNameSuggestions,
         render: (item) => (item.creditorName ?? '').slice(0, 50),
       },
       {

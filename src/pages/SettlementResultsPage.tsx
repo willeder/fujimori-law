@@ -165,7 +165,8 @@ export function SettlementResultsPage() {
       render: (r) => <StatusBadge status={r.caseStatus} />,
     },
     { key: 'acceptanceDate', header: '受任日', width: '100px', render: (r) => r.acceptanceDate ?? '-' },
-    { key: 'creditorName', header: '債権者', width: '140px' },
+    // 検索モード（Shift+F）の条件入力にも債権者候補ドロップダウンを表示
+    { key: 'creditorName', header: '債権者', width: '140px', filterSuggestions: creditorNames },
     {
       key: 'acceptanceNoticeSentDate',
       header: '受任通知送付日',

@@ -1,5 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { DataTable, type Column } from '../components'
+import { SuggestInput } from '../components/SuggestInput'
+import { useCreditorNames } from '../hooks/useCreditorNames'
 import { useUserSettings } from '../context/UserSettingsContext'
 import { useCaseDispatch, useCaseState } from '../store/useCaseStore'
 import type { ContactHistory } from '../types'
@@ -21,6 +23,8 @@ export function ContactHistoryTable({
   const dispatch = useCaseDispatch()
   const { contactHistories } = useCaseState()
   const { accountName } = useUserSettings()
+  // 債権者名の候補（検索モードの条件入力・行編集のドロップダウン用）
+  const creditorNames = useCreditorNames()
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editData, setEditData] = useState<Partial<ContactHistory>>({})
   // まだDB保存していない新規行（合成ID）。保存時にPOST→実IDへ差替え
@@ -152,13 +156,17 @@ export function ContactHistoryTable({
             width: '12rem',
             sortable: false,
             cellTruncate: false,
+            // 検索モード（Shift+F）の条件入力に債権者候補ドロップダウンを表示
+            filterSuggestions: creditorNames,
             render: (h) =>
               editingId === h.id ? (
-                <input
+                // 行編集時も候補から選択可能（クリックで一覧・入力で絞込・自由入力も可）
+                <SuggestInput
                   value={editData.creditorName ?? ''}
-                  onChange={(e) =>
-                    setEditData({ ...editData, creditorName: e.target.value || null })
+                  onValueChange={(v) =>
+                    setEditData({ ...editData, creditorName: v || null })
                   }
+                  suggestions={creditorNames}
                   className={cellIn}
                   placeholder="債権者名"
                 />

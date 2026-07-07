@@ -24,6 +24,7 @@ import { SettlementFiles } from "../components/case/SettlementFiles";
 import { LineUrlQuickEdit } from "../components/case/LineUrlQuickEdit";
 import { LineLinkControl } from "../components/case/LineLinkControl";
 import { CaseChangeHistory } from "../components/case/CaseChangeHistory";
+import { FindModeLauncher } from "../components/case/FindModeLauncher";
 import { LAST_LIST_PATH_KEY } from "../components/AppHeader";
 import type { Case } from "../types";
 import {
@@ -1044,6 +1045,8 @@ function CaseDetailBody({
             </span>
           )}
           <span className="flex shrink-0 items-center gap-1.5">
+            {/* 全体検索（検索モード）: 案件詳細でも Ctrl+F / Ctrl+Shift+F またはボタンで起動（No.150） */}
+            <FindModeLauncher />
             <div className="relative">
               <button
                 type="button"
