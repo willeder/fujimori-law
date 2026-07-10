@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useCaseDispatch } from '../store/useCaseStore'
 import { useFoundSet } from '../store/FoundSet'
 import { EditableField, StatusBadge, DataTable, type Column } from '../components'
+import { CreditorFiles } from '../components/case/CreditorFiles'
 import type { Creditor } from '../types'
 
 interface CreditorTabProps {
@@ -866,6 +867,9 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         />
       </div>
       <div className="min-w-0 col-span-1" />
+
+      {/* 債権者資料（ファイル格納フィールド）。No.8 */}
+      {creditor.id != null && <CreditorFiles creditorId={creditor.id} />}
     </div>
   )
 }

@@ -109,6 +109,7 @@ export function ClientReminderPage() {
             stickyHeader
             enableFind
             persistKey="clientReminder"
+            csvExport="依頼者リマインド一覧"
           />
         </div>
       </div>

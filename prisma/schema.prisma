@@ -206,6 +206,7 @@ model Creditor {
   repaymentTarget          String?
 
   payments Payment[]
+  files    CreditorFile[]
 
   @@index([caseId])
   @@index([status])
@@ -503,4 +504,53 @@ model EditPresence {
   @@unique([entity, entityId, email])
   @@index([entity, entityId])
   @@map("edit_presences")
+}
+
+// GMOあおぞらAPI連携のトークン（1行運用）。No.153
+model GmoApiToken {
+  id           Int       @id @default(autoincrement())
+  accessToken  String?
+  refreshToken String?
+  scope        String?
+  expiresAt    DateTime?
+  pendingState String? // 認可フロー中の state（CSRF対策）
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("gmo_api_tokens")
+}
+
+// 債権者資料（各社タブのファイル格納）。No.8
+model CreditorFile {
+  id         Int      @id @default(autoincrement())
+  creditorId Int
+  creditor   Creditor @relation(fields: [creditorId], references: [id], onDelete: Cascade)
+  name       String
+  mime       String   @default("application/octet-stream")
+  size       Int
+  data       Bytes
+  uploadedBy String   @default("")
+  createdAt  DateTime @default(now())
+
+  @@index([creditorId])
+  @@map("creditor_files")
+}
+
+// メール送信履歴（No.92/93）
+model EmailLog {
+  id         Int      @id @default(autoincrement())
+  caseId     Int?
+  toAddress  String
+  subject    String
+  body       String
+  status     String // SENT / FAILED
+  error      String?
+  provider   String   @default("")
+  providerId String?
+  sentBy     String   @default("")
+  createdAt  DateTime @default(now())
+
+  @@index([caseId])
+  @@index([createdAt])
+  @@map("email_logs")
 }

@@ -365,6 +365,78 @@ function dbApiPlugin(): Plugin {
               res.end(JSON.stringify(r.body))
               return
             }
+            // ── メール送信・履歴（No.92/93） ──
+            if (url === '/api/mail/send' || url.startsWith('/api/mail/history') || url === '/api/mail/status') {
+              const mail = (await server.ssrLoadModule(
+                '/src/server/mail.ts'
+              )) as typeof import('./src/server/mail')
+              if (url === '/api/mail/send' && req.method === 'POST') {
+                const r = await mail.sendMail(editActor, await readRawBody(req))
+                res.statusCode = r.status
+                res.setHeader('Content-Type', 'application/json; charset=utf-8')
+                res.end(JSON.stringify(r.body))
+                return
+              }
+              if (url.startsWith('/api/mail/history') && req.method === 'GET') {
+                const q = new URLSearchParams(req.url?.split('?')[1] ?? '')
+                const cid = q.get('caseId')
+                res.setHeader('Content-Type', 'application/json; charset=utf-8')
+                res.end(JSON.stringify(await mail.getMailHistory(cid ? Number(cid) : null)))
+                return
+              }
+              if (url === '/api/mail/status') {
+                res.setHeader('Content-Type', 'application/json; charset=utf-8')
+                res.end(JSON.stringify(mail.mailConfigured()))
+                return
+              }
+            }
+
+            // ── 債権者資料（各社タブのファイル格納・No.8） ──
+            const cfList = url.match(/^\/api\/creditors\/(\d+)\/files$/)
+            const cfById = url.match(/^\/api\/creditors\/files\/(\d+)$/)
+            if (cfList || cfById) {
+              const cf = (await server.ssrLoadModule(
+                '/src/server/creditorFiles.ts'
+              )) as typeof import('./src/server/creditorFiles')
+              if (cfList && req.method === 'GET') {
+                res.setHeader('Content-Type', 'application/json; charset=utf-8')
+                res.end(JSON.stringify(await cf.listCreditorFiles(Number(cfList[1]))))
+                return
+              }
+              if (cfList && req.method === 'POST') {
+                const r = await cf.uploadCreditorFile(
+                  editActor,
+                  Number(cfList[1]),
+                  await readRawBody(req)
+                )
+                res.statusCode = r.status
+                res.setHeader('Content-Type', 'application/json; charset=utf-8')
+                res.end(JSON.stringify(r.body))
+                return
+              }
+              if (cfById && req.method === 'GET') {
+                const f = await cf.getCreditorFile(Number(cfById[1]))
+                if (!f) {
+                  res.statusCode = 404
+                  res.end('not found')
+                  return
+                }
+                res.setHeader('Content-Type', f.mime)
+                res.setHeader(
+                  'Content-Disposition',
+                  `attachment; filename*=UTF-8''${encodeURIComponent(f.name)}`
+                )
+                res.end(f.data)
+                return
+              }
+              if (cfById && req.method === 'DELETE') {
+                const r = await cf.deleteCreditorFile(editActor, Number(cfById[1]))
+                res.statusCode = r.status
+                res.setHeader('Content-Type', 'application/json; charset=utf-8')
+                res.end(JSON.stringify(r.body))
+                return
+              }
+            }
             const creditorEdit = url.match(/^\/api\/creditors\/(\d+)$/)
             if (creditorEdit && req.method === 'PATCH') {
               const r = await mod.updateCreditorField(
@@ -460,6 +532,81 @@ function dbApiPlugin(): Plugin {
             res.setHeader('Content-Type', 'application/json; charset=utf-8')
             res.end(JSON.stringify(r.body))
             return
+          }
+
+          // ── 入金データ取込（銀行明細 → 実入金反映。No.88/90/91） ──
+          if (url === '/api/deposits/preview' || url === '/api/deposits/commit') {
+            const dep = (await server.ssrLoadModule(
+              '/src/server/depositImport.ts'
+            )) as typeof import('./src/server/depositImport')
+            const buf = await readRawBuffer(req)
+            if (url === '/api/deposits/preview') {
+              const out = await dep.planDepositImport(buf)
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify(out))
+              return
+            }
+            const actor = { id: sessionUser.id, email: sessionUser.email }
+            const r = await dep.commitDepositImport(actor, buf)
+            res.setHeader('Content-Type', 'application/json; charset=utf-8')
+            res.end(JSON.stringify(r))
+            return
+          }
+
+          // ── GMOあおぞらAPI連携（OAuth2 認可・No.153） ──
+          if (url.startsWith('/api/gmo/auth/') || url === '/api/gmo/userinfo') {
+            const gmoApi = (await server.ssrLoadModule(
+              '/src/server/gmoApi.ts'
+            )) as typeof import('./src/server/gmoApi')
+            const q = new URLSearchParams(req.url?.split('?')[1] ?? '')
+            if (url === '/api/gmo/auth/status') {
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify(await gmoApi.getStatus()))
+              return
+            }
+            if (url === '/api/gmo/auth/url') {
+              if (!gmoApi.isConfigured()) {
+                res.statusCode = 400
+                res.setHeader('Content-Type', 'application/json; charset=utf-8')
+                res.end(JSON.stringify({ error: 'GMO_CLIENT_ID / GMO_CLIENT_SECRET / GMO_REDIRECT_URI が未設定です' }))
+                return
+              }
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify(await gmoApi.buildAuthorizationUrl()))
+              return
+            }
+            if (url === '/api/gmo/auth/callback') {
+              const code = q.get('code') ?? ''
+              const state = q.get('state') ?? ''
+              const err = q.get('error')
+              let msg: string
+              if (err) {
+                msg = `認可がキャンセル/失敗しました: ${err} ${q.get('error_description') ?? ''}`
+              } else if (!code || !state) {
+                msg = 'code / state がありません'
+              } else {
+                try {
+                  const r = await gmoApi.exchangeCode(
+                    { id: sessionUser.id, email: sessionUser.email },
+                    code,
+                    state
+                  )
+                  msg = r.ok
+                    ? 'GMOあおぞらAPIの連携が完了しました。この画面は閉じて構いません。'
+                    : `連携に失敗しました: ${r.error}`
+                } catch (e) {
+                  msg = `連携に失敗しました: ${e instanceof Error ? e.message : String(e)}`
+                }
+              }
+              res.setHeader('Content-Type', 'text/html; charset=utf-8')
+              res.end(`<!doctype html><meta charset="utf-8"><title>GMO API連携</title><body style="font-family:sans-serif;padding:2rem"><p>${msg}</p><p><a href="/gmo-transfer">GMO振込出力へ戻る</a></p></body>`)
+              return
+            }
+            if (url === '/api/gmo/userinfo') {
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify(await gmoApi.getUserInfo()))
+              return
+            }
           }
 
           // ── GMO: 未整備（支払条件・振込先 未入力）検知 ──

@@ -245,6 +245,7 @@ export function PaymentDelayDashboard() {
                 paginated
                 enableFind
                 persistKey="paymentDelay"
+                csvExport="入金遅延一覧"
                 bodyMaxHeightClassName="max-h-[calc(100vh-21rem)]"
               />
             </div>

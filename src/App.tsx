@@ -18,6 +18,7 @@ import { LoginPage } from './pages/LoginPage'
 import { MembersPage } from './pages/MembersPage'
 import { GmoTransferPage } from './pages/GmoTransferPage'
 import { IntakeImportPage } from './pages/IntakeImportPage'
+import { DepositImportPage } from './pages/DepositImportPage'
 import { PaymentDelayDashboard } from './pages/PaymentDelayDashboard'
 import { ClientReminderPage } from './pages/ClientReminderPage'
 import { CreditorReminderPage } from './pages/CreditorReminderPage'
@@ -70,6 +71,10 @@ const router = createBrowserRouter([
   {
     path: '/intake-import',
     element: <IntakeImportPage />,
+  },
+  {
+    path: '/deposit-import',
+    element: <DepositImportPage />,
   },
 ])
 

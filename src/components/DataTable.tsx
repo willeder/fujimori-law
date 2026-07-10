@@ -49,6 +49,11 @@ export interface Column<T> {
    */
   filterable?: boolean
   /**
+   * CSV出力時にこの列の出力文字列を返す（No.166）。
+   * 未指定の場合は filterValue → item[key] の生値の順で文字列化する。
+   */
+  csvValue?: (item: T) => string | number | null | undefined
+  /**
    * cellSingleLine 時のみ。false の列は … で切らない（操作列など）
    * 未指定は省略する
    */
@@ -123,6 +128,14 @@ interface DataTableProps<T> {
    * 親はDB全体を検索して該当セットを作り、案件詳細を1件ずつ左右ナビで渡り歩く等に使う。
    */
   onFindNavigate?: (conditions: { field: string; value: string }[]) => void
+  /**
+   * 指定すると「CSV出力」ボタンを表示する（No.166）。値は出力ファイル名の先頭
+   * （例: "和解実績一覧" → 和解実績一覧_20260709.csv）。
+   * 出力前にフィールドの追加・削除（チェック）と並び替え（↑↓）ができ、
+   * 設定は localStorage に保存して次回も復元する。
+   * 出力対象は「現在の絞り込み・ソートを適用した全件」（ページ送りは無視）。
+   */
+  csvExport?: string
 }
 
 export function DataTable<T>({
@@ -146,6 +159,7 @@ export function DataTable<T>({
   persistKey,
   onGlobalFind,
   onFindNavigate,
+  csvExport,
 }: DataTableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(() => {
     if (!persistKey) return null
@@ -384,6 +398,201 @@ export function DataTable<T>({
     ? sortedData.slice((currentPage - 1) * pageSize, currentPage * pageSize)
     : sortedData
 
+  // ── CSV出力（No.166: フィールドの追加・削除・並び替えに対応） ──
+  const csvStorageKey = csvExport ? `csv.fields.${persistKey ?? csvExport}` : ''
+  // CSV候補列＝ヘッダー名を持つ列（操作列など header:'' は除外）
+  const csvCandidates = columns.filter((c) => (c.header ?? '') !== '')
+  const defaultCsvFields = () => csvCandidates.map((c) => ({ key: String(c.key), on: true }))
+  const [csvOpen, setCsvOpen] = useState(false)
+  const [csvFields, setCsvFields] = useState<{ key: string; on: boolean }[]>(defaultCsvFields)
+  // モーダルを開くたびに保存済み設定を読み、現在の列構成と突き合わせる
+  // （列が増えていれば末尾に追加・無くなった列は除去）
+  const openCsvModal = () => {
+    let saved: { key: string; on: boolean }[] | null = null
+    try {
+      const raw = localStorage.getItem(csvStorageKey)
+      if (raw) saved = JSON.parse(raw) as { key: string; on: boolean }[]
+    } catch {
+      saved = null
+    }
+    const validKeys = new Set(csvCandidates.map((c) => String(c.key)))
+    const base = (saved ?? []).filter((f) => validKeys.has(f.key))
+    const seen = new Set(base.map((f) => f.key))
+    for (const c of csvCandidates) {
+      if (!seen.has(String(c.key))) base.push({ key: String(c.key), on: saved == null })
+    }
+    setCsvFields(base.length > 0 ? base : defaultCsvFields())
+    setCsvOpen(true)
+  }
+  const saveCsvFields = (fields: { key: string; on: boolean }[]) => {
+    setCsvFields(fields)
+    try {
+      localStorage.setItem(csvStorageKey, JSON.stringify(fields))
+    } catch {
+      /* 保存失敗は無視 */
+    }
+  }
+  const moveCsvField = (i: number, dir: -1 | 1) => {
+    const j = i + dir
+    if (j < 0 || j >= csvFields.length) return
+    const next = [...csvFields]
+    ;[next[i], next[j]] = [next[j], next[i]]
+    saveCsvFields(next)
+  }
+  // この列のCSV出力文字列（csvValue → filterValue → 生値の順）
+  const cellCsvText = (col: Column<T>, item: T): string => {
+    if (col.csvValue) {
+      const v = col.csvValue(item)
+      return v == null ? '' : String(v)
+    }
+    if (col.filterValue) return col.filterValue(item)
+    const raw = (item as Record<string, unknown>)[String(col.key)]
+    if (raw === null || raw === undefined) return ''
+    return String(raw)
+  }
+  const csvEscape = (s: string): string =>
+    /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
+  const downloadCsv = () => {
+    const cols = csvFields
+      .filter((f) => f.on)
+      .map((f) => csvCandidates.find((c) => String(c.key) === f.key))
+      .filter((c): c is Column<T> => !!c)
+    if (cols.length === 0) return
+    const header = cols.map((c) => csvEscape(c.header)).join(',')
+    const lines = sortedData.map((item) =>
+      cols.map((c) => csvEscape(cellCsvText(c, item))).join(','),
+    )
+    // Excel で文字化けしないよう UTF-8 BOM + CRLF
+    const csv = '﻿' + [header, ...lines].join('\r\n') + '\r\n'
+    const now = new Date()
+    const ymd = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${csvExport}_${ymd}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    setCsvOpen(false)
+  }
+  const csvButton = csvExport ? (
+    <button
+      type="button"
+      onClick={openCsvModal}
+      title="表示中の一覧をCSVファイルで出力（フィールドの追加・削除・並び替え可）"
+      className="rounded border border-emerald-600 bg-white px-2 py-0.5 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-50"
+    >
+      CSV出力
+    </button>
+  ) : null
+  const csvModal =
+    csvExport && csvOpen ? (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
+        onClick={() => setCsvOpen(false)}
+      >
+        <div
+          className="max-h-[85vh] w-[26rem] overflow-hidden rounded-lg bg-white shadow-xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2">
+            <span className="text-sm font-semibold text-slate-700">CSV出力（{csvExport}）</span>
+            <button
+              type="button"
+              onClick={() => setCsvOpen(false)}
+              className="rounded px-2 py-0.5 text-slate-500 hover:bg-slate-100"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="px-4 py-2 text-[11px] text-slate-500">
+            出力するフィールドにチェックし、↑↓で並び順を変更できます（設定は保存されます）。
+            出力対象: 現在の絞り込み・ソートを適用した {sortedData.length} 件
+          </div>
+          <div className="max-h-[50vh] overflow-y-auto px-4 pb-2">
+            {csvFields.map((f, i) => {
+              const col = csvCandidates.find((c) => String(c.key) === f.key)
+              if (!col) return null
+              return (
+                <div
+                  key={f.key}
+                  className="flex items-center justify-between gap-2 border-b border-slate-100 py-1"
+                >
+                  <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-xs text-slate-700">
+                    <input
+                      type="checkbox"
+                      checked={f.on}
+                      onChange={(e) =>
+                        saveCsvFields(
+                          csvFields.map((x, xi) =>
+                            xi === i ? { ...x, on: e.target.checked } : x,
+                          ),
+                        )
+                      }
+                    />
+                    <span className="truncate">{col.header}</span>
+                  </label>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <button
+                      type="button"
+                      disabled={i === 0}
+                      onClick={() => moveCsvField(i, -1)}
+                      className="rounded border border-slate-300 px-1.5 py-0.5 text-[11px] text-slate-600 hover:bg-slate-50 disabled:opacity-30"
+                    >
+                      ↑
+                    </button>
+                    <button
+                      type="button"
+                      disabled={i === csvFields.length - 1}
+                      onClick={() => moveCsvField(i, 1)}
+                      className="rounded border border-slate-300 px-1.5 py-0.5 text-[11px] text-slate-600 hover:bg-slate-50 disabled:opacity-30"
+                    >
+                      ↓
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+          <div className="flex items-center justify-between gap-2 border-t border-slate-200 bg-slate-50 px-4 py-2">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => saveCsvFields(csvFields.map((f) => ({ ...f, on: true })))}
+                className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[11px] text-slate-600 hover:bg-slate-100"
+              >
+                全選択
+              </button>
+              <button
+                type="button"
+                onClick={() => saveCsvFields(csvFields.map((f) => ({ ...f, on: false })))}
+                className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[11px] text-slate-600 hover:bg-slate-100"
+              >
+                全解除
+              </button>
+              <button
+                type="button"
+                onClick={() => saveCsvFields(defaultCsvFields())}
+                className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[11px] text-slate-600 hover:bg-slate-100"
+              >
+                初期に戻す
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={downloadCsv}
+              disabled={csvFields.every((f) => !f.on)}
+              className="rounded bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-40"
+            >
+              出力する
+            </button>
+          </div>
+        </div>
+      </div>
+    ) : null
+
   const getValue = (item: T, key: string): unknown => {
     return (item as Record<string, unknown>)[key]
   }
@@ -499,6 +708,7 @@ export function DataTable<T>({
           {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, total)} / {total}件
         </span>
         <div className="flex items-center gap-2">
+          {csvButton}
           <label className="flex items-center gap-1">
             表示件数
             <select
@@ -617,6 +827,12 @@ export function DataTable<T>({
     >
       {findBar}
       {pager}
+      {csvExport && !(paginated && total > 0) && (
+        <div className="flex shrink-0 items-center justify-end gap-2 border-b border-slate-200 bg-slate-50 px-3 py-1">
+          {csvButton}
+        </div>
+      )}
+      {csvModal}
     <div className={bodyScrollClass}>
       <table className={`${tableWidthClass} ${tableText}${tableLayoutClass}${tableMinW}${tableBorder}`}>
         <thead>

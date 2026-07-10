@@ -40,3 +40,8 @@ dist-ssr/
 
 # Claude Code ローカル設定（端末固有・共有しない）
 .claude/settings.local.json
+
+# Claude(Cowork)作業用の一時ファイル（コミット禁止）
+# ステージング用アーカイブと、マウント経由で削除できないファイルの退避先
+__claude_stage*.tar.gz
+/_to_delete/

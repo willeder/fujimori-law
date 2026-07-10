@@ -65,6 +65,40 @@ export function GmoTransferPage() {
   // 当月判定の対象月（YYYY-MM）＝対象期間（開始日）の年月
   const month = start.slice(0, 7)
 
+  // ── GMOあおぞらAPI連携ステータス（No.153）──
+  const [apiStatus, setApiStatus] = useState<{
+    configured: boolean
+    connected: boolean
+    expiresAt: string | null
+    base: string
+  } | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/gmo/auth/status')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!cancelled) setApiStatus(d)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
+  const startGmoAuth = async () => {
+    try {
+      const r = await fetch('/api/gmo/auth/url')
+      const d = (await r.json()) as { url?: string; error?: string }
+      if (!r.ok || !d.url) {
+        window.alert(d.error ?? '認可URLの取得に失敗しました')
+        return
+      }
+      // 銀行のログイン・認可画面を別タブで開く（認可完了でコールバックに戻る）
+      window.open(d.url, '_blank', 'noopener')
+    } catch (e) {
+      window.alert(`認可URLの取得に失敗しました: ${e instanceof Error ? e.message : String(e)}`)
+    }
+  }
+
   // 要対応（その月に支払いが必要なのに支払条件・振込先が未入力）の検知。
   // 対象月に連動して取得する（対象期間の開始月を変えると再取得）。
   const [incomplete, setIncomplete] = useState<IncompleteResult | null>(null)
@@ -193,6 +227,34 @@ export function GmoTransferPage() {
       </AppHeader>
 
       <div className="p-3">
+        {/* GMOあおぞらAPI連携（No.153）: 入金リアルタイム反映・自動振込の前提となる認可 */}
+        {apiStatus && (
+          <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm">
+            <span className="font-semibold text-slate-700">GMOあおぞらAPI連携</span>
+            {apiStatus.connected ? (
+              <span className="rounded bg-emerald-100 px-2 py-0.5 text-emerald-800">
+                連携済み{apiStatus.expiresAt ? `（トークン期限: ${apiStatus.expiresAt.slice(0, 10)}）` : ''}
+              </span>
+            ) : apiStatus.configured ? (
+              <>
+                <span className="rounded bg-amber-100 px-2 py-0.5 text-amber-800">未連携</span>
+                <button
+                  type="button"
+                  onClick={() => void startGmoAuth()}
+                  className="rounded bg-blue-600 px-2.5 py-1 font-semibold text-white hover:bg-blue-700"
+                >
+                  銀行の認可画面を開いて連携する
+                </button>
+              </>
+            ) : (
+              <span className="rounded bg-slate-100 px-2 py-0.5 text-slate-500">
+                API設定待ち（契約完了後に GMO_CLIENT_ID 等を設定すると連携できます）
+              </span>
+            )}
+            <span className="text-[10px] text-slate-400">接続先: {apiStatus.base}</span>
+          </div>
+        )}
+
         {/* 要対応：弁済対象なのに支払条件・振込先が未入力（GMO対象から漏れる原因） */}
         {incomplete && incomplete.count > 0 && (
           <div className="mb-3 rounded-lg border border-amber-300 bg-amber-50 shadow-sm">
@@ -265,6 +327,7 @@ export function GmoTransferPage() {
                 keyField="_i"
                 density="compact"
                 paginated
+                csvExport="GMO振込一覧"
                 onRowClick={(r) => navigate(`/cases/${r.caseId}`)}
                 emptyMessage="対象となる振込はありません"
               />

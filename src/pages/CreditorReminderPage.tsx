@@ -124,6 +124,7 @@ export function CreditorReminderPage() {
             stickyHeader
             enableFind
             persistKey="creditorReminder"
+            csvExport="債権者リマインド一覧"
           />
         </div>
       </div>

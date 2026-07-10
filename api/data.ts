@@ -34,6 +34,10 @@ import {
 } from '../src/server/handlers.js'
 import * as gmo from '../src/server/gmoTransfer.js'
 import * as intake from '../src/server/intakeImport.js'
+import * as deposits from '../src/server/depositImport.js'
+import * as gmoApi from '../src/server/gmoApi.js'
+import * as creditorFiles from '../src/server/creditorFiles.js'
+import * as mail from '../src/server/mail.js'
 import { getSessionToken, getSessionUser } from '../src/server/auth.js'
 import { sendLineBroadcast, getLineBroadcastHistory } from '../src/server/lineBroadcast.js'
 import { getReminderCandidates, sendReminders } from '../src/server/paymentReminder.js'
@@ -150,6 +154,56 @@ export default async function handler(
       return
     }
 
+    // ── 入金データ取込（銀行明細 → 実入金反映。No.88/90/91） ──
+    if (path === '/api/deposits/preview' && method === 'POST') {
+      json(await deposits.planDepositImport(await getRawBody(req)))
+      return
+    }
+    if (path === '/api/deposits/commit' && method === 'POST') {
+      json(await deposits.commitDepositImport(editActor, await getRawBody(req)))
+      return
+    }
+
+    // ── GMOあおぞらAPI連携（OAuth2 認可・No.153） ──
+    if (path === '/api/gmo/auth/status' && method === 'GET') {
+      json(await gmoApi.getStatus())
+      return
+    }
+    if (path === '/api/gmo/auth/url' && method === 'GET') {
+      if (!gmoApi.isConfigured()) {
+        json({ error: 'GMO_CLIENT_ID / GMO_CLIENT_SECRET / GMO_REDIRECT_URI が未設定です' }, 400)
+        return
+      }
+      json(await gmoApi.buildAuthorizationUrl())
+      return
+    }
+    if (path === '/api/gmo/auth/callback' && method === 'GET') {
+      const code = query.get('code') ?? ''
+      const state = query.get('state') ?? ''
+      const err = query.get('error')
+      let msg: string
+      if (err) {
+        msg = `認可がキャンセル/失敗しました: ${err} ${query.get('error_description') ?? ''}`
+      } else if (!code || !state) {
+        msg = 'code / state がありません'
+      } else {
+        try {
+          const r = await gmoApi.exchangeCode(editActor, code, state)
+          msg = r.ok ? 'GMOあおぞらAPIの連携が完了しました。この画面は閉じて構いません。' : `連携に失敗しました: ${r.error}`
+        } catch (e) {
+          msg = `連携に失敗しました: ${e instanceof Error ? e.message : String(e)}`
+        }
+      }
+      res.statusCode = 200
+      res.setHeader('Content-Type', 'text/html; charset=utf-8')
+      res.end(`<!doctype html><meta charset="utf-8"><title>GMO API連携</title><body style="font-family:sans-serif;padding:2rem"><p>${msg}</p><p><a href="/gmo-transfer">GMO振込出力へ戻る</a></p></body>`)
+      return
+    }
+    if (path === '/api/gmo/userinfo' && method === 'GET') {
+      json(await gmoApi.getUserInfo())
+      return
+    }
+
     // ── GMO: 未整備（支払条件・振込先 未入力）検知 ──
     if (path === '/api/gmo/incomplete' && method === 'GET') {
       // month(YYYY-MM)＝対象月。未指定なら当月。その月に支払いが必要な未整備のみ返す
@@ -222,6 +276,65 @@ export default async function handler(
     if (path === '/api/creditors/settlement' && method === 'GET') {
       json(await getSettlementCreditors())
       return
+    }
+
+    // ── メール送信・履歴（No.92/93） ──
+    if (path === '/api/mail/send' && method === 'POST') {
+      const r = await mail.sendMail(editActor, (await getRawBody(req)).toString('utf8'))
+      json(r.body, r.status)
+      return
+    }
+    if (path === '/api/mail/history' && method === 'GET') {
+      const cid = query.get('caseId')
+      json(await mail.getMailHistory(cid ? Number(cid) : null))
+      return
+    }
+    if (path === '/api/mail/status' && method === 'GET') {
+      json(mail.mailConfigured())
+      return
+    }
+
+    // ── 債権者資料（各社タブのファイル格納・No.8） ──
+    const creditorFilesList = path.match(/^\/api\/creditors\/(\d+)\/files$/)
+    if (creditorFilesList) {
+      const cid = Number(creditorFilesList[1])
+      if (method === 'GET') {
+        json(await creditorFiles.listCreditorFiles(cid))
+        return
+      }
+      if (method === 'POST') {
+        const r = await creditorFiles.uploadCreditorFile(
+          editActor,
+          cid,
+          (await getRawBody(req)).toString('utf8')
+        )
+        json(r.body, r.status)
+        return
+      }
+    }
+    const creditorFileById = path.match(/^\/api\/creditors\/files\/(\d+)$/)
+    if (creditorFileById) {
+      const fid = Number(creditorFileById[1])
+      if (method === 'GET') {
+        const f = await creditorFiles.getCreditorFile(fid)
+        if (!f) {
+          json({ error: 'not found' }, 404)
+          return
+        }
+        res.statusCode = 200
+        res.setHeader('Content-Type', f.mime)
+        res.setHeader(
+          'Content-Disposition',
+          `attachment; filename*=UTF-8''${encodeURIComponent(f.name)}`
+        )
+        res.end(f.data)
+        return
+      }
+      if (method === 'DELETE') {
+        const r = await creditorFiles.deleteCreditorFile(editActor, fid)
+        json(r.body, r.status)
+        return
+      }
     }
 
     // ── 案件編集・変更履歴・revert ──

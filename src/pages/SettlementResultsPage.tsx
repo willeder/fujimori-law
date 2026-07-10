@@ -359,6 +359,7 @@ export function SettlementResultsPage() {
               paginated
               enableFind
               persistKey="settlementResults"
+              csvExport="和解実績一覧"
               emptyMessage="該当する和解実績がありません"
             />
           </div>

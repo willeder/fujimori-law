@@ -23,6 +23,7 @@ import { CreditorPaymentTable } from "./CreditorPaymentTable";
 import { SettlementFiles } from "../components/case/SettlementFiles";
 import { LineUrlQuickEdit } from "../components/case/LineUrlQuickEdit";
 import { LineLinkControl } from "../components/case/LineLinkControl";
+import { CaseMailControl } from "../components/case/CaseMailControl";
 import { CaseChangeHistory } from "../components/case/CaseChangeHistory";
 import { FindModeLauncher } from "../components/case/FindModeLauncher";
 import { LAST_LIST_PATH_KEY } from "../components/AppHeader";
@@ -31,6 +32,7 @@ import {
   creditorTabAccentSummary,
   creditorTabAccentForName,
 } from "../lib/creditorTabAccent";
+import { joinAddress, stripPrefecture } from "../utils/address";
 
 /** nested な案件編集を DB 列（フラット）へ。列名はほぼ同名、settlementInfo のみ別名 */
 const CASE_FIELD_RENAME: Record<string, string> = {
@@ -413,12 +415,15 @@ function CaseDetailBody({
     };
   }, []);
 
-  // ブロック中は5秒間隔で監視（相手の編集終了を早く検知してポップアップを自動で閉じる）
+  // 他ユーザーが同じレコードを開いている間・ブロック中は5秒間隔で監視
+  // （相手の「編集開始」を素早く検知してポップアップを出す／「編集終了」を検知して自動で閉じる。
+  //   通常時の20秒間隔だと、相手が編集を始めてからポップアップ表示まで最大20秒かかり
+  //   「表示されない」ように見えるため。No.165）
   useEffect(() => {
-    if (blockedBy == null) return;
+    if (blockedBy == null && otherEditors.length === 0) return;
     const iv = setInterval(() => beatFnRef.current(), 5000);
     return () => clearInterval(iv);
-  }, [blockedBy]);
+  }, [blockedBy, otherEditors.length]);
 
   // ブロック解除（相手の編集終了）を検知したら、最新データを再取得して画面へ反映
   const prevBlockedRef = useRef<string | null>(null);
@@ -1084,6 +1089,10 @@ function CaseDetailBody({
                 </div>
               )}
             </div>
+            <CaseMailControl
+              caseId={caseData.id}
+              defaultTo={caseData.clientBasicInfo.email}
+            />
             <LineLinkControl
               caseId={caseData.id}
               clientName={caseData.clientBasicInfo.name}
@@ -1716,16 +1725,18 @@ function CaseDetailBody({
                         <div className="min-w-0 col-span-4">
                           <EditableField
                             label="住所"
-                            value={
-                              [
-                                caseData.clientBasicInfo.prefecture,
-                                caseData.clientBasicInfo.address,
-                              ]
-                                .filter(Boolean)
-                                .join("") || ""
-                            }
+                            value={joinAddress(
+                              caseData.clientBasicInfo.prefecture,
+                              caseData.clientBasicInfo.address,
+                            )}
                             onChange={(v) =>
-                              updateClientBasicInfo("address", v)
+                              updateClientBasicInfo(
+                                "address",
+                                stripPrefecture(
+                                  caseData.clientBasicInfo.prefecture,
+                                  v,
+                                ),
+                              )
                             }
                             compact
                             compactLayout="inline"

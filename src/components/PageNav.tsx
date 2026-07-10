@@ -15,6 +15,7 @@ const LINKS: { path: string; label: string }[] = [
   { path: '/reminder-creditor', label: '債権者リマインド' },
   { path: '/gmo-transfer', label: 'GMO振込出力' },
   { path: '/intake-import', label: '相談票取込' },
+  { path: '/deposit-import', label: '入金取込' },
 ]
 
 export function PageNav() {

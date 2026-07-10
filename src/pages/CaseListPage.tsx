@@ -589,6 +589,7 @@ export function CaseListPage() {
             stickyHeader
             enableFind
             persistKey="caseList"
+            csvExport="案件一覧"
           />
         </div>
       </div>

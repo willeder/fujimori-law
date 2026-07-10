@@ -295,6 +295,14 @@ export function parseIntake(buf: Buffer): ParseResult {
         const val = coerce(col.type, cellOf(row, i))
         if (val !== null) caseData[col.field] = val
       }
+      // 住所欄に都道府県が重複して入っている場合は除去（No.167 都道府県重複表示対策）
+      if (typeof caseData.prefecture === 'string' && typeof caseData.address === 'string') {
+        const pref = caseData.prefecture.trim()
+        const addr = caseData.address.trim()
+        if (pref !== '' && addr.startsWith(pref)) {
+          caseData.address = addr.slice(pref.length).trim()
+        }
+      }
       cur = { rowNo: ri + 1, case: caseData, creditors: [], errors: [], warnings: [] }
       records.push(cur)
     }

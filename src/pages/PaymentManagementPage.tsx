@@ -149,6 +149,7 @@ export function PaymentManagementPage() {
               paginated
               enableFind
               persistKey="paymentManagement"
+              csvExport="入金管理一覧"
               emptyMessage="該当する案件がありません"
             />
           </div>
