@@ -109,12 +109,26 @@ export default async function handler(
     } catch {
       /* noop */
     }
+    // 固定IPプロキシの疎通確認（/api/_diag?egress=1 のときのみ実行）
+    let gmoEgress: Record<string, unknown> | null = null
+    if ((req.url ?? '').includes('egress=1')) {
+      const proxyConfigured = Boolean(process.env.GMO_PROXY_URL)
+      try {
+        const { checkEgressIp } = await import('../src/server/gmoProxy.js')
+        const t = Date.now()
+        const ip = await checkEgressIp()
+        gmoEgress = { ip, ms: Date.now() - t, proxyConfigured }
+      } catch (e) {
+        gmoEgress = { error: e instanceof Error ? e.message : String(e), proxyConfigured }
+      }
+    }
     json({
       region: process.env.VERCEL_REGION ?? null,
       coldConnectMs: pings[0] ?? -1,
       warmRttMs: pings.slice(1),
       dbError,
       db,
+      gmoEgress,
       resolvedPath: path,
       now: new Date().toISOString(),
     })
