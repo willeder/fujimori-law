@@ -23,6 +23,9 @@ importers:
       react-router-dom:
         specifier: ^7.13.2
         version: 7.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      undici:
+        specifier: ^8.7.0
+        version: 8.7.0
     devDependencies:
       '@eslint/js':
         specifier: ^9.39.4
@@ -1573,6 +1576,10 @@ packages:
   undici-types@7.18.2:
     resolution: {integrity: sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==}
 
+  undici@8.7.0:
+    resolution: {integrity: sha512-N7iQtfyLhIMOFgQubvmLV26svHpO0bqKnAiWotTQCVKCmWrcGbBotPuW1x+xwYZ2VHdSTVUfPQQnlEt1/LouTQ==}
+    engines: {node: '>=22.19.0'}
+
   update-browserslist-db@1.2.3:
     resolution: {integrity: sha512-Js0m9cx+qOgDxo0eMiFGEueWztz+d4+M3rGlmKPT+T4IS/jP4ylw3Nwpu6cpTTP8R1MAC1kF4VbdLt3ARf209w==}
     hasBin: true
@@ -2993,6 +3000,8 @@ snapshots:
   typescript@5.9.3: {}
 
   undici-types@7.18.2: {}
+
+  undici@8.7.0: {}
 
   update-browserslist-db@1.2.3(browserslist@4.28.2):
     dependencies:

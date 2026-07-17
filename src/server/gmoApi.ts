@@ -15,6 +15,7 @@
  *   GMO_AUTH_METHOD   … クライアント認証方式 "basic"（既定・推奨） or "post"
  *   GMO_SCOPE         … 要求スコープ（既定 "private:account private:virtual-account"）
  *   GMO_DEPOSIT_PATH  … 入出金明細取得APIのパス（照会系仕様書の受領後に確定）
+ *   GMO_PROXY_URL/USER/PASS … 固定IPプロキシ（gmoProxy.ts 参照。IP許可制のため必須）
  *
  * トークンは DB（gmo_api_tokens・1行運用）に保存し、期限が近づいたら
  * リフレッシュトークンで自動更新する。
@@ -22,6 +23,7 @@
 import { randomBytes } from 'node:crypto'
 import { prisma } from './db.js'
 import { writeAudit, type Actor } from './audit.js'
+import { gmoFetch } from './gmoProxy.js'
 
 const BASE = () => (process.env.GMO_API_BASE ?? 'https://stg-api.gmo-aozora.com').replace(/\/$/, '')
 const CLIENT_ID = () => process.env.GMO_CLIENT_ID ?? ''
@@ -118,7 +120,7 @@ async function callTokenEndpoint(params: Record<string, string>): Promise<TokenR
     body.set('client_id', CLIENT_ID())
     body.set('client_secret', CLIENT_SECRET())
   }
-  const r = await fetch(`${BASE()}/ganb/api/auth/v1/token`, {
+  const r = await gmoFetch(`${BASE()}/ganb/api/auth/v1/token`, {
     method: 'POST',
     headers,
     body: body.toString(),
@@ -221,7 +223,7 @@ export async function getStatus(): Promise<{
 export async function gmoGet(path: string, params?: Record<string, string>): Promise<unknown> {
   const token = await getValidAccessToken()
   const q = params ? `?${new URLSearchParams(params).toString()}` : ''
-  const r = await fetch(`${BASE()}${path}${q}`, {
+  const r = await gmoFetch(`${BASE()}${path}${q}`, {
     headers: { 'x-access-token': token, Accept: 'application/json' },
   })
   const json = (await r.json().catch(() => ({}))) as unknown
