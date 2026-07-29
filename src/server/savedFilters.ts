@@ -29,8 +29,26 @@ export type Actor = Pick<User, 'id' | 'email' | 'name' | 'role'>
 const MAX_PER_USER = 200
 /** payload の JSON 文字列としての上限（およそ32KB） */
 const MAX_PAYLOAD_BYTES = 32 * 1024
-/** 詳細検索の条件行の上限 */
+/** 絞り込み条件の行数の上限 */
 const MAX_CONDITIONS = 50
+/** 1条件あたりの値の数の上限（選択肢の複数選択を想定） */
+const MAX_VALUES_PER_CONDITION = 200
+/** 受け付ける演算子（クライアントの types/filter.ts と対で管理する） */
+const ALLOWED_OPERATORS = [
+  'contains',
+  'notContains',
+  'eq',
+  'ne',
+  'in',
+  'notIn',
+  'gt',
+  'lt',
+  'gte',
+  'lte',
+  'between',
+  'empty',
+  'notEmpty',
+]
 const MAX_NAME_LENGTH = 80
 const MAX_DESCRIPTION_LENGTH = 500
 
@@ -58,16 +76,26 @@ function asString(value: unknown): string {
 function normalizePayload(input: unknown): CaseListFilterPayload | null {
   if (!input || typeof input !== 'object') return null
   const src = input as Record<string, unknown>
-  if (src.version !== 1) return null
+  if (src.version !== 2) return null
 
-  const rawConditions = Array.isArray(src.conditions) ? src.conditions : []
+  const rawFilter = (src.filter ?? {}) as Record<string, unknown>
+  const rawConditions = Array.isArray(rawFilter.conditions) ? rawFilter.conditions : []
   if (rawConditions.length > MAX_CONDITIONS) return null
-  const conditions: { field: string; value: string }[] = []
+
+  const conditions: { field: string; operator: string; values: string[] }[] = []
   for (const item of rawConditions) {
     if (!item || typeof item !== 'object') return null
     const c = item as Record<string, unknown>
-    if (typeof c.field !== 'string' || typeof c.value !== 'string') return null
-    conditions.push({ field: c.field, value: c.value })
+    if (typeof c.field !== 'string' || typeof c.operator !== 'string') return null
+    if (!ALLOWED_OPERATORS.includes(c.operator)) return null
+    const rawValues = Array.isArray(c.values) ? c.values : []
+    if (rawValues.length > MAX_VALUES_PER_CONDITION) return null
+    const values: string[] = []
+    for (const v of rawValues) {
+      if (typeof v !== 'string') return null
+      values.push(v)
+    }
+    conditions.push({ field: c.field, operator: c.operator, values })
   }
 
   const rawQuick = (src.quick ?? {}) as Record<string, unknown>
@@ -84,7 +112,12 @@ function normalizePayload(input: unknown): CaseListFilterPayload | null {
     }
   }
 
-  const payload: CaseListFilterPayload = { version: 1, quick, conditions, sort }
+  const payload = {
+    version: 2,
+    quick,
+    filter: { logic: rawFilter.logic === 'or' ? 'or' : 'and', conditions },
+    sort,
+  } as unknown as CaseListFilterPayload
   if (Buffer.byteLength(JSON.stringify(payload), 'utf8') > MAX_PAYLOAD_BYTES) return null
   return payload
 }

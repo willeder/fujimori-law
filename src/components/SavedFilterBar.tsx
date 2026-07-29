@@ -9,11 +9,13 @@
  */
 import { useEffect, useState, type ReactNode } from 'react'
 import { useSavedFilters } from '../hooks/useSavedFilters'
-import type {
-  CaseListFilterPayload,
-  SavedFilter,
-  SavedFilterScope,
+import {
+  normalizeCaseListPayload,
+  type CaseListFilterPayload,
+  type SavedFilter,
+  type SavedFilterScope,
 } from '../types/savedFilter'
+import { NO_VALUE_OPERATORS, OPERATOR_LABEL, isEffectiveCondition } from '../types/filter'
 
 const btn =
   'rounded border border-slate-300 bg-white px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-40'
@@ -25,11 +27,19 @@ const input = 'w-full rounded border border-slate-300 px-2 py-1 text-xs focus:ou
 function describe(payload: CaseListFilterPayload, fieldLabel: (f: string) => string): string {
   const parts: string[] = []
   if (payload.quick?.value?.trim()) parts.push(`検索:${payload.quick.value}`)
-  for (const c of payload.conditions ?? []) {
-    if (c.value.trim()) parts.push(`${fieldLabel(c.field)}:${c.value}`)
+  for (const c of payload.filter?.conditions ?? []) {
+    const label = fieldLabel(c.field)
+    if (NO_VALUE_OPERATORS.includes(c.operator)) {
+      parts.push(`${label} ${OPERATOR_LABEL[c.operator]}`)
+      continue
+    }
+    const vals = (c.values ?? []).filter((v) => String(v).trim() !== '')
+    if (vals.length === 0) continue
+    parts.push(`${label} ${OPERATOR_LABEL[c.operator]} ${vals.join('・')}`)
   }
   if (payload.sort) parts.push(`並び:${payload.sort.key} ${payload.sort.order === 'asc' ? '↑' : '↓'}`)
-  return parts.length ? parts.join(' / ') : '(条件なし)'
+  const joiner = payload.filter?.logic === 'or' ? ' または ' : ' / '
+  return parts.length ? parts.join(joiner) : '(条件なし)'
 }
 
 function Modal({
@@ -82,6 +92,7 @@ export function SavedFilterBar({
   onApply,
   onClear,
   fieldLabel,
+  saveRequestToken = 0,
 }: {
   /** 今の画面の絞り込み状態（保存ボタンで保存される内容） */
   current: CaseListFilterPayload
@@ -91,10 +102,21 @@ export function SavedFilterBar({
   onClear: () => void
   /** 検索フィールドのコードを日本語ラベルにする関数 */
   fieldLabel: (field: string) => string
+  /**
+   * 値が変わるたびに保存ダイアログを開く。
+   * 絞り込みモーダルの「保存」ボタンから呼び出すために使う（0 のときは何もしない）。
+   */
+  saveRequestToken?: number
 }) {
   const { filters, loading, error, create, update, remove } = useSavedFilters()
   const [saveOpen, setSaveOpen] = useState(false)
   const [manageOpen, setManageOpen] = useState(false)
+
+  useEffect(() => {
+    // 絞り込みモーダルの「保存」から呼ばれたときだけ開く
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (saveRequestToken > 0) setSaveOpen(true)
+  }, [saveRequestToken])
 
   const shared = filters.filter((f) => f.scope === 'SHARED')
   const priv = filters.filter((f) => f.scope === 'PRIVATE')
@@ -205,7 +227,7 @@ function SaveDialog({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const conditionCount = (current.conditions ?? []).filter((c) => c.value.trim()).length
+  const conditionCount = (current.filter?.conditions ?? []).filter(isEffectiveCondition).length
   const hasQuick = !!current.quick?.value?.trim()
   const empty = conditionCount === 0 && !hasQuick
 
@@ -407,7 +429,7 @@ function ManageList({
                   )}
                 </td>
                 <td className="max-w-[260px] py-2 pr-2 text-[10px] text-slate-500">
-                  {describe(f.payload, fieldLabel)}
+                  {describe(normalizeCaseListPayload(f.payload), fieldLabel)}
                 </td>
                 <td className="py-2 pr-2 whitespace-nowrap text-[10px] text-slate-500">
                   {f.ownerLabel}

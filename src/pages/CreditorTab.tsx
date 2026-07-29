@@ -5,6 +5,12 @@ import { useFoundSet } from '../store/FoundSet'
 import { EditableField, StatusBadge, DataTable, type Column } from '../components'
 import { CreditorFiles } from '../components/case/CreditorFiles'
 import type { Creditor } from '../types'
+import {
+  ACCOUNT_TYPE_OPTIONS,
+  CREDITOR_STATUS_OPTIONS,
+  YES_NO_OPTIONS,
+  toSelectOptions,
+} from '../constants/fieldOptions'
 
 interface CreditorTabProps {
   caseId: number
@@ -309,16 +315,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           value={creditor.status}
           onChange={(v) => updateCreditor(creditor, { status: v as Creditor['status'] })}
           type="select"
-          options={[
-            { value: '受任通知発送待ち', label: '受任通知発送待ち' },
-            { value: '受任対象外', label: '受任対象外' },
-            { value: '受任通知発送済', label: '受任通知発送済' },
-            { value: '債権調査中', label: '債権調査中' },
-            { value: '和解提案中', label: '和解提案中' },
-            { value: '和解済', label: '和解済' },
-            { value: '弁済中', label: '弁済中' },
-            { value: '完済', label: '完済' },
-          ]}
+          options={toSelectOptions(CREDITOR_STATUS_OPTIONS)}
           renderValue={(v) =>
             v === '受任対象外' ? (
               <span className="inline-block rounded bg-black px-1 py-px font-medium text-white">
@@ -726,10 +723,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
             updateCreditor(creditor, { futureInterest: v || null })
           }
           type="select"
-          options={[
-            { value: 'なし', label: 'なし' },
-            { value: 'あり', label: 'あり' },
-          ]}
+          options={toSelectOptions(YES_NO_OPTIONS)}
           compact
           compactLayout="inline"
           bordered
@@ -799,10 +793,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           value={creditor.accountType}
           onChange={(v) => updateCreditor(creditor, { accountType: v || null })}
           type="select"
-          options={[
-            { value: '普通', label: '普通' },
-            { value: '当座', label: '当座' },
-          ]}
+          options={toSelectOptions(ACCOUNT_TYPE_OPTIONS)}
           compact
           compactLayout="inline"
           bordered

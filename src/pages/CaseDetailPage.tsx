@@ -33,6 +33,14 @@ import {
   creditorTabAccentForName,
 } from "../lib/creditorTabAccent";
 import { joinAddress, stripPrefecture } from "../utils/address";
+import {
+  CASE_STATUS_OPTIONS,
+  DEBT_ADJUSTMENT_TYPE_OPTIONS,
+  GENDER_OPTIONS,
+  MARITAL_STATUS_OPTIONS,
+  RANK_OPTIONS,
+  toSelectOptions,
+} from '../constants/fieldOptions'
 
 /** nested な案件編集を DB 列（フラット）へ。列名はほぼ同名、settlementInfo のみ別名 */
 const CASE_FIELD_RENAME: Record<string, string> = {
@@ -1137,13 +1145,7 @@ function CaseDetailBody({
             value={caseData.settlementInfo.status}
             onChange={(v) => updateSettlementInfo("status", v)}
             type="select"
-            options={[
-              { value: "全和解済_支払中", label: "全和解済_支払中" },
-              { value: "資格者面談待ち", label: "資格者面談待ち" },
-              { value: "和解交渉中", label: "和解交渉中" },
-              { value: "キャンセル", label: "キャンセル" },
-              { value: "辞任", label: "辞任" },
-            ]}
+            options={toSelectOptions(CASE_STATUS_OPTIONS)}
             compact
             compactLayout="inline"
             bordered
@@ -1196,11 +1198,7 @@ function CaseDetailBody({
             value={caseData.clientBasicInfo.cautionRank}
             onChange={(v) => updateClientBasicInfo("cautionRank", v)}
             type="select"
-            options={[
-              { value: "A", label: "A" },
-              { value: "B", label: "B" },
-              { value: "C", label: "C" },
-            ]}
+            options={toSelectOptions(RANK_OPTIONS)}
             compact
             compactLayout="inline"
             bordered
@@ -1288,11 +1286,7 @@ function CaseDetailBody({
             value={caseData.appointmentInfo.acceptanceRank}
             onChange={(v) => updateAppointmentInfo("acceptanceRank", v)}
             type="select"
-            options={[
-              { value: "A", label: "A" },
-              { value: "B", label: "B" },
-              { value: "C", label: "C" },
-            ]}
+            options={toSelectOptions(RANK_OPTIONS)}
             compact
             compactLayout="inline"
             bordered
@@ -1603,10 +1597,7 @@ function CaseDetailBody({
                               value={caseData.clientBasicInfo.gender}
                               onChange={(v) => updateClientBasicInfo("gender", v)}
                               type="select"
-                              options={[
-                                { value: "男", label: "男" },
-                                { value: "女", label: "女" },
-                              ]}
+                              options={toSelectOptions(GENDER_OPTIONS)}
                               compact
                               compactLayout="inline"
                               bordered
@@ -1653,11 +1644,7 @@ function CaseDetailBody({
                               updateClientBasicInfo("maritalStatus", v)
                             }
                             type="select"
-                            options={[
-                              { value: "既婚", label: "既婚" },
-                              { value: "未婚", label: "未婚" },
-                              { value: "離婚", label: "離婚" },
-                            ]}
+                            options={toSelectOptions(MARITAL_STATUS_OPTIONS)}
                             compact
                             compactLayout="inline"
                             bordered
@@ -2150,11 +2137,7 @@ function CaseDetailBody({
                               updateAppointmentInfo("debtAdjustmentType", v)
                             }
                             type="select"
-                            options={[
-                              { value: "任意整理", label: "任意整理" },
-                              { value: "自己破産", label: "自己破産" },
-                              { value: "個人再生", label: "個人再生" },
-                            ]}
+                            options={toSelectOptions(DEBT_ADJUSTMENT_TYPE_OPTIONS)}
                             compact
                             compactLayout="inline"
                             bordered
