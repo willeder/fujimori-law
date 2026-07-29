@@ -6,14 +6,57 @@ import { AppHeader } from '../components/AppHeader'
 import { LineBroadcastModal, LineHistoryModal } from '../components/case/LineBroadcastModal'
 import { SEARCH_FIELDS, type Condition } from './searchFields'
 import { useSessionState } from '../hooks/useSessionState'
+import { useCreditorNames } from '../hooks/useCreditorNames'
+import { loadFilterHistory, saveFilterHistory, filterHistoryLabel } from '../utils/findHistory'
+import { SavedFilterBar } from '../components/SavedFilterBar'
+import { FilterModal } from '../components/FilterModal'
 import {
-  loadFindHistory,
-  saveFindHistory,
-  findHistoryLabel,
-} from '../utils/findHistory'
+  compactFilterQuery,
+  emptyFilterQuery,
+  type FilterQuery,
+} from '../types/filter'
+import {
+  normalizeCaseListPayload,
+  type CaseListFilterPayload,
+  type CaseListSort,
+  type SavedFilter,
+} from '../types/savedFilter'
 import type { Case } from '../types'
 
 type SearchField = 'all' | 'name' | 'phone' | 'prefecture' | 'status' | 'staff'
+
+/** 検索フィールドのコード → 日本語ラベル（保存条件の内容表示に使う） */
+const SEARCH_FIELD_LABEL: Record<string, string> = Object.fromEntries(
+  SEARCH_FIELDS.map((f) => [f.field, f.label])
+)
+
+/**
+ * 列ごとの並び替え用の値。Case はネスト構造なので、列定義とは別に取り出し方を持つ。
+ * ここに載っている列だけが（絞り込み中に限り）ヘッダークリックで並び替えできる。
+ * 選択チェック・LINE連携済/未・LINE@URL は並び替えの意味がないため対象外。
+ */
+const SORT_VALUE: Record<
+  string,
+  ((c: Case) => string | number | null | undefined) | undefined
+> = {
+  id: (c) => c.metadata.externalId ?? '',
+  acceptanceDate: (c) => c.appointmentInfo.acceptanceDate ?? '',
+  cautionRank: (c) => c.clientBasicInfo.cautionRank ?? '',
+  listRegisteredDate: (c) => c.metadata.listRegisteredDate ?? '',
+  listCategory: (c) => c.metadata.listCategory ?? '',
+  acceptanceRank: (c) => c.appointmentInfo.acceptanceRank ?? '',
+  debtAdjustmentType: (c) => c.appointmentInfo.debtAdjustmentType ?? '',
+  status: (c) => c.settlementInfo.status ?? '',
+  // 氏名はフリガナがあればフリガナ順（五十音順）で並べる
+  name: (c) => c.clientBasicInfo.furigana || c.clientBasicInfo.name || '',
+  furigana: (c) => c.clientBasicInfo.furigana ?? '',
+  phone: (c) => c.clientBasicInfo.phone ?? '',
+  creditorCount: (c) => c.debtInfo.creditorCount,
+  declaredDebtAmount: (c) => c.debtInfo.declaredDebtAmount,
+  officeFee: (c) => c.feeInfo.officeFee,
+  appointmentStaff: (c) => c.appointmentInfo.appointmentStaff ?? '',
+  interviewStaff: (c) => c.appointmentInfo.interviewStaff ?? '',
+}
 
 /**
  * 一覧の文字列セルを「空白含む n 文字まで」に切り詰める。
@@ -31,34 +74,43 @@ export function CaseListPage() {
   // 絞り込み条件は sessionStorage に保持し、詳細から戻っても復元する
   const [searchField, setSearchField] = useSessionState<SearchField>('caseList.field', 'all')
   const [searchValue, setSearchValue] = useSessionState('caseList.value', '')
-  // 詳細検索（サーバ横断検索・複数条件AND）
-  const [showAdv, setShowAdv] = useSessionState('caseList.showAdv', false)
-  const [conditions, setConditions] = useSessionState<Condition[]>('caseList.conditions', [
-    { field: 'name', value: '' },
-  ])
+  // 絞り込み（サーバ横断検索・演算子つき・AND/OR）
+  const [filter, setFilter] = useSessionState<FilterQuery>(
+    'caseList.filter',
+    emptyFilterQuery()
+  )
+  const [filterOpen, setFilterOpen] = useState(false)
+  // 絞り込みモーダルの「保存」から、保存ダイアログを開くためのトリガー
+  const [saveRequestedAt, setSaveRequestedAt] = useState(0)
   const [results, setResults] = useState<Case[] | null>(null)
   const [searching, setSearching] = useState(false)
+  // 並び順。絞り込み中だけ有効（未絞り込みのときは常に No 昇順に固定する）
+  const [sort, setSort] = useSessionState<CaseListSort | null>('caseList.sort', null)
+  // 適用中の保存条件（プルダウンの選択状態と「適用中」バッジに使う）
+  const [activeFilterId, setActiveFilterId] = useSessionState<string | null>(
+    'caseList.savedFilterId',
+    null
+  )
 
-  const setCond = (i: number, patch: Partial<Condition>) =>
-    setConditions((cs) => cs.map((c, idx) => (idx === i ? { ...c, ...patch } : c)))
-  const addCond = () => setConditions((cs) => [...cs, { field: 'name', value: '' }])
-  const removeCond = (i: number) =>
-    setConditions((cs) => (cs.length > 1 ? cs.filter((_, idx) => idx !== i) : cs))
-  // 検索履歴（直近10件・検索モードモーダルと共有）No.147
-  const [findHistory, setFindHistory] = useState<Condition[][]>(() => loadFindHistory())
-  const runSearch = async (conds?: Condition[]) => {
-    const active = (conds ?? conditions).filter((c) => c.value.trim())
-    if (active.length === 0) {
+  // 絞り込み履歴（直近10件）No.147
+  const [filterHistory, setFilterHistory] = useState<FilterQuery[]>(() => loadFilterHistory())
+  // 債権者名の候補（絞り込みモーダルのサジェスト用）
+  const creditorNames = useCreditorNames()
+
+  /** 絞り込みを実行してサーバから該当案件を取得する */
+  const runFilter = async (q: FilterQuery) => {
+    const active = compactFilterQuery(q)
+    if (active.conditions.length === 0) {
       setResults(null)
       return
     }
-    setFindHistory(saveFindHistory(active))
+    setFilterHistory(saveFilterHistory(active))
     setSearching(true)
     try {
       const r = await fetch('/api/cases/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ conditions: active }),
+        body: JSON.stringify({ conditions: active.conditions, logic: active.logic }),
       })
       setResults(r.ok ? ((await r.json()) as Case[]) : [])
     } catch {
@@ -67,18 +119,70 @@ export function CaseListPage() {
       setSearching(false)
     }
   }
-  const clearSearch = () => {
-    setResults(null)
-    setConditions([{ field: 'name', value: '' }])
+
+  /** モーダルの「適用」 */
+  const applyFilter = (q: FilterQuery) => {
+    setFilter(q)
+    setFilterOpen(false)
+    setActiveFilterId(null)
+    void runFilter(q)
   }
 
-  // FileMaker風「検索モード」（詳細レコードでCtrl+F）から渡された条件で自動検索
+  /** 絞り込みを解除して既定表示（全件・No 昇順）に戻す */
+  const clearFilter = () => {
+    setResults(null)
+    setFilter(emptyFilterQuery())
+    setSearchValue('')
+    setActiveFilterId(null)
+    setSort(null)
+  }
+
+  // ── 保存した絞り込み条件（共有フィルタ）──────────────────────
+  // 絞り込み中かどうか。未絞り込みのときは並び替えを無効にし、常に No 昇順で表示する
+  const filtering = !!searchValue.trim() || results != null
+
+  /** いま画面に出ている絞り込み状態（「この条件を保存」で保存される内容） */
+  const currentPayload: CaseListFilterPayload = useMemo(
+    () => ({
+      version: 2,
+      quick: { field: searchField, value: searchValue },
+      filter: compactFilterQuery(filter),
+      sort: filtering ? sort : null,
+    }),
+    [searchField, searchValue, filter, sort, filtering]
+  )
+
+  /** 保存条件を画面に適用する */
+  const applySavedFilter = (saved: SavedFilter) => {
+    const payload = normalizeCaseListPayload(saved.payload)
+    setActiveFilterId(saved.id)
+    setSearchField((payload.quick.field ?? 'all') as SearchField)
+    setSearchValue(payload.quick.value ?? '')
+    setSort(payload.sort)
+    setFilter(payload.filter)
+    if (payload.filter.conditions.length > 0) void runFilter(payload.filter)
+    else setResults(null)
+  }
+
+  // 絞り込みが外れたら並び順も既定（No 昇順）に戻す
+  useEffect(() => {
+    if (!filtering && sort !== null) setSort(null)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtering])
+
+  // FileMaker風「検索モード」（詳細レコードでCtrl+F）から渡された条件で自動検索。
+  // 検索モードは旧形式（{field,value}）なので「含む」条件に読み替える。
   useEffect(() => {
     const st = location.state as { conditions?: Condition[] } | null
     if (st?.conditions && st.conditions.length > 0) {
-      setShowAdv(true)
-      setConditions(st.conditions)
-      void runSearch(st.conditions)
+      const q: FilterQuery = {
+        logic: 'and',
+        conditions: st.conditions
+          .filter((c) => c.value.trim())
+          .map((c) => ({ field: c.field, operator: 'contains' as const, values: [c.value] })),
+      }
+      setFilter(q)
+      void runFilter(q)
       navigate(location.pathname, { replace: true, state: null })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -395,6 +499,13 @@ export function CaseListPage() {
     },
   ]
 
+  // 絞り込み中だけヘッダークリックで並び替えできるようにする。
+  // 未絞り込みのときは従来どおり No（id）昇順で固定（順序を変えさせない）。
+  const sortableColumns: Column<Case>[] = columns.map((col) => {
+    const sortValue = SORT_VALUE[String(col.key)]
+    return sortValue ? { ...col, sortable: filtering, sortValue } : col
+  })
+
   return (
     <div className="min-h-screen bg-slate-100">
       <LineBroadcastModal
@@ -403,6 +514,20 @@ export function CaseListPage() {
         recipients={recipients}
       />
       <LineHistoryModal open={historyOpen} onClose={() => setHistoryOpen(false)} />
+      {/* 絞り込みモーダル（kintone の「絞り込む」相当） */}
+      <FilterModal
+        open={filterOpen}
+        value={filter}
+        fields={SEARCH_FIELDS}
+        creditorNames={creditorNames}
+        onClose={() => setFilterOpen(false)}
+        onApply={applyFilter}
+        onSave={(q) => {
+          // 条件を確定してから保存ダイアログを開く（保存内容と画面を一致させる）
+          applyFilter(q)
+          setSaveRequestedAt(Date.now())
+        }}
+      />
       <AppHeader title="司法書士法人 第一法務事務所">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
@@ -437,15 +562,39 @@ export function CaseListPage() {
             )}
             <button
               type="button"
-              onClick={() => setShowAdv((v) => !v)}
-              className={`rounded border px-2 py-1.5 text-xs font-medium ${
-                showAdv || results != null
+              onClick={() => setFilterOpen(true)}
+              className={`rounded border px-3 py-1.5 text-xs font-medium ${
+                results != null
                   ? 'border-blue-600 bg-blue-600 text-white'
                   : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-100'
               }`}
             >
-              詳細検索 {showAdv ? '▲' : '▼'}
+              絞り込む
+              {results != null && filter.conditions.length > 0
+                ? `（${filter.conditions.length}）`
+                : ''}
             </button>
+            {results != null && (
+              <button
+                type="button"
+                onClick={clearFilter}
+                className="rounded border border-slate-300 bg-white px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100"
+              >
+                解除
+              </button>
+            )}
+
+            <span className="mx-1 h-4 w-px bg-slate-300" />
+            {/* 保存した絞り込み条件（全体共有 / 個人用） */}
+            <SavedFilterBar
+              current={currentPayload}
+              activeId={activeFilterId}
+              onApply={applySavedFilter}
+              onClear={clearFilter}
+              fieldLabel={(f) => SEARCH_FIELD_LABEL[f] ?? f}
+              saveRequestToken={saveRequestedAt}
+            />
+
             <span className="mx-1 h-4 w-px bg-slate-300" />
             <button
               type="button"
@@ -471,105 +620,33 @@ export function CaseListPage() {
             </button>
             <div className="flex-1" />
             <span className="text-xs text-slate-500">
-              {results != null
-                ? `${displayed.length}件（詳細検索）`
-                : `${filteredCases.length} / 全${cases.length}件`}
+              {searching
+                ? '検索中…'
+                : results != null
+                  ? `${displayed.length}件（絞り込み中）`
+                  : `${filteredCases.length} / 全${cases.length}件`}
             </span>
           </div>
 
-          {showAdv && (
-            <div className="rounded border border-slate-200 bg-slate-50 p-2">
-              <div className="space-y-1.5">
-                {conditions.map((c, i) => (
-                  <div key={i} className="flex items-center gap-1.5">
-                    <select
-                      value={c.field}
-                      onChange={(e) => setCond(i, { field: e.target.value })}
-                      className="w-44 rounded border border-slate-300 bg-white px-2 py-1 text-xs"
-                    >
-                      {SEARCH_FIELDS.map((f) => (
-                        <option key={f.field} value={f.field}>
-                          {f.label}
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      value={c.value}
-                      onChange={(e) => setCond(i, { value: e.target.value })}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') void runSearch()
-                      }}
-                      placeholder="値（部分一致）"
-                      className="w-56 rounded border border-slate-300 px-2 py-1 text-xs"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeCond(i)}
-                      className="rounded px-1.5 py-1 text-xs text-slate-400 hover:bg-slate-200 hover:text-slate-700"
-                      title="この条件を削除"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-2 flex items-center gap-2">
+          {/* 最近の絞り込み（直近10件・クリックで再実行）No.147 */}
+          {filterHistory.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1">
+              <span className="text-[10px] text-slate-400">最近の絞り込み：</span>
+              {filterHistory.slice(0, 10).map((h, i) => (
                 <button
+                  key={i}
                   type="button"
-                  onClick={addCond}
-                  className="rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-600 hover:bg-slate-100"
+                  onClick={() => {
+                    setFilter(h)
+                    setActiveFilterId(null)
+                    void runFilter(h)
+                  }}
+                  title={filterHistoryLabel(h)}
+                  className="max-w-[220px] truncate rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] text-slate-600 hover:border-blue-300 hover:bg-blue-50"
                 >
-                  ＋ 条件を追加
+                  {filterHistoryLabel(h)}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => void runSearch()}
-                  disabled={searching}
-                  className="rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {searching ? '検索中…' : '検索'}
-                </button>
-                {results != null && (
-                  <button
-                    type="button"
-                    onClick={clearSearch}
-                    className="rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-600 hover:bg-slate-100"
-                  >
-                    解除
-                  </button>
-                )}
-                <span className="text-[10px] text-slate-400">
-                  すべての条件に一致（AND）・部分一致（含む）。日付は「2026」「2026-05」等でも可
-                </span>
-              </div>
-              {/* 最近の検索（直近10件・クリックで再検索）No.147 */}
-              <div className="mt-2 border-t border-slate-200 pt-1.5">
-                <div className="mb-1 text-[10px] font-medium text-slate-400">
-                  最近の検索（直近10件・クリックで再検索）
-                </div>
-                {findHistory.length > 0 ? (
-                  <div className="flex max-h-20 flex-wrap gap-1 overflow-auto">
-                    {findHistory.map((h, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => {
-                          setConditions(h.map((c) => ({ ...c })))
-                          void runSearch(h)
-                        }}
-                        title={findHistoryLabel(h)}
-                        className="max-w-full truncate rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] text-slate-600 hover:border-blue-300 hover:bg-blue-50"
-                      >
-                        {findHistoryLabel(h)}
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-[10px] text-slate-400">
-                    検索を実行すると、ここに履歴が表示されます
-                  </div>
-                )}
-              </div>
+              ))}
             </div>
           )}
         </div>
@@ -580,8 +657,11 @@ export function CaseListPage() {
         <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
           <DataTable
             data={displayed}
-            columns={columns}
+            columns={sortableColumns}
             keyField="id"
+            sortKey={filtering ? (sort?.key ?? null) : null}
+            sortOrder={sort?.order ?? 'asc'}
+            onSortChange={(key, order) => setSort(key ? { key, order } : null)}
             onRowClick={(item) => navigate(`/cases/${item.id}`)}
             emptyMessage="該当する案件がありません"
             density="compact"

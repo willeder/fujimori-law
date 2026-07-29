@@ -39,6 +39,7 @@ import * as gmoApi from '../src/server/gmoApi.js'
 import * as creditorFiles from '../src/server/creditorFiles.js'
 import * as mail from '../src/server/mail.js'
 import { getSessionToken, getSessionUser } from '../src/server/auth.js'
+import * as savedFilters from '../src/server/savedFilters.js'
 import { sendLineBroadcast, getLineBroadcastHistory } from '../src/server/lineBroadcast.js'
 import { getReminderCandidates, sendReminders } from '../src/server/paymentReminder.js'
 import { prisma } from '../src/server/db.js'
@@ -456,6 +457,40 @@ export default async function handler(
       const r = await sendReminders(editActor, (await getRawBody(req)).toString('utf8'), meta)
       json(r.body, r.status)
       return
+    }
+
+    // ── 保存した絞り込み条件（共有フィルタ） ──
+    if (path === '/api/saved-filters') {
+      if (method === 'GET') {
+        const r = await savedFilters.listSavedFilters(sessionUser, query.get('target'))
+        json(r.body, r.status)
+        return
+      }
+      if (method === 'POST') {
+        const r = await savedFilters.createSavedFilter(
+          sessionUser,
+          (await getRawBody(req)).toString('utf8')
+        )
+        json(r.body, r.status)
+        return
+      }
+    }
+    const savedFilterItem = path.match(/^\/api\/saved-filters\/([\w-]+)$/)
+    if (savedFilterItem) {
+      if (method === 'PATCH' || method === 'PUT') {
+        const r = await savedFilters.updateSavedFilter(
+          sessionUser,
+          savedFilterItem[1],
+          (await getRawBody(req)).toString('utf8')
+        )
+        json(r.body, r.status)
+        return
+      }
+      if (method === 'DELETE') {
+        const r = await savedFilters.deleteSavedFilter(sessionUser, savedFilterItem[1])
+        json(r.body, r.status)
+        return
+      }
     }
 
     // ── 一覧・集計（apiRoutes マップ。caseId 任意） ──

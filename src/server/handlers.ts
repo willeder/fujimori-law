@@ -11,7 +11,7 @@ import {
   detectPaymentDelays,
 } from '../services/payment/delayDetection.js'
 import { writeAudit, writeChange } from './audit.js'
-import { parseFindCriterion } from '../utils/findCriterion.js'
+import { parseFindCriterion, toIsoDate } from '../utils/findCriterion.js'
 
 const g = globalThis as unknown as { __prisma?: PrismaClient }
 const prisma = g.__prisma ?? new PrismaClient()
@@ -282,54 +282,310 @@ function buildCompareWhere(
   return null
 }
 
+// ── 日付の相対指定（今日・今月・N日前後）を「開始日〜終了日」に解決する ──────
+function isoDate(d: Date): string {
+  return d.toISOString().slice(0, 10)
+}
+function addDays(base: Date, n: number): Date {
+  const d = new Date(base)
+  d.setUTCDate(d.getUTCDate() + n)
+  return d
+}
+/** 週は月曜はじまりとして扱う */
+function weekRange(base: Date, offsetWeeks: number): { from: string; to: string } {
+  const d = addDays(base, offsetWeeks * 7)
+  const dow = (d.getUTCDay() + 6) % 7 // 月曜=0
+  const start = addDays(d, -dow)
+  return { from: isoDate(start), to: isoDate(addDays(start, 6)) }
+}
+function monthRange(base: Date, offsetMonths: number): { from: string; to: string } {
+  const y = base.getUTCFullYear()
+  const m = base.getUTCMonth() + offsetMonths
+  const start = new Date(Date.UTC(y, m, 1))
+  const end = new Date(Date.UTC(y, m + 1, 0))
+  return { from: isoDate(start), to: isoDate(end) }
+}
+function yearRange(base: Date, offsetYears: number): { from: string; to: string } {
+  const y = base.getUTCFullYear() + offsetYears
+  return { from: `${y}-01-01`, to: `${y}-12-31` }
+}
+
 /**
- * 複数条件（AND）の横断検索。条件: { field, value }[]。
+ * 日付値を期間に解決する。
+ * 絶対日付（2026-07-29）は from=to のその日。相対トークンはその期間全体。
+ * 解決できなければ null。
+ */
+export function resolveDateValue(
+  value: string,
+  now: Date = new Date()
+): { from: string; to: string } | null {
+  const v = (value ?? '').trim()
+  if (!v) return null
+  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
+
+  switch (v) {
+    case 'TODAY':
+      return { from: isoDate(today), to: isoDate(today) }
+    case 'YESTERDAY':
+      return { from: isoDate(addDays(today, -1)), to: isoDate(addDays(today, -1)) }
+    case 'TOMORROW':
+      return { from: isoDate(addDays(today, 1)), to: isoDate(addDays(today, 1)) }
+    case 'THIS_WEEK':
+      return weekRange(today, 0)
+    case 'LAST_WEEK':
+      return weekRange(today, -1)
+    case 'NEXT_WEEK':
+      return weekRange(today, 1)
+    case 'THIS_MONTH':
+      return monthRange(today, 0)
+    case 'LAST_MONTH':
+      return monthRange(today, -1)
+    case 'NEXT_MONTH':
+      return monthRange(today, 1)
+    case 'THIS_YEAR':
+      return yearRange(today, 0)
+    case 'LAST_YEAR':
+      return yearRange(today, -1)
+    case 'NEXT_YEAR':
+      return yearRange(today, 1)
+  }
+
+  const rel = /^FROM_TODAY:(-?\d+):(DAYS|WEEKS|MONTHS|YEARS)$/.exec(v)
+  if (rel) {
+    const n = Number(rel[1])
+    const unit = rel[2]
+    if (unit === 'DAYS') {
+      const d = isoDate(addDays(today, n))
+      return { from: d, to: d }
+    }
+    if (unit === 'WEEKS') {
+      const d = isoDate(addDays(today, n * 7))
+      return { from: d, to: d }
+    }
+    if (unit === 'MONTHS') {
+      const d = new Date(today)
+      d.setUTCMonth(d.getUTCMonth() + n)
+      return { from: isoDate(d), to: isoDate(d) }
+    }
+    const d = new Date(today)
+    d.setUTCFullYear(d.getUTCFullYear() + n)
+    return { from: isoDate(d), to: isoDate(d) }
+  }
+
+  const abs = toIsoDate(v)
+  if (abs) return { from: abs, to: abs }
+  return null
+}
+
+type NewCondition = { field: string; operator?: string; values?: string[]; value?: string }
+
+const COMPARE_SQL: Record<string, string> = {
+  eq: '=',
+  ne: '<>',
+  gt: '>',
+  lt: '<',
+  gte: '>=',
+  lte: '<=',
+}
+
+/**
+ * 新形式の条件（演算子つき）を WHERE 句にする。
+ * 列名はホワイトリスト検証済みの前提。値はすべてパラメータ化する。
+ * 組み立てられない条件は null（呼び出し側で無視）。
+ */
+export function buildConditionWhere(
+  cond: NewCondition,
+  params: (string | number)[]
+): string | null {
+  const field = cond.field
+  const op = cond.operator ?? ''
+  const values = (cond.values ?? []).map((v) => String(v ?? '').trim())
+  const filled = values.filter((v) => v !== '')
+
+  // 債権者名（リレーション）
+  if (field === 'creditorName') {
+    if (filled.length === 0) return null
+    params.push(`%${filled[0]}%`)
+    const exists = `EXISTS (SELECT 1 FROM creditors cr WHERE cr."caseId" = c.id AND cr."creditorName" ILIKE $${params.length})`
+    return op === 'notContains' ? `NOT ${exists}` : exists
+  }
+
+  // 電話番号（数字のみに正規化して照合）
+  if (field === 'phone') {
+    const col = `regexp_replace(COALESCE(c."phone", ''), '[^0-9]', '', 'g')`
+    if (op === 'empty') return `COALESCE(c."phone", '') = ''`
+    if (op === 'notEmpty') return `COALESCE(c."phone", '') <> ''`
+    if (filled.length === 0) return null
+    params.push(`%${filled[0].replace(/\D/g, '')}%`)
+    return op === 'notContains' ? `${col} NOT ILIKE $${params.length}` : `${col} ILIKE $${params.length}`
+  }
+
+  const type = CASE_SEARCH_TYPE[field]
+  if (!type) return null // ホワイトリスト外
+  const col = `c."${field}"`
+  const isNum = type === 'Int' || type === 'Float' || type === 'Decimal' || type === 'BigInt'
+  const isDate = type === 'DateTime'
+
+  if (op === 'empty') return `(${col} IS NULL${isNum || isDate ? '' : ` OR ${col} = ''`})`
+  if (op === 'notEmpty')
+    return `(${col} IS NOT NULL${isNum || isDate ? '' : ` AND ${col} <> ''`})`
+
+  if (filled.length === 0) return null
+
+  // 選択肢の複数選択
+  if (op === 'in' || op === 'notIn') {
+    const holes = filled.map((v) => {
+      params.push(v)
+      return `$${params.length}`
+    })
+    const inSql = `CAST(${col} AS TEXT) IN (${holes.join(', ')})`
+    // notIn は「値が入っていない（NULL）」も対象に含める（kintone の挙動に合わせる）
+    return op === 'in' ? inSql : `(${col} IS NULL OR NOT ${inSql})`
+  }
+
+  // 日付
+  if (isDate) {
+    const dateCol = `CAST(${col} AS DATE)`
+    if (op === 'between') {
+      const a = resolveDateValue(filled[0])
+      const b = resolveDateValue(filled[1] ?? filled[0])
+      if (!a || !b) return null
+      params.push(a.from, b.to)
+      return `${dateCol} BETWEEN $${params.length - 1}::date AND $${params.length}::date`
+    }
+    const r = resolveDateValue(filled[0])
+    if (!r) return null
+    switch (op) {
+      case 'eq':
+        params.push(r.from, r.to)
+        return `${dateCol} BETWEEN $${params.length - 1}::date AND $${params.length}::date`
+      case 'ne':
+        params.push(r.from, r.to)
+        return `(${col} IS NULL OR ${dateCol} NOT BETWEEN $${params.length - 1}::date AND $${params.length}::date)`
+      case 'gte':
+        params.push(r.from)
+        return `${dateCol} >= $${params.length}::date`
+      case 'gt':
+        params.push(r.to)
+        return `${dateCol} > $${params.length}::date`
+      case 'lte':
+        params.push(r.to)
+        return `${dateCol} <= $${params.length}::date`
+      case 'lt':
+        params.push(r.from)
+        return `${dateCol} < $${params.length}::date`
+      default:
+        return null
+    }
+  }
+
+  // 数値
+  if (isNum) {
+    const toNum = (s: string) => Number(s.replace(/[,，\s円]/g, ''))
+    if (op === 'between') {
+      const a = toNum(filled[0])
+      const b = toNum(filled[1] ?? filled[0])
+      if (!Number.isFinite(a) || !Number.isFinite(b)) return null
+      params.push(Math.min(a, b), Math.max(a, b))
+      return `${col} BETWEEN $${params.length - 1} AND $${params.length}`
+    }
+    const n = toNum(filled[0])
+    if (!Number.isFinite(n)) return null
+    const sql = COMPARE_SQL[op]
+    if (!sql) return null
+    params.push(n)
+    // ne は NULL も「等しくない」として扱う
+    return op === 'ne'
+      ? `(${col} IS NULL OR ${col} <> $${params.length})`
+      : `${col} ${sql} $${params.length}`
+  }
+
+  // 文字列
+  switch (op) {
+    case 'contains':
+      params.push(`%${filled[0]}%`)
+      return `CAST(${col} AS TEXT) ILIKE $${params.length}`
+    case 'notContains':
+      params.push(`%${filled[0]}%`)
+      return `(${col} IS NULL OR CAST(${col} AS TEXT) NOT ILIKE $${params.length})`
+    case 'eq':
+      params.push(filled[0])
+      return `CAST(${col} AS TEXT) = $${params.length}`
+    case 'ne':
+      params.push(filled[0])
+      return `(${col} IS NULL OR CAST(${col} AS TEXT) <> $${params.length})`
+    default:
+      return null
+  }
+}
+
+/**
+ * 旧形式の条件（値に記法を書く方式）を WHERE 句にする。既存の検索モード・検索履歴用。
+ */
+function buildLegacyWhere(
+  cond: { field: string; value: string },
+  params: (string | number)[]
+): string | null {
+  const v = (cond?.value ?? '').trim()
+  if (!v) return null
+  if (cond.field === 'creditorName') {
+    params.push(`%${v}%`)
+    return `EXISTS (SELECT 1 FROM creditors cr WHERE cr."caseId" = c.id AND cr."creditorName" ILIKE $${params.length})`
+  }
+  if (cond.field === 'phone') {
+    params.push(`%${v.replace(/\D/g, '')}%`)
+    return `regexp_replace(COALESCE(c."phone", ''), '[^0-9]', '', 'g') ILIKE $${params.length}`
+  }
+  const type = CASE_SEARCH_TYPE[cond.field]
+  if (!type) return null // ホワイトリスト外は無視（列名はここで検証）
+  const compared = buildCompareWhere(`c."${cond.field}"`, type, v, params)
+  if (compared) return compared
+  params.push(`%${v}%`)
+  return `CAST(c."${cond.field}" AS TEXT) ILIKE $${params.length}`
+}
+
+/**
+ * 複数条件の横断検索。条件: { field, value }[]（旧）または
+ * { field, operator, values }[]（新・演算子つき）。`logic` で AND / OR を切り替える。
+ *
+ * 旧形式（value に記法を書く方式）:
  *   - 比較式（>=100000 / <=2026-06-30 / 100000..200000 / 2026-04-01..2026-06-30 等）
  *     → 数値列・日付列は型に合わせた比較で検索（検索モードのインライン検索と同一記法）
  *   - それ以外はすべての列をテキスト化して **部分一致（ILIKE・大小無視）** で検索
- *     （例: 申告債務額"200"・受任日"2026-05"）
- *   - 電話番号          → 数字のみ正規化して含む検索（ハイフン無視・下4桁可）
- *   - creditorName      → 債権者リレーションの含む検索
+ * 新形式:
+ *   - contains / notContains / eq / ne / in / notIn / gt / lt / gte / lte / between / empty / notEmpty
+ *   - 日付は相対指定（TODAY・THIS_MONTH・FROM_TODAY:-7:DAYS 等）も可
+ * 共通:
+ *   - 電話番号     → 数字のみ正規化して含む検索（ハイフン無視・下4桁可）
+ *   - creditorName → 債権者リレーションの含む検索
  * 列名はホワイトリスト（DMMF由来）済みのみ使用し、値はパラメータ化（インジェクション対策）。
  */
 export async function searchCases(raw: string) {
-  let conditions: { field: string; value: string }[] = []
+  let conditions: NewCondition[] = []
+  let logic: 'AND' | 'OR' = 'AND'
   try {
-    const body = JSON.parse(raw || '{}') as { conditions?: { field: string; value: string }[] }
+    const body = JSON.parse(raw || '{}') as {
+      conditions?: NewCondition[]
+      logic?: string
+    }
     conditions = body.conditions ?? []
+    if (String(body.logic ?? '').toLowerCase() === 'or') logic = 'OR'
   } catch {
     return { error: 'bad request' }
   }
   const wheres: string[] = []
   const params: (string | number)[] = []
   for (const cond of conditions) {
-    const v = (cond?.value ?? '').trim()
-    if (!v) continue
-    if (cond.field === 'creditorName') {
-      params.push(`%${v}%`)
-      wheres.push(
-        `EXISTS (SELECT 1 FROM creditors cr WHERE cr."caseId" = c.id AND cr."creditorName" ILIKE $${params.length})`
-      )
-      continue
-    }
-    if (cond.field === 'phone') {
-      params.push(`%${v.replace(/\D/g, '')}%`)
-      wheres.push(`regexp_replace(COALESCE(c."phone", ''), '[^0-9]', '', 'g') ILIKE $${params.length}`)
-      continue
-    }
-    const type = CASE_SEARCH_TYPE[cond.field]
-    if (!type) continue // ホワイトリスト外は無視（列名はここで検証）
-    const compared = buildCompareWhere(`c."${cond.field}"`, type, v, params)
-    if (compared) {
-      wheres.push(compared)
-      continue
-    }
-    params.push(`%${v}%`)
-    wheres.push(`CAST(c."${cond.field}" AS TEXT) ILIKE $${params.length}`)
+    if (!cond || typeof cond.field !== 'string') continue
+    // operator があれば新形式、無ければ従来どおり value を解釈する
+    const where = cond.operator
+      ? buildConditionWhere(cond, params)
+      : buildLegacyWhere({ field: cond.field, value: cond.value ?? '' }, params)
+    if (where) wheres.push(where)
   }
 
   const sql = `SELECT c.id FROM cases c${
-    wheres.length ? ' WHERE ' + wheres.join(' AND ') : ''
+    wheres.length ? ' WHERE ' + wheres.join(` ${logic} `) : ''
   } ORDER BY c.id ASC LIMIT 5000`
   const idRows = await prisma.$queryRawUnsafe<{ id: number }[]>(sql, ...params)
   const ids = idRows.map((r) => r.id)

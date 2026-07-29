@@ -375,6 +375,9 @@ model User {
   changeLogs      ChangeLog[] @relation("ChangeActor")
   revertedChanges ChangeLog[] @relation("ChangeReverter")
 
+  // 保存した絞り込み条件（作成者として）
+  savedFilters SavedFilter[] @relation("SavedFilterOwner")
+
   @@index([role])
   @@index([status])
   @@map("users")
@@ -553,4 +556,39 @@ model EmailLog {
   @@index([caseId])
   @@index([createdAt])
   @@map("email_logs")
+}
+
+// ============================================================
+// 保存した絞り込み条件（一覧の検索条件を名前を付けて保存・共有する）
+// ------------------------------------------------------------
+// 一覧画面で組んだ検索条件・並び順に名前を付けて保存し、
+// SHARED なら全ユーザーが、PRIVATE なら作成者本人だけが呼び出せる。
+// 編集・削除は「作成者本人」または ADMIN のみ（API側で判定）。
+// ============================================================
+enum SavedFilterScope {
+  SHARED // 全ユーザーで共有
+  PRIVATE // 作成者本人のみ
+}
+
+model SavedFilter {
+  id          String           @id @default(cuid())
+  // 対象画面。将来ほかの一覧でも使えるようにキーで分ける（例: caseList）
+  target      String           @default("caseList")
+  name        String
+  description String?
+  scope       SavedFilterScope @default(SHARED)
+  // 検索条件・並び順の実体（画面ごとのスキーマは src/types/savedFilter.ts）
+  payload     Json
+  // 表示順（小さいほど上。同値なら作成日時順）
+  sortOrder   Int              @default(0)
+
+  ownerId String
+  owner   User   @relation("SavedFilterOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([target, scope])
+  @@index([ownerId])
+  @@map("saved_filters")
 }
