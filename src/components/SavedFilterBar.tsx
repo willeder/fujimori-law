@@ -145,7 +145,14 @@ export function SavedFilterBar({
           適用中：{active.name}
         </span>
       )}
-      {error && <span className="text-[10px] text-rose-600">{error}</span>}
+      {error && (
+        <span
+          title={error}
+          className="max-w-[280px] truncate text-[10px] text-rose-600"
+        >
+          {error}
+        </span>
+      )}
 
       {saveOpen && (
         <SaveDialog

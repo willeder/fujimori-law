@@ -8,13 +8,35 @@ import { SAVED_FILTER_TARGET_CASE_LIST } from '../types/savedFilter'
 
 type Result = { ok: boolean; error?: string; filter?: SavedFilter }
 
+/**
+ * エラーレスポンスを、原因が分かる日本語メッセージにする。
+ * 「エラーが発生しました（404）」だけだと何を直せばよいか分からないため、
+ * ステータスごとに次の一手が分かる文言を返し、詳細は console にも出す。
+ */
 async function readError(res: Response): Promise<string> {
+  let raw = ''
+  let apiError = ''
   try {
-    const data = (await res.json()) as { error?: string }
-    return data.error ?? `エラーが発生しました（${res.status}）`
+    raw = await res.text()
+    const data = JSON.parse(raw) as { error?: string }
+    apiError = data.error ?? ''
   } catch {
-    return `エラーが発生しました（${res.status}）`
+    /* JSON でない（HTML の404ページ等）場合は raw をそのまま診断に使う */
   }
+  console.error('[saved-filters]', res.status, res.url, raw.slice(0, 300))
+
+  // テーブル未作成（マイグレーション未適用）はメッセージから判定する
+  if (/saved_filters/.test(apiError) && /does not exist|存在しません/.test(apiError)) {
+    return '保存条件のテーブルがまだありません。prisma migrate を実行してください'
+  }
+  if (apiError) return apiError
+
+  if (res.status === 401) return 'ログインの有効期限が切れています。再読み込みしてください'
+  if (res.status === 404) {
+    return '保存条件のAPIが見つかりません（404）。デプロイ状況と vercel.json のルーティングを確認してください'
+  }
+  if (res.status >= 500) return `サーバエラー（${res.status}）。詳細はブラウザのコンソールを確認してください`
+  return `エラーが発生しました（${res.status}）。詳細はブラウザのコンソールを確認してください`
 }
 
 export function useSavedFilters(target: string = SAVED_FILTER_TARGET_CASE_LIST) {

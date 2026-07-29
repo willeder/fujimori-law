@@ -22,6 +22,8 @@
     { "source": "/api/mail/:p*", "destination": "/api/data?__path=mail/:p*" },
     { "source": "/api/reminders/:p*", "destination": "/api/data?__path=reminders/:p*" },
     { "source": "/api/presence/:p*", "destination": "/api/data?__path=presence/:p*" },
+    { "source": "/api/saved-filters", "destination": "/api/data?__path=saved-filters" },
+    { "source": "/api/saved-filters/:p*", "destination": "/api/data?__path=saved-filters/:p*" },
     { "source": "/api/_diag", "destination": "/api/data?__path=_diag" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
