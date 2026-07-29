@@ -1,0 +1,2555 @@
+openapi: 3.0.0
+info:
+  description: TOPPAN MyPage API
+  version: 1.0.0
+  title: MyPage API
+servers:
+  - url: 'https://xxx/v1/api'
+tags:
+  - name: Groups
+  - name: Sections
+  - name: Async
+paths:
+  '/services/{serviceApiKey}/groups':
+    get:
+      tags:
+        - Groups
+      summary: グループ情報取得API
+      operationId: getGroups
+      security:
+        - serviceBasicAuth: []
+      description: |
+        利用者 士業様に連携許可された債権者情報を取得します。
+      parameters:
+        - in: path
+          name: serviceApiKey
+          description: サービスAPIKEY
+          required: true
+          schema:
+            type: string
+            minLength: 32
+            maxLength: 32
+            pattern: '^[A-Za-z0-9]*$'
+        - in: query
+          name: updatedAtFrom
+          description: 更新日時
+          required: false
+          example: 2011-12-03T10:15:30+09:00
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: updatedAtTo
+          description: 更新日時
+          required: false
+          example: 2011-12-03T10:15:30+09:00
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: page
+          description: ページ番号。デフォルトは1。
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          description: 取得件数。デフォルトは100。最大300。
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: グループ情報
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/group'
+        '400':
+          description: Bad Request
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '401':
+          description: Unauthorized
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '403':
+          description: Forbidden
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Not Found
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '500':
+          description: Internal Server Error
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '503':
+          description: Server Maintenance
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  '/services/{serviceApiKey}/groups/{id}':
+    get:
+      tags:
+        - Groups
+      summary: グループ情報取得API
+      operationId: getGroup
+      security:
+        - serviceBasicAuth: []
+      description: |
+        利用者 士業様に連携許可された債権者情報を取得します。
+      parameters:
+        - in: path
+          name: serviceApiKey
+          description: サービスAPIKEY
+          required: true
+          schema:
+            type: string
+            minLength: 32
+            maxLength: 32
+            pattern: '^[A-Za-z0-9]*$'
+        - in: path
+          name: id
+          description: グループID
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: グループ情報
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/group'
+        '400':
+          description: Bad Request
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '401':
+          description: Unauthorized
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '403':
+          description: Forbidden
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Not Found
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '500':
+          description: Internal Server Error
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '503':
+          description: Server Maintenance
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  '/services/{serviceApiKey}/sections':
+    post:
+      tags:
+        - Sections
+      summary: セクションAPI
+      operationId: postSections
+      security:
+        - serviceBasicAuth: []
+      description: |
+        新しいセクションを登録します。
+      parameters:
+        - name: serviceApiKey
+          in: path
+          description: IDaaSサービスAPIKEY
+          required: true
+          schema:
+            type: string
+            minLength: 32
+            maxLength: 32
+            pattern: '^[A-Za-z0-9]*$'
+      requestBody:
+        $ref: '#/components/requestBodies/postSection'
+      responses:
+        '200':
+          description: セクション登録に成功しました。
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sectionId:
+                    type: integer
+                    format: int64
+                    description: セクションの一意識別子
+        '400':
+          description: Bad Request
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '401':
+          description: Unauthorized
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '403':
+          description: Forbidden
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Not Found
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '500':
+          description: Internal Server Error
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '503':
+          description: Server Maintenance
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+    get:
+      tags:
+        - Sections
+      summary: セクションAPI
+      operationId: getSections
+      security:
+        - serviceBasicAuth: []
+      description: |
+        セクションを返します。
+      parameters:
+        - name: serviceApiKey
+          in: path
+          description: IDaaSサービスAPIKEY
+          required: true
+          schema:
+            type: string
+            minLength: 32
+            maxLength: 32
+            pattern: '^[A-Za-z0-9]*$'
+        - in: query
+          name: updatedAtFrom
+          description: 更新日時
+          required: false
+          example: 2011-12-03T10:15:30+09:00
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: updatedAtTo
+          description: 更新日時
+          required: false
+          example: 2011-12-03T10:15:30+09:00
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: page
+          description: ページ番号。デフォルトは1。
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          description: 取得件数。デフォルトは100。最大300。
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 債権者情報
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/section'
+        '400':
+          description: Bad Request
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '401':
+          description: Unauthorized
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '403':
+          description: Forbidden
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Not Found
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '500':
+          description: Internal Server Error
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '503':
+          description: Server Maintenance
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  '/services/{serviceApiKey}/sections/{id}':
+    get:
+      tags:
+        - Sections
+      summary: セクションAPI
+      operationId: getSection
+      security:
+        - serviceBasicAuth: []
+      description: |
+        セクションを返します。
+      parameters:
+        - name: serviceApiKey
+          in: path
+          description: IDaaSサービスAPIKEY
+          required: true
+          schema:
+            type: string
+            minLength: 32
+            maxLength: 32
+            pattern: '^[A-Za-z0-9]*$'
+        - name: id
+          in: path
+          description: セクションID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: セクション情報
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/section'
+        '400':
+          description: Bad Request
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '401':
+          description: Unauthorized
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '403':
+          description: Forbidden
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Not Found
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '500':
+          description: Internal Server Error
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '503':
+          description: Server Maintenance
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+    put:
+      tags:
+        - Sections
+      summary: セクションAPI
+      operationId: putSections
+      security:
+        - serviceBasicAuth: []
+      description: |
+        既存セクションを編集します。
+      parameters:
+        - name: serviceApiKey
+          in: path
+          description: IDaaSサービスAPIKEY
+          required: true
+          schema:
+            type: string
+            minLength: 32
+            maxLength: 32
+            pattern: '^[A-Za-z0-9]*$'
+        - name: id
+          in: path
+          description: セクションID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        $ref: '#/components/requestBodies/putSection'
+      responses:
+        '200':
+          description: セクション登録に成功しました。
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sectionId:
+                    type: integer
+                    format: int64
+                    description: セクションの一意識別子
+        '400':
+          description: Bad Request
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '401':
+          description: Unauthorized
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '403':
+          description: Forbidden
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Not Found
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '500':
+          description: Internal Server Error
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '503':
+          description: Server Maintenance
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+    delete:
+      tags:
+        - Sections
+      summary: セクションAPI
+      operationId: deleteSection
+      security:
+        - serviceBasicAuth: []
+      description: |
+        セクションを削除します。
+      parameters:
+        - name: serviceApiKey
+          in: path
+          description: IDaaSサービスAPIKEY
+          required: true
+          schema:
+            type: string
+            minLength: 32
+            maxLength: 32
+            pattern: '^[A-Za-z0-9]*$'
+        - name: id
+          in: path
+          description: セクションID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: セクション削除
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+        '400':
+          description: Bad Request
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '401':
+          description: Unauthorized
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '403':
+          description: Forbidden
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Not Found
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '500':
+          description: Internal Server Error
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '503':
+          description: Server Maintenance
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  '/services/{serviceApiKey}/async/sections':
+    post:
+      tags:
+        - Async
+      summary: セクション一括登録API
+      operationId: asyncSections
+      security:
+        - serviceBasicAuth: []
+      description: |
+        新しいセクションを一括登録します。登録は非同期で実行されます。結果は非同期セクション登録結果にて取得することができます。
+      parameters:
+        - name: serviceApiKey
+          in: path
+          description: IDaaSサービスAPIKEY
+          required: true
+          schema:
+            type: string
+            minLength: 32
+            maxLength: 32
+            pattern: '^[A-Za-z0-9]*$'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                filename: 
+                  type: string
+                file:
+                  type: string
+                  format: binary
+                  description: ZIP圧縮されたセクション情報CSVファイル
+      responses:
+        '200':
+          description: セクション登録を受け付けました。
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: 非同期実行インスタンスID
+                  effects:
+                    type: integer
+                    description: 受け入れ件数
+        '400':
+          description: Bad Request
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '401':
+          description: Unauthorized
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '403':
+          description: Forbidden
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Not Found
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '500':
+          description: Internal Server Error
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '503':
+          description: Server Maintenance
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  '/services/{serviceApiKey}/async/sections/{id}':
+    get:
+      tags:
+        - Async
+      summary: 非同期セクション登録結果API
+      operationId: getAsyncSection
+      security:
+        - serviceBasicAuth: []
+      description: |
+        非同期セクション登録結果を返します。
+      parameters:
+        - name: serviceApiKey
+          in: path
+          description: IDaaSサービスAPIKEY
+          required: true
+          schema:
+            type: string
+            minLength: 32
+            maxLength: 32
+            pattern: '^[A-Za-z0-9]*$'
+        - name: id
+          in: path
+          description: 非同期実行インスタンスID
+          required: true
+          schema:
+            type: string
+            minLength: 32
+            maxLength: 32
+            pattern: '^[A-Za-z0-9]*$'
+      responses:
+        '200':
+          description: セクション情報
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: 
+                    type: string
+                    description: 非同期実行インスタンスID
+                  effects:
+                    type: integer
+                    description: 受け入れ件数
+                  status:
+                    type: string
+                    enum: [applied, scceeded, warned, failed]
+                    description: >
+                      非同期実行状況
+                      
+                      `applied` - 受け入れ済み
+                      `scceeded` - 正常に完了
+                      `warned` - 失敗を含む完了
+                      `failed` - 失敗
+                  errors: 
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        externalId:
+                          type: string
+                          description: リクエスト時に指定したexternalId。指定がない場合は未設定
+                        message:
+                          type: string
+                          description: 失敗の理由
+                        sequence:
+                          type: integer
+                          description: 失敗したリクエストの順序。リクエスト時のリスト添字。
+                      required:
+                        - message
+                        - sequence
+                required:
+                  - id
+                  - effects
+                  - status
+        '400':
+          description: Bad Request
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '401':
+          description: Unauthorized
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '403':
+          description: Forbidden
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Not Found
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '500':
+          description: Internal Server Error
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '503':
+          description: Server Maintenance
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            X-FRAME-OPTIONS:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+components:
+  securitySchemes:
+    serviceBasicAuth:
+      description: |
+        ベーシック認証
+        * Username : Api Key
+        * Password : Secret
+      type: http
+      scheme: basic
+  requestBodies:
+    postSection:
+      description: セクション登録情報
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: "#/components/schemas/postMpnrSection"
+    putSection:
+      description: セクション編集情報
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: "#/components/schemas/putMpnrSection"
+    postSections:
+      description: セクション登録情報
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/postMpnrSection"
+  schemas:
+    postMpnrSection:
+      description: MPNRセクション登録情報
+      type: object
+      properties:
+        groupId:
+          type: integer
+          description: グループID。債権者のグループID
+        externalId:
+          type: string
+          maxLength: 256
+          description: 任意識別子
+        noticeAcceptanceTypeName: 
+          type: string
+          enum: [006_voluntary_arrangement, 006_bankruptcy, 006_rehabilitation, 006_policy_undecided, 006_resignation, 006_disclosure_only]
+          description: >
+            受任通知書種別名:
+            
+            `006_voluntary_arrangement` - 任意整理
+            `006_bankruptcy` - 破産
+            `006_rehabilitation` - 再生
+            `006_policy_undecided` - 方針未定
+            `006_resignation` - 辞任
+            `006_disclosure_only` - 開示のみ
+        disclosureRequest: 
+          type: string
+          enum: [028_required, 028_not_required]
+          description: >
+            取引履歴開示請求:
+            
+            `028_required` - 必要
+            `028_not_required` - 不要
+        birthdayBirthYear: 
+          type: string
+          description: 生年月日 年
+        birthdayBirthMonth: 
+          type: string
+          description: 生年月日 月
+        birthdayBirthDay: 
+          type: string
+          description: 生年月日 日
+        addressPostalCode: 
+          type: string
+          description: 郵便番号
+        addressPrefecture: 
+          type: string
+          description: 住所_都道府県
+        addressCity: 
+          type: string
+          description: 住所_市区町村
+        addressAddress1: 
+          type: string
+          description: 住所_番地
+        addressAddress2: 
+          type: string
+          description: 住所_建物名
+        phoneNumber1: 
+          type: string
+          description: 電話番号１（自宅・携帯）
+        phoneNumber2: 
+          type: string
+          description: 電話番号２（自宅）
+        oldName1: 
+          type: string
+          description: 旧氏名（姓）1
+        oldNameKana1: 
+          type: string
+          description: 旧氏名（姓）カナ1
+        oldName2: 
+          type: string
+          description: 旧氏名（姓）2
+        oldNameKana2: 
+          type: string
+          description: 旧氏名（姓）カナ2
+        oldAddress1PostalCode: 
+          type: string
+          description: 旧郵便番号
+        oldAddress1Prefecture: 
+          type: string
+          description: 旧住所_都道府県
+        oldAddress1City: 
+          type: string
+          description: 旧住所_市区町村
+        oldAddress1Address1: 
+          type: string
+          description: 旧住所_番地
+        oldAddress1Address2: 
+          type: string
+          description: 旧住所_建物名
+        oldAddress2PostalCode: 
+          type: string
+          description: 旧郵便番号
+        oldAddress2Prefecture: 
+          type: string
+          description: 旧住所_都道府県
+        oldAddress2City: 
+          type: string
+          description: 旧住所_市区町村
+        oldAddress2Address1: 
+          type: string
+          description: 旧住所_番地
+        oldAddress2Address2: 
+          type: string
+          description: 旧住所_建物名
+        oldAddress3PostalCode: 
+          type: string
+          description: 旧郵便番号
+        oldAddress3Prefecture: 
+          type: string
+          description: 旧住所_都道府県
+        oldAddress3City: 
+          type: string
+          description: 旧住所_市区町村
+        oldAddress3Address1: 
+          type: string
+          description: 旧住所_番地
+        oldAddress3Address2: 
+          type: string
+          description: 旧住所_建物名
+        drivingLicenseNumber: 
+          type: string
+          description: 運転免許証番号
+        heirNameFamilyName: 
+          type: string
+          description: 相続人氏名（姓）
+        heirNameGivenName: 
+          type: string
+          description: 相続人氏名（名）
+        heirNameKanaFamilyNameKana: 
+          type: string
+          description: 相続人氏名（姓）カナ
+        heirNameKanaGivenNameKana: 
+          type: string
+          description: 相続人氏名（名）カナ
+        heirBirthdayYear: 
+          type: string
+          description: 相続人生年月日 年
+        heirBirthdayMonth: 
+          type: string
+          description: 相続人生年月日 月
+        heirBirthdayDay: 
+          type: string
+          description: 相続人生年月日 日
+        heirAddressPostalCode: 
+          type: string
+          description: 相続人住所_郵便番号
+        heirAddressPrefecture: 
+          type: string
+          description: 相続人住所_都道府県
+        heirAddressCity: 
+          type: string
+          description: 相続人住所_市区町村
+        heirAddressAddress1: 
+          type: string
+          description: 相続人住所_番地
+        heirAddressAddress2: 
+          type: string
+          description: 相続人住所_建物名
+        heirPhoneNumber1: 
+          type: string
+          description: 相続人電話番号１
+        heirPhoneNumber2: 
+          type: string
+          description: 相続人電話番号２
+        disclosureSubjectDateOfDeathYear: 
+          type: string
+          description: 債務者命日 年
+        disclosureSubjectDateOfDeathMonth: 
+          type: string
+          description: 債務者命日 月
+        disclosureSubjectDateOfDeathDay: 
+          type: string
+          description: 債務者命日 日
+        freeTextArea: 
+          type: string
+          description: 自由記入欄
+        businessEmail: 
+          type: string
+          description: メールアドレス
+        lawyerRegistrationNumber:
+          type: string
+          description: 弁護士登録番号/司法書士認定番号
+        managerAgentNameFamilyName: 
+          type: string
+          description: 担当代理人（姓）
+        managerAgentNameGivenName: 
+          type: string
+          description: 担当代理人（名）
+        managerAgentNameKanaFamilyNameKana: 
+          type: string
+          description: 担当代理人（姓）カナ
+        managerAgentNameKanaGivenNameKana: 
+          type: string
+          description: 担当代理人（名）カナ
+        nameFamilyName: 
+          type: string
+          description: 債務者氏名（姓）
+        nameGivenName: 
+          type: string
+          description: 債務者氏名（名）
+        nameKanaFamilyNameKana: 
+          type: string
+          description: 債務者氏名（姓）カナ
+        nameKanaGivenNameKana: 
+          type: string
+          description: 債務者氏名（名）カナ
+      required:
+        - groupId
+        - noticeAcceptanceTypeName
+        - disclosureRequest
+        - nameFamilyName
+        - nameGivenName
+        - nameKanaFamilyNameKana
+        - nameKanaGivenNameKana
+        - birthdayBirthYear
+        - birthdayBirthMonth
+        - birthdayBirthDay
+        - addressPostalCode
+        - addressPrefecture
+        - addressCity
+        - phoneNumber1
+        - businessEmail
+    putMpnrSection:
+      description: MPNRセクション編集情報
+      type: object
+      properties:
+        externalId:
+          type: string
+          maxLength: 256
+          description: 任意識別子
+        sectionManagerUserId: 
+          type: integer
+          format: int32
+          description: セクション担当者のユーザーID
+        noticeAcceptanceTypeName: 
+          type: string
+          enum: [006_voluntary_arrangement, 006_bankruptcy, 006_rehabilitation, 006_policy_undecided, 006_resignation, 006_disclosure_only]
+          description: >
+            受任通知書種別名:
+            
+            `006_voluntary_arrangement` - 任意整理
+            `006_bankruptcy` - 破産
+            `006_rehabilitation` - 再生
+            `006_policy_undecided` - 方針未定
+            `006_resignation` - 辞任
+            `006_disclosure_only` - 開示のみ
+        disclosureRequest: 
+          type: string
+          enum: [028_required, 028_not_required]
+          description: >
+            取引履歴開示請求:
+            
+            `028_required` - 必要
+            `028_not_required` - 不要
+        birthdayBirthYear: 
+          type: string
+          description: 生年月日 年
+        birthdayBirthMonth: 
+          type: string
+          description: 生年月日 月
+        birthdayBirthDay: 
+          type: string
+          description: 生年月日 日
+        addressPostalCode: 
+          type: string
+          description: 郵便番号
+        addressPrefecture: 
+          type: string
+          description: 住所_都道府県
+        addressCity: 
+          type: string
+          description: 住所_市区町村
+        addressAddress1: 
+          type: string
+          description: 住所_番地
+        addressAddress2: 
+          type: string
+          description: 住所_建物名
+        phoneNumber1: 
+          type: string
+          description: 電話番号１（自宅・携帯）
+        phoneNumber2: 
+          type: string
+          description: 電話番号２（自宅）
+        oldName1: 
+          type: string
+          description: 旧氏名（姓）1
+        oldNameKana1: 
+          type: string
+          description: 旧氏名（姓）カナ1
+        oldName2: 
+          type: string
+          description: 旧氏名（姓）2
+        oldNameKana2: 
+          type: string
+          description: 旧氏名（姓）カナ2
+        oldAddress1PostalCode: 
+          type: string
+          description: 旧郵便番号
+        oldAddress1Prefecture: 
+          type: string
+          description: 旧住所_都道府県
+        oldAddress1City: 
+          type: string
+          description: 旧住所_市区町村
+        oldAddress1Address1: 
+          type: string
+          description: 旧住所_番地
+        oldAddress1Address2: 
+          type: string
+          description: 旧住所_建物名
+        oldAddress2PostalCode: 
+          type: string
+          description: 旧郵便番号
+        oldAddress2Prefecture: 
+          type: string
+          description: 旧住所_都道府県
+        oldAddress2City: 
+          type: string
+          description: 旧住所_市区町村
+        oldAddress2Address1: 
+          type: string
+          description: 旧住所_番地
+        oldAddress2Address2: 
+          type: string
+          description: 旧住所_建物名
+        oldAddress3PostalCode: 
+          type: string
+          description: 旧郵便番号
+        oldAddress3Prefecture: 
+          type: string
+          description: 旧住所_都道府県
+        oldAddress3City: 
+          type: string
+          description: 旧住所_市区町村
+        oldAddress3Address1: 
+          type: string
+          description: 旧住所_番地
+        oldAddress3Address2: 
+          type: string
+          description: 旧住所_建物名
+        drivingLicenseNumber: 
+          type: string
+          description: 運転免許証番号
+        heirNameFamilyName: 
+          type: string
+          description: 相続人氏名（姓）
+        heirNameGivenName: 
+          type: string
+          description: 相続人氏名（名）
+        heirNameKanaFamilyNameKana: 
+          type: string
+          description: 相続人氏名（姓）カナ
+        heirNameKanaGivenNameKana: 
+          type: string
+          description: 相続人氏名（名）カナ
+        heirBirthdayYear: 
+          type: string
+          description: 相続人生年月日 年
+        heirBirthdayMonth: 
+          type: string
+          description: 相続人生年月日 月
+        heirBirthdayDay: 
+          type: string
+          description: 相続人生年月日 日
+        heirAddressPostalCode: 
+          type: string
+          description: 相続人住所_郵便番号
+        heirAddressPrefecture: 
+          type: string
+          description: 相続人住所_都道府県
+        heirAddressCity: 
+          type: string
+          description: 相続人住所_市区町村
+        heirAddressAddress1: 
+          type: string
+          description: 相続人住所_番地
+        heirAddressAddress2: 
+          type: string
+          description: 相続人住所_建物名
+        heirPhoneNumber1: 
+          type: string
+          description: 相続人電話番号１
+        heirPhoneNumber2: 
+          type: string
+          description: 相続人電話番号２
+        disclosureSubjectDateOfDeathYear: 
+          type: string
+          description: 債務者命日 年
+        disclosureSubjectDateOfDeathMonth: 
+          type: string
+          description: 債務者命日 月
+        disclosureSubjectDateOfDeathDay: 
+          type: string
+          description: 債務者命日 日
+        freeTextArea: 
+          type: string
+          description: 自由記入欄
+        businessEmail: 
+          type: string
+          description: メールアドレス
+        lawyerRegistrationNumber:
+          type: string
+          description: 弁護士登録番号/司法書士認定番号
+        managerAgentNameFamilyName: 
+          type: string
+          description: 担当代理人（姓）
+        managerAgentNameGivenName: 
+          type: string
+          description: 担当代理人（名）
+        managerAgentNameKanaFamilyNameKana: 
+          type: string
+          description: 担当代理人（姓）カナ
+        managerAgentNameKanaGivenNameKana: 
+          type: string
+          description: 担当代理人（名）カナ
+        nameFamilyName: 
+          type: string
+          description: 債務者氏名（姓）
+        nameGivenName: 
+          type: string
+          description: 債務者氏名（名）
+        nameKanaFamilyNameKana: 
+          type: string
+          description: 債務者氏名（姓）カナ
+        nameKanaGivenNameKana: 
+          type: string
+          description: 債務者氏名（名）カナ
+      required:
+        - sectionManagerUserId
+        - noticeAcceptanceTypeName
+        - disclosureRequest
+        - nameFamilyName
+        - nameGivenName
+        - nameKanaFamilyNameKana
+        - nameKanaGivenNameKana
+        - birthdayBirthYear
+        - birthdayBirthMonth
+        - birthdayBirthDay
+        - addressPostalCode
+        - addressPrefecture
+        - addressCity
+        - businessEmail
+        - phoneNumber1
+    group:
+      type: object
+      properties:
+        groupId:
+          type: integer
+          description: グループID
+        groupName:
+          type: string
+          description: グループ名
+        groupTypeName:  
+          type: string
+          description: グループ種別名
+        parentUserProfile:  
+          oneOf:
+            - $ref: "#/components/schemas/creditorParentUser"
+    creditorParentUser:  
+      type: object
+      description: 債権者グループ親ユーザ（オーナー）の情報
+      properties:
+        nameFamilyName:
+          type: string
+          description: 姓
+        nameGivenName:
+          type: string
+          description: 名
+        nameKanaFamilyNameKana:
+          type: string
+          description: 姓カナ
+        nameKanaGivenNameKana:
+          type: string
+          description: 名カナ
+        phoneNumber:
+          type: string
+          description: 電話番号
+        birthdayBirthYear:
+          type: string
+          description: 生年月日 年
+        birthdayBirthMonth:
+          type: string
+          description: 生年月日 月
+        birthdayBirthDay:
+          type: string
+          description: 生年月日 日
+        creditorCompanyName:
+          type: string
+          description: 債権者会社名
+        creditorCompanyNameKana:
+          type: string
+          description: 債権者会社名カナ
+        addressPostalCode:
+          type: string
+          description: 債権者郵便番号
+        addressPrefecture:
+          type: string
+          description: 債権者住所_都道府県
+        addressCity:
+          type: string
+          description: 債権者住所_市区町村
+        addressAddress1:
+          type: string
+          description: 債権者住所_番地
+        addressAddress2:
+          type: string
+          description: 債権者住所_建物名
+        creditorPhoneNumber:
+          type: string
+          description: 債権者電話番号
+        email:
+          type: string
+          description: メールアドレス
+    section: 
+      type: object
+      description: セクション情報
+      properties:
+        sectionId: 
+          type: integer
+          format: int64
+          description: セクションID
+        externalId: 
+          type: string
+          description: 任意の識別子
+        groupId: 
+          type: integer
+          format: int32
+          description: 作成者グループID
+        toGroupId: 
+          type: integer
+          format: int32
+          description: 関連グループID
+        userId: 
+          type: integer
+          format: int32
+          description: 作成者ID
+        createdAt: 
+          type: string
+          format: date-time
+          description: 登録日時
+        updatedAt: 
+          type: string
+          format: date-time
+          description: 更新日時
+        sectionInfo:
+          oneOf:
+            - $ref: "#/components/schemas/mpnrSectionInfo"
+      required:
+        - sectionId
+        - groupId
+        - toGroupId
+        - userId
+        - createdAt
+        - updatedAt
+        - sectionInfo
+    mpnrSectionInfo: 
+      type: object
+      properties:
+        sectionManagerUserId: 
+          type: integer
+          format: int32
+          description: セクション担当者のユーザーID
+        noticeAcceptanceTypeName: 
+          type: string
+          description: 受任通知書種別名
+        disclosureRequest: 
+          type: string
+          description: 受任通知書種別名
+        birthdayBirthYear: 
+          type: string
+          description: 生年月日 年
+        birthdayBirthMonth: 
+          type: string
+          description: 生年月日 月
+        birthdayBirthDay: 
+          type: string
+          description: 生年月日 日
+        addressPostalCode: 
+          type: string
+          description: 郵便番号
+        addressPrefecture: 
+          type: string
+          description: 住所_都道府県
+        addressCity: 
+          type: string
+          description: 住所_市区町村
+        addressAddress1: 
+          type: string
+          description: 住所_番地
+        addressAddress2: 
+          type: string
+          description: 住所_建物名
+        phoneNumber1: 
+          type: string
+          description: 電話番号１（自宅・携帯）
+        phoneNumber2: 
+          type: string
+          description: 電話番号２（自宅）
+        oldName1: 
+          type: string
+          description: 旧氏名（姓）1
+        oldNameKana1: 
+          type: string
+          description: 旧氏名（姓）カナ1
+        oldName2: 
+          type: string
+          description: 旧氏名（姓）2
+        oldNameKana2: 
+          type: string
+          description: 旧氏名（姓）カナ2
+        oldAddress1PostalCode: 
+          type: string
+          description: 旧郵便番号
+        oldAddress1Prefecture: 
+          type: string
+          description: 旧住所_都道府県
+        oldAddress1City: 
+          type: string
+          description: 旧住所_市区町村
+        oldAddress1Address1: 
+          type: string
+          description: 旧住所_番地
+        oldAddress1Address2: 
+          type: string
+          description: 旧住所_建物名
+        oldAddress2PostalCode: 
+          type: string
+          description: 旧郵便番号
+        oldAddress2Prefecture: 
+          type: string
+          description: 旧住所_都道府県
+        oldAddress2City: 
+          type: string
+          description: 旧住所_市区町村
+        oldAddress2Address1: 
+          type: string
+          description: 旧住所_番地
+        oldAddress2Address2: 
+          type: string
+          description: 旧住所_建物名
+        oldAddress3PostalCode: 
+          type: string
+          description: 旧郵便番号
+        oldAddress3Prefecture: 
+          type: string
+          description: 旧住所_都道府県
+        oldAddress3City: 
+          type: string
+          description: 旧住所_市区町村
+        oldAddress3Address1: 
+          type: string
+          description: 旧住所_番地
+        oldAddress3Address2: 
+          type: string
+          description: 旧住所_建物名
+        drivingLicenseNumber: 
+          type: string
+          description: 運転免許証番号
+        heirNameFamilyName: 
+          type: string
+          description: 相続人氏名（姓）
+        heirNameGivenName: 
+          type: string
+          description: 相続人氏名（名）
+        heirNameKanaFamilyNameKana: 
+          type: string
+          description: 相続人氏名（姓）カナ
+        heirNameKanaGivenNameKana: 
+          type: string
+          description: 相続人氏名（名）カナ
+        heirBirthdayYear: 
+          type: string
+          description: 相続人生年月日 年
+        heirBirthdayMonth: 
+          type: string
+          description: 相続人生年月日 月
+        heirBirthdayDay: 
+          type: string
+          description: 相続人生年月日 日
+        heirAddressPostalCode: 
+          type: string
+          description: 相続人住所_郵便番号
+        heirAddressPrefecture: 
+          type: string
+          description: 相続人住所_都道府県
+        heirAddressCity: 
+          type: string
+          description: 相続人住所_市区町村
+        heirAddressAddress1: 
+          type: string
+          description: 相続人住所_番地
+        heirAddressAddress2: 
+          type: string
+          description: 相続人住所_建物名
+        heirPhoneNumber1: 
+          type: string
+          description: 相続人電話番号１
+        heirPhoneNumber2: 
+          type: string
+          description: 相続人電話番号２
+        disclosureSubjectDateOfDeathYear: 
+          type: string
+          description: 債務者命日 年
+        disclosureSubjectDateOfDeathMonth: 
+          type: string
+          description: 債務者命日 月
+        disclosureSubjectDateOfDeathDay: 
+          type: string
+          description: 債務者命日 日
+        freeTextArea: 
+          type: string
+          description: 自由記入欄
+        professionalCompanyName: 
+          type: string
+          description: 事業所名
+        professionalPhoneNumber: 
+          type: string
+          description: 事業所電話番号
+        businessEmail: 
+          type: string
+          description: メールアドレス
+        delegateAgentName: 
+          type: string
+          description: 代表代理人
+        delegateAgentNameKana: 
+          type: string
+          description: 代表代理人カナ
+        lawyerRegistrationNumber:
+          type: string
+          description: 弁護士登録番号/司法書士認定番号
+        managerAgentNameFamilyName: 
+          type: string
+          description: 担当代理人（姓）
+        managerAgentNameGivenName: 
+          type: string
+          description: 担当代理人（名）
+        managerAgentNameKanaFamilyNameKana: 
+          type: string
+          description: 担当代理人（姓）カナ
+        managerAgentNameKanaGivenNameKana: 
+          type: string
+          description: 担当代理人（名）カナ
+        nameFamilyName: 
+          type: string
+          description: 債務者氏名（姓）
+        nameGivenName: 
+          type: string
+          description: 債務者氏名（名）
+        nameKanaFamilyNameKana: 
+          type: string
+          description: 債務者氏名（姓）カナ
+        nameKanaGivenNameKana: 
+          type: string
+          description: 債務者氏名（名）カナ
+    errorItem:
+      type: object
+      properties:
+        errorCode:
+          type: string
+          description: エラーコード
+          example: E-1234
+        errorMessage:
+          type: string
+          description: エラーコードに対応したエラーメッセージ
+          example: 予期せぬエラーが発生しました。システム管理者にお問い合わせください。
+    errorResponse:
+      type: object
+      properties:
+        errorList:
+          description: エラーリスト
+          type: array
+          items:
+            $ref: '#/components/schemas/errorItem'
+

@@ -26,6 +26,12 @@ export interface Column<T> {
   cellClassName?: string
   /** false のときソート不可（通番列など） */
   sortable?: boolean
+  /**
+   * ソート時にこの列の比較値を返す。ネスト構造（item.clientBasicInfo.name 等）の列で指定する。
+   * 未指定の場合は従来どおり item[key] の生値を比較する。
+   * 数値を返せば数値順、文字列を返せば日本語ロケール順で並ぶ（空値は常に末尾）。
+   */
+  sortValue?: (item: T) => string | number | null | undefined
   render?: (item: T, index: number) => React.ReactNode
   /**
    * 検索モード（FileMaker風インライン検索）で、この列の検索対象文字列を返す。
@@ -136,6 +142,14 @@ interface DataTableProps<T> {
    * 出力対象は「現在の絞り込み・ソートを適用した全件」（ページ送りは無視）。
    */
   csvExport?: string
+  /**
+   * 並び順を親コンポーネントで制御する場合に指定する（保存した絞り込み条件で
+   * 並び順まで復元したいときなど）。onSortChange を渡したときだけ制御モードになり、
+   * sortKey / sortOrder は親の値がそのまま使われる（persistKey による保持は行わない）。
+   */
+  sortKey?: string | null
+  sortOrder?: 'asc' | 'desc'
+  onSortChange?: (key: string | null, order: 'asc' | 'desc') => void
 }
 
 export function DataTable<T>({
@@ -160,8 +174,14 @@ export function DataTable<T>({
   onGlobalFind,
   onFindNavigate,
   csvExport,
+  sortKey: sortKeyProp,
+  sortOrder: sortOrderProp,
+  onSortChange,
 }: DataTableProps<T>) {
-  const [sortKey, setSortKey] = useState<string | null>(() => {
+  // onSortChange が渡されたときだけ「親が並び順を持つ」制御モードになる。
+  // 渡されない従来の使い方では、これまでどおり内部状態＋persistKey で保持する。
+  const sortControlled = typeof onSortChange === 'function'
+  const [internalSortKey, setInternalSortKey] = useState<string | null>(() => {
     if (!persistKey) return null
     try {
       const r = sessionStorage.getItem(`${persistKey}.sortKey`)
@@ -170,7 +190,7 @@ export function DataTable<T>({
       return null
     }
   })
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(() => {
+  const [internalSortOrder, setInternalSortOrder] = useState<'asc' | 'desc'>(() => {
     if (!persistKey) return 'asc'
     try {
       return sessionStorage.getItem(`${persistKey}.sortOrder`) === 'desc' ? 'desc' : 'asc'
@@ -178,15 +198,17 @@ export function DataTable<T>({
       return 'asc'
     }
   })
+  const sortKey = sortControlled ? (sortKeyProp ?? null) : internalSortKey
+  const sortOrder = sortControlled ? (sortOrderProp ?? 'asc') : internalSortOrder
   useEffect(() => {
-    if (!persistKey) return
+    if (!persistKey || sortControlled) return
     try {
       sessionStorage.setItem(`${persistKey}.sortKey`, JSON.stringify(sortKey))
       sessionStorage.setItem(`${persistKey}.sortOrder`, sortOrder)
     } catch {
       /* noop */
     }
-  }, [persistKey, sortKey, sortOrder])
+  }, [persistKey, sortControlled, sortKey, sortOrder])
 
   // ── 検索モード（FileMaker風: 検索リクエストに条件入力 → Enter で実行 → 該当セット表示） ──
   // findOn   : 検索モード中（空の検索リクエストに条件入力中。データ行は隠す）
@@ -364,16 +386,39 @@ export function DataTable<T>({
           )
 
   const handleSort = (key: string) => {
-    if (sortKey === key) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
-    } else {
-      setSortKey(key)
-      setSortOrder('asc')
+    const nextOrder: 'asc' | 'desc' = sortKey === key && sortOrder === 'asc' ? 'desc' : 'asc'
+    if (sortControlled) {
+      onSortChange(key, nextOrder)
+      return
     }
+    setInternalSortKey(key)
+    setInternalSortOrder(nextOrder)
   }
+
+  // 並び替え用の列定義（sortValue を持つ列だけ新しい比較ロジックを使う）
+  const sortColumn = sortKey ? columns.find((c) => String(c.key) === sortKey) : undefined
 
   const sortedData = [...findData].sort((a, b) => {
     if (!sortKey) return 0
+
+    // sortValue 指定あり: ネスト構造の値を取り出して比較する。
+    // 数値は数値として、文字列は日本語ロケールで比較し、空値は常に末尾へ送る。
+    if (sortColumn?.sortValue) {
+      const aVal = sortColumn.sortValue(a)
+      const bVal = sortColumn.sortValue(b)
+      const aEmpty = aVal === null || aVal === undefined || aVal === ''
+      const bEmpty = bVal === null || bVal === undefined || bVal === ''
+      if (aEmpty && bEmpty) return 0
+      if (aEmpty) return 1
+      if (bEmpty) return -1
+      const comparison =
+        typeof aVal === 'number' && typeof bVal === 'number'
+          ? aVal - bVal
+          : String(aVal).localeCompare(String(bVal), 'ja')
+      return sortOrder === 'asc' ? comparison : -comparison
+    }
+
+    // sortValue 未指定: 従来どおり item[key] の生値をそのまま比較する
     const aVal = (a as Record<string, unknown>)[sortKey]
     const bVal = (b as Record<string, unknown>)[sortKey]
     if (aVal === bVal) return 0

@@ -11,9 +11,50 @@ import {
   saveFindHistory,
   findHistoryLabel,
 } from '../utils/findHistory'
+import { SavedFilterBar } from '../components/SavedFilterBar'
+import {
+  emptyCaseListPayload,
+  isCaseListPayload,
+  type CaseListFilterPayload,
+  type CaseListSort,
+  type SavedFilter,
+} from '../types/savedFilter'
 import type { Case } from '../types'
 
 type SearchField = 'all' | 'name' | 'phone' | 'prefecture' | 'status' | 'staff'
+
+/** 検索フィールドのコード → 日本語ラベル（保存条件の内容表示に使う） */
+const SEARCH_FIELD_LABEL: Record<string, string> = Object.fromEntries(
+  SEARCH_FIELDS.map((f) => [f.field, f.label])
+)
+
+/**
+ * 列ごとの並び替え用の値。Case はネスト構造なので、列定義とは別に取り出し方を持つ。
+ * ここに載っている列だけが（絞り込み中に限り）ヘッダークリックで並び替えできる。
+ * 選択チェック・LINE連携済/未・LINE@URL は並び替えの意味がないため対象外。
+ */
+const SORT_VALUE: Record<
+  string,
+  ((c: Case) => string | number | null | undefined) | undefined
+> = {
+  id: (c) => c.metadata.externalId ?? '',
+  acceptanceDate: (c) => c.appointmentInfo.acceptanceDate ?? '',
+  cautionRank: (c) => c.clientBasicInfo.cautionRank ?? '',
+  listRegisteredDate: (c) => c.metadata.listRegisteredDate ?? '',
+  listCategory: (c) => c.metadata.listCategory ?? '',
+  acceptanceRank: (c) => c.appointmentInfo.acceptanceRank ?? '',
+  debtAdjustmentType: (c) => c.appointmentInfo.debtAdjustmentType ?? '',
+  status: (c) => c.settlementInfo.status ?? '',
+  // 氏名はフリガナがあればフリガナ順（五十音順）で並べる
+  name: (c) => c.clientBasicInfo.furigana || c.clientBasicInfo.name || '',
+  furigana: (c) => c.clientBasicInfo.furigana ?? '',
+  phone: (c) => c.clientBasicInfo.phone ?? '',
+  creditorCount: (c) => c.debtInfo.creditorCount,
+  declaredDebtAmount: (c) => c.debtInfo.declaredDebtAmount,
+  officeFee: (c) => c.feeInfo.officeFee,
+  appointmentStaff: (c) => c.appointmentInfo.appointmentStaff ?? '',
+  interviewStaff: (c) => c.appointmentInfo.interviewStaff ?? '',
+}
 
 /**
  * 一覧の文字列セルを「空白含む n 文字まで」に切り詰める。
@@ -38,6 +79,13 @@ export function CaseListPage() {
   ])
   const [results, setResults] = useState<Case[] | null>(null)
   const [searching, setSearching] = useState(false)
+  // 並び順。絞り込み中だけ有効（未絞り込みのときは常に No 昇順に固定する）
+  const [sort, setSort] = useSessionState<CaseListSort | null>('caseList.sort', null)
+  // 適用中の保存条件（プルダウンの選択状態と「適用中」バッジに使う）
+  const [activeFilterId, setActiveFilterId] = useSessionState<string | null>(
+    'caseList.savedFilterId',
+    null
+  )
 
   const setCond = (i: number, patch: Partial<Condition>) =>
     setConditions((cs) => cs.map((c, idx) => (idx === i ? { ...c, ...patch } : c)))
@@ -70,7 +118,59 @@ export function CaseListPage() {
   const clearSearch = () => {
     setResults(null)
     setConditions([{ field: 'name', value: '' }])
+    setActiveFilterId(null)
+    setSort(null)
   }
+
+  // ── 保存した絞り込み条件（共有フィルタ）──────────────────────
+  // 絞り込み中かどうか。未絞り込みのときは並び替えを無効にし、常に No 昇順で表示する
+  const filtering = !!searchValue.trim() || results != null
+
+  /** いま画面に出ている絞り込み状態（「この条件を保存」で保存される内容） */
+  const currentPayload: CaseListFilterPayload = useMemo(
+    () => ({
+      version: 1,
+      quick: { field: searchField, value: searchValue },
+      conditions: conditions.filter((c) => c.value.trim()),
+      sort: filtering ? sort : null,
+    }),
+    [searchField, searchValue, conditions, sort, filtering]
+  )
+
+  /** 保存条件を画面に適用する */
+  const applySavedFilter = (filter: SavedFilter) => {
+    const payload = isCaseListPayload(filter.payload)
+      ? filter.payload
+      : emptyCaseListPayload()
+    setActiveFilterId(filter.id)
+    setSearchField((payload.quick?.field ?? 'all') as SearchField)
+    setSearchValue(payload.quick?.value ?? '')
+    setSort(payload.sort ?? null)
+
+    const conds = payload.conditions ?? []
+    if (conds.length > 0) {
+      setShowAdv(true)
+      setConditions(conds.map((c) => ({ ...c })))
+      void runSearch(conds)
+    } else {
+      setConditions([{ field: 'name', value: '' }])
+      setResults(null)
+    }
+  }
+
+  /** 絞り込みを解除して既定表示（全件・No 昇順）に戻す */
+  const clearSavedFilter = () => {
+    setActiveFilterId(null)
+    setSearchValue('')
+    setSort(null)
+    clearSearch()
+  }
+
+  // 絞り込みが外れたら並び順も既定（No 昇順）に戻す
+  useEffect(() => {
+    if (!filtering && sort !== null) setSort(null)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtering])
 
   // FileMaker風「検索モード」（詳細レコードでCtrl+F）から渡された条件で自動検索
   useEffect(() => {
@@ -395,6 +495,13 @@ export function CaseListPage() {
     },
   ]
 
+  // 絞り込み中だけヘッダークリックで並び替えできるようにする。
+  // 未絞り込みのときは従来どおり No（id）昇順で固定（順序を変えさせない）。
+  const sortableColumns: Column<Case>[] = columns.map((col) => {
+    const sortValue = SORT_VALUE[String(col.key)]
+    return sortValue ? { ...col, sortable: filtering, sortValue } : col
+  })
+
   return (
     <div className="min-h-screen bg-slate-100">
       <LineBroadcastModal
@@ -446,6 +553,17 @@ export function CaseListPage() {
             >
               詳細検索 {showAdv ? '▲' : '▼'}
             </button>
+
+            <span className="mx-1 h-4 w-px bg-slate-300" />
+            {/* 保存した絞り込み条件（全体共有 / 個人用） */}
+            <SavedFilterBar
+              current={currentPayload}
+              activeId={activeFilterId}
+              onApply={applySavedFilter}
+              onClear={clearSavedFilter}
+              fieldLabel={(f) => SEARCH_FIELD_LABEL[f] ?? f}
+            />
+
             <span className="mx-1 h-4 w-px bg-slate-300" />
             <button
               type="button"
@@ -580,8 +698,11 @@ export function CaseListPage() {
         <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
           <DataTable
             data={displayed}
-            columns={columns}
+            columns={sortableColumns}
             keyField="id"
+            sortKey={filtering ? (sort?.key ?? null) : null}
+            sortOrder={sort?.order ?? 'asc'}
+            onSortChange={(key, order) => setSort(key ? { key, order } : null)}
             onRowClick={(item) => navigate(`/cases/${item.id}`)}
             emptyMessage="該当する案件がありません"
             density="compact"

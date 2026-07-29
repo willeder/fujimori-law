@@ -257,6 +257,37 @@ function dbApiPlugin(): Plugin {
             return
           }
 
+          // ── 保存した絞り込み条件（共有フィルタ） ──
+          if (url.startsWith('/api/saved-filters')) {
+            const sf = (await server.ssrLoadModule(
+              '/src/server/savedFilters.ts'
+            )) as typeof import('./src/server/savedFilters')
+            const actor = {
+              id: sessionUser.id,
+              email: sessionUser.email,
+              name: sessionUser.name ?? null,
+              role: sessionUser.role,
+            }
+            const item = url.match(/^\/api\/saved-filters\/([\w-]+)$/)
+            let result: { status: number; body: unknown }
+            if (url === '/api/saved-filters' && req.method === 'GET') {
+              const target = new URLSearchParams(req.url?.split('?')[1] ?? '').get('target')
+              result = await sf.listSavedFilters(actor, target)
+            } else if (url === '/api/saved-filters' && req.method === 'POST') {
+              result = await sf.createSavedFilter(actor, await readRawBody(req))
+            } else if (item && (req.method === 'PATCH' || req.method === 'PUT')) {
+              result = await sf.updateSavedFilter(actor, item[1], await readRawBody(req))
+            } else if (item && req.method === 'DELETE') {
+              result = await sf.deleteSavedFilter(actor, item[1])
+            } else {
+              result = { status: 404, body: { error: 'not found' } }
+            }
+            res.statusCode = result.status
+            res.setHeader('Content-Type', 'application/json; charset=utf-8')
+            res.end(JSON.stringify(result.body))
+            return
+          }
+
           // ── 編集中プレゼンス（同時編集の検知） ──
           if (url === '/api/presence/heartbeat' && req.method === 'POST') {
             const r = await mod.presenceHeartbeat(
