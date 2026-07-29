@@ -729,15 +729,24 @@ export async function updateCaseField(
   if (!existing) return { status: 404, body: { error: '案件が見つかりません' } }
 
   // ── 楽観ロック（先勝ち）──
-  // クライアントは読み込み時点の updatedAt（ISO・ミリ秒）を __baseUpdatedAt で送る。
-  // 他のユーザーが先に保存していた場合（DB側が新しい ＆ 最終更新者が自分以外）は
-  // 409 を返して保存しない（先に保存した側が優先）。
+  // クライアントは読み込み時点の updatedAt（ISO・ミリ秒）を __baseUpdatedAt、
+  // タブ単位の識別子を __clientId で送る。
+  // 自分のタブ以外が先に保存していた場合は 409 を返して保存しない。
+  //
+  // 以前は「最終更新者のメールが自分と違うか」で判定していたため、
+  // 同じアカウントの別ウィンドウ同士は競合とみなされず、警告なしで上書きされていた。
+  // セッション単位で比較することで、アカウント共有時の上書き事故も検知できる。
   const baseUpdatedAt =
     typeof body.__baseUpdatedAt === 'string' ? body.__baseUpdatedAt : null
+  const clientId = typeof body.__clientId === 'string' ? body.__clientId : null
   delete body.__baseUpdatedAt
+  delete body.__clientId
   if (baseUpdatedAt) {
     const current = existing.updatedAt.toISOString()
-    if (current > baseUpdatedAt && existing.updatedBy && existing.updatedBy !== actor.email) {
+    const lastClient = (existing as { updatedByClient?: string | null }).updatedByClient ?? null
+    // 直前の保存が自分のタブ自身なら競合ではない（連続保存で自分を弾かないため）
+    const bySomeoneElse = lastClient ? lastClient !== clientId : !!existing.updatedBy
+    if (current > baseUpdatedAt && bySomeoneElse) {
       return {
         status: 409,
         body: {
@@ -768,6 +777,7 @@ export async function updateCaseField(
     return { status: 200, body: { case: toCaseJson(existing), changed: false } }
   }
   updateData.updatedBy = actor.email
+  updateData.updatedByClient = clientId
   const updated = await prisma.case.update({ where: { id }, data: updateData })
   await writeChange({
     actor,
@@ -1383,33 +1393,82 @@ const PRESENCE_TTL_SECONDS = 45
 // これを超えて更新が無い editing=true は「切断などで放置されたロック」とみなして無効化する。
 const EDITING_TTL_SECONDS = 25
 
+/** プレゼンス1行（ロック判定に使う形） */
+export type PresenceRow = {
+  clientId: string
+  email: string
+  name: string
+  editing: boolean
+  editingSince: string | null
+  startedAt: string
+}
+
+/**
+ * ロック保持者を1人に決める（先に編集を始めた人が優先）。
+ *
+ * 以前はクライアント側で「編集中の誰か」を見つけるだけだったため、
+ * A と B がほぼ同時に編集を始めると互いを編集中と判定し、
+ * 両方にポップアップが出たまま解除されない相互ブロックが起きていた。
+ * サーバ側で editingSince の早い順に1人だけ選ぶことで構造的に防ぐ。
+ */
+export function pickLockHolder(rows: PresenceRow[]): PresenceRow | null {
+  const editing = rows.filter((r) => r.editing)
+  if (editing.length === 0) return null
+  return editing.slice().sort((a, b) => {
+    const sa = a.editingSince ?? a.startedAt
+    const sb = b.editingSince ?? b.startedAt
+    if (sa !== sb) return sa < sb ? -1 : 1
+    // 同時刻なら clientId で決定的に決める（両者が同じ勝者を選ぶことが重要）
+    return a.clientId < b.clientId ? -1 : 1
+  })[0]
+}
+
 export async function presenceHeartbeat(actor: EditActor & { name?: string | null }, raw: string) {
-  let body: { entity?: string; entityId?: number; name?: string; editing?: boolean }
+  let body: {
+    entity?: string
+    entityId?: number
+    clientId?: string
+    name?: string
+    editing?: boolean
+  }
   try {
-    body = JSON.parse(raw || '{}') as {
-      entity?: string
-      entityId?: number
-      name?: string
-      editing?: boolean
-    }
+    body = JSON.parse(raw || '{}') as typeof body
   } catch {
     return { status: 400, body: { error: 'bad request' } }
   }
   const entity = body.entity === 'Case' ? 'Case' : null
   const entityId = Number(body.entityId)
+  // clientId はタブ単位の識別子。未送信の古いクライアントはメールで代替する
+  const clientId = (body.clientId ?? '').toString().slice(0, 100) || actor.email
   if (!entity || !Number.isInteger(entityId) || entityId <= 0) {
     return { status: 400, body: { error: 'bad request' } }
   }
   const name = (body.name ?? actor.name ?? '').toString().slice(0, 100)
   const editing = body.editing === true
-  // 滞在＋編集状態の記録（upsert）
+
+  // 滞在＋編集状態の記録（upsert）。
+  // editingSince は「編集中が継続している間は最初の開始時刻を保つ」ことが肝で、
+  // ハートビートのたびに更新すると先着判定が壊れる。
   await prisma.$executeRawUnsafe(
-    `INSERT INTO edit_presences ("entity", "entityId", "email", "name", "editing", "updatedAt")
-     VALUES ($1, $2, $3, $4, $5, NOW())
-     ON CONFLICT ("entity", "entityId", "email")
-     DO UPDATE SET "name" = EXCLUDED."name", "editing" = EXCLUDED."editing", "updatedAt" = NOW()`,
+    `INSERT INTO edit_presences
+       ("entity", "entityId", "clientId", "email", "name", "editing", "editingSince", "updatedAt")
+     VALUES ($1, $2, $3, $4, $5, $6, CASE WHEN $6 THEN NOW() ELSE NULL END, NOW())
+     ON CONFLICT ("entity", "entityId", "clientId")
+     DO UPDATE SET
+       "email" = EXCLUDED."email",
+       "name" = EXCLUDED."name",
+       "editing" = EXCLUDED."editing",
+       "editingSince" = CASE
+         WHEN EXCLUDED."editing" AND edit_presences."editing"
+              AND edit_presences."editingSince" IS NOT NULL
+           THEN edit_presences."editingSince"
+         WHEN EXCLUDED."editing" THEN NOW()
+         ELSE NULL
+       END,
+       "updatedAt" = NOW()`,
     entity,
     entityId,
+    clientId,
     actor.email,
     name,
     editing
@@ -1418,37 +1477,72 @@ export async function presenceHeartbeat(actor: EditActor & { name?: string | nul
   await prisma.$executeRawUnsafe(
     `DELETE FROM edit_presences WHERE "updatedAt" < NOW() - INTERVAL '10 minutes'`
   )
-  // 同じレコードを開いている他ユーザー（TTL内）。editing は鮮度切れなら false に落とす
-  const others = await prisma.$queryRawUnsafe<
-    { email: string; name: string; startedAt: Date; editing: boolean }[]
+
+  // 同じレコードを開いている全セッション（自分を含む・TTL内）。
+  // 自分も含めて取得し、サーバ側でロック保持者を決める。
+  // editing は鮮度切れ（切断で放置されたロック）なら false に落とす。
+  const rows = await prisma.$queryRawUnsafe<
+    {
+      clientId: string
+      email: string
+      name: string
+      editing: boolean
+      editingSince: Date | null
+      startedAt: Date
+    }[]
   >(
-    `SELECT "email", "name", "startedAt",
+    `SELECT "clientId", "email", "name", "editingSince", "startedAt",
             ("editing" AND "updatedAt" > NOW() - INTERVAL '${EDITING_TTL_SECONDS} seconds') AS "editing"
      FROM edit_presences
-     WHERE "entity" = $1 AND "entityId" = $2 AND "email" <> $3
-       AND "updatedAt" > NOW() - INTERVAL '${PRESENCE_TTL_SECONDS} seconds'
-     ORDER BY "startedAt" ASC`,
+     WHERE "entity" = $1 AND "entityId" = $2
+       AND "updatedAt" > NOW() - INTERVAL '${PRESENCE_TTL_SECONDS} seconds'`,
     entity,
-    entityId,
-    actor.email
+    entityId
   )
+
+  const iso = (d: Date | null): string | null =>
+    d instanceof Date ? d.toISOString() : d == null ? null : String(d)
+  const all: PresenceRow[] = rows.map((r) => ({
+    clientId: r.clientId,
+    email: r.email,
+    name: r.name || r.email,
+    editing: r.editing === true,
+    editingSince: iso(r.editingSince),
+    startedAt: iso(r.startedAt) ?? '',
+  }))
+
+  const holder = pickLockHolder(all)
+  const others = all.filter((r) => r.clientId !== clientId)
+
   return {
     status: 200,
     body: {
+      // 自分以外で同じレコードを開いているセッション（同一アカウントの別ウィンドウも含む）
       others: others.map((o) => ({
         email: o.email,
-        name: o.name || o.email,
-        editing: o.editing === true,
-        startedAt: o.startedAt instanceof Date ? o.startedAt.toISOString() : String(o.startedAt),
+        name: o.name,
+        editing: o.editing,
+        startedAt: o.startedAt,
+        // 同じアカウントを別ウィンドウで開いている場合は表示を変えるための印
+        sameAccount: o.email === actor.email,
       })),
+      // ロック保持者。自分が保持者なら編集を続けてよい
+      lock: holder
+        ? {
+            name: holder.name,
+            editing: true,
+            isMine: holder.clientId === clientId,
+            sameAccount: holder.email === actor.email,
+          }
+        : null,
     },
   }
 }
 
 export async function presenceLeave(actor: EditActor, raw: string) {
-  let body: { entity?: string; entityId?: number }
+  let body: { entity?: string; entityId?: number; clientId?: string }
   try {
-    body = JSON.parse(raw || '{}') as { entity?: string; entityId?: number }
+    body = JSON.parse(raw || '{}') as { entity?: string; entityId?: number; clientId?: string }
   } catch {
     return { status: 400, body: { error: 'bad request' } }
   }
@@ -1457,11 +1551,22 @@ export async function presenceLeave(actor: EditActor, raw: string) {
   if (!entity || !Number.isInteger(entityId) || entityId <= 0) {
     return { status: 400, body: { error: 'bad request' } }
   }
-  await prisma.$executeRawUnsafe(
-    `DELETE FROM edit_presences WHERE "entity" = $1 AND "entityId" = $2 AND "email" = $3`,
-    entity,
-    entityId,
-    actor.email
-  )
+  const clientId = (body.clientId ?? '').toString().slice(0, 100)
+  // clientId があればそのタブだけ、無ければ従来どおりアカウント単位で削除する
+  if (clientId) {
+    await prisma.$executeRawUnsafe(
+      `DELETE FROM edit_presences WHERE "entity" = $1 AND "entityId" = $2 AND "clientId" = $3`,
+      entity,
+      entityId,
+      clientId
+    )
+  } else {
+    await prisma.$executeRawUnsafe(
+      `DELETE FROM edit_presences WHERE "entity" = $1 AND "entityId" = $2 AND "email" = $3`,
+      entity,
+      entityId,
+      actor.email
+    )
+  }
   return { status: 200, body: { ok: true } }
 }

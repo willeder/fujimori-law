@@ -33,6 +33,7 @@ import {
   creditorTabAccentForName,
 } from "../lib/creditorTabAccent";
 import { joinAddress, stripPrefecture } from "../utils/address";
+import { getClientId } from "../utils/clientId";
 import {
   CASE_STATUS_OPTIONS,
   DEBT_ADJUSTMENT_TYPE_OPTIONS,
@@ -314,26 +315,34 @@ function CaseDetailBody({
   const [showHistory, setShowHistory] = useState(false);
 
   // ── 同時編集の検知（編集中ロック）＋先勝ち保存（後発は保存不可） ──
-  // otherEditors: 同じレコードを開いている他ユーザー（プレゼンスTTL内。editing=編集中）
-  // blockedBy  : いま編集中の他ユーザー名。null 以外の間はブロックポップアップを表示し編集不可。
-  //              相手の編集終了を検知すると自動で閉じ、最新データを再取得して反映する。
-  // conflictBy : 保存競合（409）した相手（表示用）。null 以外でポップアップ表示
+  // 識別はアカウント（メール）ではなく **タブ単位の clientId**。
+  // これにより「同じアカウントを別ウィンドウで開いている」場合も相手として検知できる。
+  //
+  // otherEditors  : 同じレコードを開いている他セッション（自分の別ウィンドウを含む）
+  // locked        : いま編集ロックを持っている他セッション。null 以外の間は操作不可
+  // conflictBy    : 保存競合（409）した相手（表示用）
+  // presenceError : ハートビート自体が失敗しているときの理由（無言で死なせない）
+  const clientId = useMemo(() => getClientId(), []);
   const [otherEditors, setOtherEditors] = useState<
-    { email: string; name: string; editing: boolean }[]
+    { email: string; name: string; editing: boolean; sameAccount: boolean }[]
   >([]);
-  const [blockedBy, setBlockedBy] = useState<string | null>(null);
+  const [locked, setLocked] = useState<{ name: string; sameAccount: boolean } | null>(
+    null,
+  );
   const [conflictBy, setConflictBy] = useState<string | null>(null);
+  const [presenceError, setPresenceError] = useState<string | null>(null);
   // 読み込み時点の updatedAt（ISO・ミリ秒）。保存時に __baseUpdatedAt として送り先勝ち判定に使う
   const baseUpdatedAtRef = useRef<string | null>(null);
-  // 自分がいま編集中か（入力欄フォーカスで判定）と、即時ハートビート送信用の参照
-  const editingLocalRef = useRef(false);
+  // 自分がいまロックを主張しているか、と即時ハートビート送信用の参照
+  const claimingRef = useRef(false);
   const beatFnRef = useRef<() => void>(() => {});
+  const releaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     baseUpdatedAtRef.current = caseData?.metadata?.updatedAtExact ?? null;
   }, [caseData?.metadata?.updatedAtExact]);
 
-  // 滞在中のハートビート送信と他ユーザーの検知（通常20秒間隔・離脱時に削除）。
-  // 自分の編集開始/終了は editing フラグとして即時送信する。
+  // 滞在中のハートビート送信と他セッションの検知（通常20秒間隔・離脱時に削除）。
+  // 編集の開始/終了は即時送信する。
   useEffect(() => {
     const caseId = Number(id);
     if (!Number.isInteger(caseId) || caseId <= 0) return;
@@ -346,26 +355,56 @@ function CaseDetailBody({
           body: JSON.stringify({
             entity: "Case",
             entityId: caseId,
+            clientId,
             name: user?.name ?? user?.email ?? "",
-            editing: editingLocalRef.current,
+            editing: claimingRef.current,
           }),
         });
-        if (!r.ok) return;
+        if (!r.ok) {
+          // 以前はここで無言 return していたため、テーブル未作成やルーティング漏れでも
+          // 「何も起きない」だけで原因が分からなかった。理由を画面に出す。
+          if (stopped) return;
+          setPresenceError(
+            r.status === 404
+              ? "同時編集の監視APIが見つかりません（404）。デプロイ状況を確認してください"
+              : r.status === 401
+                ? "ログインの有効期限が切れています。再読み込みしてください"
+                : `同時編集の監視に失敗しています（${r.status}）。マイグレーション未適用の可能性があります`,
+          );
+          setOtherEditors([]);
+          setLocked(null);
+          return;
+        }
         const d = (await r.json()) as {
-          others?: { email: string; name: string; editing?: boolean }[];
+          others?: {
+            email: string;
+            name: string;
+            editing?: boolean;
+            sameAccount?: boolean;
+          }[];
+          lock?: { name: string; isMine?: boolean; sameAccount?: boolean } | null;
         };
         if (stopped) return;
-        const others = (d.others ?? []).map((o) => ({
-          email: o.email,
-          name: o.name,
-          editing: o.editing === true,
-        }));
-        setOtherEditors(others);
-        // 他ユーザーが編集中ならブロック（先に編集を始めた人を優先表示）
-        const editor = others.find((o) => o.editing);
-        setBlockedBy(editor ? editor.name || editor.email : null);
+        setPresenceError(null);
+        setOtherEditors(
+          (d.others ?? []).map((o) => ({
+            email: o.email,
+            name: o.name,
+            editing: o.editing === true,
+            sameAccount: o.sameAccount === true,
+          })),
+        );
+        // ロック保持者はサーバが先着（editingSince の早い順）で1人に決めている。
+        // 自分が保持者なら編集を続けてよい＝ブロックしない。
+        const lock = d.lock ?? null;
+        setLocked(
+          lock && lock.isMine !== true
+            ? { name: lock.name, sameAccount: lock.sameAccount === true }
+            : null,
+        );
       } catch {
-        /* 通信失敗時は次回ハートビートで回復 */
+        if (stopped) return;
+        setPresenceError("同時編集の監視で通信エラーが発生しています");
       }
     };
     beatFnRef.current = () => void beat();
@@ -375,9 +414,10 @@ function CaseDetailBody({
       try {
         navigator.sendBeacon?.(
           "/api/presence/leave",
-          new Blob([JSON.stringify({ entity: "Case", entityId: caseId })], {
-            type: "application/json",
-          }),
+          new Blob(
+            [JSON.stringify({ entity: "Case", entityId: caseId, clientId })],
+            { type: "application/json" },
+          ),
         );
       } catch {
         /* noop */
@@ -390,10 +430,15 @@ function CaseDetailBody({
       window.removeEventListener("beforeunload", leave);
       leave();
     };
-  }, [id, user?.name, user?.email]);
+  }, [id, clientId, user?.name, user?.email]);
 
-  // 自分の編集開始/終了の検知：ページ内の入力欄（input/textarea/select/contentEditable）に
-  // フォーカスしている間を「編集中」とし、変化した瞬間に即時ハートビートで他ユーザーへ伝える。
+  // 自分の編集開始/終了の検知。
+  // 入力欄（input/textarea/select/contentEditable）にフォーカスしている間を編集中とするが、
+  // フォーカスが外れた瞬間にロックを手放すと、数秒で終わる編集が相手のポーリングの
+  // 隙間に落ちて「ポップアップが出ない」ことになる。
+  // そこで **最後の編集から MIN_LOCK_HOLD_MS の間はロックを保持** し、
+  // 相手の次のポーリングに必ず載るようにする。
+  const MIN_LOCK_HOLD_MS = 8000;
   useEffect(() => {
     const isFormEl = (el: Element | null): boolean =>
       !!el &&
@@ -401,12 +446,32 @@ function CaseDetailBody({
         el.tagName === "TEXTAREA" ||
         el.tagName === "SELECT" ||
         (el as HTMLElement).isContentEditable);
-    const update = () => {
-      const now = isFormEl(document.activeElement);
-      if (editingLocalRef.current !== now) {
-        editingLocalRef.current = now;
-        beatFnRef.current(); // 開始/終了を即時送信（相手側のロック開始・自動解除を早める）
+
+    const claim = () => {
+      if (releaseTimerRef.current) {
+        clearTimeout(releaseTimerRef.current);
+        releaseTimerRef.current = null;
       }
+      if (!claimingRef.current) {
+        claimingRef.current = true;
+        beatFnRef.current();
+      }
+    };
+    const scheduleRelease = () => {
+      if (releaseTimerRef.current) clearTimeout(releaseTimerRef.current);
+      releaseTimerRef.current = setTimeout(() => {
+        releaseTimerRef.current = null;
+        if (isFormEl(document.activeElement)) return; // 入力に戻っていれば保持継続
+        if (claimingRef.current) {
+          claimingRef.current = false;
+          beatFnRef.current();
+        }
+      }, MIN_LOCK_HOLD_MS);
+    };
+
+    const update = () => {
+      if (isFormEl(document.activeElement)) claim();
+      else scheduleRelease();
     };
     const onFocusIn = () => update();
     // blur 直後は activeElement が body になる瞬間があるため少し待ってから判定
@@ -416,27 +481,34 @@ function CaseDetailBody({
     return () => {
       document.removeEventListener("focusin", onFocusIn);
       document.removeEventListener("focusout", onFocusOut);
-      if (editingLocalRef.current) {
-        editingLocalRef.current = false;
+      if (releaseTimerRef.current) clearTimeout(releaseTimerRef.current);
+      if (claimingRef.current) {
+        claimingRef.current = false;
         beatFnRef.current();
       }
     };
   }, []);
 
-  // 他ユーザーが同じレコードを開いている間・ブロック中は5秒間隔で監視
-  // （相手の「編集開始」を素早く検知してポップアップを出す／「編集終了」を検知して自動で閉じる。
-  //   通常時の20秒間隔だと、相手が編集を始めてからポップアップ表示まで最大20秒かかり
-  //   「表示されない」ように見えるため。No.165）
+  // 他セッションが同じレコードを開いている間・ロック中は5秒間隔で監視
+  // （相手の編集開始を素早く検知し、終了も素早く反映するため）
   useEffect(() => {
-    if (blockedBy == null && otherEditors.length === 0) return;
+    if (locked == null && otherEditors.length === 0) return;
     const iv = setInterval(() => beatFnRef.current(), 5000);
     return () => clearInterval(iv);
-  }, [blockedBy, otherEditors.length]);
+  }, [locked, otherEditors.length]);
 
-  // ブロック解除（相手の編集終了）を検知したら、最新データを再取得して画面へ反映
-  const prevBlockedRef = useRef<string | null>(null);
+  // ロック中はフォーカスを外す（inert で入力は無効化されるが、
+  // ロック開始時点で入力欄にフォーカスが残っているとキャレットが残るため）
   useEffect(() => {
-    if (prevBlockedRef.current != null && blockedBy == null) {
+    if (locked == null) return;
+    const el = document.activeElement as HTMLElement | null;
+    if (el && typeof el.blur === "function") el.blur();
+  }, [locked]);
+
+  // ロック解除（相手の編集終了）を検知したら、最新データを再取得して画面へ反映
+  const prevLockedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (prevLockedRef.current != null && locked == null) {
       const caseId = Number(id);
       fetch(`/api/cases/${caseId}`)
         .then((r) => (r.ok ? r.json() : null))
@@ -446,9 +518,9 @@ function CaseDetailBody({
         .catch(() => {});
       setHistoryRefreshKey((k) => k + 1);
     }
-    prevBlockedRef.current = blockedBy;
+    prevLockedRef.current = locked ? locked.name : null;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [blockedBy]);
+  }, [locked]);
   // 案件削除（ADMIN のみ）。確認モーダル→「はい」で実行→一覧へ戻る。
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -671,6 +743,7 @@ function CaseDetailBody({
         body: JSON.stringify({
           ...cols,
           __baseUpdatedAt: baseUpdatedAtRef.current,
+          __clientId: clientId,
         }),
       })
         .then(async (r) => {
@@ -911,7 +984,32 @@ function CaseDetailBody({
         : `https://${lineUrlRaw}`
       : null;
   return (
-    <div className="flex min-h-screen min-h-0 flex-col bg-slate-200">
+    <>
+      {/* 編集中ロック（他セッションが編集中）。inert の外側に置くので操作を受け付ける */}
+      {locked && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50">
+          <div className="w-[26rem] max-w-[90vw] rounded-lg bg-white p-5 shadow-xl">
+            <div className="flex items-center gap-2 text-sm font-semibold text-red-600">
+              <span className="inline-block h-2.5 w-2.5 animate-pulse rounded-full bg-red-500" />
+              {locked.sameAccount
+                ? "同じアカウントの別のウィンドウで編集中です"
+                : `${locked.name} さんが編集しているので編集ができません`}
+            </div>
+            <div className="mt-3 text-xs leading-relaxed text-slate-600">
+              {locked.sameAccount
+                ? "同じアカウントで開いている別のウィンドウが先に編集を始めています。そちらの編集が終わると、この表示は自動で閉じて最新の内容に更新されます。"
+                : `${locked.name} さんの編集が終わると、この表示は自動で閉じて最新の内容に更新されます。そのままお待ちください。`}
+            </div>
+          </div>
+        </div>
+      )}
+      <div
+        // ロック中は入力・フォーカス・キー操作をまとめて無効化する。
+        // 以前はオーバーレイを重ねるだけで、フォーカス済みの入力欄には
+        // キーボードから入力でき、そのまま保存もできてしまっていた。
+        inert={locked != null}
+        className="flex min-h-screen min-h-0 flex-col bg-slate-200"
+      >
       {/* 案件削除の確認ダイアログ */}
       {confirmDelete && (
         <div
@@ -955,22 +1053,6 @@ function CaseDetailBody({
           </div>
         </div>
       )}
-      {/* 編集中ロック：他ユーザーが編集を開始したら、編集が終わるまで操作をブロック。
-          相手の編集終了を検知すると自動で閉じ、最新データを再取得して反映する（手動で閉じる操作はなし） */}
-      {blockedBy != null && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50">
-          <div className="w-[26rem] max-w-[90vw] rounded-lg bg-white p-5 shadow-xl">
-            <div className="flex items-center gap-2 text-sm font-semibold text-red-600">
-              <span className="inline-block h-2.5 w-2.5 animate-pulse rounded-full bg-red-500" />
-              {blockedBy} さんが編集しているので編集ができません
-            </div>
-            <div className="mt-3 text-xs leading-relaxed text-slate-600">
-              {blockedBy} さんの編集が終わると、この表示は自動で閉じて
-              最新の内容に更新されます。そのままお待ちください。
-            </div>
-          </div>
-        </div>
-      )}
       {/* 保存競合（先勝ち）ポップアップ：後からの保存は反映されない */}
       {conflictBy != null && (
         <div
@@ -1003,12 +1085,21 @@ function CaseDetailBody({
           </div>
         </div>
       )}
+      {/* 同時編集の監視が失敗しているときの警告（無言で機能しないのを防ぐ） */}
+      {presenceError && (
+        <div className="sticky top-0 z-50 flex items-center gap-2 bg-rose-100 px-4 py-1 text-xs text-rose-800">
+          <span className="inline-block h-2 w-2 rounded-full bg-rose-500" />
+          {presenceError}
+        </div>
+      )}
       {/* 同時閲覧の常時バナー（同じレコードを開いている人がいる間の注意喚起） */}
       {otherEditors.length > 0 && (
         <div className="sticky top-0 z-50 flex items-center gap-2 bg-amber-100 px-4 py-1 text-xs text-amber-800">
           <span className="inline-block h-2 w-2 rounded-full bg-amber-500" />
-          {otherEditors.map((o) => o.name).join("、")}
-          さんもこのレコードを開いています（誰かが編集を始めると、他の人は編集できなくなります）
+          {otherEditors
+            .map((o) => (o.sameAccount ? `${o.name}（別のウィンドウ）` : `${o.name} さん`))
+            .join("、")}
+          もこのレコードを開いています（誰かが編集を始めると、他の人は編集できなくなります）
         </div>
       )}
       {/* Header（スクロール時に固定） */}
@@ -2354,6 +2445,7 @@ function CaseDetailBody({
           </div>
         </div>
       </main>
-    </div>
+      </div>
+    </>
   );
 }
