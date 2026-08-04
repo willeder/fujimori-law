@@ -81,8 +81,10 @@ export function LineLinkControl({ caseId, clientName }: Props) {
   }
 
   // 案内文には「コード」を含めない（受信者がコードだけ切り出す手間をなくすため、コードは別送）
+  // 2ステップ方式: 「連携開始」を送ってもらってからでないとコードを受け付けない。
+  // （通常のチャット会話に自動返信が割り込まないようにするための仕様）
   const guidanceText = () =>
-    `【ご案内】LINEで手続き状況や入金予定をお知らせします。\n\n①下記から友だち追加してください\n${ADD_FRIEND_URL}\n\n②追加後、トークに「登録コード」をそのまま送信してください\n（登録コードは別途お送りします）`
+    `【ご案内】LINEで手続き状況や入金予定をお知らせします。\n\n①下記から友だち追加してください\n${ADD_FRIEND_URL}\n\n②追加後、トークに「連携開始」と送信してください\n\n③「登録コードを送信してください」と返信が届いたら、別途お送りする登録コードをそのまま送信してください\n（10分以内にご入力ください）`
 
   const copyGuidance = async () => {
     await navigator.clipboard.writeText(guidanceText())

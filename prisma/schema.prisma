@@ -138,6 +138,10 @@ model Case {
   acceptanceDocs     String?
   createdBy          String?
   updatedBy          String?
+  // 最後に保存したセッション（タブ）の識別子。先勝ち保存の判定に使う。
+  // アカウントではなくセッションで比較することで、同じアカウントの別ウィンドウ同士でも
+  // 上書きを検知できる（旧: updatedBy のメール比較だったため同一アカウントは素通りしていた）
+  updatedByClient    String?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
@@ -301,6 +305,25 @@ model LineLink {
 
   @@index([lineUserId])
   @@map("line_links")
+}
+
+// ============================================================
+// LINE 連携セッション（トリガー語受信後の一時状態）
+// ------------------------------------------------------------
+// 「連携開始」等のトリガー語を送ったユーザーだけを一定時間ここに登録し、
+// その間の発言のみを登録コードとして照合する。
+// これが無いと、手動チャット中の通常会話にまで自動返信が飛ぶ。
+// Vercel Functions はステートレスなためメモリではなく DB に保持する。
+// ============================================================
+model LineCodeSession {
+  lineUserId String   @id // LINE ユーザーID（連携前なので案件とは未紐付け）
+  attempts   Int      @default(0) // 入力ミス回数。上限超過でセッション終了
+  expiresAt  DateTime // この時刻を過ぎたらコードとして受け付けない
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([expiresAt])
+  @@map("line_code_sessions")
 }
 
 // ============================================================
@@ -495,16 +518,21 @@ model ChangeLog {
 // クライアントが滞在中にハートビートで upsert し、離脱時に削除。TTL超過は自動掃除。
 // ============================================================
 model EditPresence {
-  id        Int      @id @default(autoincrement())
-  entity    String // 例: "Case"
-  entityId  Int
-  email     String // 編集中ユーザーのメール（アカウント特定）
-  name      String   @default("") // 表示名（アカウント名）
-  editing   Boolean  @default(false) // 編集中フラグ（閲覧のみ=false。trueの間、他ユーザーは編集不可）
-  startedAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id       Int    @id @default(autoincrement())
+  entity   String // 例: "Case"
+  entityId Int
+  // タブ単位の識別子。これで識別することで、同じアカウントを別ウィンドウで開いている
+  // 場合も「別のセッション」として検知できる（旧: email をキーにしていたため検知不可だった）
+  clientId String
+  email    String // 編集中ユーザーのメール（表示と同一アカウント判定に使う）
+  name     String @default("") // 表示名（アカウント名）
+  editing  Boolean @default(false) // 編集中フラグ（閲覧のみ=false）
+  // 編集を開始した時刻。これが最も早いセッションがロック保持者（先着優先）
+  editingSince DateTime?
+  startedAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
-  @@unique([entity, entityId, email])
+  @@unique([entity, entityId, clientId])
   @@index([entity, entityId])
   @@map("edit_presences")
 }
