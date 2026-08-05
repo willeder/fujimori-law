@@ -36,19 +36,36 @@ export interface DepositRow {
   amount: number
   /** 振込入金口座（バーチャル口座）番号。案件との突合キー */
   accountNumber: string | null
-  /** 振込依頼人名（表示用） */
+  /** バーチャル口座の支店名。口座番号と組にして突合キーにする */
+  branch: string | null
+  /** 振込依頼人名（名義照合に使う。支店・口座番号を除いた部分） */
   payerName: string | null
+  /** 摘要の原文（表示・監査用） */
+  rawSummary: string | null
 }
+
+/** 名義照合の結果 */
+export type NameCheck =
+  | 'match' // 氏名まで一致（旧姓・新姓の括弧表記も考慮）
+  | 'given-only' // 名だけ一致（姓が違う ＝ 家族などによる代理振込とみなす）
+  | 'mismatch' // 一致しない ＝ 誤入金の疑い
+  | 'unknown' // 依頼者のフリガナ未登録などで判定できない
 
 export interface DepositGroupPlan {
   date: string
   accountNumber: string | null
+  /** バーチャル口座の支店名（摘要から抽出） */
+  branch: string | null
   payerName: string | null
   deposits: { rowNo: number; amount: number }[]
   depositSum: number
   caseId: number | null
   externalId: string | null
   clientName: string | null
+  /** 依頼者フリガナ（名義照合の根拠として画面に出す） */
+  clientFurigana: string | null
+  /** 名義照合の結果 */
+  nameCheck: NameCheck
   /** 判定結果 */
   action: 'skip' | 'reflect' | 'error' | 'unmatched'
   /** 反映額（reflect時。d では差額のみ） */
@@ -108,6 +125,110 @@ const toAmount = (v: string): number | null => {
   if (s === '' || s === '-') return null
   if (!/^-?\d+$/.test(s)) return null
   return Number(s)
+}
+
+// ============================================================
+// 摘要の分解
+// ------------------------------------------------------------
+// GMOあおぞらの入出金明細には口座番号の専用列が無く、依頼者からの入金は
+// 摘要1列に「振込依頼人名・支店名・バーチャル口座番号」が連結されている。
+//   例: 「振込  タカシマ　サオリ エキデン支店 6946670」
+//        └ 振込依頼人名 ┘└ 支店名 ┘└ 口座番号 ┘
+// 債権者への弁済（出金）は「振込 ミツイスミトモ アコム（カ」のように
+// 支店名・口座番号を持たないため、この正規表現には一致しない。
+// ============================================================
+
+/** 摘要 → 振込依頼人名 / 支店名 / 口座番号 */
+const SUMMARY_RE = /^振込[\s　]+(.+?)[\s　]+([^\s　]+支店)[\s　]+([0-9０-９]{6,8})$/
+
+/** 全角数字→半角 */
+const toHalfDigits = (s: string): string =>
+  s.replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0))
+
+export type ParsedSummary = {
+  payerName: string | null
+  branch: string | null
+  accountNumber: string | null
+}
+
+/**
+ * 摘要を3要素に分解する。分解できない場合は payerName に原文を返す
+ * （V口座を経由しない直接振込など。手動処理へ回す）。
+ */
+export function parseSummary(raw: string): ParsedSummary {
+  const s = (raw ?? '').trim()
+  if (!s) return { payerName: null, branch: null, accountNumber: null }
+  const m = s.match(SUMMARY_RE)
+  if (!m) return { payerName: s, branch: null, accountNumber: null }
+  // 振込依頼人名の先頭に振込人自身の口座番号が入っている明細があるため除去する
+  //   例: 「７１３７６７４１　ノムラ　ケイスケ」→「ノムラ　ケイスケ」
+  const payer = m[1].replace(/^[0-9０-９]+[\s　]*/, '').trim()
+  return {
+    payerName: payer || null,
+    branch: m[2],
+    accountNumber: toHalfDigits(m[3]),
+  }
+}
+
+// ============================================================
+// 名義照合
+// ------------------------------------------------------------
+// 振込依頼人名と依頼者フリガナを突き合わせ、他人のV口座への誤振込を検知する。
+// 全銀システムのカナは小書き文字を使わない（ショウタ → シヨウタ）ため、
+// 小書き→大書きに正規化しないと 14% 程度が誤判定になる（7月実績で確認）。
+// ============================================================
+
+/** 小書きカナ・濁点ゆれを吸収した比較キー */
+const KANA_FOLD: Record<string, string> = {
+  ァ: 'ア', ィ: 'イ', ゥ: 'ウ', ェ: 'エ', ォ: 'オ',
+  ャ: 'ヤ', ュ: 'ユ', ョ: 'ヨ', ッ: 'ツ', ヮ: 'ワ',
+  ヵ: 'カ', ヶ: 'ケ', ヅ: 'ズ', ヂ: 'ジ',
+}
+const kanaKey = (s: string): string =>
+  (s ?? '')
+    .normalize('NFKC') // 半角カナ・全角英数を統一
+    .replace(/[\s　]+/g, '')
+    .replace(/[ァィゥェォャュョッヮヵヶヅヂ]/g, (c) => KANA_FOLD[c] ?? c)
+
+/** 空白区切りの最後の要素＝名（下の名前） */
+const givenPart = (s: string): string => {
+  const t = (s ?? '').normalize('NFKC').trim()
+  if (!t) return ''
+  const parts = t.split(/[\s　]+/)
+  return parts[parts.length - 1] ?? ''
+}
+
+/**
+ * 依頼者フリガナから照合候補を作る。
+ * 「フクトメ　エナ（サカモト）」のような旧姓・新姓の併記に対応し、
+ * 括弧内を姓として差し替えた候補も許容する。
+ */
+function furiganaCandidates(furigana: string | null): { keys: Set<string>; given: string } {
+  const raw = (furigana ?? '').normalize('NFKC')
+  if (!raw.trim()) return { keys: new Set(), given: '' }
+  const paren = raw.match(/[（(]([^）)]*)[）)]/)
+  const plain = raw.replace(/[（(][^）)]*[）)]/g, '').trim()
+  const given = givenPart(plain)
+  const keys = new Set<string>()
+  if (plain) keys.add(kanaKey(plain))
+  if (paren?.[1]?.trim()) keys.add(kanaKey(paren[1] + given)) // 別姓＋名
+  return { keys, given: kanaKey(given) }
+}
+
+/** 振込依頼人名と依頼者フリガナを照合する */
+export function checkPayerName(
+  payerName: string | null,
+  furigana: string | null
+): NameCheck {
+  const payer = kanaKey(payerName ?? '')
+  const { keys, given } = furiganaCandidates(furigana)
+  if (!payer || keys.size === 0) return 'unknown'
+  // 銀行側は文字数上限で名前が切れることがあるため前方一致も許容する
+  for (const k of keys) {
+    if (payer === k || k.startsWith(payer) || payer.startsWith(k)) return 'match'
+  }
+  if (given && kanaKey(givenPart(payerName ?? '')) === given) return 'given-only'
+  return 'mismatch'
 }
 
 /**
@@ -178,12 +299,20 @@ export function parseDeposits(buf: Buffer): {
     const outgo = outIdx >= 0 ? toAmount(cell(outIdx)) : null
     if (!date || amount == null || amount <= 0) return
     if (outgo != null && outgo > 0) return // 出金明細は対象外
+
+    // 口座番号の専用列があればそれを使う。無い形式（GMOあおぞらの入出金明細）では
+    // 摘要から「振込依頼人名・支店名・口座番号」を切り出す。
+    const rawSummary = cell(payerIdx).trim() || null
+    const acctCol = cell(acctIdx).trim()
+    const parsed = rawSummary ? parseSummary(rawSummary) : null
     out.push({
       rowNo: headerIdx + 2 + i,
       date,
       amount,
-      accountNumber: cell(acctIdx).trim() || null,
-      payerName: cell(payerIdx).trim() || null,
+      accountNumber: acctCol ? toHalfDigits(acctCol) : (parsed?.accountNumber ?? null),
+      branch: parsed?.branch ?? null,
+      payerName: parsed?.payerName ?? rawSummary,
+      rawSummary,
     })
   })
   return { encoding, headerFound: true, rows: out }
@@ -288,18 +417,52 @@ export async function planDepositImport(buf: Buffer): Promise<DepositPreview> {
     }
   }
 
-  // 口座番号 → 案件 の突合マップ
+  // 口座番号 → 案件 の突合マップ。
+  // vAccountNumber には一意制約が無く、実データにも同一番号・別支店の案件が
+  // 存在するため、支店名まで含めた複合キーを優先して突合する。
   const accts = [...new Set(parsed.rows.map((r) => r.accountNumber).filter((s): s is string => !!s))]
   const cases = accts.length
     ? await prisma.case.findMany({
         where: { vAccountNumber: { in: accts } },
-        select: { id: true, externalId: true, name: true, vAccountNumber: true },
+        select: {
+          id: true,
+          externalId: true,
+          name: true,
+          furigana: true,
+          vAccountBranch: true,
+          vAccountNumber: true,
+        },
       })
     : []
-  const byAcct = new Map(cases.map((c) => [c.vAccountNumber as string, c]))
+  type CaseRow = (typeof cases)[number]
+  const byBranchAcct = new Map<string, CaseRow>()
+  const byAcctOnly = new Map<string, CaseRow[]>()
+  for (const c of cases) {
+    const num = c.vAccountNumber as string
+    if (c.vAccountBranch) byBranchAcct.set(c.vAccountBranch + '|' + num, c)
+    const list = byAcctOnly.get(num) ?? []
+    list.push(c)
+    byAcctOnly.set(num, list)
+  }
+  /** 支店＋番号 → 番号のみ（一意なときだけ）の順で案件を特定する */
+  const resolveCase = (
+    branch: string | null,
+    accountNumber: string | null
+  ): { kase: CaseRow | null; ambiguous: boolean } => {
+    if (!accountNumber) return { kase: null, ambiguous: false }
+    if (branch) {
+      const hit = byBranchAcct.get(branch + '|' + accountNumber)
+      if (hit) return { kase: hit, ambiguous: false }
+    }
+    const list = byAcctOnly.get(accountNumber) ?? []
+    if (list.length === 1) return { kase: list[0], ambiguous: false }
+    if (list.length > 1) return { kase: null, ambiguous: true } // 同一番号が複数案件 → 自動突合しない
+    return { kase: null, ambiguous: false }
+  }
 
-  // 同一案件（口座）・同一日でグループ化（a〜e は「同一日」の単位で判定）
-  const keyOf = (r: DepositRow) => `${r.accountNumber ?? `?${r.payerName ?? ''}`} ${r.date}`
+  // 同一案件（支店＋口座）・同一日でグループ化（a〜e は「同一日」の単位で判定）
+  const keyOf = (r: DepositRow) =>
+    (r.branch ?? '') + '|' + (r.accountNumber ?? '?' + (r.payerName ?? '')) + ' ' + r.date
   const grouped = new Map<string, DepositRow[]>()
   for (const r of parsed.rows) {
     const k = keyOf(r)
@@ -308,18 +471,22 @@ export async function planDepositImport(buf: Buffer): Promise<DepositPreview> {
   }
 
   for (const [, rows] of grouped) {
-    const { date, accountNumber, payerName } = rows[0]
+    const { date, accountNumber, branch, payerName } = rows[0]
     const depositSum = rows.reduce((s, r) => s + r.amount, 0)
-    const kase = accountNumber ? byAcct.get(accountNumber) : undefined
+    const { kase, ambiguous } = resolveCase(branch, accountNumber)
+    const nameCheck: NameCheck = kase ? checkPayerName(payerName, kase.furigana) : 'unknown'
     const base: Omit<DepositGroupPlan, 'action' | 'note'> = {
       date,
       accountNumber,
+      branch,
       payerName,
       deposits: rows.map((r) => ({ rowNo: r.rowNo, amount: r.amount })),
       depositSum,
       caseId: kase?.id ?? null,
       externalId: kase?.externalId ?? null,
       clientName: kase?.name ?? null,
+      clientFurigana: kase?.furigana ?? null,
+      nameCheck,
       reflectAmount: null,
       targetPaymentId: null,
       targetPlannedDate: null,
@@ -331,9 +498,21 @@ export async function planDepositImport(buf: Buffer): Promise<DepositPreview> {
       groups.push({
         ...base,
         action: 'unmatched',
-        note: accountNumber
-          ? `バーチャル口座 ${accountNumber} に一致する案件がありません`
-          : '口座番号が明細にありません（手動で反映してください）',
+        note: ambiguous
+          ? `口座番号 ${accountNumber} が複数の案件に登録されています（支店で特定できません・要確認）`
+          : accountNumber
+            ? `バーチャル口座 ${branch ?? ''} ${accountNumber} に一致する案件がありません`
+            : '摘要から口座番号を読み取れませんでした（手動で反映してください）',
+      })
+      continue
+    }
+
+    // 名義照合: 他人のV口座への誤振込を自動では反映しない
+    if (nameCheck === 'mismatch') {
+      groups.push({
+        ...base,
+        action: 'error',
+        note: `振込依頼人名「${payerName ?? ''}」が依頼者「${kase.furigana ?? kase.name}」と一致しません（誤振込の疑い・要確認）`,
       })
       continue
     }
@@ -423,6 +602,9 @@ export async function planDepositImport(buf: Buffer): Promise<DepositPreview> {
       supplementAmount: alloc.shortage > 0 ? alloc.shortage : null,
       note:
         [
+          nameCheck === 'given-only'
+            ? `振込依頼人名「${payerName ?? ''}」は依頼者と姓が異なります（名は一致・代理振込とみなして反映）`
+            : '',
           ruleNote,
           alloc.pattern === 'A'
             ? '予定と同額（パターンA）'
