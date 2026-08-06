@@ -286,7 +286,7 @@ export function PaymentTable({
     },
     {
       key: 'plannedDate',
-      header: '入金日',
+      header: '入金予定日',
       width: '6rem',
       headerClassName: 'bg-green-50',
       sortable: false,
@@ -314,7 +314,7 @@ export function PaymentTable({
     },
     {
       key: 'plannedAmount',
-      header: '入金額',
+      header: '入金予定額',
       width: '4.5rem',
       align: 'right',
       headerClassName: 'bg-green-50',

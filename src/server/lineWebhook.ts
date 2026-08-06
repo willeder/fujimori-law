@@ -3,20 +3,24 @@
  * Vite 開発サーバ（vite.config.ts の dbApiPlugin）と
  * Vercel Function（api/line/webhook.ts）の双方から呼ばれる。
  *
- * 連携フロー（2ステップの登録コード方式）:
- *   follow            … 歓迎メッセージで「連携開始」の送信を依頼
- *   message「連携開始」 … 連携セッションを開始し、登録コードの入力を促す
- *   message（コード）   … セッション中の入力のみを登録コードとして照合し、LINKED にする
- *   unfollow          … ブロック扱いで連携を無効化（BLOCKED）
+ * 連携フロー（登録コードの受け取り方は2通り）:
+ *   ① 案内文の全文一致 … 依頼者には案内文（src/constants/lineGuidance.ts）を
+ *      「全文コピーしてそのまま返信」してもらう。受信テキストが案内文と全文一致
+ *      したときだけ、その中の登録コードで連携する（セッション不要）。
+ *   ② 2ステップ        … 「連携開始」を受け取ってからの一定時間だけ、8桁コード
+ *      単体も受け付ける（全文コピーがうまくできない依頼者向けの保険）。
+ *   follow   … 歓迎メッセージで案内文の返信を依頼
+ *   unfollow … ブロック扱いで連携を無効化（BLOCKED）
  *
  * ★重要（この公式アカウントはスタッフが手動チャットにも使う）:
  *   連携セッション中でも連携済みでもないユーザーの発言には **一切返信しない**。
  *   以前は受信テキストを無条件にコード照合していたため、通常の会話にまで
  *   「登録コードを送信してください。」「コードが確認できませんでした。」が
- *   毎回返っていた。トリガー語を受けたときだけ応答する。
+ *   毎回返っていた。目印つきコードか、トリガー語を受けたときだけ応答する。
  */
 import { prisma } from './db.js'
 import { replyText, verifyLineSignature } from './line.js'
+import { extractCodeFromGuidance } from '../constants/lineGuidance.js'
 
 /** 連携セッションを開始するトリガー語（メッセージ全体がこれと完全一致した場合のみ） */
 const TRIGGER_WORDS = ['連携開始', '連携', '登録', '連携する', '登録する', 'れんけい']
@@ -29,7 +33,8 @@ const MAX_ATTEMPTS = 5
 
 const WELCOME =
   '友だち追加ありがとうございます。\n' +
-  'ご連絡の準備のため、まずはこのトークに「連携開始」と送信してください。'
+  '事務所からお送りした【ご案内】のメッセージを全文コピーして、\n' +
+  'そのままこのトークにご返信ください。'
 
 const PROMPT_CODE =
   '事務所からお渡しした「登録コード」（英数字8桁）をこのトークに送信してください。\n' +
@@ -135,10 +140,11 @@ async function countAttempt(userId: string, current: number): Promise<boolean> {
 
 /**
  * message(text) の処理。
- *   1. 連携済みユーザー → 無反応
- *   2. トリガー語        → セッション開始し、コード入力を促す
- *   3. セッション中      → 登録コードとして照合
- *   4. それ以外          → 無反応（通常の会話を邪魔しない）
+ *   1. 連携済みユーザー   → 無反応
+ *   2. 案内文と全文一致   → その場で照合して連携
+ *   3. トリガー語         → セッション開始し、コード入力を促す
+ *   4. セッション中       → 8桁コード単体も照合
+ *   5. それ以外           → 無反応（通常の会話を邪魔しない）
  */
 async function handleText(ev: LineEvent): Promise<void> {
   const userId = ev.source?.userId
@@ -152,18 +158,26 @@ async function handleText(ev: LineEvent): Promise<void> {
   })
   if (myLink && myLink.status === 'LINKED') return
 
-  // 2. トリガー語 → セッション開始
+  // 2. 案内文の全文一致。依頼者が案内文をそのままコピーして返信してきた場合だけ、
+  //    その中の登録コードを取り出して照合する（改行・空白・全角半角のゆらぎは吸収）。
+  const fromGuidance = extractCodeFromGuidance(raw)
+  if (fromGuidance) {
+    await applyCode(ev.replyToken, userId, myLink, fromGuidance)
+    return
+  }
+
+  // 3. トリガー語 → セッション開始
   if (isTrigger(raw)) {
     await startSession(userId)
     await replyText(ev.replyToken, PROMPT_CODE)
     return
   }
 
-  // 3. セッション中のみ、コードとして扱う
+  // 4. セッション中のみ、8桁コード単体も受け付ける
   const session = await prisma.lineCodeSession.findUnique({
     where: { lineUserId: userId },
   })
-  // 4. セッションが無い / 期限切れ → 無反応（ここが今回の要点）
+  // 5. セッションが無い / 期限切れ → 無反応（通常の会話を邪魔しない）
   if (!session) return
   if (session.expiresAt < new Date()) {
     await endSession(userId)
@@ -171,9 +185,23 @@ async function handleText(ev: LineEvent): Promise<void> {
   }
 
   const code = normalizeCode(raw)
+  const over = await countAttempt(userId, session.attempts)
+  await applyCode(ev.replyToken, userId, myLink, code, over)
+}
+
+/**
+ * 登録コードを照合して連携を確定する。
+ * 目印つきコード（セッション不要）とセッション中の入力の両方から呼ばれる。
+ */
+async function applyCode(
+  replyToken: string,
+  userId: string,
+  myLink: { id: number } | null,
+  code: string,
+  attemptsOver = false
+): Promise<void> {
   if (!/^[A-Z0-9]{8}$/.test(code)) {
-    const over = await countAttempt(userId, session.attempts)
-    await replyText(ev.replyToken, over ? SESSION_OVER : CODE_FORMAT)
+    await replyText(replyToken, attemptsOver ? SESSION_OVER : CODE_FORMAT)
     return
   }
 
@@ -183,20 +211,19 @@ async function handleText(ev: LineEvent): Promise<void> {
   })
 
   if (!link || link.status === 'BLOCKED') {
-    const over = await countAttempt(userId, session.attempts)
-    await replyText(ev.replyToken, over ? SESSION_OVER : CODE_NOT_FOUND)
+    await replyText(replyToken, attemptsOver ? SESSION_OVER : CODE_NOT_FOUND)
     return
   }
   if (link.codeExpiresAt && link.codeExpiresAt < new Date()) {
     await endSession(userId)
-    await replyText(ev.replyToken, CODE_EXPIRED)
+    await replyText(replyToken, CODE_EXPIRED)
     return
   }
 
   // 既に別ユーザーで連携済みの userId か（1ユーザー=1案件想定）
   if (myLink && myLink.id !== link.id) {
     await endSession(userId)
-    await replyText(ev.replyToken, CODE_IN_USE)
+    await replyText(replyToken, CODE_IN_USE)
     return
   }
 
@@ -207,7 +234,7 @@ async function handleText(ev: LineEvent): Promise<void> {
   await endSession(userId)
 
   await replyText(
-    ev.replyToken,
+    replyToken,
     `連携が完了しました（${link.case.name} 様）。\n今後、入金予定日のお知らせ等をこちらからご連絡します。`
   )
 }

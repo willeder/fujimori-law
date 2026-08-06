@@ -122,19 +122,22 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         render: (item) => <StatusBadge status={item.status} size="sm" />,
       },
       {
-        key: 'repaymentExcluded',
+        // 個別画面の「弁済対象」・GMO送金の対象判定（gmoTransfer.ts）と同じ
+        // repaymentTarget を参照する。repaymentExcluded は移行時に常に null が
+        // 入る未使用項目で、以前はこの列だけが空欄になっていた。
+        key: 'repaymentTarget',
         header: '弁済除外',
         width: '80px',
         cellTruncate: false,
         render: (item) => {
-          const isExcluded = item.repaymentExcluded === '停止' || item.repaymentExcluded === '終了'
+          const isExcluded = item.repaymentTarget === '停止' || item.repaymentTarget === '終了'
           return (
             <select
-              value={item.repaymentExcluded ?? ''}
+              value={item.repaymentTarget ?? ''}
               onChange={(e) => {
                 const value = e.target.value as '停止' | '終了' | ''
                 updateCreditor(item, {
-                  repaymentExcluded: value === '' ? null : value,
+                  repaymentTarget: value === '' ? null : value,
                 })
               }}
               className={`w-full rounded border border-slate-200 px-1 py-0.5 text-xs ${

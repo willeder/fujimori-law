@@ -1087,19 +1087,32 @@ function CaseDetailBody({
       )}
       {/* 同時編集の監視が失敗しているときの警告（無言で機能しないのを防ぐ） */}
       {presenceError && (
-        <div className="sticky top-0 z-50 flex items-center gap-2 bg-rose-100 px-4 py-1 text-xs text-rose-800">
-          <span className="inline-block h-2 w-2 rounded-full bg-rose-500" />
+        <div className="sticky top-0 z-50 flex items-center gap-2 border-b-2 border-rose-600 bg-rose-600 px-4 py-2 text-sm font-bold text-white shadow-md">
+          <span className="inline-block h-3 w-3 shrink-0 animate-pulse rounded-full bg-white" />
+          <span className="rounded bg-white/25 px-2 py-0.5 text-xs font-black tracking-wide">
+            通信エラー
+          </span>
           {presenceError}
         </div>
       )}
       {/* 同時閲覧の常時バナー（同じレコードを開いている人がいる間の注意喚起） */}
       {otherEditors.length > 0 && (
-        <div className="sticky top-0 z-50 flex items-center gap-2 bg-amber-100 px-4 py-1 text-xs text-amber-800">
-          <span className="inline-block h-2 w-2 rounded-full bg-amber-500" />
-          {otherEditors
-            .map((o) => (o.sameAccount ? `${o.name}（別のウィンドウ）` : `${o.name} さん`))
-            .join("、")}
-          もこのレコードを開いています（誰かが編集を始めると、他の人は編集できなくなります）
+        <div className="sticky top-0 z-50 border-b-2 border-amber-600 bg-amber-400 px-4 py-2 text-slate-900 shadow-md">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="inline-block h-3 w-3 shrink-0 animate-pulse rounded-full bg-red-600" />
+            <span className="rounded bg-slate-900 px-2 py-0.5 text-xs font-black tracking-wide text-amber-300">
+              同時閲覧中 {otherEditors.length}人
+            </span>
+            <span className="text-sm font-bold">
+              {otherEditors
+                .map((o) => (o.sameAccount ? `${o.name}（別のウィンドウ）` : `${o.name} さん`))
+                .join("、")}
+              　もこのレコードを開いています
+            </span>
+            <span className="text-xs font-semibold text-amber-900">
+              誰かが編集を始めると、他の人は編集できなくなります
+            </span>
+          </div>
         </div>
       )}
       {/* Header（スクロール時に固定） */}

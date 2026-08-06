@@ -7,6 +7,7 @@
  *   - 整形: コードのゼロ埋め(金融機関4/支店3/口座7)、預金種目(普通1/当座2/他4)、ASC半角化、振込依頼人名
  */
 import { prisma } from './db.js'
+import { GMO_TRANSFER_TARGET_STATUSES } from '../constants/fieldOptions.js'
 
 // ── 全角→半角（Excel ASC 相当） ──────────────────────────
 const KATA_MAP: Record<string, string> = {
@@ -190,6 +191,10 @@ export async function buildGmoTransfers(
       repaymentTarget: null, // 停止/終了は対象外
       paymentStartMonth: { not: null }, // 支払開始日(年月日)を保持
       caseId: { in: [...paidCaseIds] }, // 当月入金のある案件のみ
+      // 受任後ステータスが弁済継続中の案件だけを対象にする。
+      // 破産手続中・免責済・キャンセル・辞任・資格者面談待ち・全和解済_完済 は
+      // もう弁済代行が発生しないため、振込データに含めない。
+      case: { settlementStatus: { in: [...GMO_TRANSFER_TARGET_STATUSES] } },
     },
     select: {
       caseId: true,
@@ -310,6 +315,9 @@ export async function buildIncompleteRepayments(
   const creditors = await prisma.creditor.findMany({
     where: {
       repaymentTarget: null, // 停止/終了は除外
+      // 振込データと同じ条件で受任後ステータスを絞る。
+      // 振込対象にならない案件を「未整備」として挙げても対応のしようがないため。
+      case: { settlementStatus: { in: [...GMO_TRANSFER_TARGET_STATUSES] } },
       // 対象月に支払いが必要なもののみ（支払開始日 ≤ 対象月末 ≤ … ≤ 最終支払日）。
       // 支払開始日/最終支払日は年月日(YYYY-MM-DD)で保持しているため、対象月(YYYY-MM)を
       // 月初(-01)・月末(-31)の境界文字列に展開して比較する。支払開始日が未入力なら除外。

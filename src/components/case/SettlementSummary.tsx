@@ -2,6 +2,7 @@
  * 和解進捗サマリコンポーネント
  */
 import { EditableField } from '../EditableField'
+import { CASE_STATUS_OPTIONS, toSelectOptions } from '../../constants/fieldOptions'
 import type { Creditor, SettlementInfo } from '../../types'
 
 interface SettlementSummaryProps {
@@ -48,12 +49,7 @@ export function SettlementSummary({
           value={settlementInfo.status}
           onChange={(v) => onChange('status', v)}
           type="select"
-          options={[
-            { value: '資格者面談待ち', label: '資格者面談待ち' },
-            { value: '和解交渉中', label: '和解交渉中' },
-            { value: '全和解済_支払中', label: '全和解済_支払中' },
-            { value: 'キャンセル', label: 'キャンセル' },
-          ]}
+          options={toSelectOptions(CASE_STATUS_OPTIONS)}
           disabled={readonly}
         />
         <EditableField

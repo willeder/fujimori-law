@@ -676,23 +676,11 @@ export async function commitDepositImport(actor: Actor, buf: Buffer): Promise<De
         },
       })
       reflected += 1
-      // C) 不足分の補充行を追加（入金予定日: 実入金日の翌日〜次回予定日の前日）
+      // C) 不足分の補充行を追加。
+      // 入金予定日は「不足が出た元の予定行と同じ日」にする。
+      // （元の予定日が空の場合のみ、実入金日をフォールバックとして使う）
       if (alloc.pattern === 'C' && alloc.shortage > 0) {
-        const next = await tx.payment.findFirst({
-          where: {
-            caseId: target.caseId,
-            actualDate: null,
-            id: { not: target.id },
-            plannedDate: { gt: target.plannedDate ?? undefined },
-          },
-          orderBy: [{ plannedDate: 'asc' }],
-        })
-        const dep = new Date(`${g.date}T00:00:00Z`)
-        let suppDate = new Date(dep.getTime() + 86400000)
-        if (next?.plannedDate) {
-          const prevDay = new Date(next.plannedDate.getTime() - 86400000)
-          if (prevDay > dep) suppDate = prevDay
-        }
+        const suppDate = target.plannedDate ?? new Date(`${g.date}T00:00:00Z`)
         await tx.payment.create({
           data: {
             caseId: target.caseId,

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { buildGuidance } from '../../constants/lineGuidance'
 
 interface LineLink {
   status: 'NONE' | 'PENDING' | 'LINKED' | 'BLOCKED'
@@ -13,9 +14,6 @@ interface Props {
   clientName: string | null
 }
 
-/** 友だち追加URL（公式アカウント固有・全案件共通）。client-mock/.env の VITE_LINE_ADD_FRIEND_URL で設定 */
-const ADD_FRIEND_URL =
-  import.meta.env.VITE_LINE_ADD_FRIEND_URL || 'https://lin.ee/xxxxxxx'
 
 const STATUS_META: Record<
   LineLink['status'],
@@ -80,11 +78,12 @@ export function LineLinkControl({ caseId, clientName }: Props) {
     }
   }
 
-  // 案内文には「コード」を含めない（受信者がコードだけ切り出す手間をなくすため、コードは別送）
-  // 2ステップ方式: 「連携開始」を送ってもらってからでないとコードを受け付けない。
-  // （通常のチャット会話に自動返信が割り込まないようにするための仕様）
+  /**
+   * 依頼者へ送る案内文。文面は src/constants/lineGuidance.ts に一本化しており、
+   * Webhook 側も同じ定義で全文一致を判定する。
+   */
   const guidanceText = () =>
-    `【ご案内】LINEで手続き状況や入金予定をお知らせします。\n\n①下記から友だち追加してください\n${ADD_FRIEND_URL}\n\n②追加後、トークに「連携開始」と送信してください\n\n③「登録コードを送信してください」と返信が届いたら、別途お送りする登録コードをそのまま送信してください\n（10分以内にご入力ください）`
+    link?.registrationCode ? buildGuidance(link.registrationCode) : ''
 
   const copyGuidance = async () => {
     await navigator.clipboard.writeText(guidanceText())
@@ -182,7 +181,10 @@ export function LineLinkControl({ caseId, clientName }: Props) {
                 </>
               )}
               <p className="mt-2 text-[10px] leading-snug text-slate-400">
-                「案内文をコピー」はコードを含みません（友だち追加URLと手順のみ）。コードは「コードをコピー」で別送すると、依頼者はコードだけをそのままトークに貼り付けられます。コードは一度発行すると固定です（再発行すると旧コードは使えなくなります）。
+                「案内文をコピー」の1通を送ってください。依頼者が
+                <b>その全文をそのまま返信すると自動で連携</b>されます。
+                文面を書き換えると一致しなくなるのでご注意ください。
+                コードは一度発行すると固定です（再発行すると旧コードは使えなくなります）。
               </p>
             </>
           )}
