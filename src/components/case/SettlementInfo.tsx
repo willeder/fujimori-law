@@ -2,6 +2,7 @@
  * 和解情報コンポーネント
  */
 import { EditableField } from '../EditableField'
+import { CASE_STATUS_OPTIONS, toSelectOptions } from '../../constants/fieldOptions'
 import type { SettlementInfo as SettlementInfoType } from '../../types'
 
 interface SettlementInfoProps {
@@ -18,13 +19,7 @@ export function SettlementInfo({ data, onChange, readonly = false }: SettlementI
         value={data.status}
         onChange={(v) => onChange('status', v)}
         type="select"
-        options={[
-          { value: '資格者面談待ち', label: '資格者面談待ち' },
-          { value: '和解交渉中', label: '和解交渉中' },
-          { value: '全和解済_支払中', label: '全和解済_支払中' },
-          { value: 'キャンセル', label: 'キャンセル' },
-          { value: '辞任', label: '辞任' },
-        ]}
+        options={toSelectOptions(CASE_STATUS_OPTIONS)}
         disabled={readonly}
       />
       <EditableField
