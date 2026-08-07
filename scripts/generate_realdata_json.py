@@ -282,6 +282,12 @@ def emit_cases(order_ids, master, id_to_case):
                 "cumulativePlannedFeeAllocation": i(g("累)報酬充当予定額")),
                 "cumulativePoolAllocation": i(g("累)ﾌﾟｰﾙ充当額")),
                 "cumulativeRepaymentAllocation": i(g("累)弁済充当額")),
+                # 2026-08-07 追加（従来は取り込んでいなかった累計値）
+                "cumulativePlannedAgentFeeAllocation": i(g("累)弁代報酬充当予定額")),
+                "cumulativeAgentFeeAllocation": i(g("累)弁代報酬充当額")),
+                "cumulativePlannedPoolAllocation": i(g("累)ﾌﾟｰﾙ充当予定額")),
+                "cumulativePlannedRepaymentAllocation": i(g("累)弁済充当予定額")),
+                "cumulativeHandlingFee": i(g("累)手数料")),
                 "totalMinusPoolMinusRepayment": i(g("総額-ﾌﾟｰﾙ-累弁済")),
                 "notificationExcluded": None,
                 "vAccountBranch": s(g("V口座-支店")),

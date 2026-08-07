@@ -121,6 +121,13 @@ model Case {
   cumulativePlannedFeeAllocation Int?
   cumulativePoolAllocation       Int?
   cumulativeRepaymentAllocation  Int?
+  // 2026-08-07 追加。kintone「基本情報」にはあるが未移行だった累計値
+  // （報酬・弁代・プールチェック一覧で使用）
+  cumulativePlannedAgentFeeAllocation Int? // 累)弁代報酬充当予定額
+  cumulativeAgentFeeAllocation        Int? // 累)弁代報酬充当額
+  cumulativePlannedPoolAllocation     Int? // 累)ﾌﾟｰﾙ充当予定額
+  cumulativePlannedRepaymentAllocation Int? // 累)弁済充当予定額
+  cumulativeHandlingFee               Int? // 累)手数料
   totalMinusPoolMinusRepayment   Int?
   notificationExcluded           String? // 除外 / null
   vAccountBranch                 String?

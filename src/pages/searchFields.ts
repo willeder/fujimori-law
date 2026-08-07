@@ -1,7 +1,10 @@
 /** 横断検索（絞り込みモーダル / FileMaker風検索モード）で共有する検索フィールド定義 */
 import {
+  BICYCLE_OPTIONS,
   CASE_STATUS_OPTIONS,
   DEBT_ADJUSTMENT_TYPE_OPTIONS,
+  PAYMENT_DELAY_OPTIONS,
+  PENSION_OPTIONS,
   PREFECTURE_OPTIONS,
   RANK_OPTIONS,
 } from '../constants/fieldOptions'
@@ -52,6 +55,25 @@ export const SEARCH_FIELDS: SearchFieldDef[] = [
   { field: 'creditorName', label: '債権者名', type: 'creditor' },
   { field: 'declaredDebtAmount', label: '申告債務額', type: 'number' },
   { field: 'creditorCount', label: '債権社数', type: 'number' },
+  // 「新規入力漏れチェック」で空欄を洗い出すために追加した項目
+  { field: 'paymentDelay', label: '遅れ', type: 'choice', options: PAYMENT_DELAY_OPTIONS },
+  { field: 'bicycleNote', label: '自転車', type: 'choice', options: BICYCLE_OPTIONS },
+  { field: 'pension', label: '年金', type: 'choice', options: PENSION_OPTIONS },
+  { field: 'lineUrl', label: 'LINE@ URL' },
+  { field: 'settlementProposalDate', label: '和解提案予定日', type: 'date' },
+  { field: 'postSettlementPaymentCount', label: '和解後代弁社数', type: 'number' },
+  { field: 'nextPaymentDate', label: '次回入金日', type: 'date' },
+  // 「報酬・弁代・プールチェック」で使う金額項目（一覧の追加列と対応）
+  { field: 'officeFee', label: '事務所報酬（通常）', type: 'number' },
+  { field: 'cumulativePlannedFeeAllocation', label: '累)報酬充当予定額', type: 'number' },
+  { field: 'plannedPaymentFeeTotal', label: '予定弁済報酬総額', type: 'number' },
+  {
+    field: 'cumulativePlannedAgentFeeAllocation',
+    label: '累)弁代報酬充当予定額',
+    type: 'number',
+  },
+  { field: 'cumulativePlannedPoolAllocation', label: '累)ﾌﾟｰﾙ充当予定額', type: 'number' },
+  { field: 'cumulativeHandlingFee', label: '累)手数料', type: 'number' },
 ]
 
 /** フィールドコード → 定義 */

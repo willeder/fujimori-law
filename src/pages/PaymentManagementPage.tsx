@@ -20,6 +20,11 @@ export function PaymentManagementPage() {
   // 未入金案件IDはサーバ集計から取得（全 payments のロードを回避）
   const [unpaidIds, setUnpaidIds] = useState<Set<number> | null>(null)
 
+  // 入金管理ファイル（集計）の出力可否。許可されたユーザーにだけボタンを出す。
+  // 実際の可否判定はサーバ側（/api/payment-summary/file）でも行う。
+  const [canExport, setCanExport] = useState(false)
+  const [exporting, setExporting] = useState(false)
+
   useEffect(() => {
     let cancelled = false
     fetch('/api/payments/unpaid-case-ids')
@@ -34,6 +39,51 @@ export function PaymentManagementPage() {
       cancelled = true
     }
   }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/payment-summary/permission')
+      .then((r) => (r.ok ? r.json() : { allowed: false }))
+      .then((d: { allowed: boolean }) => {
+        if (!cancelled) setCanExport(!!d.allowed)
+      })
+      .catch(() => {
+        if (!cancelled) setCanExport(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  /**
+   * 入金管理ファイル（集計）をダウンロードする。
+   * 中身は Excel「入金管理ファイル.xlsx」の1つ目のタブと同じ集計。
+   */
+  const downloadSummary = async () => {
+    setExporting(true)
+    try {
+      const r = await fetch('/api/payment-summary/file')
+      if (!r.ok) {
+        window.alert(
+          r.status === 403
+            ? 'この出力の権限がありません。'
+            : `出力に失敗しました（HTTP ${r.status}）`
+        )
+        return
+      }
+      const blob = await r.blob()
+      const ymd = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = `入金管理_${ymd}.xlsx`
+      a.click()
+      URL.revokeObjectURL(a.href)
+    } catch (e) {
+      window.alert(`出力に失敗しました: ${e instanceof Error ? e.message : String(e)}`)
+    } finally {
+      setExporting(false)
+    }
+  }
 
   const rows = useMemo(() => {
     const query = q.trim().toLowerCase()
@@ -132,6 +182,17 @@ export function PaymentManagementPage() {
           <div className="text-sm text-slate-500">
             {onlyUnpaid && unpaidIds === null ? '読み込み中…' : `${rows.length}件`}
           </div>
+          {canExport && (
+            <button
+              type="button"
+              onClick={() => void downloadSummary()}
+              disabled={exporting}
+              title="Excel「入金管理ファイル」の1つ目のタブと同じ集計を xlsx で出力します"
+              className="ml-auto rounded bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-40"
+            >
+              {exporting ? '集計中…' : '入金管理ファイル出力'}
+            </button>
+          )}
         </div>
       </AppHeader>
 

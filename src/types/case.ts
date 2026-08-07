@@ -130,6 +130,11 @@ export interface PaymentInfo {
   cumulativePlannedFeeAllocation: number | null // 累)報酬充当予定額
   cumulativePoolAllocation: number | null // 累)プール充当額
   cumulativeRepaymentAllocation: number | null // 累)弁済充当額
+  cumulativePlannedRepaymentAllocation: number | null // 累)弁済充当予定額
+  cumulativePlannedPoolAllocation: number | null // 累)ﾌﾟｰﾙ充当予定額
+  cumulativeAgentFeeAllocation: number | null // 累)弁代報酬充当額
+  cumulativePlannedAgentFeeAllocation: number | null // 累)弁代報酬充当予定額
+  cumulativeHandlingFee: number | null // 累)手数料
   totalMinusPoolMinusRepayment: number | null // 総額-プール-累弁済
   /** 催促通知除外: '除外' | null */
   notificationExcluded: '除外' | null
