@@ -1,12 +1,17 @@
 /**
- * 相談票CSV取込（新規依頼者の一括登録）。
- * 相談票Excelの「新kintone-取込」シートを書き出したCSVをアップロード
- *   → プレビュー（文字コード判定・件数・債権者・検証エラー）
- *   → 問題なければ登録（Case + Creditor を作成）。
+ * 相談票取込（新規依頼者の一括登録）。
+ * 相談票Excel（または書き出したCSV）をアップロード／ドラッグ&ドロップ
+ *   → プレビュー（文字コード判定・件数・債権者・入金予定・検証エラー）
+ *   → 問題なければ登録（Case + Creditor + Payment を作成）。
+ *
+ * Excel の場合は「システム取込」タブから依頼者・債権者を、
+ * 「入金情報取込配列」タブから入金スケジュールを読み取る。
  */
 import { useMemo, useRef, useState } from 'react'
 import { AppHeader } from '../components/AppHeader'
 import { PageLoading } from '../components/PageLoading'
+import { FileDropOverlay } from '../components/FileDropOverlay'
+import { useFileDrop } from '../hooks/useFileDrop'
 import { useRefreshCases } from '../store/CaseStore'
 
 type IntakeRecord = {
@@ -27,6 +32,9 @@ type ParseResult = {
 }
 type Created = { caseId: number; name: string; externalId: string | null; creditors: number }
 
+/** 受け付ける拡張子 */
+const ACCEPT_RE = /\.(csv|xlsx|xls)$/i
+
 export function IntakeImportPage() {
   const fileRef = useRef<HTMLInputElement>(null)
   const [bytes, setBytes] = useState<ArrayBuffer | null>(null)
@@ -46,6 +54,12 @@ export function IntakeImportPage() {
 
   const onPick = async (file: File) => {
     reset()
+    if (!ACCEPT_RE.test(file.name)) {
+      setFileName('')
+      setBytes(null)
+      setError(`「${file.name}」は取り込めません。Excel(.xlsx / .xls) または CSV を指定してください。`)
+      return
+    }
     setFileName(file.name)
     const buf = await file.arrayBuffer()
     setBytes(buf)
@@ -91,6 +105,11 @@ export function IntakeImportPage() {
     return x == null || x === '' ? '-' : String(x).slice(0, 10)
   }
 
+  // ドラッグ&ドロップ（画面のどこに落としても受け付ける）
+  const dragging = useFileDrop((files) => {
+    if (files[0]) void onPick(files[0])
+  }, !loading && !committing)
+
   const summary = useMemo(() => {
     if (!result) return null
     const warnCount = result.records.reduce((s, r) => s + r.warnings.length, 0)
@@ -104,8 +123,9 @@ export function IntakeImportPage() {
   }, [result, totalErrors])
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      <AppHeader title="相談票取込（CSV/Excel・新規依頼者の登録）">
+    <div className="relative min-h-screen bg-slate-100">
+      <FileDropOverlay show={dragging} accept="Excel(.xlsx / .xls) / CSV" />
+      <AppHeader title="相談票取込（Excel/CSV・新規依頼者の登録）">
         <div className="flex flex-wrap items-center gap-2">
           <input
             ref={fileRef}

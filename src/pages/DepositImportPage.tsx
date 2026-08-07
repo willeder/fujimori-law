@@ -13,6 +13,8 @@
  */
 import { useRef, useState } from 'react'
 import { AppHeader } from '../components/AppHeader'
+import { FileDropOverlay } from '../components/FileDropOverlay'
+import { useFileDrop } from '../hooks/useFileDrop'
 import { PageLoading } from '../components/PageLoading'
 import { useRefreshCases } from '../store/CaseStore'
 
@@ -336,8 +338,6 @@ export function DepositImportPage() {
   const [loading, setLoading] = useState(false)
   const [committing, setCommitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [dragging, setDragging] = useState(false)
-  const dragDepth = useRef(0) // 子要素をまたぐ dragleave で解除されないよう深さを数える
   const refreshCases = useRefreshCases()
 
   const onPick = async (file: File) => {
@@ -386,32 +386,10 @@ export function DepositImportPage() {
     }
   }
 
-  // ---- ドラッグ&ドロップ（画面のどこに落としても受け付ける） ----
-  const onDragEnter = (e: React.DragEvent) => {
-    if (!e.dataTransfer.types.includes('Files')) return
-    e.preventDefault()
-    dragDepth.current += 1
-    setDragging(true)
-  }
-  const onDragOver = (e: React.DragEvent) => {
-    if (!e.dataTransfer.types.includes('Files')) return
-    e.preventDefault()
-    e.dataTransfer.dropEffect = 'copy'
-  }
-  const onDragLeave = (e: React.DragEvent) => {
-    if (!e.dataTransfer.types.includes('Files')) return
-    e.preventDefault()
-    dragDepth.current = Math.max(0, dragDepth.current - 1)
-    if (dragDepth.current === 0) setDragging(false)
-  }
-  const onDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    dragDepth.current = 0
-    setDragging(false)
-    if (loading || committing) return
-    const f = e.dataTransfer.files?.[0]
-    if (f) void onPick(f)
-  }
+  // ドラッグ&ドロップ（画面のどこに落としても受け付ける）
+  const dragging = useFileDrop((files) => {
+    if (files[0]) void onPick(files[0])
+  }, !loading && !committing)
 
   const openPicker = () => {
     if (fileRef.current) fileRef.current.value = ''
@@ -421,22 +399,8 @@ export function DepositImportPage() {
   const reflectCount = preview?.groups.filter((g) => g.action === 'reflect').length ?? 0
 
   return (
-    <div
-      className="relative min-h-screen bg-slate-100"
-      onDragEnter={onDragEnter}
-      onDragOver={onDragOver}
-      onDragLeave={onDragLeave}
-      onDrop={onDrop}
-    >
-      {/* ドラッグ中の全面オーバーレイ */}
-      {dragging && (
-        <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40">
-          <div className="rounded-2xl border-4 border-dashed border-white bg-slate-900/70 px-10 py-8 text-center text-white">
-            <p className="text-lg font-bold">ここにドロップして取り込む</p>
-            <p className="mt-1 text-sm opacity-90">CSV / Excel(.xlsx / .xls)</p>
-          </div>
-        </div>
-      )}
+    <div className="relative min-h-screen bg-slate-100">
+      <FileDropOverlay show={dragging} accept="CSV / Excel(.xlsx / .xls)" />
 
       <AppHeader title="入金取込（銀行明細 → 実入金反映）">
         <div className="flex flex-wrap items-center gap-2">
