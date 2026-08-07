@@ -6,6 +6,7 @@ export { EditableField } from './EditableField'
 export { DataTable, type Column } from './DataTable'
 export { StatusBadge } from './StatusBadge'
 export { Tabs } from './Tabs'
+export { FileDropOverlay } from './FileDropOverlay'
 
 // 案件関連コンポーネント
 export {
