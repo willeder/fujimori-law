@@ -640,6 +640,42 @@ function dbApiPlugin(): Plugin {
             }
           }
 
+          // ── 入金管理ファイル（集計）出力。土橋・田中のみ ──
+          if (
+            url === '/api/payment-summary/permission' ||
+            url === '/api/payment-summary/file'
+          ) {
+            const ps = (await server.ssrLoadModule(
+              '/src/server/paymentSummary.ts'
+            )) as typeof import('./src/server/paymentSummary')
+            const allowed = ps.canExportPaymentSummary(sessionUser.email)
+            if (url === '/api/payment-summary/permission') {
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify({ allowed }))
+              return
+            }
+            if (!allowed) {
+              res.statusCode = 403
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify({ error: 'forbidden' }))
+              return
+            }
+            const summary = await ps.buildPaymentSummary()
+            const today = new Date().toISOString().slice(0, 10)
+            const buf = ps.paymentSummaryToXlsx(
+              summary,
+              new Date().toISOString().slice(0, 16).replace('T', ' ')
+            )
+            const name = encodeURIComponent(ps.paymentSummaryFileName(today))
+            res.setHeader(
+              'Content-Type',
+              'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            )
+            res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${name}`)
+            res.end(buf)
+            return
+          }
+
           // ── GMO: 未整備（支払条件・振込先 未入力）検知 ──
           if (url === '/api/gmo/incomplete' && req.method === 'GET') {
             const gmo = (await server.ssrLoadModule(

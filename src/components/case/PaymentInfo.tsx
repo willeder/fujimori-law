@@ -105,6 +105,46 @@ export function PaymentInfo({ data, onChange, readonly = false }: PaymentInfoPro
         disabled={readonly}
       />
       <EditableField
+        label="累計弁済充当予定額"
+        value={data.cumulativePlannedRepaymentAllocation}
+        onChange={(v) => onChange('cumulativePlannedRepaymentAllocation', v)}
+        type="number"
+        suffix="円"
+        disabled={readonly}
+      />
+      <EditableField
+        label="累計プール充当予定額"
+        value={data.cumulativePlannedPoolAllocation}
+        onChange={(v) => onChange('cumulativePlannedPoolAllocation', v)}
+        type="number"
+        suffix="円"
+        disabled={readonly}
+      />
+      <EditableField
+        label="累計弁代報酬充当額"
+        value={data.cumulativeAgentFeeAllocation}
+        onChange={(v) => onChange('cumulativeAgentFeeAllocation', v)}
+        type="number"
+        suffix="円"
+        disabled={readonly}
+      />
+      <EditableField
+        label="累計弁代報酬充当予定額"
+        value={data.cumulativePlannedAgentFeeAllocation}
+        onChange={(v) => onChange('cumulativePlannedAgentFeeAllocation', v)}
+        type="number"
+        suffix="円"
+        disabled={readonly}
+      />
+      <EditableField
+        label="累計手数料"
+        value={data.cumulativeHandlingFee}
+        onChange={(v) => onChange('cumulativeHandlingFee', v)}
+        type="number"
+        suffix="円"
+        disabled={readonly}
+      />
+      <EditableField
         label="総額-プール-累弁済"
         value={data.totalMinusPoolMinusRepayment}
         onChange={(v) => onChange('totalMinusPoolMinusRepayment', v)}

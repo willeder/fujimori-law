@@ -56,6 +56,15 @@ export const CREDITOR_STATUS_OPTIONS = [
 /** 受任ランク / 要注意ランク（Case.acceptanceRank / Case.cautionRank） */
 export const RANK_OPTIONS = ['A', 'B', 'C'] as const
 
+/** 遅れ（Case.paymentDelay） */
+export const PAYMENT_DELAY_OPTIONS = ['あり', 'なし'] as const
+
+/** 自転車（Case.bicycleNote） */
+export const BICYCLE_OPTIONS = ['あり', 'なし'] as const
+
+/** 年金（Case.pension） */
+export const PENSION_OPTIONS = ['未受給', '受給中', '受給予定'] as const
+
 /** 債務整理区分（Case.debtAdjustmentType） */
 export const DEBT_ADJUSTMENT_TYPE_OPTIONS = ['任意整理', '自己破産', '個人再生'] as const
 

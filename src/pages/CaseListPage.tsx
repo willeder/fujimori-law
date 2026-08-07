@@ -54,6 +54,12 @@ const SORT_VALUE: Record<
   creditorCount: (c) => c.debtInfo.creditorCount,
   declaredDebtAmount: (c) => c.debtInfo.declaredDebtAmount,
   officeFee: (c) => c.feeInfo.officeFee,
+  cumulativePlannedFeeAllocation: (c) => c.paymentInfo.cumulativePlannedFeeAllocation,
+  plannedPaymentFeeTotal: (c) => c.feeInfo.plannedPaymentFeeTotal,
+  cumulativePlannedAgentFeeAllocation: (c) =>
+    c.paymentInfo.cumulativePlannedAgentFeeAllocation,
+  cumulativePlannedPoolAllocation: (c) => c.paymentInfo.cumulativePlannedPoolAllocation,
+  cumulativeHandlingFee: (c) => c.paymentInfo.cumulativeHandlingFee,
   appointmentStaff: (c) => c.appointmentInfo.appointmentStaff ?? '',
   interviewStaff: (c) => c.appointmentInfo.interviewStaff ?? '',
 }
@@ -90,6 +96,13 @@ export function CaseListPage() {
   const [activeFilterId, setActiveFilterId] = useSessionState<string | null>(
     'caseList.savedFilterId',
     null
+  )
+
+  // 金額列（報酬・弁代・プールチェック用）の表示切替。
+  // 常時表示すると一覧が横に長くなるため既定は非表示。sessionStorage に保持する。
+  const [showFeeColumns, setShowFeeColumns] = useSessionState<boolean>(
+    'caseList.showFeeColumns',
+    false
   )
 
   // 絞り込み履歴（直近10件）No.147
@@ -282,6 +295,78 @@ export function CaseListPage() {
       '-'
     )
 
+  /**
+   * 「報酬・弁代・プールチェック」で確認する金額列（kintone の並び順に合わせる）。
+   * 事務所報酬（通常）は常時表示の列なのでここには含めない。
+   */
+  const feeColumns: Column<Case>[] = [
+    {
+      key: 'cumulativePlannedFeeAllocation',
+      header: '累)報酬充当予定額',
+      width: '124px',
+      align: 'right',
+      sortable: false,
+      render: (item) => yen(item.paymentInfo.cumulativePlannedFeeAllocation),
+      filterValue: (item) =>
+        item.paymentInfo.cumulativePlannedFeeAllocation != null
+          ? String(item.paymentInfo.cumulativePlannedFeeAllocation)
+          : '',
+      filterNumber: (item) => item.paymentInfo.cumulativePlannedFeeAllocation,
+    },
+    {
+      key: 'plannedPaymentFeeTotal',
+      header: '予定弁済報酬総額',
+      width: '124px',
+      align: 'right',
+      sortable: false,
+      render: (item) => yen(item.feeInfo.plannedPaymentFeeTotal),
+      filterValue: (item) =>
+        item.feeInfo.plannedPaymentFeeTotal != null
+          ? String(item.feeInfo.plannedPaymentFeeTotal)
+          : '',
+      filterNumber: (item) => item.feeInfo.plannedPaymentFeeTotal,
+    },
+    {
+      key: 'cumulativePlannedAgentFeeAllocation',
+      header: '累)弁代報酬充当予定額',
+      width: '140px',
+      align: 'right',
+      sortable: false,
+      render: (item) => yen(item.paymentInfo.cumulativePlannedAgentFeeAllocation),
+      filterValue: (item) =>
+        item.paymentInfo.cumulativePlannedAgentFeeAllocation != null
+          ? String(item.paymentInfo.cumulativePlannedAgentFeeAllocation)
+          : '',
+      filterNumber: (item) => item.paymentInfo.cumulativePlannedAgentFeeAllocation,
+    },
+    {
+      key: 'cumulativePlannedPoolAllocation',
+      header: '累)ﾌﾟｰﾙ充当予定額',
+      width: '128px',
+      align: 'right',
+      sortable: false,
+      render: (item) => yen(item.paymentInfo.cumulativePlannedPoolAllocation),
+      filterValue: (item) =>
+        item.paymentInfo.cumulativePlannedPoolAllocation != null
+          ? String(item.paymentInfo.cumulativePlannedPoolAllocation)
+          : '',
+      filterNumber: (item) => item.paymentInfo.cumulativePlannedPoolAllocation,
+    },
+    {
+      key: 'cumulativeHandlingFee',
+      header: '累)手数料',
+      width: '104px',
+      align: 'right',
+      sortable: false,
+      render: (item) => yen(item.paymentInfo.cumulativeHandlingFee),
+      filterValue: (item) =>
+        item.paymentInfo.cumulativeHandlingFee != null
+          ? String(item.paymentInfo.cumulativeHandlingFee)
+          : '',
+      filterNumber: (item) => item.paymentInfo.cumulativeHandlingFee,
+    },
+  ]
+
   const columns: Column<Case>[] = [
     {
       key: '_sel',
@@ -459,14 +544,16 @@ export function CaseListPage() {
     },
     {
       key: 'officeFee',
-      header: '事務所報酬',
-      width: '104px',
+      header: '事務所報酬（通常）',
+      width: '116px',
       align: 'right',
       sortable: false,
       render: (item) => yen(item.feeInfo.officeFee),
       filterValue: (item) => (item.feeInfo.officeFee != null ? String(item.feeInfo.officeFee) : ''),
       filterNumber: (item) => item.feeInfo.officeFee,
     },
+    // 「報酬・弁代・プールチェック」用の金額列。ヘッダーの「報酬・プール列」で表示を切り替える。
+    ...(showFeeColumns ? feeColumns : []),
     {
       key: 'appointmentStaff',
       header: 'アポ担当',
@@ -583,6 +670,19 @@ export function CaseListPage() {
                 解除
               </button>
             )}
+
+            <button
+              type="button"
+              onClick={() => setShowFeeColumns((v) => !v)}
+              title="事務所報酬（通常）の右に、報酬・弁代・プールの金額列を表示します"
+              className={`rounded border px-2 py-1.5 text-xs font-medium ${
+                showFeeColumns
+                  ? 'border-blue-600 bg-blue-600 text-white'
+                  : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              報酬・プール列
+            </button>
 
             <span className="mx-1 h-4 w-px bg-slate-300" />
             {/* 保存した絞り込み条件（全体共有 / 個人用） */}

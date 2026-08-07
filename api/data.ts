@@ -33,6 +33,7 @@ import {
   presenceLeave,
 } from '../src/server/handlers.js'
 import * as gmo from '../src/server/gmoTransfer.js'
+import * as paymentSummary from '../src/server/paymentSummary.js'
 import * as intake from '../src/server/intakeImport.js'
 import * as deposits from '../src/server/depositImport.js'
 import * as gmoApi from '../src/server/gmoApi.js'
@@ -216,6 +217,32 @@ export default async function handler(
     }
     if (path === '/api/gmo/userinfo' && method === 'GET') {
       json(await gmoApi.getUserInfo())
+      return
+    }
+
+    // ── 入金管理ファイル（集計）出力。土橋・田中のみ ──
+    if (path === '/api/payment-summary/permission' && method === 'GET') {
+      json({ allowed: paymentSummary.canExportPaymentSummary(sessionUser.email) })
+      return
+    }
+    if (path === '/api/payment-summary/file' && method === 'GET') {
+      if (!paymentSummary.canExportPaymentSummary(sessionUser.email)) {
+        json({ error: 'forbidden' }, 403)
+        return
+      }
+      const summary = await paymentSummary.buildPaymentSummary()
+      const today = new Date().toISOString().slice(0, 10)
+      const buf = paymentSummary.paymentSummaryToXlsx(
+        summary,
+        new Date().toISOString().slice(0, 16).replace('T', ' ')
+      )
+      const name = encodeURIComponent(paymentSummary.paymentSummaryFileName(today))
+      res.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      )
+      res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${name}`)
+      res.end(buf)
       return
     }
 
