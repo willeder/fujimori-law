@@ -78,6 +78,8 @@ export interface DepositGroupPlan {
   pattern: 'A' | 'B' | 'C' | null
   /** C のとき追加する補充行の金額 */
   supplementAmount: number | null
+  /** 不足のうちプール金から取り崩した額（reflect時） */
+  fromPool: number | null
   /** 人向けの説明 */
   note: string
 }
@@ -318,70 +320,62 @@ export function parseDeposits(buf: Buffer): {
   return { encoding, headerFound: true, rows: out }
 }
 
-/** 実入金の充当計算（充当優先順位: 弁済→弁代報酬→手数料→報酬→プール） */
+/**
+ * 実入金の充当計算。
+ *
+ * kintone の実データ192,446行を検証して得た事務所の実際の運用に合わせている。
+ *
+ *   1. 入金があった時点では **報酬** と **弁代報酬** だけを充当する。
+ *      弁済充当額と振)手数料は、実際に債権者へ振り込んだ時点で計上するもので、
+ *      入金時点では 0。振り込むまでの原資はプールに残る。
+ *   2. 予定額に届かなかった不足分は、まず **プール金** から取り崩す。
+ *      プール残高で足りない分だけ **報酬** を減らす（弁代報酬は必ず満額確保する）。
+ *   3. プール充当額は残余（実入金額 − 報酬 − 弁代報酬）。取り崩したぶんは負値になる。
+ *
+ * 恒等式「実入金額 = 報酬 + 弁代報酬 + プール + 弁済 + 振)手数料」は
+ * kintone 側でも 44,430/44,431 行で成立しており、この計算でも常に成立する。
+ *
+ * @param poolBalance この入金を反映する前の、案件のプール残高（実プール充当額の累計）
+ */
 export function allocateActual(
   planned: {
     plannedAmount: number
     plannedFeeAllocation: number
     plannedAgentFeeAllocation: number
-    plannedPoolAllocation: number
-    plannedRepaymentAllocation: number
-    handlingFee: number
   },
   actualAmount: number,
+  poolBalance: number,
 ): {
   actualFeeAllocation: number | null
   actualAgentFeeAllocation: number | null
   actualPoolAllocation: number | null
   actualRepaymentAllocation: number | null
-  handlingFee: number | null
+  actualHandlingFee: number | null
   pattern: 'A' | 'B' | 'C'
+  /** 予定額に対する不足額（補充行の金額） */
   shortage: number
+  /** 不足のうちプール金から取り崩した額 */
+  fromPool: number
 } {
-  // A) 同額
-  if (actualAmount === planned.plannedAmount) {
-    return {
-      actualFeeAllocation: planned.plannedFeeAllocation || null,
-      actualAgentFeeAllocation: planned.plannedAgentFeeAllocation || null,
-      actualPoolAllocation: planned.plannedPoolAllocation || null,
-      actualRepaymentAllocation: planned.plannedRepaymentAllocation || null,
-      handlingFee: planned.handlingFee || null,
-      pattern: 'A',
-      shortage: 0,
-    }
-  }
-  // B) 超過: 予定のまま＋プールへ差額加算
-  if (actualAmount > planned.plannedAmount) {
-    const excess = actualAmount - planned.plannedAmount
-    return {
-      actualFeeAllocation: planned.plannedFeeAllocation || null,
-      actualAgentFeeAllocation: planned.plannedAgentFeeAllocation || null,
-      actualPoolAllocation: (planned.plannedPoolAllocation + excess) || null,
-      actualRepaymentAllocation: planned.plannedRepaymentAllocation || null,
-      handlingFee: planned.handlingFee || null,
-      pattern: 'B',
-      shortage: 0,
-    }
-  }
-  // C) 不足: 優先順位順に充当し、残りは補充行へ
-  let remaining = actualAmount
-  const repayment = Math.min(remaining, planned.plannedRepaymentAllocation)
-  remaining -= repayment
-  const agentFee = Math.min(remaining, planned.plannedAgentFeeAllocation)
-  remaining -= agentFee
-  const handling = Math.min(remaining, planned.handlingFee)
-  remaining -= handling
-  const fee = Math.min(remaining, planned.plannedFeeAllocation)
-  remaining -= fee
-  const pool = remaining // 残り（通常0）
+  const shortage = Math.max(0, planned.plannedAmount - actualAmount)
+  // 不足はまずプール残高で埋め、足りない分だけ報酬を減らす
+  const fromPool = Math.min(shortage, Math.max(poolBalance, 0))
+  const fee = planned.plannedFeeAllocation - (shortage - fromPool)
+  const agentFee = planned.plannedAgentFeeAllocation
+  // プールは残余。kintone にも負値の行があるため、ここでは 0 で止めない。
+  const pool = actualAmount - fee - agentFee
+  const pattern =
+    actualAmount === planned.plannedAmount ? 'A' : actualAmount > planned.plannedAmount ? 'B' : 'C'
   return {
-    actualRepaymentAllocation: repayment || null,
-    actualAgentFeeAllocation: agentFee || null,
-    handlingFee: handling || null,
     actualFeeAllocation: fee || null,
+    actualAgentFeeAllocation: agentFee || null,
     actualPoolAllocation: pool || null,
-    pattern: 'C',
-    shortage: planned.plannedAmount - actualAmount,
+    // 弁済と手数料は振込実行時に計上する
+    actualRepaymentAllocation: null,
+    actualHandlingFee: null,
+    pattern,
+    shortage,
+    fromPool,
   }
 }
 
@@ -397,7 +391,9 @@ type PaymentRow = {
   plannedRepaymentAllocation: number | null
   actualDate: Date | null
   actualAmount: number | null
+  actualPoolAllocation: number | null
   handlingFee: number | null
+  repaymentCount: number | null
 }
 
 const iso = (d: Date | null): string | null => (d ? d.toISOString().slice(0, 10) : null)
@@ -493,6 +489,7 @@ export async function planDepositImport(buf: Buffer): Promise<DepositPreview> {
       targetPlannedAmount: null,
       pattern: null,
       supplementAmount: null,
+      fromPool: null,
     }
     if (!kase) {
       groups.push({
@@ -532,7 +529,9 @@ export async function planDepositImport(buf: Buffer): Promise<DepositPreview> {
         plannedRepaymentAllocation: true,
         actualDate: true,
         actualAmount: true,
+        actualPoolAllocation: true,
         handlingFee: true,
+        repaymentCount: true,
       },
     })
 
@@ -580,16 +579,16 @@ export async function planDepositImport(buf: Buffer): Promise<DepositPreview> {
       })
       continue
     }
+    // プール残高＝これまでに実際にプールへ積まれた額の合計
+    const poolBalance = payments.reduce((sum, p) => sum + (p.actualPoolAllocation ?? 0), 0)
     const alloc = allocateActual(
       {
         plannedAmount: target.plannedAmount ?? 0,
         plannedFeeAllocation: target.plannedFeeAllocation ?? 0,
         plannedAgentFeeAllocation: target.plannedAgentFeeAllocation ?? 0,
-        plannedPoolAllocation: target.plannedPoolAllocation ?? 0,
-        plannedRepaymentAllocation: target.plannedRepaymentAllocation ?? 0,
-        handlingFee: target.handlingFee ?? 0,
       },
       reflectAmount,
+      poolBalance,
     )
     groups.push({
       ...base,
@@ -600,6 +599,7 @@ export async function planDepositImport(buf: Buffer): Promise<DepositPreview> {
       targetPlannedAmount: target.plannedAmount,
       pattern: alloc.pattern,
       supplementAmount: alloc.shortage > 0 ? alloc.shortage : null,
+      fromPool: alloc.fromPool || null,
       note:
         [
           nameCheck === 'given-only'
@@ -651,16 +651,19 @@ export async function commitDepositImport(actor: Actor, buf: Buffer): Promise<De
     await prisma.$transaction(async (tx) => {
       const target = await tx.payment.findUnique({ where: { id: g.targetPaymentId! } })
       if (!target || target.actualDate != null) return // 二重実行防止
+      // プール残高は反映直前に取り直す（同一実行内で複数件を順に反映するため）
+      const poolAgg = await tx.payment.aggregate({
+        where: { caseId: target.caseId },
+        _sum: { actualPoolAllocation: true },
+      })
       const alloc = allocateActual(
         {
           plannedAmount: target.plannedAmount ?? 0,
           plannedFeeAllocation: target.plannedFeeAllocation ?? 0,
           plannedAgentFeeAllocation: target.plannedAgentFeeAllocation ?? 0,
-          plannedPoolAllocation: target.plannedPoolAllocation ?? 0,
-          plannedRepaymentAllocation: target.plannedRepaymentAllocation ?? 0,
-          handlingFee: target.handlingFee ?? 0,
         },
         g.reflectAmount!,
+        poolAgg._sum.actualPoolAllocation ?? 0,
       )
       await tx.payment.update({
         where: { id: target.id },
@@ -670,9 +673,10 @@ export async function commitDepositImport(actor: Actor, buf: Buffer): Promise<De
           actualFeeAllocation: alloc.actualFeeAllocation,
           actualAgentFeeAllocation: alloc.actualAgentFeeAllocation,
           actualPoolAllocation: alloc.actualPoolAllocation,
+          // 弁済充当額・振)手数料・社数（実績）は債権者への振込を実行した時点で計上する。
+          // 入金時点では未確定なので触らない（原資はプールに残る）。
           actualRepaymentAllocation: alloc.actualRepaymentAllocation,
-          // handlingFee は不足時のみ実充当額で上書き（A/Bは予定のまま）
-          ...(alloc.pattern === 'C' ? { handlingFee: alloc.handlingFee } : {}),
+          actualHandlingFee: alloc.actualHandlingFee,
         },
       })
       reflected += 1

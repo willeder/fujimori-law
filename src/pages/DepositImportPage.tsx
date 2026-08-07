@@ -95,13 +95,22 @@ const IRREGULAR_RULES: { id: string; cond: string; result: string }[] = [
 
 /** 予定額との差による充当パターン */
 const ALLOCATION_PATTERNS: { id: string; cond: string; result: string }[] = [
-  { id: 'A', cond: '入金額が入金予定額と同額', result: '予定していた各充当額（報酬・弁代報酬・プール・弁済）をそのまま実績にする' },
-  { id: 'B', cond: '入金額が入金予定額より多い', result: '各充当額は予定どおりにし、超過分をプール金へ加算する' },
+  {
+    id: 'A',
+    cond: '入金額が入金予定額と同額',
+    result:
+      '報酬充当額・弁代報酬充当額を予定どおりにし、残り（予定していた弁済分と手数料分を含む）はプール金に積む',
+  },
+  {
+    id: 'B',
+    cond: '入金額が入金予定額より多い',
+    result: '報酬・弁代報酬は予定どおりにし、超過分もあわせてプール金へ入れる',
+  },
   {
     id: 'C',
     cond: '入金額が入金予定額より少ない',
     result:
-      '入金額に合わせて「弁済 → 弁代報酬 → 手数料 → 報酬」の順に充当し、不足額の補充行を同じ入金予定日で1行追加する',
+      '不足分はまずプール金から取り崩し、プール残高で足りない分だけ報酬充当額を減らす（弁代報酬は必ず満額）。不足額の補充行を同じ入金予定日で1行追加する',
   },
 ]
 
@@ -224,6 +233,12 @@ function RuleGuide({ open }: { open: boolean }) {
           <p className="mb-1 leading-relaxed text-slate-600">
             反映先は、その案件で<b>まだ入金がない最も古い入金予定行</b>です。
             プレビューの「反映額」欄に、どのパターンで計算したかを (A)(B)(C) で表示します。
+          </p>
+          <p className="mb-1 rounded border border-amber-200 bg-amber-50 px-2 py-1.5 leading-relaxed text-amber-900">
+            <b>入金の時点で充当するのは「報酬」と「弁代報酬」だけ</b>です。
+            弁済充当額・振)手数料・社数（実績）は、実際に債権者へ振り込んだ時点で計上するもので、
+            それまでの原資はプール金に残ります。
+            そのため、どのパターンでも「実入金額 ＝ 報酬 ＋ 弁代報酬 ＋ プール」になります。
           </p>
           <table className="w-full border-collapse text-[12px]">
             <thead>

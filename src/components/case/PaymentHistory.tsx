@@ -312,6 +312,9 @@ export function PaymentHistory({ payments, onUpdate, onAdd, readonly = false }: 
               actualRepaymentAllocation: null,
               handlingFee: null,
               repaymentCount: null,
+              repaymentDate: null,
+              actualRepaymentCount: null,
+              actualHandlingFee: null,
               cumulativePool: null,
             })
           }}

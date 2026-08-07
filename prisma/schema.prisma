@@ -251,8 +251,13 @@ model Payment {
   actualAgentFeeAllocation   Int?
   actualPoolAllocation       Int?
   actualRepaymentAllocation  Int?
-  handlingFee                Int?
-  repaymentCount             Int?
+  handlingFee                Int?  // 手数料（予定）
+  repaymentCount             Int?  // 社数（予定）
+  // 実績側。kintone は予定と実績で別項目を持つ（数 / 振)手数料 / 弁済日）。
+  // 以前は予定側の列を実績にも流用していたため、社数・手数料の集計が実態とずれていた。
+  repaymentDate              DateTime? @db.Date // 弁済日
+  actualRepaymentCount       Int?  // 数（実績の社数）
+  actualHandlingFee          Int?  // 振)手数料（実績の手数料）
   cumulativePool             Int?
 
   @@index([caseId])

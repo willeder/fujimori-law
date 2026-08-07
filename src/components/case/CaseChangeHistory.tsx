@@ -161,7 +161,10 @@ const FIELD_LABEL: Record<string, string> = {
   plannedRepaymentAllocation: '予定弁済充当',
   actualRepaymentAllocation: '弁済充当',
   handlingFee: '手数料',
-  repaymentCount: '弁済回数',
+  repaymentCount: '社数（予定）',
+  repaymentDate: '弁済日',
+  actualRepaymentCount: '社数（実績）',
+  actualHandlingFee: '振)手数料',
   // 債権者・入金 その他
   expectedSettlementAmount: '想定和解額',
   expectedPaymentCount: '想定弁済回数',

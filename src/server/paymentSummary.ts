@@ -12,12 +12,16 @@
  *   G 報酬充当予定額      → plannedFeeAllocation
  *   H 弁代報酬充当予定額  → plannedAgentFeeAllocation
  *   I ﾌﾟｰﾙ充当予定額      → plannedPoolAllocation
+ *   J 社数（予定）        → repaymentCount
+ *   K 手数料（予定）      → handlingFee
  *   L 弁済充当予定額      → plannedRepaymentAllocation
  *   N 実入金日            → actualDate
  *   O 実入金額            → actualAmount
  *   P 報酬充当額          → actualFeeAllocation
  *   Q 弁代報酬充当額      → actualAgentFeeAllocation
  *   R ﾌﾟｰﾙ充当額          → actualPoolAllocation
+ *   T 数（実績の社数）    → actualRepaymentCount
+ *   U 振)手数料（実績）   → actualHandlingFee
  *   V 弁済充当額          → actualRepaymentAllocation
  *
  * 集計の仕方も元ファイルに合わせている。
@@ -25,16 +29,21 @@
  *     （弁済充当額も元ファイルは弁済日ではなく実入金日で集計しているため、それに合わせる）
  *   - 「累計」列は日付の有無に関わらず全レコードの単純合計（元ファイルの SUM(列:列) と同じ）
  *   - 受任後ステータス等での絞り込みは行わない（元ファイルも絞り込んでいない）
+ *
+ * 社数について:
+ *   元ファイルは「弁代報酬充当（予定）額 ÷ 1,505」で社数に換算していたが、実際の単価は
+ *   1,521円で、実績側は手数料が引かれない行があるため大きくずれる（2026-07 実績: 実列
+ *   6,739社 に対し ÷1,505 では 9,817.8社）。ここでは kintone の実列（社数 / 数）を
+ *   そのまま合計する。手数料 = 社数 × 129円 は全件で一致するため、検算に使える。
  */
 import { prisma } from './db.js'
 import { buildXlsx, STYLE, type XlsxRow } from './xlsxWrite.js'
 
 /**
- * 弁代報酬の1社あたり単価（円）。
- * 元ファイルは「弁代報酬充当（予定）額 ÷ 1505」で社数に換算している。
- * 単価が変わったら環境変数 AGENT_FEE_UNIT で上書きできる。
+ * 1社あたりの振込手数料（円）。手数料 = 社数 × この単価 が全件で成立するため、
+ * 出力した社数の検算に使う。変わったら環境変数 HANDLING_FEE_UNIT で上書きできる。
  */
-export const AGENT_FEE_UNIT = Number(process.env.AGENT_FEE_UNIT ?? '') || 1505
+export const HANDLING_FEE_UNIT = Number(process.env.HANDLING_FEE_UNIT ?? '') || 129
 
 /**
  * この出力を使えるユーザー（メールアドレス）。
@@ -64,9 +73,15 @@ type Bucket = {
   agentFee: number
   pool: number
   repayment: number
+  /** 社数（予定は「社数」列 / 実績は「数」列） */
+  count: number
+  /** 手数料（予定は「手数料」列 / 実績は「振)手数料」列） */
+  handling: number
 }
 
-const zero = (): Bucket => ({ amount: 0, fee: 0, agentFee: 0, pool: 0, repayment: 0 })
+const zero = (): Bucket => ({
+  amount: 0, fee: 0, agentFee: 0, pool: 0, repayment: 0, count: 0, handling: 0,
+})
 
 /** Postgres の sum() は bigint / numeric を返すので数値へ寄せる */
 const num = (v: unknown): number => {
@@ -82,6 +97,8 @@ type RawRow = {
   agent_fee: unknown
   pool: unknown
   repayment: unknown
+  cnt: unknown
+  handling: unknown
 }
 
 const toMap = (rows: RawRow[]): Map<string, Bucket> => {
@@ -93,6 +110,8 @@ const toMap = (rows: RawRow[]): Map<string, Bucket> => {
       agentFee: num(r.agent_fee),
       pool: num(r.pool),
       repayment: num(r.repayment),
+      count: num(r.cnt),
+      handling: num(r.handling),
     })
   }
   return m
@@ -118,7 +137,9 @@ export async function buildPaymentSummary(): Promise<PaymentSummary> {
            sum("plannedFeeAllocation")       AS fee,
            sum("plannedAgentFeeAllocation")  AS agent_fee,
            sum("plannedPoolAllocation")      AS pool,
-           sum("plannedRepaymentAllocation") AS repayment
+           sum("plannedRepaymentAllocation") AS repayment,
+           sum("repaymentCount")             AS cnt,
+           sum("handlingFee")                AS handling
       FROM payments WHERE "plannedDate" IS NOT NULL GROUP BY 1`
   const actualMonth = await prisma.$queryRaw<RawRow[]>`
     SELECT to_char("actualDate", 'YYYY-MM')  AS k,
@@ -126,7 +147,9 @@ export async function buildPaymentSummary(): Promise<PaymentSummary> {
            sum("actualFeeAllocation")        AS fee,
            sum("actualAgentFeeAllocation")   AS agent_fee,
            sum("actualPoolAllocation")       AS pool,
-           sum("actualRepaymentAllocation")  AS repayment
+           sum("actualRepaymentAllocation")  AS repayment,
+           sum("actualRepaymentCount")       AS cnt,
+           sum("actualHandlingFee")          AS handling
       FROM payments WHERE "actualDate" IS NOT NULL GROUP BY 1`
   const totals = await prisma.$queryRaw<
     {
@@ -136,11 +159,15 @@ export async function buildPaymentSummary(): Promise<PaymentSummary> {
       p_agent: unknown
       p_pool: unknown
       p_rep: unknown
+      p_cnt: unknown
+      p_hand: unknown
       a_amount: unknown
       a_fee: unknown
       a_agent: unknown
       a_pool: unknown
       a_rep: unknown
+      a_cnt: unknown
+      a_hand: unknown
     }[]
   >`
     SELECT count(*)                          AS rows,
@@ -149,11 +176,15 @@ export async function buildPaymentSummary(): Promise<PaymentSummary> {
            sum("plannedAgentFeeAllocation")  AS p_agent,
            sum("plannedPoolAllocation")      AS p_pool,
            sum("plannedRepaymentAllocation") AS p_rep,
+           sum("repaymentCount")             AS p_cnt,
+           sum("handlingFee")                AS p_hand,
            sum("actualAmount")               AS a_amount,
            sum("actualFeeAllocation")        AS a_fee,
            sum("actualAgentFeeAllocation")   AS a_agent,
            sum("actualPoolAllocation")       AS a_pool,
-           sum("actualRepaymentAllocation")  AS a_rep
+           sum("actualRepaymentAllocation")  AS a_rep,
+           sum("actualRepaymentCount")       AS a_cnt,
+           sum("actualHandlingFee")          AS a_hand
       FROM payments`
 
   const plannedByMonth = toMap(plannedMonth)
@@ -186,6 +217,8 @@ export async function buildPaymentSummary(): Promise<PaymentSummary> {
       cur.agentFee += v.agentFee
       cur.pool += v.pool
       cur.repayment += v.repayment
+      cur.count += v.count
+      cur.handling += v.handling
       m.set(y, cur)
     }
     return m
@@ -205,6 +238,8 @@ export async function buildPaymentSummary(): Promise<PaymentSummary> {
       agentFee: num(t.p_agent),
       pool: num(t.p_pool),
       repayment: num(t.p_rep),
+      count: num(t.p_cnt),
+      handling: num(t.p_hand),
     },
     actualTotal: {
       amount: num(t.a_amount),
@@ -212,6 +247,8 @@ export async function buildPaymentSummary(): Promise<PaymentSummary> {
       agentFee: num(t.a_agent),
       pool: num(t.a_pool),
       repayment: num(t.a_rep),
+      count: num(t.a_cnt),
+      handling: num(t.a_hand),
     },
     rows: num(t.rows),
   }
@@ -234,6 +271,11 @@ const METRICS: {
   { label: 'ﾌﾟｰﾙ充当額', side: 'actual', key: 'pool' },
   { label: '弁済充当予定額', side: 'planned', key: 'repayment' },
   { label: '弁済充当額', side: 'actual', key: 'repayment' },
+  // 社数はkintoneの実列をそのまま合計する（予定=「社数」/ 実績=「数」）
+  { label: '社数（予定）', side: 'planned', key: 'count' },
+  { label: '社数（実績）', side: 'actual', key: 'count' },
+  { label: '手数料（予定）', side: 'planned', key: 'handling' },
+  { label: '振)手数料（実績）', side: 'actual', key: 'handling' },
 ]
 
 const r1 = (n: number): number => Math.round(n * 10) / 10
@@ -304,22 +346,13 @@ function buildBlock(
     })
   }
 
-  // 社数換算（元ファイルの「弁代報酬充当（予定）数」= 金額 ÷ 単価）
+  // 検算用。手数料 ÷ 129 は社数と一致するはず（予定側は全件一致する）
   rows.push({
     cells: [
       '',
-      `弁代報酬充当予定数（÷${AGENT_FEE_UNIT.toLocaleString()}）`,
-      r1(plannedTotal.agentFee / AGENT_FEE_UNIT),
-      ...periods.map((p) => r1(pick('planned', 'agentFee', p) / AGENT_FEE_UNIT)),
-    ],
-    styles: decStyles(periods.length),
-  })
-  rows.push({
-    cells: [
-      '',
-      `弁代報酬充当数（÷${AGENT_FEE_UNIT.toLocaleString()}）`,
-      r1(actualTotal.agentFee / AGENT_FEE_UNIT),
-      ...periods.map((p) => r1(pick('actual', 'agentFee', p) / AGENT_FEE_UNIT)),
+      `社数の検算（手数料÷${HANDLING_FEE_UNIT}・予定）`,
+      r1(plannedTotal.handling / HANDLING_FEE_UNIT),
+      ...periods.map((p) => r1(pick('planned', 'handling', p) / HANDLING_FEE_UNIT)),
     ],
     styles: decStyles(periods.length),
   })
@@ -346,7 +379,7 @@ export function paymentSummaryToXlsx(s: PaymentSummary, generatedAt: string): Bu
       cells: [
         '',
         `出力日時 ${generatedAt}`,
-        `対象 入金予定 ${s.rows.toLocaleString()} 行 / 弁代報酬単価 ${AGENT_FEE_UNIT.toLocaleString()} 円`,
+        `対象 入金予定 ${s.rows.toLocaleString()} 行 / 社数は kintone の「社数」「数」列の合計`,
       ],
     },
     { cells: [] },

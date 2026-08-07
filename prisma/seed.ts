@@ -215,6 +215,7 @@ async function main() {
       ...p,
       plannedDate: d(p.plannedDate),
       actualDate: d(p.actualDate),
+      repaymentDate: d(p.repaymentDate),
     })),
     3000
   )) {
