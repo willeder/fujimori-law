@@ -17,23 +17,30 @@ function fmtNum(n: number | null | undefined) {
 }
 
 /**
- * 実入金額に基づいて各充当額を自動計算
+ * 実入金額に基づいて各充当額を自動計算する。
+ * サーバ側の入金取込（src/server/depositImport.ts の allocateActual）と同じ規則。
  *
- * 入金情報の計上定義:
- * ①プール金の計算（予定時）
- *   新計算式: 入金予定額 - 報酬充当予定額 - 弁代報酬充当予定額 - 弁済充当予定額 - 手数料
- *   ※手数料と同額のプール金計上は廃止
+ * 【予定側】
+ *   ﾌﾟｰﾙ充当予定額 = 入金予定額 − 報酬充当予定額 − 弁代報酬充当予定額 − 弁済充当予定額 − 手数料
+ *   （kintone の実データ192,446行すべてで成立）
  *
- * ②実入金反映時
- *   A) 予定金額と同額：予定の各項目の数値を反映
- *   B) 予定金額より超過：報酬額などは予定のまま、プール金へ差額を加算
- *   C) 予定金額より不足：実入金額に合わせて各項目を反映し、補充行を追加
+ * 【実入金の反映】
+ *   1. 入金があった時点で充当するのは 報酬 と 弁代報酬 だけ。
+ *      弁済充当額・振)手数料・社数（実績）は、実際に債権者へ振り込んだ時点で計上する。
+ *      振り込むまでの原資はプールに残る。
+ *   2. 予定額に届かない不足分は、まずプール金から取り崩す。
+ *      プール残高で足りない分だけ報酬を減らす（弁代報酬は必ず満額確保）。
+ *   3. プール充当額は残余（実入金額 − 報酬 − 弁代報酬）。取り崩し分は負値になる。
  *
- * 充当優先順位: 弁済 → 弁代報酬 → 手数料 → 報酬
+ *   A) 予定と同額 / B) 超過 → 報酬・弁代報酬は予定どおり、差額はプールへ
+ *   C) 不足        → 上記2の順で吸収し、不足額の補充行を追加する
+ *
+ * @param poolBalance この行を反映する前の案件のプール残高（実プール充当額の累計）
  */
 function calculateActualAllocations(
   payment: PaymentRecord,
-  actualAmount: number | null
+  actualAmount: number | null,
+  poolBalance: number
 ): Partial<PaymentRecord> {
   if (actualAmount == null) {
     return {
@@ -41,67 +48,31 @@ function calculateActualAllocations(
       actualAgentFeeAllocation: null,
       actualPoolAllocation: null,
       actualRepaymentAllocation: null,
+      actualHandlingFee: null,
+      actualRepaymentCount: null,
     }
   }
 
   const plannedAmount = payment.plannedAmount ?? 0
-
-  // A) 予定金額と同額の場合：予定の各項目の数値をそのまま反映
-  if (actualAmount === plannedAmount) {
-    return {
-      actualFeeAllocation: payment.plannedFeeAllocation,
-      actualAgentFeeAllocation: payment.plannedAgentFeeAllocation,
-      actualPoolAllocation: payment.plannedPoolAllocation,
-      actualRepaymentAllocation: payment.plannedRepaymentAllocation,
-    }
-  }
-
-  // B) 予定金額より超過の場合：報酬額などは予定のまま、プール金へ差額を加算
-  if (actualAmount > plannedAmount) {
-    const excess = actualAmount - plannedAmount
-    const basePool = payment.plannedPoolAllocation ?? 0
-    return {
-      actualFeeAllocation: payment.plannedFeeAllocation,
-      actualAgentFeeAllocation: payment.plannedAgentFeeAllocation,
-      actualPoolAllocation: basePool + excess,
-      actualRepaymentAllocation: payment.plannedRepaymentAllocation,
-    }
-  }
-
-  // C) 予定金額より不足の場合：実入金額に合わせて各項目を反映
-  // 充当優先順位: 弁済 → 弁代報酬 → 手数料 → 報酬 → プール
-  const plannedRepayment = payment.plannedRepaymentAllocation ?? 0
-  const plannedAgentFee = payment.plannedAgentFeeAllocation ?? 0
-  const plannedHandlingFee = payment.handlingFee ?? 0
   const plannedFee = payment.plannedFeeAllocation ?? 0
+  const plannedAgentFee = payment.plannedAgentFeeAllocation ?? 0
 
-  let remaining = actualAmount
-
-  // 1. 弁済充当（最優先、予定額まで）
-  const actualRepayment = Math.min(remaining, plannedRepayment)
-  remaining -= actualRepayment
-
-  // 2. 弁代報酬充当（予定額まで）
-  const actualAgentFee = Math.min(remaining, plannedAgentFee)
-  remaining -= actualAgentFee
-
-  // 3. 手数料（予定額まで）
-  const actualHandlingFee = Math.min(remaining, plannedHandlingFee)
-  remaining -= actualHandlingFee
-
-  // 4. 報酬充当（予定額まで）
-  const actualFee = Math.min(remaining, plannedFee)
-  remaining -= actualFee
-
-  // 5. プール金（残り）
-  const actualPool = remaining
+  const shortage = Math.max(0, plannedAmount - actualAmount)
+  // 不足はまずプール残高で埋め、足りない分だけ報酬を減らす
+  const fromPool = Math.min(shortage, Math.max(poolBalance, 0))
+  const fee = plannedFee - (shortage - fromPool)
+  const agentFee = plannedAgentFee
+  // プールは残余。取り崩したときは負値になる（kintone にも負値の行がある）
+  const pool = actualAmount - fee - agentFee
 
   return {
-    actualRepaymentAllocation: actualRepayment > 0 ? actualRepayment : null,
-    actualAgentFeeAllocation: actualAgentFee > 0 ? actualAgentFee : null,
-    actualPoolAllocation: actualPool > 0 ? actualPool : null,
-    actualFeeAllocation: actualFee > 0 ? actualFee : null,
-    handlingFee: actualHandlingFee > 0 ? actualHandlingFee : null,
+    actualFeeAllocation: fee || null,
+    actualAgentFeeAllocation: agentFee || null,
+    actualPoolAllocation: pool || null,
+    // 弁済・手数料・社数（実績）は振込実行時に計上する
+    actualRepaymentAllocation: null,
+    actualHandlingFee: null,
+    actualRepaymentCount: null,
   }
 }
 
@@ -143,11 +114,14 @@ export function PaymentTable({
       actualAgentFeeAllocation: payment.actualAgentFeeAllocation,
       actualPoolAllocation: payment.actualPoolAllocation,
       actualRepaymentAllocation: payment.actualRepaymentAllocation,
+      actualRepaymentCount: payment.actualRepaymentCount,
+      actualHandlingFee: payment.actualHandlingFee,
+      repaymentDate: payment.repaymentDate,
     })
   }
 
   const handleSave = (payment: PaymentRecord) => {
-    let finalData = { ...editData }
+    const finalData = { ...editData }
 
     // 実入金日が入力されている場合、充当額を自動計算
     if (finalData.actualDate) {
@@ -155,8 +129,12 @@ export function PaymentTable({
       const actualAmount = finalData.actualAmount ?? payment.plannedAmount
       finalData.actualAmount = actualAmount
 
+      // プール残高＝この行より前に実際にプールへ積まれた額の合計
+      const poolBalance = allCasePayments
+        .filter((p) => p.id !== payment.id)
+        .reduce((sum, p) => sum + (p.actualPoolAllocation ?? 0), 0)
       // 各充当額を自動計算（手動入力がない場合のみ）
-      const calculated = calculateActualAllocations(payment, actualAmount)
+      const calculated = calculateActualAllocations(payment, actualAmount, poolBalance)
       if (finalData.actualFeeAllocation === payment.actualFeeAllocation) {
         finalData.actualFeeAllocation = calculated.actualFeeAllocation
       }
@@ -166,39 +144,16 @@ export function PaymentTable({
       if (finalData.actualPoolAllocation === payment.actualPoolAllocation) {
         finalData.actualPoolAllocation = calculated.actualPoolAllocation
       }
-      if (finalData.actualRepaymentAllocation === payment.actualRepaymentAllocation) {
-        finalData.actualRepaymentAllocation = calculated.actualRepaymentAllocation
-      }
+      // 弁済充当額・振)手数料・社数（実績）は振込実行時に入れる値なので、
+      // 入金日を入れただけでは触らない（既に入っている値を消さない）。
 
       // 実入金が不足の場合、補充レコードを追加
       const plannedAmount = payment.plannedAmount ?? 0
       const shortage = plannedAmount - (actualAmount ?? 0)
       if (shortage > 0 && finalData.actualDate) {
-        // 今回の入金の次の入金を探す
-        const currentIndex = sortedPayments.findIndex((p) => p.id === payment.id)
-        const nextPayment = sortedPayments[currentIndex + 1]
-
-        // 補充レコードの入金予定日を決定
-        // 今回の入金日の翌日、または次回入金日の前日
-        let supplementDate: string
-        const currentDate = new Date(finalData.actualDate)
-        if (nextPayment?.plannedDate) {
-          const nextDate = new Date(nextPayment.plannedDate)
-          // 次回入金日の1日前
-          nextDate.setDate(nextDate.getDate() - 1)
-          // 今回の入金日より後であることを確認
-          if (nextDate > currentDate) {
-            supplementDate = nextDate.toISOString().split('T')[0]
-          } else {
-            // 今回の入金日の翌日
-            currentDate.setDate(currentDate.getDate() + 1)
-            supplementDate = currentDate.toISOString().split('T')[0]
-          }
-        } else {
-          // 次回入金がない場合、今回の入金日の翌日
-          currentDate.setDate(currentDate.getDate() + 1)
-          supplementDate = currentDate.toISOString().split('T')[0]
-        }
+        // 補充行の入金予定日は「不足が出た元の予定行と同じ日」にする。
+        // （元の予定日が空のときだけ、実入金日をフォールバックに使う）
+        const supplementDate = payment.plannedDate ?? finalData.actualDate
 
         // 新しい補充レコードを追加（サーバへも作成）
         const newId = Math.max(0, ...allCasePayments.map((p) => p.id)) + 1
@@ -221,6 +176,9 @@ export function PaymentTable({
           actualRepaymentAllocation: null,
           handlingFee: null,
           repaymentCount: null,
+          repaymentDate: null,
+          actualRepaymentCount: null,
+          actualHandlingFee: null,
           cumulativePool: null,
         })
       }
@@ -609,25 +567,58 @@ export function PaymentTable({
         return fmtNum(item.actualPoolAllocation)
       },
     },
+    // 実績側は kintone の「数」「振)手数料」を出す（予定側の 社数/手数料 とは別項目）。
     {
-      key: 'repaymentCountActual',
+      key: 'actualRepaymentCount',
       header: '社数',
-      width: '2rem',
+      width: '2.5rem',
       align: 'right',
       sortable: false,
       headerClassName: 'bg-blue-50',
-      render: (item) =>
-        item.actualDate ? fmtNum(item.repaymentCount) : <span className="text-slate-300">-</span>,
+      render: (item) => {
+        if (editingId === item.id) {
+          return (
+            <input
+              type="number"
+              value={editData.actualRepaymentCount ?? ''}
+              onChange={(e) =>
+                setEditData({
+                  ...editData,
+                  actualRepaymentCount: Number(e.target.value) || null,
+                })
+              }
+              className={`${inputCls} text-right`}
+            />
+          )
+        }
+        return fmtNum(item.actualRepaymentCount)
+      },
     },
     {
-      key: 'handlingFeeActual',
+      key: 'actualHandlingFee',
       header: '手数料',
       width: '3.5rem',
       align: 'right',
       sortable: false,
       headerClassName: 'bg-blue-50',
-      render: (item) =>
-        item.actualDate ? fmtNum(item.handlingFee) : <span className="text-slate-300">-</span>,
+      render: (item) => {
+        if (editingId === item.id) {
+          return (
+            <input
+              type="number"
+              value={editData.actualHandlingFee ?? ''}
+              onChange={(e) =>
+                setEditData({
+                  ...editData,
+                  actualHandlingFee: Number(e.target.value) || null,
+                })
+              }
+              className={`${inputCls} text-right`}
+            />
+          )
+        }
+        return fmtNum(item.actualHandlingFee)
+      },
     },
     {
       key: 'actualRepaymentAllocation',
@@ -754,6 +745,9 @@ export function PaymentTable({
             actualRepaymentAllocation: null,
             handlingFee: null,
             repaymentCount: null,
+            repaymentDate: null,
+            actualRepaymentCount: null,
+            actualHandlingFee: null,
             cumulativePool: null,
           })
         }}

@@ -24,6 +24,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 13932,
     repaymentCount: 108,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -45,6 +48,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: null,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -66,6 +72,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: 0,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 258,
   },
   {
@@ -87,6 +96,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 258,
   },
   {
@@ -108,6 +120,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 258,
   },
   {
@@ -129,6 +144,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 258,
   },
   {
@@ -150,6 +168,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 258,
   },
   {
@@ -171,6 +192,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 4958,
   },
   {
@@ -192,6 +216,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1005,
   },
   {
@@ -213,6 +240,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1005,
   },
   {
@@ -234,6 +264,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1005,
   },
   {
@@ -255,6 +288,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1005,
   },
   {
@@ -276,6 +312,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1005,
   },
   {
@@ -297,6 +336,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1005,
   },
   {
@@ -318,6 +360,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -339,6 +384,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -360,6 +408,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -381,6 +432,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -402,6 +456,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -423,6 +480,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -444,6 +504,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -465,6 +528,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -486,6 +552,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -507,6 +576,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -528,6 +600,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -549,6 +624,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -570,6 +648,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -591,6 +672,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -612,6 +696,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -633,6 +720,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -654,6 +744,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -675,6 +768,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -696,6 +792,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -717,6 +816,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -738,6 +840,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -759,6 +864,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -780,6 +888,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -801,6 +912,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -822,6 +936,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -843,6 +960,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -864,6 +984,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -885,6 +1008,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -906,6 +1032,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -927,6 +1056,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -948,6 +1080,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -969,6 +1104,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -990,6 +1128,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1011,6 +1152,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1032,6 +1176,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1053,6 +1200,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1074,6 +1224,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1095,6 +1248,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1116,6 +1272,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1137,6 +1296,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1158,6 +1320,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1179,6 +1344,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1200,6 +1368,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1221,6 +1392,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1242,6 +1416,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1263,6 +1440,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1284,6 +1464,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1305,6 +1488,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1326,6 +1512,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1347,6 +1536,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1368,6 +1560,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1389,6 +1584,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1410,6 +1608,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1431,6 +1632,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1452,6 +1656,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1473,6 +1680,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1494,6 +1704,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1515,6 +1728,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1536,6 +1752,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1557,6 +1776,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1578,6 +1800,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1599,6 +1824,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1620,6 +1848,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1641,6 +1872,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1662,6 +1896,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1683,6 +1920,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1704,6 +1944,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: 0,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -1725,6 +1968,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -1746,6 +1992,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -1767,6 +2016,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -1788,6 +2040,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -1809,6 +2064,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -1830,6 +2088,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -1851,6 +2112,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -1872,6 +2136,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 2560,
   },
   {
@@ -1893,6 +2160,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 678,
   },
   {
@@ -1914,6 +2184,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 678,
   },
   {
@@ -1935,6 +2208,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 678,
   },
   {
@@ -1956,6 +2232,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1977,6 +2256,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -1998,6 +2280,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2019,6 +2304,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2040,6 +2328,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2061,6 +2352,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2082,6 +2376,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2103,6 +2400,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2124,6 +2424,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2145,6 +2448,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2166,6 +2472,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2187,6 +2496,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2208,6 +2520,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2229,6 +2544,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2250,6 +2568,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2271,6 +2592,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2292,6 +2616,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2313,6 +2640,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2334,6 +2664,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2355,6 +2688,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2376,6 +2712,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2397,6 +2736,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2418,6 +2760,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2439,6 +2784,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2460,6 +2808,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2481,6 +2832,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2502,6 +2856,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2523,6 +2880,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2544,6 +2904,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2565,6 +2928,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2586,6 +2952,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2607,6 +2976,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2628,6 +3000,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2649,6 +3024,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2670,6 +3048,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2691,6 +3072,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2712,6 +3096,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2733,6 +3120,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2754,6 +3144,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2775,6 +3168,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2796,6 +3192,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2817,6 +3216,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2838,6 +3240,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2859,6 +3264,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2880,6 +3288,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2901,6 +3312,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2922,6 +3336,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2943,6 +3360,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2964,6 +3384,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -2985,6 +3408,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3006,6 +3432,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3027,6 +3456,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3048,6 +3480,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3069,6 +3504,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3090,6 +3528,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: 0,
     handlingFee: 1290,
     repaymentCount: 10,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1290,
   },
   {
@@ -3111,6 +3552,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 1290,
     repaymentCount: 10,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1290,
   },
   {
@@ -3132,6 +3576,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 1290,
     repaymentCount: 10,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1290,
   },
   {
@@ -3153,6 +3600,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 1290,
     repaymentCount: 10,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1290,
   },
   {
@@ -3174,6 +3624,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 1290,
     repaymentCount: 10,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1290,
   },
   {
@@ -3195,6 +3648,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 1290,
     repaymentCount: 10,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 16030,
   },
   {
@@ -3216,6 +3672,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 1290,
     repaymentCount: 10,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: -2450,
   },
   {
@@ -3237,6 +3696,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 1290,
     repaymentCount: 10,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: -2450,
   },
   {
@@ -3258,6 +3720,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 1290,
     repaymentCount: 10,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: -2450,
   },
   {
@@ -3279,6 +3744,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 1290,
     repaymentCount: 10,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 21550,
   },
   {
@@ -3300,6 +3768,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 1290,
     repaymentCount: 10,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: -2450,
   },
   {
@@ -3321,6 +3792,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 1290,
     repaymentCount: 10,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: -2450,
   },
   {
@@ -3342,6 +3816,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 1290,
     repaymentCount: 10,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3363,6 +3840,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 1290,
     repaymentCount: 10,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3384,6 +3864,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 1290,
     repaymentCount: 10,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3405,6 +3888,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 1290,
     repaymentCount: 10,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3426,6 +3912,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 1290,
     repaymentCount: 10,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3447,6 +3936,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 1290,
     repaymentCount: 10,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3468,6 +3960,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 1290,
     repaymentCount: 10,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3489,6 +3984,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 1290,
     repaymentCount: 10,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3510,6 +4008,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 1032,
     repaymentCount: 8,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3531,6 +4032,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 1032,
     repaymentCount: 8,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3552,6 +4056,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 1032,
     repaymentCount: 8,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3573,6 +4080,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 1032,
     repaymentCount: 8,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3594,6 +4104,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3615,6 +4128,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3636,6 +4152,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3657,6 +4176,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3678,6 +4200,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3699,6 +4224,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3720,6 +4248,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3741,6 +4272,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3762,6 +4296,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3783,6 +4320,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3804,6 +4344,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3825,6 +4368,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3846,6 +4392,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3867,6 +4416,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3888,6 +4440,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3909,6 +4464,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3930,6 +4488,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3951,6 +4512,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3972,6 +4536,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -3993,6 +4560,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4014,6 +4584,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4035,6 +4608,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4056,6 +4632,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4077,6 +4656,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4098,6 +4680,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4119,6 +4704,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4140,6 +4728,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4161,6 +4752,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4182,6 +4776,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4203,6 +4800,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4224,6 +4824,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4245,6 +4848,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4266,6 +4872,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4287,6 +4896,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4308,6 +4920,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4329,6 +4944,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4350,6 +4968,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4371,6 +4992,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4392,6 +5016,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4413,6 +5040,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4434,6 +5064,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4455,6 +5088,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4476,6 +5112,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4497,6 +5136,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4518,6 +5160,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4539,6 +5184,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4560,6 +5208,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4581,6 +5232,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4602,6 +5256,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4623,6 +5280,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4644,6 +5304,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4665,6 +5328,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4686,6 +5352,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4707,6 +5376,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -4728,6 +5400,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: 0,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 258,
   },
   {
@@ -4749,6 +5424,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 258,
   },
   {
@@ -4770,6 +5448,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 258,
   },
   {
@@ -4791,6 +5472,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 258,
   },
   {
@@ -4812,6 +5496,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 258,
   },
   {
@@ -4833,6 +5520,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1989,
   },
   {
@@ -4854,6 +5544,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 489,
   },
   {
@@ -4875,6 +5568,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 489,
   },
   {
@@ -4896,6 +5592,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 489,
   },
   {
@@ -4917,6 +5616,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 489,
   },
   {
@@ -4938,6 +5640,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 489,
   },
   {
@@ -4959,6 +5664,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 489,
   },
   {
@@ -4980,6 +5688,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5001,6 +5712,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5022,6 +5736,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5043,6 +5760,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5064,6 +5784,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5085,6 +5808,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5106,6 +5832,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5127,6 +5856,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5148,6 +5880,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5169,6 +5904,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5190,6 +5928,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5211,6 +5952,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5232,6 +5976,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5253,6 +6000,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5274,6 +6024,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5295,6 +6048,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5316,6 +6072,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5337,6 +6096,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5358,6 +6120,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5379,6 +6144,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5400,6 +6168,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5421,6 +6192,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5442,6 +6216,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5463,6 +6240,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5484,6 +6264,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5505,6 +6288,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5526,6 +6312,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5547,6 +6336,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5568,6 +6360,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5589,6 +6384,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5610,6 +6408,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5631,6 +6432,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5652,6 +6456,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5673,6 +6480,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5694,6 +6504,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5715,6 +6528,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5736,6 +6552,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5757,6 +6576,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5778,6 +6600,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5799,6 +6624,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5820,6 +6648,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5841,6 +6672,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5862,6 +6696,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5883,6 +6720,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5904,6 +6744,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5925,6 +6768,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5946,6 +6792,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5967,6 +6816,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -5988,6 +6840,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6009,6 +6864,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6030,6 +6888,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6051,6 +6912,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6072,6 +6936,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6093,6 +6960,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6114,6 +6984,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: 0,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 258,
   },
   {
@@ -6135,6 +7008,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 258,
   },
   {
@@ -6156,6 +7032,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 258,
   },
   {
@@ -6177,6 +7056,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 258,
   },
   {
@@ -6198,6 +7080,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 258,
   },
   {
@@ -6219,6 +7104,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1458,
   },
   {
@@ -6240,6 +7128,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 655,
   },
   {
@@ -6261,6 +7152,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 655,
   },
   {
@@ -6282,6 +7176,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 655,
   },
   {
@@ -6303,6 +7200,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 655,
   },
   {
@@ -6324,6 +7224,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 655,
   },
   {
@@ -6345,6 +7248,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 655,
   },
   {
@@ -6366,6 +7272,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6387,6 +7296,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6408,6 +7320,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6429,6 +7344,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6450,6 +7368,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6471,6 +7392,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6492,6 +7416,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6513,6 +7440,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6534,6 +7464,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6555,6 +7488,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6576,6 +7512,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6597,6 +7536,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6618,6 +7560,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6639,6 +7584,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6660,6 +7608,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6681,6 +7632,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6702,6 +7656,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6723,6 +7680,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6744,6 +7704,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6765,6 +7728,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6786,6 +7752,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6807,6 +7776,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6828,6 +7800,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6849,6 +7824,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6870,6 +7848,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6891,6 +7872,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6912,6 +7896,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6933,6 +7920,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6954,6 +7944,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6975,6 +7968,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -6996,6 +7992,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7017,6 +8016,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7038,6 +8040,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7059,6 +8064,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7080,6 +8088,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7101,6 +8112,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7122,6 +8136,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7143,6 +8160,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7164,6 +8184,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7185,6 +8208,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7206,6 +8232,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7227,6 +8256,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7248,6 +8280,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7269,6 +8304,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7290,6 +8328,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7311,6 +8352,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7332,6 +8376,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7353,6 +8400,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7374,6 +8424,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7395,6 +8448,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7416,6 +8472,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7437,6 +8496,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7458,6 +8520,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7479,6 +8544,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7500,6 +8568,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7521,6 +8592,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7542,6 +8616,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7563,6 +8640,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7584,6 +8664,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7605,6 +8688,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7626,6 +8712,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7647,6 +8736,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7668,6 +8760,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7689,6 +8784,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7710,6 +8808,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7731,6 +8832,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7752,6 +8856,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7773,6 +8880,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7794,6 +8904,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7815,6 +8928,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7836,6 +8952,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7857,6 +8976,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7878,6 +9000,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7899,6 +9024,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7920,6 +9048,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7941,6 +9072,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7962,6 +9096,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -7983,6 +9120,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8004,6 +9144,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: 0,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 516,
   },
   {
@@ -8025,6 +9168,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 516,
   },
   {
@@ -8046,6 +9192,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 516,
   },
   {
@@ -8067,6 +9216,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 516,
   },
   {
@@ -8088,6 +9240,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 516,
   },
   {
@@ -8109,6 +9264,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 37807,
   },
   {
@@ -8130,6 +9288,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 771,
   },
   {
@@ -8151,6 +9312,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 771,
   },
   {
@@ -8172,6 +9336,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 771,
   },
   {
@@ -8193,6 +9360,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 771,
   },
   {
@@ -8214,6 +9384,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 771,
   },
   {
@@ -8235,6 +9408,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 771,
   },
   {
@@ -8256,6 +9432,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8277,6 +9456,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8298,6 +9480,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8319,6 +9504,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8340,6 +9528,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8361,6 +9552,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8382,6 +9576,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8403,6 +9600,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8424,6 +9624,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8445,6 +9648,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8466,6 +9672,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8487,6 +9696,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8508,6 +9720,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8529,6 +9744,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8550,6 +9768,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8571,6 +9792,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8592,6 +9816,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8613,6 +9840,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8634,6 +9864,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8655,6 +9888,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8676,6 +9912,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8697,6 +9936,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8718,6 +9960,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8739,6 +9984,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8760,6 +10008,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8781,6 +10032,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8802,6 +10056,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8823,6 +10080,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8844,6 +10104,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8865,6 +10128,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8886,6 +10152,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8907,6 +10176,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8928,6 +10200,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8949,6 +10224,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8970,6 +10248,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -8991,6 +10272,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9012,6 +10296,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9033,6 +10320,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9054,6 +10344,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9075,6 +10368,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9096,6 +10392,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9117,6 +10416,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9138,6 +10440,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9159,6 +10464,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9180,6 +10488,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9201,6 +10512,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9222,6 +10536,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9243,6 +10560,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9264,6 +10584,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9285,6 +10608,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9306,6 +10632,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9327,6 +10656,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9348,6 +10680,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9369,6 +10704,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9390,6 +10728,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: 0,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 0,
   },
   {
@@ -9411,6 +10752,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 129,
   },
   {
@@ -9432,6 +10776,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 516,
   },
   {
@@ -9453,6 +10800,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 516,
   },
   {
@@ -9474,6 +10824,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 516,
   },
   {
@@ -9495,6 +10848,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 516,
   },
   {
@@ -9516,6 +10872,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 2066,
   },
   {
@@ -9537,6 +10896,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1181,
   },
   {
@@ -9558,6 +10920,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1181,
   },
   {
@@ -9579,6 +10944,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1181,
   },
   {
@@ -9600,6 +10968,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1181,
   },
   {
@@ -9621,6 +10992,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1181,
   },
   {
@@ -9642,6 +11016,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9663,6 +11040,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9684,6 +11064,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9705,6 +11088,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9726,6 +11112,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9747,6 +11136,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9768,6 +11160,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9789,6 +11184,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9810,6 +11208,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9831,6 +11232,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9852,6 +11256,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9873,6 +11280,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9894,6 +11304,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9915,6 +11328,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9936,6 +11352,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9957,6 +11376,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9978,6 +11400,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -9999,6 +11424,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10020,6 +11448,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10041,6 +11472,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10062,6 +11496,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10083,6 +11520,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10104,6 +11544,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10125,6 +11568,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10146,6 +11592,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10167,6 +11616,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10188,6 +11640,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10209,6 +11664,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10230,6 +11688,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10251,6 +11712,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10272,6 +11736,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10293,6 +11760,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10314,6 +11784,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10335,6 +11808,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10356,6 +11832,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10377,6 +11856,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10398,6 +11880,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10419,6 +11904,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10440,6 +11928,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10461,6 +11952,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10482,6 +11976,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10503,6 +12000,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10524,6 +12024,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10545,6 +12048,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10566,6 +12072,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10587,6 +12096,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10608,6 +12120,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10629,6 +12144,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10650,6 +12168,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10671,6 +12192,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10692,6 +12216,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10713,6 +12240,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10734,6 +12264,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10755,6 +12288,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10776,6 +12312,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -10797,6 +12336,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -10818,6 +12360,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -10839,6 +12384,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -10860,6 +12408,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 75087,
   },
   {
@@ -10881,6 +12432,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 20437,
   },
   {
@@ -10902,6 +12456,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 20437,
   },
   {
@@ -10923,6 +12480,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: -36563,
   },
   {
@@ -10944,6 +12504,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: -36563,
   },
   {
@@ -10965,6 +12528,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: -36563,
   },
   {
@@ -10986,6 +12552,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 218437,
   },
   {
@@ -11007,6 +12576,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: -41563,
   },
   {
@@ -11028,6 +12600,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: -41563,
   },
   {
@@ -11049,6 +12624,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11070,6 +12648,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11091,6 +12672,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11112,6 +12696,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11133,6 +12720,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11154,6 +12744,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11175,6 +12768,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11196,6 +12792,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11217,6 +12816,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11238,6 +12840,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11259,6 +12864,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11280,6 +12888,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11301,6 +12912,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11322,6 +12936,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11343,6 +12960,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11364,6 +12984,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11385,6 +13008,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11406,6 +13032,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11427,6 +13056,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11448,6 +13080,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11469,6 +13104,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11490,6 +13128,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11511,6 +13152,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11532,6 +13176,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11553,6 +13200,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11574,6 +13224,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11595,6 +13248,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11616,6 +13272,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11637,6 +13296,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11658,6 +13320,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11679,6 +13344,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: 0,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 516,
   },
   {
@@ -11700,6 +13368,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 774,
   },
   {
@@ -11721,6 +13392,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 774,
   },
   {
@@ -11742,6 +13416,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 774,
   },
   {
@@ -11763,6 +13440,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 774,
   },
   {
@@ -11784,6 +13464,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1914,
   },
   {
@@ -11805,6 +13488,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 989,
   },
   {
@@ -11826,6 +13512,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 989,
   },
   {
@@ -11847,6 +13536,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 989,
   },
   {
@@ -11868,6 +13560,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 989,
   },
   {
@@ -11889,6 +13584,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 989,
   },
   {
@@ -11910,6 +13608,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 989,
   },
   {
@@ -11931,6 +13632,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11952,6 +13656,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11973,6 +13680,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -11994,6 +13704,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12015,6 +13728,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12036,6 +13752,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12057,6 +13776,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12078,6 +13800,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12099,6 +13824,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12120,6 +13848,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12141,6 +13872,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12162,6 +13896,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12183,6 +13920,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12204,6 +13944,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12225,6 +13968,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12246,6 +13992,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12267,6 +14016,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12288,6 +14040,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12309,6 +14064,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12330,6 +14088,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12351,6 +14112,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12372,6 +14136,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12393,6 +14160,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12414,6 +14184,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12435,6 +14208,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12456,6 +14232,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12477,6 +14256,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12498,6 +14280,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12519,6 +14304,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12540,6 +14328,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12561,6 +14352,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12582,6 +14376,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12603,6 +14400,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12624,6 +14424,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12645,6 +14448,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12666,6 +14472,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12687,6 +14496,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12708,6 +14520,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12729,6 +14544,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12750,6 +14568,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12771,6 +14592,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12792,6 +14616,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12813,6 +14640,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12834,6 +14664,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12855,6 +14688,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12876,6 +14712,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12897,6 +14736,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12918,6 +14760,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12939,6 +14784,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12960,6 +14808,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -12981,6 +14832,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13002,6 +14856,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13023,6 +14880,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13044,6 +14904,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13065,6 +14928,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: 0,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 0,
   },
   {
@@ -13086,6 +14952,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 0,
   },
   {
@@ -13107,6 +14976,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: 0,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -13128,6 +15000,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -13149,6 +15024,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -13170,6 +15048,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -13191,6 +15072,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -13212,6 +15096,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 83687,
   },
   {
@@ -13233,6 +15120,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: -16123,
   },
   {
@@ -13254,6 +15144,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: -16123,
   },
   {
@@ -13275,6 +15168,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: -16123,
   },
   {
@@ -13296,6 +15192,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: -16123,
   },
   {
@@ -13317,6 +15216,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: -16123,
   },
   {
@@ -13338,6 +15240,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 85877,
   },
   {
@@ -13359,6 +15264,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13380,6 +15288,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13401,6 +15312,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13422,6 +15336,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13443,6 +15360,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13464,6 +15384,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13485,6 +15408,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13506,6 +15432,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13527,6 +15456,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13548,6 +15480,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13569,6 +15504,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13590,6 +15528,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13611,6 +15552,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13632,6 +15576,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13653,6 +15600,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13674,6 +15624,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13695,6 +15648,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13716,6 +15672,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13737,6 +15696,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13758,6 +15720,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13779,6 +15744,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13800,6 +15768,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13821,6 +15792,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13842,6 +15816,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13863,6 +15840,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13884,6 +15864,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13905,6 +15888,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13926,6 +15912,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13947,6 +15936,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13968,6 +15960,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -13989,6 +15984,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14010,6 +16008,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14031,6 +16032,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14052,6 +16056,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14073,6 +16080,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14094,6 +16104,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14115,6 +16128,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14136,6 +16152,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14157,6 +16176,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14178,6 +16200,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14199,6 +16224,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14220,6 +16248,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14241,6 +16272,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14262,6 +16296,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14283,6 +16320,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14304,6 +16344,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14325,6 +16368,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14346,6 +16392,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14367,6 +16416,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14388,6 +16440,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14409,6 +16464,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14430,6 +16488,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14451,6 +16512,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14472,6 +16536,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14493,6 +16560,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: 0,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -14514,6 +16584,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -14535,6 +16608,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -14556,6 +16632,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -14577,6 +16656,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -14598,6 +16680,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -14619,6 +16704,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -14640,6 +16728,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -14661,6 +16752,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -14682,6 +16776,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1359,
   },
   {
@@ -14703,6 +16800,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1180,
   },
   {
@@ -14724,6 +16824,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1180,
   },
   {
@@ -14745,6 +16848,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14766,6 +16872,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14787,6 +16896,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14808,6 +16920,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14829,6 +16944,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14850,6 +16968,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14871,6 +16992,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14892,6 +17016,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14913,6 +17040,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14934,6 +17064,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14955,6 +17088,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14976,6 +17112,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -14997,6 +17136,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15018,6 +17160,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15039,6 +17184,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15060,6 +17208,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15081,6 +17232,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15102,6 +17256,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15123,6 +17280,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15144,6 +17304,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15165,6 +17328,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15186,6 +17352,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15207,6 +17376,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15228,6 +17400,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15249,6 +17424,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15270,6 +17448,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15291,6 +17472,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15312,6 +17496,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15333,6 +17520,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15354,6 +17544,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15375,6 +17568,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15396,6 +17592,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15417,6 +17616,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15438,6 +17640,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15459,6 +17664,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15480,6 +17688,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15501,6 +17712,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15522,6 +17736,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15543,6 +17760,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15564,6 +17784,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15585,6 +17808,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15606,6 +17832,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15627,6 +17856,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15648,6 +17880,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15669,6 +17904,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15690,6 +17928,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15711,6 +17952,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15732,6 +17976,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15753,6 +18000,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15774,6 +18024,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15795,6 +18048,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15816,6 +18072,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15837,6 +18096,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15858,6 +18120,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -15879,6 +18144,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: 0,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -15900,6 +18168,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -15921,6 +18192,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -15942,6 +18216,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -15963,6 +18240,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -15984,6 +18264,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 3956,
   },
   {
@@ -16005,6 +18288,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 731,
   },
   {
@@ -16026,6 +18312,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 731,
   },
   {
@@ -16047,6 +18336,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 731,
   },
   {
@@ -16068,6 +18360,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 731,
   },
   {
@@ -16089,6 +18384,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 731,
   },
   {
@@ -16110,6 +18408,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 731,
   },
   {
@@ -16131,6 +18432,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16152,6 +18456,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16173,6 +18480,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16194,6 +18504,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16215,6 +18528,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16236,6 +18552,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16257,6 +18576,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16278,6 +18600,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16299,6 +18624,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16320,6 +18648,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16341,6 +18672,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16362,6 +18696,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16383,6 +18720,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16404,6 +18744,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16425,6 +18768,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16446,6 +18792,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16467,6 +18816,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16488,6 +18840,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16509,6 +18864,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16530,6 +18888,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16551,6 +18912,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16572,6 +18936,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16593,6 +18960,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16614,6 +18984,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16635,6 +19008,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16656,6 +19032,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16677,6 +19056,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16698,6 +19080,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16719,6 +19104,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16740,6 +19128,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16761,6 +19152,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16782,6 +19176,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16803,6 +19200,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16824,6 +19224,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16845,6 +19248,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16866,6 +19272,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16887,6 +19296,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16908,6 +19320,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16929,6 +19344,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16950,6 +19368,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16971,6 +19392,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -16992,6 +19416,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17013,6 +19440,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -17034,6 +19464,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -17055,6 +19488,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 84287,
   },
   {
@@ -17076,6 +19512,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 108437,
   },
   {
@@ -17097,6 +19536,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: -191563,
   },
   {
@@ -17118,6 +19560,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1217,
   },
   {
@@ -17139,6 +19584,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 794,
   },
   {
@@ -17160,6 +19608,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 794,
   },
   {
@@ -17181,6 +19632,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 794,
   },
   {
@@ -17202,6 +19656,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 794,
   },
   {
@@ -17223,6 +19680,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 794,
   },
   {
@@ -17244,6 +19704,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 794,
   },
   {
@@ -17265,6 +19728,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17286,6 +19752,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17307,6 +19776,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17328,6 +19800,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17349,6 +19824,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17370,6 +19848,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17391,6 +19872,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17412,6 +19896,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17433,6 +19920,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17454,6 +19944,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17475,6 +19968,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17496,6 +19992,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17517,6 +20016,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17538,6 +20040,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17559,6 +20064,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17580,6 +20088,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17601,6 +20112,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17622,6 +20136,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17643,6 +20160,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17664,6 +20184,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17685,6 +20208,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17706,6 +20232,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17727,6 +20256,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17748,6 +20280,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17769,6 +20304,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17790,6 +20328,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17811,6 +20352,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17832,6 +20376,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17853,6 +20400,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17874,6 +20424,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17895,6 +20448,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17916,6 +20472,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17937,6 +20496,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17958,6 +20520,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -17979,6 +20544,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18000,6 +20568,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18021,6 +20592,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18042,6 +20616,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18063,6 +20640,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18084,6 +20664,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18105,6 +20688,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18126,6 +20712,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18147,6 +20736,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18168,6 +20760,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18189,6 +20784,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18210,6 +20808,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18231,6 +20832,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18252,6 +20856,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18273,6 +20880,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18294,6 +20904,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18315,6 +20928,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18336,6 +20952,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18357,6 +20976,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18378,6 +21000,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18399,6 +21024,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: 0,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 258,
   },
   {
@@ -18420,6 +21048,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 258,
   },
   {
@@ -18441,6 +21072,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 258,
   },
   {
@@ -18462,6 +21096,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 258,
   },
   {
@@ -18483,6 +21120,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 258,
   },
   {
@@ -18504,6 +21144,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 458,
   },
   {
@@ -18525,6 +21168,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1008,
   },
   {
@@ -18546,6 +21192,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1008,
   },
   {
@@ -18567,6 +21216,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1008,
   },
   {
@@ -18588,6 +21240,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1008,
   },
   {
@@ -18609,6 +21264,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1008,
   },
   {
@@ -18630,6 +21288,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1008,
   },
   {
@@ -18651,6 +21312,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18672,6 +21336,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18693,6 +21360,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18714,6 +21384,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18735,6 +21408,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18756,6 +21432,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18777,6 +21456,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18798,6 +21480,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18819,6 +21504,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18840,6 +21528,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18861,6 +21552,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18882,6 +21576,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18903,6 +21600,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18924,6 +21624,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18945,6 +21648,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18966,6 +21672,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -18987,6 +21696,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19008,6 +21720,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19029,6 +21744,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19050,6 +21768,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19071,6 +21792,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19092,6 +21816,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19113,6 +21840,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19134,6 +21864,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19155,6 +21888,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19176,6 +21912,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19197,6 +21936,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19218,6 +21960,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19239,6 +21984,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19260,6 +22008,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19281,6 +22032,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19302,6 +22056,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19323,6 +22080,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19344,6 +22104,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19365,6 +22128,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19386,6 +22152,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19407,6 +22176,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19428,6 +22200,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19449,6 +22224,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19470,6 +22248,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19491,6 +22272,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19512,6 +22296,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19533,6 +22320,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19554,6 +22344,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19575,6 +22368,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19596,6 +22392,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19617,6 +22416,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19638,6 +22440,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19659,6 +22464,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19680,6 +22488,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19701,6 +22512,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19722,6 +22536,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19743,6 +22560,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19764,6 +22584,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -19785,6 +22608,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: 0,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 129,
   },
   {
@@ -19806,6 +22632,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 129,
   },
   {
@@ -19827,6 +22656,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 129,
   },
   {
@@ -19848,6 +22680,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 129,
   },
   {
@@ -19869,6 +22704,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 129,
   },
   {
@@ -19890,6 +22728,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 5729,
   },
   {
@@ -19911,6 +22752,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 489,
   },
   {
@@ -19932,6 +22776,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 489,
   },
   {
@@ -19953,6 +22800,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 489,
   },
   {
@@ -19974,6 +22824,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 489,
   },
   {
@@ -19995,6 +22848,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 489,
   },
   {
@@ -20016,6 +22872,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 489,
   },
   {
@@ -20037,6 +22896,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20058,6 +22920,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20079,6 +22944,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20100,6 +22968,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20121,6 +22992,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20142,6 +23016,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20163,6 +23040,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20184,6 +23064,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20205,6 +23088,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20226,6 +23112,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20247,6 +23136,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20268,6 +23160,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20289,6 +23184,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20310,6 +23208,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20331,6 +23232,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20352,6 +23256,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20373,6 +23280,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20394,6 +23304,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20415,6 +23328,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20436,6 +23352,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20457,6 +23376,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20478,6 +23400,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20499,6 +23424,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20520,6 +23448,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20541,6 +23472,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20562,6 +23496,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20583,6 +23520,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20604,6 +23544,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20625,6 +23568,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20646,6 +23592,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20667,6 +23616,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20688,6 +23640,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20709,6 +23664,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20730,6 +23688,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20751,6 +23712,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20772,6 +23736,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20793,6 +23760,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20814,6 +23784,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20835,6 +23808,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20856,6 +23832,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20877,6 +23856,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20898,6 +23880,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20919,6 +23904,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20940,6 +23928,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20961,6 +23952,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -20982,6 +23976,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21003,6 +24000,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21024,6 +24024,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21045,6 +24048,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21066,6 +24072,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21087,6 +24096,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21108,6 +24120,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21129,6 +24144,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21150,6 +24168,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21171,6 +24192,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21192,6 +24216,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21213,6 +24240,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21234,6 +24264,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21255,6 +24288,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21276,6 +24312,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21297,6 +24336,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21318,6 +24360,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21339,6 +24384,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21360,6 +24408,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21381,6 +24432,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21402,6 +24456,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21423,6 +24480,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21444,6 +24504,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21465,6 +24528,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21486,6 +24552,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21507,6 +24576,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21528,6 +24600,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21549,6 +24624,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21570,6 +24648,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21591,6 +24672,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21612,6 +24696,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21633,6 +24720,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21654,6 +24744,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21675,6 +24768,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: 0,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 129,
   },
   {
@@ -21696,6 +24792,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 129,
   },
   {
@@ -21717,6 +24816,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 129,
   },
   {
@@ -21738,6 +24840,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 129,
   },
   {
@@ -21759,6 +24864,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 129,
   },
   {
@@ -21780,6 +24888,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 5882,
   },
   {
@@ -21801,6 +24912,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 530,
   },
   {
@@ -21822,6 +24936,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 530,
   },
   {
@@ -21843,6 +24960,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 530,
   },
   {
@@ -21864,6 +24984,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 530,
   },
   {
@@ -21885,6 +25008,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 530,
   },
   {
@@ -21906,6 +25032,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 530,
   },
   {
@@ -21927,6 +25056,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21948,6 +25080,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21969,6 +25104,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -21990,6 +25128,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22011,6 +25152,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22032,6 +25176,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22053,6 +25200,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22074,6 +25224,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22095,6 +25248,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22116,6 +25272,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22137,6 +25296,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22158,6 +25320,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22179,6 +25344,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22200,6 +25368,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22221,6 +25392,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22242,6 +25416,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22263,6 +25440,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22284,6 +25464,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22305,6 +25488,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22326,6 +25512,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22347,6 +25536,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22368,6 +25560,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22389,6 +25584,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22410,6 +25608,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22431,6 +25632,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22452,6 +25656,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22473,6 +25680,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22494,6 +25704,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: 0,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -22515,6 +25728,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -22536,6 +25752,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -22557,6 +25776,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -22578,6 +25800,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -22599,6 +25824,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -22620,6 +25848,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -22641,6 +25872,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -22662,6 +25896,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -22683,6 +25920,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -22704,6 +25944,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 6472,
   },
   {
@@ -22725,6 +25968,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1044,
   },
   {
@@ -22746,6 +25992,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22767,6 +26016,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22788,6 +26040,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22809,6 +26064,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22830,6 +26088,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22851,6 +26112,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22872,6 +26136,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22893,6 +26160,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22914,6 +26184,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22935,6 +26208,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22956,6 +26232,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22977,6 +26256,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -22998,6 +26280,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23019,6 +26304,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23040,6 +26328,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23061,6 +26352,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23082,6 +26376,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23103,6 +26400,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23124,6 +26424,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23145,6 +26448,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23166,6 +26472,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23187,6 +26496,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23208,6 +26520,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23229,6 +26544,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23250,6 +26568,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23271,6 +26592,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23292,6 +26616,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23313,6 +26640,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23334,6 +26664,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23355,6 +26688,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23376,6 +26712,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23397,6 +26736,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23418,6 +26760,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23439,6 +26784,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23460,6 +26808,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23481,6 +26832,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23502,6 +26856,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23523,6 +26880,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23544,6 +26904,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23565,6 +26928,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23586,6 +26952,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23607,6 +26976,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23628,6 +27000,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23649,6 +27024,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23670,6 +27048,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23691,6 +27072,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23712,6 +27096,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23733,6 +27120,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23754,6 +27144,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23775,6 +27168,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23796,6 +27192,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23817,6 +27216,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23838,6 +27240,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23859,6 +27264,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -23880,6 +27288,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 774,
   },
   {
@@ -23901,6 +27312,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 774,
   },
   {
@@ -23922,6 +27336,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 774,
   },
   {
@@ -23943,6 +27360,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 774,
   },
   {
@@ -23964,6 +27384,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 774,
   },
   {
@@ -23985,6 +27408,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 2910,
   },
   {
@@ -24006,6 +27432,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1421,
   },
   {
@@ -24027,6 +27456,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1421,
   },
   {
@@ -24048,6 +27480,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1421,
   },
   {
@@ -24069,6 +27504,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1421,
   },
   {
@@ -24090,6 +27528,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1421,
   },
   {
@@ -24111,6 +27552,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1421,
   },
   {
@@ -24132,6 +27576,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24153,6 +27600,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24174,6 +27624,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24195,6 +27648,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24216,6 +27672,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24237,6 +27696,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24258,6 +27720,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24279,6 +27744,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24300,6 +27768,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24321,6 +27792,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24342,6 +27816,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24363,6 +27840,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24384,6 +27864,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24405,6 +27888,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24426,6 +27912,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24447,6 +27936,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24468,6 +27960,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24489,6 +27984,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24510,6 +28008,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24531,6 +28032,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24552,6 +28056,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24573,6 +28080,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24594,6 +28104,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24615,6 +28128,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24636,6 +28152,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24657,6 +28176,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24678,6 +28200,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24699,6 +28224,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24720,6 +28248,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24741,6 +28272,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24762,6 +28296,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24783,6 +28320,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24804,6 +28344,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24825,6 +28368,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24846,6 +28392,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24867,6 +28416,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24888,6 +28440,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24909,6 +28464,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24930,6 +28488,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24951,6 +28512,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24972,6 +28536,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -24993,6 +28560,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25014,6 +28584,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25035,6 +28608,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25056,6 +28632,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25077,6 +28656,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25098,6 +28680,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25119,6 +28704,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25140,6 +28728,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25161,6 +28752,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25182,6 +28776,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25203,6 +28800,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25224,6 +28824,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25245,6 +28848,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25266,6 +28872,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -25287,6 +28896,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -25308,6 +28920,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -25329,6 +28944,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -25350,6 +28968,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -25371,6 +28992,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -25392,6 +29016,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -25413,6 +29040,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -25434,6 +29064,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -25455,6 +29088,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 5211,
   },
   {
@@ -25476,6 +29112,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 893,
   },
   {
@@ -25497,6 +29136,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 893,
   },
   {
@@ -25518,6 +29160,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25539,6 +29184,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25560,6 +29208,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25581,6 +29232,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25602,6 +29256,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25623,6 +29280,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25644,6 +29304,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25665,6 +29328,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25686,6 +29352,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25707,6 +29376,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25728,6 +29400,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25749,6 +29424,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25770,6 +29448,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25791,6 +29472,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25812,6 +29496,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25833,6 +29520,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25854,6 +29544,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25875,6 +29568,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25896,6 +29592,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25917,6 +29616,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25938,6 +29640,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25959,6 +29664,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -25980,6 +29688,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26001,6 +29712,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26022,6 +29736,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26043,6 +29760,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26064,6 +29784,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26085,6 +29808,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26106,6 +29832,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26127,6 +29856,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26148,6 +29880,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26169,6 +29904,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26190,6 +29928,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26211,6 +29952,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26232,6 +29976,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26253,6 +30000,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26274,6 +30024,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26295,6 +30048,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26316,6 +30072,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26337,6 +30096,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26358,6 +30120,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26379,6 +30144,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26400,6 +30168,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26421,6 +30192,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26442,6 +30216,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26463,6 +30240,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26484,6 +30264,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26505,6 +30288,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26526,6 +30312,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26547,6 +30336,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26568,6 +30360,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26589,6 +30384,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26610,6 +30408,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26631,6 +30432,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26652,6 +30456,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: 0,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 645,
   },
   {
@@ -26673,6 +30480,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 645,
   },
   {
@@ -26694,6 +30504,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 645,
   },
   {
@@ -26715,6 +30528,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 645,
   },
   {
@@ -26736,6 +30552,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 645,
   },
   {
@@ -26757,6 +30576,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 645,
   },
   {
@@ -26778,6 +30600,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 645,
   },
   {
@@ -26799,6 +30624,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 645,
   },
   {
@@ -26820,6 +30648,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 645,
   },
   {
@@ -26841,6 +30672,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 645,
   },
   {
@@ -26862,6 +30696,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 645,
   },
   {
@@ -26883,6 +30720,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1271,
   },
   {
@@ -26904,6 +30744,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26925,6 +30768,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26946,6 +30792,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26967,6 +30816,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -26988,6 +30840,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27009,6 +30864,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27030,6 +30888,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27051,6 +30912,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27072,6 +30936,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27093,6 +30960,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27114,6 +30984,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27135,6 +31008,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27156,6 +31032,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27177,6 +31056,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27198,6 +31080,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27219,6 +31104,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27240,6 +31128,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27261,6 +31152,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27282,6 +31176,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27303,6 +31200,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27324,6 +31224,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27345,6 +31248,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27366,6 +31272,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27387,6 +31296,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27408,6 +31320,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27429,6 +31344,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27450,6 +31368,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27471,6 +31392,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27492,6 +31416,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27513,6 +31440,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27534,6 +31464,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27555,6 +31488,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27576,6 +31512,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27597,6 +31536,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27618,6 +31560,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27639,6 +31584,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27660,6 +31608,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27681,6 +31632,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27702,6 +31656,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27723,6 +31680,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27744,6 +31704,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -27765,6 +31728,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: 0,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -27786,6 +31752,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -27807,6 +31776,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -27828,6 +31800,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -27849,6 +31824,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -27870,6 +31848,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 3687,
   },
   {
@@ -27891,6 +31872,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 790,
   },
   {
@@ -27912,6 +31896,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 790,
   },
   {
@@ -27933,6 +31920,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 790,
   },
   {
@@ -27954,6 +31944,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 790,
   },
   {
@@ -27975,6 +31968,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 790,
   },
   {
@@ -27996,6 +31992,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 790,
   },
   {
@@ -28017,6 +32016,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28038,6 +32040,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28059,6 +32064,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28080,6 +32088,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28101,6 +32112,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28122,6 +32136,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28143,6 +32160,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28164,6 +32184,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28185,6 +32208,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28206,6 +32232,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28227,6 +32256,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28248,6 +32280,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28269,6 +32304,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28290,6 +32328,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28311,6 +32352,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28332,6 +32376,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28353,6 +32400,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28374,6 +32424,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28395,6 +32448,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28416,6 +32472,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28437,6 +32496,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28458,6 +32520,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28479,6 +32544,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28500,6 +32568,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28521,6 +32592,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28542,6 +32616,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28563,6 +32640,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28584,6 +32664,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28605,6 +32688,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28626,6 +32712,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28647,6 +32736,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28668,6 +32760,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28689,6 +32784,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28710,6 +32808,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28731,6 +32832,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28752,6 +32856,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28773,6 +32880,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28794,6 +32904,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28815,6 +32928,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28836,6 +32952,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28857,6 +32976,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28878,6 +33000,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28899,6 +33024,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28920,6 +33048,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28941,6 +33072,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28962,6 +33096,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -28983,6 +33120,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29004,6 +33144,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29025,6 +33168,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29046,6 +33192,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29067,6 +33216,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29088,6 +33240,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29109,6 +33264,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29130,6 +33288,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29151,6 +33312,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: 0,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -29172,6 +33336,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -29193,6 +33360,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -29214,6 +33384,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -29235,6 +33408,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 48137,
   },
   {
@@ -29256,6 +33432,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 668,
   },
   {
@@ -29277,6 +33456,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 668,
   },
   {
@@ -29298,6 +33480,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 668,
   },
   {
@@ -29319,6 +33504,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 668,
   },
   {
@@ -29340,6 +33528,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 668,
   },
   {
@@ -29361,6 +33552,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 668,
   },
   {
@@ -29382,6 +33576,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 668,
   },
   {
@@ -29403,6 +33600,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29424,6 +33624,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29445,6 +33648,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29466,6 +33672,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29487,6 +33696,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29508,6 +33720,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29529,6 +33744,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29550,6 +33768,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29571,6 +33792,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29592,6 +33816,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29613,6 +33840,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29634,6 +33864,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29655,6 +33888,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29676,6 +33912,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29697,6 +33936,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29718,6 +33960,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29739,6 +33984,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29760,6 +34008,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29781,6 +34032,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29802,6 +34056,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29823,6 +34080,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29844,6 +34104,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29865,6 +34128,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29886,6 +34152,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29907,6 +34176,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29928,6 +34200,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29949,6 +34224,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29970,6 +34248,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -29991,6 +34272,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30012,6 +34296,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30033,6 +34320,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30054,6 +34344,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30075,6 +34368,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30096,6 +34392,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30117,6 +34416,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30138,6 +34440,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30159,6 +34464,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30180,6 +34488,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30201,6 +34512,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30222,6 +34536,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30243,6 +34560,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30264,6 +34584,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30285,6 +34608,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30306,6 +34632,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30327,6 +34656,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30348,6 +34680,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30369,6 +34704,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30390,6 +34728,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30411,6 +34752,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30432,6 +34776,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30453,6 +34800,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30474,6 +34824,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30495,6 +34848,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30516,6 +34872,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: 0,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 645,
   },
   {
@@ -30537,6 +34896,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 645,
   },
   {
@@ -30558,6 +34920,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 645,
   },
   {
@@ -30579,6 +34944,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 645,
   },
   {
@@ -30600,6 +34968,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 645,
   },
   {
@@ -30621,6 +34992,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 645,
   },
   {
@@ -30642,6 +35016,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 645,
   },
   {
@@ -30663,6 +35040,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 645,
   },
   {
@@ -30684,6 +35064,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 645,
   },
   {
@@ -30705,6 +35088,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 645,
   },
   {
@@ -30726,6 +35112,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 645,
   },
   {
@@ -30747,6 +35136,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 8153,
   },
   {
@@ -30768,6 +35160,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30789,6 +35184,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30810,6 +35208,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30831,6 +35232,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30852,6 +35256,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30873,6 +35280,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30894,6 +35304,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30915,6 +35328,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30936,6 +35352,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30957,6 +35376,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30978,6 +35400,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -30999,6 +35424,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31020,6 +35448,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31041,6 +35472,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31062,6 +35496,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31083,6 +35520,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31104,6 +35544,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31125,6 +35568,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31146,6 +35592,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31167,6 +35616,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31188,6 +35640,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31209,6 +35664,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31230,6 +35688,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31251,6 +35712,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31272,6 +35736,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31293,6 +35760,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31314,6 +35784,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31335,6 +35808,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31356,6 +35832,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31377,6 +35856,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31398,6 +35880,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31419,6 +35904,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31440,6 +35928,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31461,6 +35952,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31482,6 +35976,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31503,6 +36000,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31524,6 +36024,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31545,6 +36048,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31566,6 +36072,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31587,6 +36096,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31608,6 +36120,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31629,6 +36144,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31650,6 +36168,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31671,6 +36192,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31692,6 +36216,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31713,6 +36240,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31734,6 +36264,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31755,6 +36288,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31776,6 +36312,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31797,6 +36336,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31818,6 +36360,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31839,6 +36384,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31860,6 +36408,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31881,6 +36432,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -31902,6 +36456,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: 0,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -31923,6 +36480,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -31944,6 +36504,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -31965,6 +36528,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -31986,6 +36552,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -32007,6 +36576,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -32028,6 +36600,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 5237,
   },
   {
@@ -32049,6 +36624,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 437,
   },
   {
@@ -32070,6 +36648,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 437,
   },
   {
@@ -32091,6 +36672,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 437,
   },
   {
@@ -32112,6 +36696,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 437,
   },
   {
@@ -32133,6 +36720,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 437,
   },
   {
@@ -32154,6 +36744,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32175,6 +36768,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32196,6 +36792,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32217,6 +36816,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32238,6 +36840,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32259,6 +36864,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32280,6 +36888,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32301,6 +36912,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32322,6 +36936,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32343,6 +36960,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32364,6 +36984,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32385,6 +37008,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32406,6 +37032,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32427,6 +37056,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32448,6 +37080,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32469,6 +37104,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32490,6 +37128,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32511,6 +37152,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32532,6 +37176,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32553,6 +37200,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32574,6 +37224,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32595,6 +37248,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32616,6 +37272,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32637,6 +37296,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32658,6 +37320,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32679,6 +37344,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32700,6 +37368,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32721,6 +37392,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32742,6 +37416,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32763,6 +37440,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -32784,6 +37464,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: 0,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 903,
   },
   {
@@ -32805,6 +37488,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 903,
   },
   {
@@ -32826,6 +37512,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 903,
   },
   {
@@ -32847,6 +37536,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 903,
   },
   {
@@ -32868,6 +37560,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 903,
   },
   {
@@ -32889,6 +37584,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 22103,
   },
   {
@@ -32910,6 +37608,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: -5987,
   },
   {
@@ -32931,6 +37632,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: -5987,
   },
   {
@@ -32952,6 +37656,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: -5987,
   },
   {
@@ -32973,6 +37680,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 36013,
   },
   {
@@ -32994,6 +37704,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: -5987,
   },
   {
@@ -33015,6 +37728,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: -5987,
   },
   {
@@ -33036,6 +37752,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33057,6 +37776,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33078,6 +37800,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33099,6 +37824,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33120,6 +37848,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33141,6 +37872,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33162,6 +37896,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33183,6 +37920,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33204,6 +37944,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33225,6 +37968,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33246,6 +37992,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33267,6 +38016,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33288,6 +38040,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33309,6 +38064,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33330,6 +38088,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33351,6 +38112,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33372,6 +38136,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33393,6 +38160,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33414,6 +38184,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33435,6 +38208,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33456,6 +38232,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33477,6 +38256,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33498,6 +38280,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33519,6 +38304,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33540,6 +38328,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33561,6 +38352,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33582,6 +38376,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33603,6 +38400,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33624,6 +38424,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33645,6 +38448,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33666,6 +38472,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33687,6 +38496,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33708,6 +38520,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33729,6 +38544,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33750,6 +38568,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33771,6 +38592,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33792,6 +38616,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33813,6 +38640,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33834,6 +38664,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33855,6 +38688,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33876,6 +38712,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33897,6 +38736,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33918,6 +38760,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33939,6 +38784,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33960,6 +38808,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -33981,6 +38832,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34002,6 +38856,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34023,6 +38880,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34044,6 +38904,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34065,6 +38928,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34086,6 +38952,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34107,6 +38976,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34128,6 +39000,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34149,6 +39024,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34170,6 +39048,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: 0,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 903,
   },
   {
@@ -34191,6 +39072,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 903,
   },
   {
@@ -34212,6 +39096,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 903,
   },
   {
@@ -34233,6 +39120,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 903,
   },
   {
@@ -34254,6 +39144,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 903,
   },
   {
@@ -34275,6 +39168,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 903,
   },
   {
@@ -34296,6 +39192,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 903,
   },
   {
@@ -34317,6 +39216,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 903,
   },
   {
@@ -34338,6 +39240,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 903,
   },
   {
@@ -34359,6 +39264,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 903,
   },
   {
@@ -34380,6 +39288,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 903,
   },
   {
@@ -34401,6 +39312,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 8851,
   },
   {
@@ -34422,6 +39336,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34443,6 +39360,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34464,6 +39384,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34485,6 +39408,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34506,6 +39432,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34527,6 +39456,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34548,6 +39480,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34569,6 +39504,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34590,6 +39528,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34611,6 +39552,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34632,6 +39576,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34653,6 +39600,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34674,6 +39624,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34695,6 +39648,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34716,6 +39672,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34737,6 +39696,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34758,6 +39720,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34779,6 +39744,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34800,6 +39768,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34821,6 +39792,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34842,6 +39816,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34863,6 +39840,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34884,6 +39864,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34905,6 +39888,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 903,
     repaymentCount: 7,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34926,6 +39912,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34947,6 +39936,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34968,6 +39960,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -34989,6 +39984,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35010,6 +40008,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35031,6 +40032,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35052,6 +40056,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35073,6 +40080,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35094,6 +40104,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35115,6 +40128,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35136,6 +40152,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35157,6 +40176,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35178,6 +40200,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35199,6 +40224,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35220,6 +40248,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35241,6 +40272,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35262,6 +40296,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35283,6 +40320,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35304,6 +40344,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35325,6 +40368,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35346,6 +40392,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35367,6 +40416,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35388,6 +40440,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35409,6 +40464,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35430,6 +40488,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35451,6 +40512,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35472,6 +40536,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35493,6 +40560,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35514,6 +40584,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35535,6 +40608,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35556,6 +40632,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: 0,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 774,
   },
   {
@@ -35577,6 +40656,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 774,
   },
   {
@@ -35598,6 +40680,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 774,
   },
   {
@@ -35619,6 +40704,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 63174,
   },
   {
@@ -35640,6 +40728,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 40874,
   },
   {
@@ -35661,6 +40752,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 6547,
   },
   {
@@ -35682,6 +40776,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: -33769,
   },
   {
@@ -35703,6 +40800,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: -33769,
   },
   {
@@ -35724,6 +40824,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: -33769,
   },
   {
@@ -35745,6 +40848,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 176231,
   },
   {
@@ -35766,6 +40872,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: -33769,
   },
   {
@@ -35787,6 +40896,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: -33769,
   },
   {
@@ -35808,6 +40920,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35829,6 +40944,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35850,6 +40968,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35871,6 +40992,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35892,6 +41016,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35913,6 +41040,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35934,6 +41064,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35955,6 +41088,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35976,6 +41112,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -35997,6 +41136,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36018,6 +41160,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36039,6 +41184,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36060,6 +41208,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36081,6 +41232,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36102,6 +41256,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36123,6 +41280,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36144,6 +41304,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36165,6 +41328,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36186,6 +41352,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36207,6 +41376,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36228,6 +41400,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36249,6 +41424,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36270,6 +41448,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36291,6 +41472,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36312,6 +41496,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36333,6 +41520,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36354,6 +41544,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36375,6 +41568,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36396,6 +41592,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36417,6 +41616,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36438,6 +41640,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36459,6 +41664,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36480,6 +41688,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36501,6 +41712,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36522,6 +41736,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36543,6 +41760,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 645,
     repaymentCount: 5,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36564,6 +41784,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36585,6 +41808,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36606,6 +41832,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36627,6 +41856,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36648,6 +41880,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36669,6 +41904,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36690,6 +41928,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36711,6 +41952,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36732,6 +41976,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36753,6 +42000,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36774,6 +42024,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36795,6 +42048,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36816,6 +42072,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36837,6 +42096,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36858,6 +42120,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36879,6 +42144,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36900,6 +42168,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36921,6 +42192,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -36942,6 +42216,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: 0,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 774,
   },
   {
@@ -36963,6 +42240,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 774,
   },
   {
@@ -36984,6 +42264,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 774,
   },
   {
@@ -37005,6 +42288,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 774,
   },
   {
@@ -37026,6 +42312,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 774,
   },
   {
@@ -37047,6 +42336,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 774,
   },
   {
@@ -37068,6 +42360,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 774,
   },
   {
@@ -37089,6 +42384,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 13780,
   },
   {
@@ -37110,6 +42408,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1227,
   },
   {
@@ -37131,6 +42432,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1227,
   },
   {
@@ -37152,6 +42456,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1227,
   },
   {
@@ -37173,6 +42480,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 774,
     repaymentCount: 6,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 1227,
   },
   {
@@ -37194,6 +42504,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37215,6 +42528,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37236,6 +42552,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37257,6 +42576,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37278,6 +42600,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37299,6 +42624,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37320,6 +42648,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37341,6 +42672,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37362,6 +42696,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37383,6 +42720,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37404,6 +42744,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37425,6 +42768,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37446,6 +42792,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37467,6 +42816,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37488,6 +42840,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37509,6 +42864,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37530,6 +42888,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37551,6 +42912,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37572,6 +42936,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37593,6 +42960,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 516,
     repaymentCount: 4,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37614,6 +42984,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37635,6 +43008,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37656,6 +43032,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 258,
     repaymentCount: 2,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37677,6 +43056,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37698,6 +43080,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37719,6 +43104,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37740,6 +43128,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37761,6 +43152,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37782,6 +43176,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37803,6 +43200,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37824,6 +43224,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37845,6 +43248,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37866,6 +43272,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37887,6 +43296,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37908,6 +43320,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37929,6 +43344,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37950,6 +43368,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37971,6 +43392,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -37992,6 +43416,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38013,6 +43440,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38034,6 +43464,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38055,6 +43488,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38076,6 +43512,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38097,6 +43536,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38118,6 +43560,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38139,6 +43584,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38160,6 +43608,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38181,6 +43632,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 129,
     repaymentCount: 1,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38202,6 +43656,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38223,6 +43680,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38244,6 +43704,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38265,6 +43728,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38286,6 +43752,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38307,6 +43776,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38328,6 +43800,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: 0,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -38349,6 +43824,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -38370,6 +43848,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -38391,6 +43872,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -38412,6 +43896,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 387,
   },
   {
@@ -38433,6 +43920,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 687,
   },
   {
@@ -38454,6 +43944,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 837,
   },
   {
@@ -38475,6 +43968,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 837,
   },
   {
@@ -38496,6 +43992,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 837,
   },
   {
@@ -38517,6 +44016,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 837,
   },
   {
@@ -38538,6 +44040,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 837,
   },
   {
@@ -38559,6 +44064,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: 837,
   },
   {
@@ -38580,6 +44088,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38601,6 +44112,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38622,6 +44136,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38643,6 +44160,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38664,6 +44184,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38685,6 +44208,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38706,6 +44232,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38727,6 +44256,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38748,6 +44280,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38769,6 +44304,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38790,6 +44328,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38811,6 +44352,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38832,6 +44376,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38853,6 +44400,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38874,6 +44424,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38895,6 +44448,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38916,6 +44472,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38937,6 +44496,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38958,6 +44520,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -38979,6 +44544,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39000,6 +44568,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39021,6 +44592,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39042,6 +44616,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39063,6 +44640,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39084,6 +44664,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39105,6 +44688,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39126,6 +44712,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39147,6 +44736,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39168,6 +44760,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39189,6 +44784,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39210,6 +44808,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39231,6 +44832,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39252,6 +44856,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39273,6 +44880,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39294,6 +44904,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39315,6 +44928,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39336,6 +44952,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39357,6 +44976,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39378,6 +45000,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39399,6 +45024,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39420,6 +45048,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39441,6 +45072,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39462,6 +45096,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39483,6 +45120,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39504,6 +45144,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39525,6 +45168,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39546,6 +45192,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39567,6 +45216,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 387,
     repaymentCount: 3,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39588,6 +45240,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39609,6 +45264,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39630,6 +45288,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39651,6 +45312,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39672,6 +45336,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
   {
@@ -39693,6 +45360,9 @@ export const mockPaymentRecordsFromDocs: PaymentRecord[] = [
     actualRepaymentAllocation: null,
     handlingFee: 0,
     repaymentCount: 0,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
     cumulativePool: null,
   },
 ]

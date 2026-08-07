@@ -14,7 +14,7 @@
  */
 import { prisma } from './db.js'
 import { writeAudit, type Actor } from './audit.js'
-import { isXlsx, parseXlsxToRows } from './xlsxLite.js'
+import { isXlsx, parseXlsxToRows, parseXlsxSheetRows } from './xlsxLite.js'
 
 // ── 列マッピング（新kintone-取込のヘッダー名 → DBフィールド） ──────────
 type FieldType = 'string' | 'int' | 'date'
@@ -104,8 +104,28 @@ const CREDITOR_COLUMNS: ColMap[] = [
   { header: '和解内容コメント', field: 'settlementContentComment', type: 'string' },
 ]
 
+/** 入金スケジュールが入っているタブ（相談票Excel） */
+const PAYMENT_SHEET_NAME = '入金情報取込配列'
+
+/** 入金スケジュールの列（入金情報取込配列のヘッダー名 → Payment のフィールド） */
+const PAYMENT_COLUMNS: ColMap[] = [
+  { header: '入金予定日', field: 'plannedDate', type: 'date' },
+  { header: '入金予定額', field: 'plannedAmount', type: 'int' },
+  { header: '報酬充当予定額', field: 'plannedFeeAllocation', type: 'int' },
+  { header: '弁代報酬充当予定額', field: 'plannedAgentFeeAllocation', type: 'int' },
+  { header: 'ﾌﾟｰﾙ充当予定額', field: 'plannedPoolAllocation', type: 'int' },
+  { header: '弁済充当予定額', field: 'plannedRepaymentAllocation', type: 'int' },
+  { header: '社数', field: 'repaymentCount', type: 'int' },
+  { header: '手数料', field: 'handlingFee', type: 'int' },
+]
+
+/** 1社あたりの振込手数料。相談票では空欄のことが多いので 社数×この単価 で補う */
+const HANDLING_FEE_UNIT = 129
+
 const RECORD_START_HEADER = 'レコードの開始行'
 const DEFAULT_CREDITOR_STATUS = '受任通知発送待ち'
+/** 受任後ステータスの既定値（相談票では空欄のため、取込時にこれを入れる） */
+const DEFAULT_CASE_STATUS = '受任通知発送待ち'
 /** 受任対象外（タブ/一覧で常に末尾に並べる） */
 const EXCLUDED_CREDITOR_STATUS = '受任対象外'
 
@@ -217,6 +237,8 @@ export type IntakeRecord = {
   rowNo: number
   case: Record<string, unknown>
   creditors: Record<string, unknown>[]
+  /** 入金スケジュール（相談票Excelの「入金情報取込配列」タブ由来。CSV取込では空） */
+  payments: Record<string, unknown>[]
   errors: string[]
   warnings: string[]
 }
@@ -226,6 +248,8 @@ export type ParseResult = {
   headerFound: boolean
   records: IntakeRecord[]
   totalCreditors: number
+  /** 取り込む入金予定の行数 */
+  totalPayments: number
   errorCount: number
 }
 
@@ -249,13 +273,76 @@ function buildIndex(headerRow: string[]): {
   }
 }
 
+/**
+ * 相談票Excelの「入金情報取込配列」タブから入金スケジュールを読む。
+ *
+ * このタブは100行ぶんの枠が用意されていて、実際に使うのは入金予定額が入っている行だけ。
+ * 残りは数式の残骸（入金予定額0・弁済充当予定額が #N/A など）なので取り込まない。
+ *
+ * 手数料とﾌﾟｰﾙ充当予定額は空欄のことが多いので、次のとおり補完する。
+ *   手数料           = 社数 × 129円
+ *   ﾌﾟｰﾙ充当予定額   = 入金予定額 − 報酬 − 弁代報酬 − 弁済 − 手数料
+ * （この関係は kintone の実データ192,446行すべてで成立している）
+ */
+function parsePaymentSheet(buf: Buffer): Record<string, unknown>[] {
+  let rows: string[][] | null = null
+  try {
+    rows = parseXlsxSheetRows(buf, PAYMENT_SHEET_NAME)
+  } catch {
+    return []
+  }
+  if (!rows) return []
+  const nonEmpty = rows.filter((r) => r.some((c) => (c ?? '').trim() !== ''))
+  if (nonEmpty.length === 0) return []
+
+  // ヘッダー行（先頭3行のうち「入金予定日」を含む行）
+  let hi = -1
+  for (let i = 0; i < Math.min(nonEmpty.length, 3); i++) {
+    if (nonEmpty[i].map(norm).includes(norm('入金予定日'))) {
+      hi = i
+      break
+    }
+  }
+  if (hi < 0) return []
+  const header = nonEmpty[hi].map(norm)
+  const idxOf = (h: string) => header.indexOf(norm(h))
+  const cols = PAYMENT_COLUMNS.map((col) => ({ col, i: idxOf(col.header) })).filter((x) => x.i >= 0)
+
+  const out: Record<string, unknown>[] = []
+  for (const row of nonEmpty.slice(hi + 1)) {
+    const rec: Record<string, unknown> = {}
+    for (const { col, i } of cols) {
+      const val = coerce(col.type, i < row.length ? row[i] : '')
+      if (val !== null) rec[col.field] = val
+    }
+    // 予定日と予定額が揃っている行だけが実データ
+    const amount = (rec.plannedAmount as number | undefined) ?? 0
+    if (!rec.plannedDate || amount <= 0) continue
+
+    const count = (rec.repaymentCount as number | undefined) ?? 0
+    if (rec.handlingFee == null) rec.handlingFee = count * HANDLING_FEE_UNIT
+    if (rec.plannedPoolAllocation == null) {
+      rec.plannedPoolAllocation =
+        amount -
+        (((rec.plannedFeeAllocation as number | undefined) ?? 0) +
+          ((rec.plannedAgentFeeAllocation as number | undefined) ?? 0) +
+          ((rec.plannedRepaymentAllocation as number | undefined) ?? 0) +
+          ((rec.handlingFee as number | undefined) ?? 0))
+    }
+    out.push(rec)
+  }
+  return out
+}
+
 export function parseIntake(buf: Buffer): ParseResult {
   // 入力は CSV / Excel(.xlsx) のどちらでも可。先頭バイトで判別する。
   let allRows: string[][]
   let encoding: string
+  let paymentRows: Record<string, unknown>[] = []
   if (isXlsx(buf)) {
     allRows = parseXlsxToRows(buf)
     encoding = 'xlsx'
+    paymentRows = parsePaymentSheet(buf)
   } else {
     const dec = decodeCsvBytes(buf)
     allRows = parseCsv(dec.text)
@@ -263,7 +350,14 @@ export function parseIntake(buf: Buffer): ParseResult {
   }
   const rows = allRows.filter((r) => r.some((c) => (c ?? '').trim() !== ''))
   if (rows.length === 0)
-    return { encoding, headerFound: false, records: [], totalCreditors: 0, errorCount: 0 }
+    return {
+      encoding,
+      headerFound: false,
+      records: [],
+      totalCreditors: 0,
+      totalPayments: 0,
+      errorCount: 0,
+    }
 
   // ヘッダー行を探す（先頭3行のうち '名前' と '債権者' を含む行）
   let headerRowIdx = -1
@@ -303,7 +397,16 @@ export function parseIntake(buf: Buffer): ParseResult {
           caseData.address = addr.slice(pref.length).trim()
         }
       }
-      cur = { rowNo: ri + 1, case: caseData, creditors: [], errors: [], warnings: [] }
+      // 受任後ステータスは相談票では空欄なので、既定値を入れる
+      if (!caseData.settlementStatus) caseData.settlementStatus = DEFAULT_CASE_STATUS
+      cur = {
+        rowNo: ri + 1,
+        case: caseData,
+        creditors: [],
+        payments: [],
+        errors: [],
+        warnings: [],
+      }
       records.push(cur)
     }
 
@@ -320,6 +423,11 @@ export function parseIntake(buf: Buffer): ParseResult {
       cur.creditors.push(cr)
     }
   })
+
+  // 入金スケジュールは「1ファイル1顧客」前提なので、レコードが1件のときだけ割り当てる
+  if (records.length === 1 && paymentRows.length > 0) {
+    records[0].payments = paymentRows
+  }
 
   // 債権者の並び順を確定（受任を先、受任対象外を後ろ。各グループ内はCSV出現順を維持）し
   // displayOrder を 1 から採番。タブは左→右、合算一覧は上→下にこの順で並ぶ。
@@ -375,8 +483,9 @@ export function parseIntake(buf: Buffer): ParseResult {
     }
   }
 
+  const totalPayments = records.reduce((s, r) => s + r.payments.length, 0)
   const errorCount = records.reduce((s, r) => s + r.errors.length, 0)
-  return { encoding, headerFound, records, totalCreditors, errorCount }
+  return { encoding, headerFound, records, totalCreditors, totalPayments, errorCount }
 }
 
 /** DB上の externalId 重複をチェックして errors に追記 */
@@ -438,6 +547,7 @@ export async function commitIntake(actor: Actor, buf: Buffer): Promise<CommitRes
         creditors: rec.creditors.length
           ? { create: rec.creditors as never }
           : undefined,
+        payments: rec.payments.length ? { create: rec.payments as never } : undefined,
       } as never,
       select: { id: true, name: true, externalId: true },
     })
@@ -452,7 +562,7 @@ export async function commitIntake(actor: Actor, buf: Buffer): Promise<CommitRes
       action: 'CREATE',
       entity: 'Case',
       entityId: String(c.id),
-      summary: `相談票取込[${result.encoding}]: ${c.name}（債権者${rec.creditors.length}件）`,
+      summary: `相談票取込[${result.encoding}]: ${c.name}（債権者${rec.creditors.length}件・入金予定${rec.payments.length}件）`,
       metadata: { externalId: c.externalId, source: `intake-${result.encoding}` },
     })
   }

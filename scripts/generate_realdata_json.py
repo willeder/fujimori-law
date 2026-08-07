@@ -341,6 +341,10 @@ def emit_payments(id_to_case):
             "actualRepaymentAllocation": i(r.get("弁済充当額")),
             "handlingFee": i(r.get("手数料")),
             "repaymentCount": i(r.get("社数")),
+            # 実績側（kintone は予定と別項目）。予定値の流用をやめてこちらを使う。
+            "repaymentDate": iso_date(r.get("弁済日")),
+            "actualRepaymentCount": i(r.get("数")),
+            "actualHandlingFee": i(r.get("振)手数料")),
             "cumulativePool": i(r.get("累積ﾌﾟｰﾙ")),
         })
         pid += 1

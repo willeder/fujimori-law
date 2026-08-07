@@ -262,8 +262,11 @@ export interface PaymentRecord {
   actualAgentFeeAllocation: number | null // 弁代報酬充当額
   actualPoolAllocation: number | null // プール充当額
   actualRepaymentAllocation: number | null // 弁済充当額
-  handlingFee: number | null // 手数料
-  repaymentCount: number | null // 弁済社数
+  handlingFee: number | null // 手数料（予定）
+  repaymentCount: number | null // 社数（予定）
+  repaymentDate: string | null // 弁済日（実績）
+  actualRepaymentCount: number | null // 数（実績の社数）
+  actualHandlingFee: number | null // 振)手数料（実績の手数料）
   cumulativePool: number | null // 累積プール
 }
 

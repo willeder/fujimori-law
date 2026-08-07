@@ -159,7 +159,12 @@ function toCreditorJson(c: Record<string, any>) {
 }
 
 function toPaymentJson(p: Record<string, any>) {
-  return { ...p, plannedDate: ds(p.plannedDate), actualDate: ds(p.actualDate) }
+  return {
+    ...p,
+    plannedDate: ds(p.plannedDate),
+    actualDate: ds(p.actualDate),
+    repaymentDate: ds(p.repaymentDate),
+  }
 }
 
 function toContactJson(h: Record<string, any>) {

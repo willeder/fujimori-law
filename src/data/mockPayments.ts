@@ -98,6 +98,9 @@ export function buildCreditorRepaymentSchedulesForCase(
         actualRepaymentAllocation: paid ? amt : null,
         handlingFee: null,
         repaymentCount: null,
+        repaymentDate: null,
+        actualRepaymentCount: null,
+        actualHandlingFee: null,
         cumulativePool: null,
       })
     })

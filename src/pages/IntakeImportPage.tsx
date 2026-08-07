@@ -13,6 +13,7 @@ type IntakeRecord = {
   rowNo: number
   case: Record<string, unknown>
   creditors: Record<string, unknown>[]
+  payments: Record<string, unknown>[]
   errors: string[]
   warnings: string[]
 }
@@ -21,6 +22,7 @@ type ParseResult = {
   headerFound: boolean
   records: IntakeRecord[]
   totalCreditors: number
+  totalPayments: number
   errorCount: number
 }
 type Created = { caseId: number; name: string; externalId: string | null; creditors: number }
@@ -92,7 +94,13 @@ export function IntakeImportPage() {
   const summary = useMemo(() => {
     if (!result) return null
     const warnCount = result.records.reduce((s, r) => s + r.warnings.length, 0)
-    return { records: result.records.length, creditors: result.totalCreditors, errors: totalErrors, warnings: warnCount }
+    return {
+      records: result.records.length,
+      creditors: result.totalCreditors,
+      payments: result.totalPayments,
+      errors: totalErrors,
+      warnings: warnCount,
+    }
   }, [result, totalErrors])
 
   return (
@@ -182,15 +190,21 @@ export function IntakeImportPage() {
           </div>
         ) : !result ? (
           <div className="rounded-lg border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
-            相談票Excelの「新kintone-取込」シートを、CSV または Excel(.xlsx) のまま選択してください。
+            相談票Excelを、そのまま Excel(.xlsx) で選択してください（CSVも可）。
             <br />
-            形式（CSV/Excel）と文字コード（UTF-8 / Shift-JIS）は自動判定します。フォーマットは「テンプレートDL」で確認できます。
+            Excelの場合は「<b>システム取込</b>」タブから依頼者・債権者（受任対象外を含む）を、
+            「<b>入金情報取込配列</b>」タブから入金スケジュールを読み取ります。
+            <br />
+            受任後ステータスは空欄のときに「受任通知発送待ち」を入れます。
+            形式（CSV/Excel）と文字コード（UTF-8 / Shift-JIS）は自動判定します。
+            フォーマットは「テンプレートDL」で確認できます。
           </div>
         ) : (
           <>
             <div className="mb-2 flex flex-wrap items-center gap-3 text-sm">
               <span className="text-slate-700">
-                依頼者 <b>{summary?.records}</b> 件 / 債権者 {summary?.creditors} 件
+                依頼者 <b>{summary?.records}</b> 件 / 債権者 {summary?.creditors} 件 / 入金予定{' '}
+                {summary?.payments} 件
               </span>
               <span className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
                 文字コード: {result.encoding}
@@ -222,6 +236,7 @@ export function IntakeImportPage() {
                     <th className="px-2 py-1.5">受任日</th>
                     <th className="px-2 py-1.5">区分</th>
                     <th className="px-2 py-1.5">債権者</th>
+                    <th className="px-2 py-1.5">入金予定</th>
                     <th className="px-2 py-1.5">検証</th>
                   </tr>
                 </thead>
@@ -238,6 +253,7 @@ export function IntakeImportPage() {
                       <td className="px-2 py-1.5">{v(rec, 'acceptanceDate')}</td>
                       <td className="px-2 py-1.5">{v(rec, 'debtAdjustmentType')}</td>
                       <td className="px-2 py-1.5">{rec.creditors.length}件</td>
+                      <td className="px-2 py-1.5">{rec.payments.length}件</td>
                       <td className="px-2 py-1.5">
                         {rec.errors.map((e, i) => (
                           <span key={i} className="mr-1 inline-block rounded bg-red-100 px-1 text-[10px] text-red-700">

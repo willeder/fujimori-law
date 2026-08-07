@@ -156,7 +156,12 @@ function colToIndex(ref: string): number {
 }
 
 // ── ワークブック → 対象シート選択 ───────────────────────────
-function pickSheetPath(entries: ZipEntries): string {
+/**
+ * ブック内のシート（タブ順）を name/path で返す。
+ * 相談票Excelのように「システム取込」「入金情報取込配列」など複数タブを
+ * 読み分けたい場合に使う。
+ */
+function listSheets(entries: ZipEntries): { name: string; path: string }[] {
   const wb = entries.get('xl/workbook.xml')?.toString('utf8') ?? ''
   const rels =
     entries.get('xl/_rels/workbook.xml.rels')?.toString('utf8') ?? ''
@@ -192,9 +197,27 @@ function pickSheetPath(entries: ZipEntries): string {
     sheets.push({ name: unescapeXml(name), path })
   }
 
+  return sheets
+}
+
+/**
+ * 相談票の本体シートを選ぶ。
+ * 「システム取込」＝このシステム向けに作られたタブを最優先する。
+ * （「新kintone-取込」には受任対象外の債権者や債権者別ステータスが入っていないため、
+ *   そちらを読むと対象外債権者が取り込まれない）
+ */
+const PREFERRED_SHEETS = ['システム取込']
+
+function pickSheetPath(entries: ZipEntries): string {
+  const sheets = listSheets(entries)
   if (sheets.length > 0) {
-    // 「取込」を含むシートを優先、無ければ先頭タブ
-    const hit = sheets.find((s) => s.name.replace(/\s/g, '').includes('取込'))
+    const key = (n: string) => n.replace(/\s/g, '')
+    for (const want of PREFERRED_SHEETS) {
+      const hit = sheets.find((s) => key(s.name) === key(want))
+      if (hit) return hit.path
+    }
+    // 次点: 「取込」を含むシート、無ければ先頭タブ
+    const hit = sheets.find((s) => key(s.name).includes('取込'))
     return (hit ?? sheets[0]).path
   }
   // フォールバック: 最初に見つかる worksheet
@@ -205,15 +228,32 @@ function pickSheetPath(entries: ZipEntries): string {
 }
 
 // ── 本体: xlsx Buffer → 行列(string[][]) ───────────────────
+/** 既定のシート（システム取込 → 「取込」を含むタブ → 先頭タブ）を読む */
 export function parseXlsxToRows(buf: Buffer): string[][] {
   const entries = readZip(buf)
+  return readSheet(entries, pickSheetPath(entries))
+}
+
+/**
+ * シート名を指定して読む。見つからなければ null。
+ * 相談票Excelの「入金情報取込配列」タブのように、本体とは別のタブを
+ * あわせて取り込みたいときに使う。名前は空白を無視して比較する。
+ */
+export function parseXlsxSheetRows(buf: Buffer, name: string): string[][] | null {
+  const entries = readZip(buf)
+  const key = (n: string) => n.replace(/\s/g, '')
+  const hit = listSheets(entries).find((sh) => key(sh.name) === key(name))
+  if (!hit) return null
+  return readSheet(entries, hit.path)
+}
+
+function readSheet(entries: ZipEntries, sheetPath: string): string[][] {
   const shared = parseSharedStrings(
     entries.get('xl/sharedStrings.xml')?.toString('utf8')
   )
   const dateStyle = parseDateStyles(
     entries.get('xl/styles.xml')?.toString('utf8')
   )
-  const sheetPath = pickSheetPath(entries)
   const sheetXml = entries.get(sheetPath)?.toString('utf8')
   if (!sheetXml) throw new Error('xlsx: シート本体を読めません')
 
