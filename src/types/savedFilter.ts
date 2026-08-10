@@ -29,6 +29,12 @@ export type CaseListFilterPayload = {
   filter: FilterQuery
   /** 並び順。null なら既定（No 昇順） */
   sort: CaseListSort | null
+  /**
+   * 2段目の並び順。1段目が同じ値の行だけをさらに並べ替える。
+   * kintone が「受任日の新しい順、同じ日ならレコード番号順」のように
+   * 絞り込みごとに2段で並んでいるため、それに合わせられるようにしている。
+   */
+  sort2?: CaseListSort | null
 }
 
 /** 旧形式（version 1）の保存内容 */
@@ -74,6 +80,7 @@ export function emptyCaseListPayload(): CaseListFilterPayload {
     quick: { field: 'all', value: '' },
     filter: emptyFilterQuery(),
     sort: null,
+    sort2: null,
   }
 }
 
@@ -92,11 +99,14 @@ export function normalizeCaseListPayload(value: unknown): CaseListFilterPayload 
     value: typeof rawQuick.value === 'string' ? rawQuick.value : '',
   }
 
-  const rawSort = v.sort as Record<string, unknown> | null | undefined
-  const sort: CaseListSort | null =
-    rawSort && typeof rawSort.key === 'string' && rawSort.key
-      ? { key: rawSort.key, order: rawSort.order === 'desc' ? 'desc' : 'asc' }
+  const toSort = (raw: unknown): CaseListSort | null => {
+    const r = raw as Record<string, unknown> | null | undefined
+    return r && typeof r.key === 'string' && r.key
+      ? { key: r.key, order: r.order === 'desc' ? 'desc' : 'asc' }
       : null
+  }
+  const sort = toSort(v.sort)
+  const sort2 = toSort(v.sort2)
 
   // version 2（現行）
   const rawFilter = v.filter as Record<string, unknown> | undefined
@@ -111,6 +121,7 @@ export function normalizeCaseListPayload(value: unknown): CaseListFilterPayload 
         ),
       },
       sort,
+      sort2,
     }
   }
 
@@ -127,8 +138,9 @@ export function normalizeCaseListPayload(value: unknown): CaseListFilterPayload 
           .map((c) => ({ field: c.field, operator: 'contains' as const, values: [c.value] })),
       },
       sort,
+      sort2,
     }
   }
 
-  return { ...emptyCaseListPayload(), quick, sort }
+  return { ...emptyCaseListPayload(), quick, sort, sort2 }
 }

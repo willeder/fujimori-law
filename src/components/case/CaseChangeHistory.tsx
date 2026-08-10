@@ -169,7 +169,6 @@ const FIELD_LABEL: Record<string, string> = {
   expectedSettlementAmount: '想定和解額',
   expectedPaymentCount: '想定弁済回数',
   expectedFutureInterest: '想定将来利息',
-  repaymentExcluded: '弁済対象除外',
   check: 'チェック',
   reminder: 'リマインド',
   paymentCount: '弁済回数',

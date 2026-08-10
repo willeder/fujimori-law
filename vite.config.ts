@@ -310,27 +310,6 @@ function dbApiPlugin(): Plugin {
             return
           }
 
-          // ── LINE 一斉送信・送信履歴 ──
-          if (
-            (url === '/api/line/broadcast' && req.method === 'POST') ||
-            (url === '/api/line/broadcast-history' && req.method === 'GET')
-          ) {
-            const lb = (await server.ssrLoadModule(
-              '/src/server/lineBroadcast.ts'
-            )) as typeof import('./src/server/lineBroadcast')
-            const editActor = { id: sessionUser.id, email: sessionUser.email }
-            if (url === '/api/line/broadcast') {
-              const r = await lb.sendLineBroadcast(editActor, await readRawBody(req), meta)
-              res.statusCode = r.status
-              res.setHeader('Content-Type', 'application/json; charset=utf-8')
-              res.end(JSON.stringify(r.body))
-              return
-            }
-            res.setHeader('Content-Type', 'application/json; charset=utf-8')
-            res.end(JSON.stringify(await lb.getLineBroadcastHistory()))
-            return
-          }
-
           // ── 入金催促通知（候補抽出・手動送信） ──
           if (
             (url === '/api/reminders/candidates' && req.method === 'GET') ||

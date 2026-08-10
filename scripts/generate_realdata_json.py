@@ -373,7 +373,6 @@ def _build_creditor(cid, case_id, name, r, d):
         "expectedPaymentCount": None,
         "expectedFutureInterest": None,
         "status": status,
-        "repaymentExcluded": None,
         "check": s(r.get("CHECK[CHECK]")),
         "nextProcessDate": iso_date(r.get("次回処理日時")),
         "acceptanceNoticeSentDate": iso_date(r.get("受任通知送付日")),

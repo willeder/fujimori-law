@@ -190,8 +190,6 @@ export type CreditorStatus =
   | '完済'
 
 /** 弁済除外ステータス */
-export type RepaymentExcludedStatus = '停止' | '終了' | null
-
 /** 債権者情報（和解対象債権） */
 export interface Creditor {
   id: number
@@ -206,7 +204,6 @@ export interface Creditor {
   expectedFutureInterest: string | null // 和解予定利息
   status: CreditorStatus
   displayOrder?: number | null // タブ/一覧の表示順（受任→受任対象外）
-  repaymentExcluded: RepaymentExcludedStatus // 弁済除外（停止・終了）
   check?: string | null // CHECK
   nextProcessDate: string | null // 次回処理日時
   acceptanceNoticeSentDate: string | null // 受任通知送付日

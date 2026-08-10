@@ -41,7 +41,6 @@ import * as creditorFiles from '../src/server/creditorFiles.js'
 import * as mail from '../src/server/mail.js'
 import { getSessionToken, getSessionUser } from '../src/server/auth.js'
 import * as savedFilters from '../src/server/savedFilters.js'
-import { sendLineBroadcast, getLineBroadcastHistory } from '../src/server/lineBroadcast.js'
 import { getReminderCandidates, sendReminders } from '../src/server/paymentReminder.js'
 import { prisma } from '../src/server/db.js'
 
@@ -461,17 +460,6 @@ export default async function handler(
           ? await issueLineCode(cid, query.get('force') === '1')
           : await getLineLink(cid)
       )
-      return
-    }
-
-    // ── LINE 一斉送信・送信履歴 ──
-    if (path === '/api/line/broadcast' && method === 'POST') {
-      const r = await sendLineBroadcast(editActor, (await getRawBody(req)).toString('utf8'), meta)
-      json(r.body, r.status)
-      return
-    }
-    if (path === '/api/line/broadcast-history' && method === 'GET') {
-      json(await getLineBroadcastHistory())
       return
     }
 

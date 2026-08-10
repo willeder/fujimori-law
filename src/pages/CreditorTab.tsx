@@ -123,8 +123,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       },
       {
         // 個別画面の「弁済対象」・GMO送金の対象判定（gmoTransfer.ts）と同じ
-        // repaymentTarget を参照する。repaymentExcluded は移行時に常に null が
-        // 入る未使用項目で、以前はこの列だけが空欄になっていた。
+        // repaymentTarget を参照する（旧 repaymentExcluded 列は未使用のため廃止）。
         key: 'repaymentTarget',
         header: '弁済除外',
         width: '80px',

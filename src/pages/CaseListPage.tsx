@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useCaseState } from '../store/useCaseStore'
 import { DataTable, type Column, StatusBadge } from '../components'
 import { AppHeader } from '../components/AppHeader'
-import { LineBroadcastModal, LineHistoryModal } from '../components/case/LineBroadcastModal'
 import { SEARCH_FIELDS, type Condition } from './searchFields'
 import { useSessionState } from '../hooks/useSessionState'
 import { useCreditorNames } from '../hooks/useCreditorNames'
@@ -33,7 +32,7 @@ const SEARCH_FIELD_LABEL: Record<string, string> = Object.fromEntries(
 /**
  * 列ごとの並び替え用の値。Case はネスト構造なので、列定義とは別に取り出し方を持つ。
  * ここに載っている列だけが（絞り込み中に限り）ヘッダークリックで並び替えできる。
- * 選択チェック・LINE連携済/未・LINE@URL は並び替えの意味がないため対象外。
+ * LINE連携済/未・LINE@URL は並び替えの意味がないため対象外。
  */
 const SORT_VALUE: Record<
   string,
@@ -64,6 +63,22 @@ const SORT_VALUE: Record<
   interviewStaff: (c) => c.appointmentInfo.interviewStaff ?? '',
 }
 
+/** 2段目の並び替えに指定できる列（SORT_VALUE を持つ列と同じ並び） */
+const SORT2_OPTIONS: { key: string; label: string }[] = [
+  { key: 'id', label: 'ID' },
+  { key: 'acceptanceDate', label: '受任日' },
+  { key: 'listRegisteredDate', label: 'リスト登録日' },
+  { key: 'name', label: '名前（フリガナ順）' },
+  { key: 'furigana', label: 'フリガナ' },
+  { key: 'status', label: '受任後ステータス' },
+  { key: 'debtAdjustmentType', label: '債務整理区分' },
+  { key: 'creditorCount', label: '債権者数' },
+  { key: 'declaredDebtAmount', label: '申告債務額' },
+  { key: 'officeFee', label: '事務所報酬（通常）' },
+  { key: 'appointmentStaff', label: 'アポ担当' },
+  { key: 'interviewStaff', label: '面談担当' },
+]
+
 /**
  * 一覧の文字列セルを「空白含む n 文字まで」に切り詰める。
  * n+1 文字以上は先頭 n 文字のみ表示（…は付けない）。全文は title 属性で確認可能。
@@ -92,6 +107,9 @@ export function CaseListPage() {
   const [searching, setSearching] = useState(false)
   // 並び順。絞り込み中だけ有効（未絞り込みのときは常に No 昇順に固定する）
   const [sort, setSort] = useSessionState<CaseListSort | null>('caseList.sort', null)
+  // 2段目の並び順。1段目が同じ値の行だけをさらに並べ替える
+  // （kintone の「受任日の新しい順、同じ日ならID順」に合わせるため）
+  const [sort2, setSort2] = useSessionState<CaseListSort | null>('caseList.sort2', null)
   // 適用中の保存条件（プルダウンの選択状態と「適用中」バッジに使う）
   const [activeFilterId, setActiveFilterId] = useSessionState<string | null>(
     'caseList.savedFilterId',
@@ -148,6 +166,7 @@ export function CaseListPage() {
     setSearchValue('')
     setActiveFilterId(null)
     setSort(null)
+    setSort2(null)
   }
 
   // ── 保存した絞り込み条件（共有フィルタ）──────────────────────
@@ -161,8 +180,9 @@ export function CaseListPage() {
       quick: { field: searchField, value: searchValue },
       filter: compactFilterQuery(filter),
       sort: filtering ? sort : null,
+      sort2: filtering ? sort2 : null,
     }),
-    [searchField, searchValue, filter, sort, filtering]
+    [searchField, searchValue, filter, sort, sort2, filtering]
   )
 
   /** 保存条件を画面に適用する */
@@ -172,6 +192,7 @@ export function CaseListPage() {
     setSearchField((payload.quick.field ?? 'all') as SearchField)
     setSearchValue(payload.quick.value ?? '')
     setSort(payload.sort)
+    setSort2(payload.sort2 ?? null)
     setFilter(payload.filter)
     if (payload.filter.conditions.length > 0) void runFilter(payload.filter)
     else setResults(null)
@@ -180,6 +201,7 @@ export function CaseListPage() {
   // 絞り込みが外れたら並び順も既定（No 昇順）に戻す
   useEffect(() => {
     if (!filtering && sort !== null) setSort(null)
+    if (!filtering && sort2 !== null) setSort2(null)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtering])
 
@@ -250,40 +272,6 @@ export function CaseListPage() {
     if (results != null) return [...results].sort((a, b) => (a.id ?? 0) - (b.id ?? 0))
     return sortedCases
   }, [results, sortedCases])
-
-  // ── LINE一斉送信: 行選択 ──
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(() => new Set())
-  const [broadcastOpen, setBroadcastOpen] = useState(false)
-  const [historyOpen, setHistoryOpen] = useState(false)
-  const caseById = useMemo(() => new Map(cases.map((c) => [c.id, c])), [cases])
-  const recipients = useMemo(
-    () =>
-      [...selectedIds]
-        .map((id) => caseById.get(id))
-        .filter((c): c is Case => !!c)
-        .map((c) => ({
-          id: c.id,
-          name: c.clientBasicInfo.name,
-          lineLinked: !!c.metadata.lineLinked,
-        })),
-    [selectedIds, caseById]
-  )
-  const toggleSel = (id: number) =>
-    setSelectedIds((prev) => {
-      const n = new Set(prev)
-      if (n.has(id)) n.delete(id)
-      else n.add(id)
-      return n
-    })
-  const allDisplayedSelected =
-    displayed.length > 0 && displayed.every((c) => selectedIds.has(c.id))
-  const toggleAllDisplayed = () =>
-    setSelectedIds((prev) => {
-      const n = new Set(prev)
-      if (allDisplayedSelected) displayed.forEach((c) => n.delete(c.id))
-      else displayed.forEach((c) => n.add(c.id))
-      return n
-    })
 
   const yen = (n: number | null | undefined) =>
     n != null ? (
@@ -368,21 +356,6 @@ export function CaseListPage() {
   ]
 
   const columns: Column<Case>[] = [
-    {
-      key: '_sel',
-      header: '選択',
-      width: '40px',
-      align: 'center',
-      sortable: false,
-      render: (item) => (
-        <input
-          type="checkbox"
-          checked={selectedIds.has(item.id)}
-          onClick={(e) => e.stopPropagation()}
-          onChange={() => toggleSel(item.id)}
-        />
-      ),
-    },
     {
       key: 'id',
       header: 'ID',
@@ -595,12 +568,6 @@ export function CaseListPage() {
 
   return (
     <div className="min-h-screen bg-slate-100">
-      <LineBroadcastModal
-        open={broadcastOpen}
-        onClose={() => setBroadcastOpen(false)}
-        recipients={recipients}
-      />
-      <LineHistoryModal open={historyOpen} onClose={() => setHistoryOpen(false)} />
       {/* 絞り込みモーダル（kintone の「絞り込む」相当） */}
       <FilterModal
         open={filterOpen}
@@ -684,6 +651,46 @@ export function CaseListPage() {
               報酬・プール列
             </button>
 
+            {/* 2段目の並び順。1段目（ヘッダークリック）が同じ値の行だけを並べ替える */}
+            {filtering && sort && (
+              <>
+                <span className="mx-1 h-4 w-px bg-slate-300" />
+                <label className="flex items-center gap-1 text-xs text-slate-500">
+                  同順のとき
+                  <select
+                    value={sort2?.key ?? ''}
+                    onChange={(e) =>
+                      setSort2(
+                        e.target.value
+                          ? { key: e.target.value, order: sort2?.order ?? 'asc' }
+                          : null
+                      )
+                    }
+                    className="rounded border border-slate-300 bg-white px-1.5 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">指定なし</option>
+                    {SORT2_OPTIONS.filter((o) => o.key !== sort.key).map((o) => (
+                      <option key={o.key} value={o.key}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                  {sort2 && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setSort2({ key: sort2.key, order: sort2.order === 'asc' ? 'desc' : 'asc' })
+                      }
+                      title="2段目の昇順・降順を切り替える"
+                      className="rounded border border-slate-300 bg-white px-1.5 py-1 text-xs text-slate-600 hover:bg-slate-100"
+                    >
+                      {sort2.order === 'asc' ? '昇順' : '降順'}
+                    </button>
+                  )}
+                </label>
+              </>
+            )}
+
             <span className="mx-1 h-4 w-px bg-slate-300" />
             {/* 保存した絞り込み条件（全体共有 / 個人用） */}
             <SavedFilterBar
@@ -695,29 +702,6 @@ export function CaseListPage() {
               saveRequestToken={saveRequestedAt}
             />
 
-            <span className="mx-1 h-4 w-px bg-slate-300" />
-            <button
-              type="button"
-              onClick={toggleAllDisplayed}
-              className="rounded border border-slate-300 bg-white px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100"
-            >
-              {allDisplayedSelected ? '選択解除' : '表示中を全選択'}
-            </button>
-            <button
-              type="button"
-              onClick={() => setBroadcastOpen(true)}
-              disabled={selectedIds.size === 0}
-              className="rounded bg-emerald-700 px-2.5 py-1.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-40"
-            >
-              LINE送信{selectedIds.size > 0 ? `（${selectedIds.size}）` : ''}
-            </button>
-            <button
-              type="button"
-              onClick={() => setHistoryOpen(true)}
-              className="rounded border border-slate-300 bg-white px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100"
-            >
-              送信履歴
-            </button>
             <div className="flex-1" />
             <span className="text-xs text-slate-500">
               {searching
@@ -762,6 +746,8 @@ export function CaseListPage() {
             sortKey={filtering ? (sort?.key ?? null) : null}
             sortOrder={sort?.order ?? 'asc'}
             onSortChange={(key, order) => setSort(key ? { key, order } : null)}
+            sortKey2={filtering ? (sort2?.key ?? null) : null}
+            sortOrder2={sort2?.order ?? 'asc'}
             onRowClick={(item) => navigate(`/cases/${item.id}`)}
             emptyMessage="該当する案件がありません"
             density="compact"

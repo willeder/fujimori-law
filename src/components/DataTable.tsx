@@ -150,6 +150,13 @@ interface DataTableProps<T> {
   sortKey?: string | null
   sortOrder?: 'asc' | 'desc'
   onSortChange?: (key: string | null, order: 'asc' | 'desc') => void
+  /**
+   * 2段目の並び順（同点の行だけをさらに並べ替える）。kintone の一覧が
+   * 「受任日の新しい順、同じ日ならレコード番号順」のように2段で並ぶため。
+   * key は columns のキー（sortValue を持つ列）を指す。
+   */
+  sortKey2?: string | null
+  sortOrder2?: 'asc' | 'desc'
 }
 
 export function DataTable<T>({
@@ -177,6 +184,8 @@ export function DataTable<T>({
   sortKey: sortKeyProp,
   sortOrder: sortOrderProp,
   onSortChange,
+  sortKey2 = null,
+  sortOrder2 = 'asc',
 }: DataTableProps<T>) {
   // onSortChange が渡されたときだけ「親が並び順を持つ」制御モードになる。
   // 渡されない従来の使い方では、これまでどおり内部状態＋persistKey で保持する。
@@ -397,15 +406,15 @@ export function DataTable<T>({
 
   // 並び替え用の列定義（sortValue を持つ列だけ新しい比較ロジックを使う）
   const sortColumn = sortKey ? columns.find((c) => String(c.key) === sortKey) : undefined
+  const sortColumn2 = sortKey2 ? columns.find((c) => String(c.key) === sortKey2) : undefined
 
-  const sortedData = [...findData].sort((a, b) => {
-    if (!sortKey) return 0
-
+  /** 1つのキーで2行を比べる。同点なら 0 */
+  const compareBy = (a: T, b: T, key: string, col: Column<T> | undefined, order: 'asc' | 'desc') => {
     // sortValue 指定あり: ネスト構造の値を取り出して比較する。
     // 数値は数値として、文字列は日本語ロケールで比較し、空値は常に末尾へ送る。
-    if (sortColumn?.sortValue) {
-      const aVal = sortColumn.sortValue(a)
-      const bVal = sortColumn.sortValue(b)
+    if (col?.sortValue) {
+      const aVal = col.sortValue(a)
+      const bVal = col.sortValue(b)
       const aEmpty = aVal === null || aVal === undefined || aVal === ''
       const bEmpty = bVal === null || bVal === undefined || bVal === ''
       if (aEmpty && bEmpty) return 0
@@ -415,17 +424,26 @@ export function DataTable<T>({
         typeof aVal === 'number' && typeof bVal === 'number'
           ? aVal - bVal
           : String(aVal).localeCompare(String(bVal), 'ja')
-      return sortOrder === 'asc' ? comparison : -comparison
+      return order === 'asc' ? comparison : -comparison
     }
 
     // sortValue 未指定: 従来どおり item[key] の生値をそのまま比較する
-    const aVal = (a as Record<string, unknown>)[sortKey]
-    const bVal = (b as Record<string, unknown>)[sortKey]
+    const aVal = (a as Record<string, unknown>)[key]
+    const bVal = (b as Record<string, unknown>)[key]
     if (aVal === bVal) return 0
     if (aVal === null || aVal === undefined) return 1
     if (bVal === null || bVal === undefined) return -1
     const comparison = aVal < bVal ? -1 : 1
-    return sortOrder === 'asc' ? comparison : -comparison
+    return order === 'asc' ? comparison : -comparison
+  }
+
+  const sortedData = [...findData].sort((a, b) => {
+    if (!sortKey) return 0
+    const first = compareBy(a, b, sortKey, sortColumn, sortOrder)
+    if (first !== 0) return first
+    // 1段目が同点のときだけ2段目で並べる
+    if (!sortKey2 || sortKey2 === sortKey) return 0
+    return compareBy(a, b, sortKey2, sortColumn2, sortOrder2)
   })
 
   // ── ページネーション ──
