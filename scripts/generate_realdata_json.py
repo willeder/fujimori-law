@@ -34,18 +34,22 @@ GENDER_ALLOWED = {"男", "女"}
 MARITAL_ALLOWED = {"既婚", "未婚", "離婚"}
 RANK_ALLOWED = {"A", "B", "C"}
 ADJUSTMENT_ALLOWED = {"任意整理", "自己破産", "個人再生"}
+# 債権者別ステータスは kintone の値をそのまま保持する。
+# 以前は7種類に丸めていたため「和解後完済済」「弁護士和解済 返済中」などが
+# すべて「受任通知発送待ち」になり、GMO振込の対象からも外れていた。
 CREDITOR_STATUS_ALLOWED = {
-    "受任通知発送待ち", "受任通知発送済", "債権調査中",
-    "和解提案中", "和解済", "弁済中", "完済",
+    "受任通知発送待ち", "債権調査票待ち", "求償先調査票待ち",
+    "和解提案書作成待ち", "和解提案書発送待ち", "和解提案書発送済", "和解稟議中",
+    "和解済", "弁護士和解済 返済中", "和解後完済済",
+    "破産申立待ち", "破産申立済", "弁護士引継ぎ待ち", "弁護士引継ぎ済",
+    "受任対象外",
 }
+# 案件側のステータスが債権者欄に混ざっていた場合の読み替えだけ残す
 CREDITOR_STATUS_MAP = {
-    "債権調査票待ち": "債権調査中",
-    "和解提案書発送待ち": "和解提案中",
-    "和解提案書発送済": "和解提案中",
-    "一部受任通知発送済": "受任通知発送済",
-    "全社受任通知発送済": "受任通知発送済",
-    "全和解済_支払中": "弁済中",
-    "一部和解済_支払中": "弁済中",
+    "一部受任通知発送済": "受任通知発送待ち",
+    "全社受任通知発送済": "受任通知発送待ち",
+    "全和解済_支払中": "和解済",
+    "一部和解済_支払中": "和解済",
 }
 
 
@@ -105,12 +109,15 @@ def pick(value, allowed, default=None):
 
 
 def creditor_status(raw):
+    """kintone の債権者別ステータスをそのまま返す。
+    空欄のときだけ「受任通知発送待ち」を既定にする。
+    未知の値は丸めずそのまま通す（丸めると実態が消えるため）。"""
     t = s(raw)
     if not t:
-        return "受任通知発送待ち"
+        return ""
     if t in CREDITOR_STATUS_ALLOWED:
         return t
-    return CREDITOR_STATUS_MAP.get(t, "受任通知発送待ち")
+    return CREDITOR_STATUS_MAP.get(t, t)
 
 
 def negotiation_partner(val):
@@ -358,9 +365,11 @@ def _build_creditor(cid, case_id, name, r, d):
     if settlement_amount is None:
         settlement_amount = i(r.get("和解"))
     status = creditor_status(r.get("債権者別ステータス"))
-    # 一覧にステータスが無く、和解詳細にスケジュール/和解日があれば弁済中扱い
+    # 一覧にステータスが無く、和解詳細にスケジュール/和解日があれば和解済とみなす
     if not status and (s(d.get("支払開始月")) or s(d.get("和解日"))):
-        status = "弁済中"
+        status = "和解済"
+    if not status:
+        status = "受任通知発送待ち"
     return {
         "id": cid,
         "caseId": case_id,

@@ -3,10 +3,16 @@ import { useEffect, useRef, useState } from 'react'
 type LineUrlQuickEditProps = {
   lineUrl: string | null | undefined
   onSave: (next: string | null) => void
+  /** 編集モードでないときは押せなくする */
+  disabled?: boolean
 }
 
 /** ヘッダー用：レイアウトを崩さず URL の修正のみポップオーバーで行う */
-export function LineUrlQuickEdit({ lineUrl, onSave }: LineUrlQuickEditProps) {
+export function LineUrlQuickEdit({
+  lineUrl,
+  onSave,
+  disabled = false,
+}: LineUrlQuickEditProps) {
   const [open, setOpen] = useState(false)
   const [draft, setDraft] = useState('')
   const rootRef = useRef<HTMLDivElement>(null)
@@ -43,11 +49,12 @@ export function LineUrlQuickEdit({ lineUrl, onSave }: LineUrlQuickEditProps) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+        disabled={disabled}
+        className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 disabled:opacity-40 disabled:hover:bg-transparent"
         aria-expanded={open}
         aria-haspopup="dialog"
         aria-label="LINE@ URLを編集"
-        title="LINE@ URLを編集"
+        title={disabled ? "「編集」を押すと変更できます" : "LINE@ URLを編集"}
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
           <path

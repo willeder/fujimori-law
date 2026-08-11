@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCaseDispatch } from '../store/useCaseStore'
 import { useFoundSet } from '../store/FoundSet'
+import { useCaseEdit } from '../context/CaseEditContext'
 import { EditableField, StatusBadge, DataTable, type Column } from '../components'
 import { CreditorFiles } from '../components/case/CreditorFiles'
 import type { Creditor } from '../types'
 import {
   ACCOUNT_TYPE_OPTIONS,
   CREDITOR_STATUS_OPTIONS,
+  SETTLED_CREDITOR_STATUSES,
   YES_NO_OPTIONS,
   toSelectOptions,
 } from '../constants/fieldOptions'
@@ -26,6 +28,8 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
   const dispatch = useCaseDispatch()
   const navigate = useNavigate()
   const { setFoundSet } = useFoundSet()
+  // 編集モード中は下書きに貯めるだけ（「編集完了」でまとめて保存される）
+  const { stageCreditor } = useCaseEdit()
 
   const [creditorNameSuggestions, setCreditorNameSuggestions] = useState<string[]>(
     () => __creditorNameSuggestions ?? []
@@ -78,6 +82,11 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
   }
 
   const updateCreditor = (creditor: Creditor, updates: Partial<Creditor>) => {
+    // 案件詳細の編集モード配下では、その場で保存せず下書きへ積む
+    if (stageCreditor) {
+      stageCreditor(creditor, updates)
+      return
+    }
     // 楽観的にローカル反映
     dispatch({
       type: 'UPDATE_CREDITOR',
@@ -98,7 +107,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
     // 受任対象外は明細テーブルには表示するが、サマリの件数・合計には含めない。
     const accepted = creditors.filter((c) => c.status !== '受任対象外')
     const settledCount = accepted.filter((c) =>
-      ['和解済', '弁済中', '完済'].includes(c.status)
+      (SETTLED_CREDITOR_STATUSES as readonly string[]).includes(c.status)
     ).length
     const totalDeclared = accepted.reduce(
       (sum, c) => sum + (c.declaredAmount ?? 0),
@@ -112,6 +121,14 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       (sum, c) => sum + (c.settlementAmount ?? 0),
       0
     )
+    // 減額率。和解が済んだ債権者だけで比べる（未和解を混ぜると率が実態より良く見えるため）
+    const settledCreditors = accepted.filter((c) =>
+      (SETTLED_CREDITOR_STATUSES as readonly string[]).includes(c.status)
+    )
+    const settledDeclared = settledCreditors.reduce((sum, c) => sum + (c.declaredAmount ?? 0), 0)
+    const settledAmount = settledCreditors.reduce((sum, c) => sum + (c.settlementAmount ?? 0), 0)
+    const reductionRate =
+      settledDeclared > 0 ? (1 - settledAmount / settledDeclared) * 100 : null
 
     const columns: Column<Creditor>[] = [
       {
@@ -258,7 +275,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           （うち和解済：{settledCount}社）・案件ID: {caseId}
         </div>
         {/* 合計サマリ（入金スケジュールのサマリ相当の読みやすさ） */}
-        <div className="grid grid-cols-2 gap-2 rounded bg-slate-50 p-2 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 rounded bg-slate-50 p-2 sm:grid-cols-5">
           <div>
             <div className="text-xs font-medium leading-tight text-slate-500">債権者数</div>
             <div className="text-sm font-bold tabular-nums text-slate-800">
@@ -283,6 +300,19 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
             <div className="text-xs font-medium leading-tight text-slate-500">和解金額合計</div>
             <div className="text-sm font-bold tabular-nums text-green-700">
               {totalSettlement.toLocaleString()}円
+            </div>
+          </div>
+          <div>
+            <div className="text-xs font-medium leading-tight text-slate-500">
+              減額率（和解済のみ）
+            </div>
+            <div className="text-sm font-bold tabular-nums text-green-700">
+              {reductionRate == null ? '-' : `${reductionRate.toFixed(1)}%`}
+              {reductionRate != null && (
+                <span className="ml-1 text-[10px] font-normal text-slate-400">
+                  {settledDeclared.toLocaleString()}→{settledAmount.toLocaleString()}円
+                </span>
+              )}
             </div>
           </div>
         </div>

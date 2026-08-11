@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { SuggestInput } from "./SuggestInput";
+import { useCaseEdit } from "../context/CaseEditContext";
 
 interface EditableFieldProps {
   label: string;
@@ -70,7 +71,7 @@ export function EditableField({
   options,
   suffix,
   placeholder,
-  disabled = false,
+  disabled: disabledProp = false,
   compact = false,
   compactSize = "md",
   compactLayout = "inline",
@@ -82,6 +83,10 @@ export function EditableField({
   fillWidth = false,
   suggestions,
 }: EditableFieldProps) {
+  // 案件詳細の「編集モード」。編集ボタンを押していない間は読み取り専用にする。
+  // （プロバイダの外側では editing=true なので、他画面の挙動は変わらない）
+  const { editing: editModeOn } = useCaseEdit();
+  const disabled = disabledProp || !editModeOn;
   const labelWithColon =
     label.endsWith("：") || label.endsWith(":") ? label : `${label}：`;
 

@@ -2,6 +2,11 @@
  * 債権者詳細コンポーネント
  */
 import { EditableField, StatusBadge } from '../index'
+import {
+  CREDITOR_STATUS_OPTIONS,
+  SETTLED_CREDITOR_STATUSES,
+  toSelectOptions,
+} from '../../constants/fieldOptions'
 import type { Creditor } from '../../types'
 
 interface CreditorDetailProps {
@@ -11,7 +16,7 @@ interface CreditorDetailProps {
 }
 
 export function CreditorDetail({ creditor, onChange, readonly = false }: CreditorDetailProps) {
-  const isSettled = ['和解済', '弁済中', '完済'].includes(creditor.status)
+  const isSettled = (SETTLED_CREDITOR_STATUSES as readonly string[]).includes(creditor.status)
 
   return (
     <div className="space-y-3">
@@ -58,15 +63,7 @@ export function CreditorDetail({ creditor, onChange, readonly = false }: Credito
           value={creditor.status}
           onChange={(v) => onChange('status', v)}
           type="select"
-          options={[
-            { value: '受任通知発送待ち', label: '受任通知発送待ち' },
-            { value: '受任通知発送済', label: '受任通知発送済' },
-            { value: '債権調査中', label: '債権調査中' },
-            { value: '和解提案中', label: '和解提案中' },
-            { value: '和解済', label: '和解済' },
-            { value: '弁済中', label: '弁済中' },
-            { value: '完済', label: '完済' },
-          ]}
+          options={toSelectOptions(CREDITOR_STATUS_OPTIONS)}
           disabled={readonly}
         />
         <EditableField

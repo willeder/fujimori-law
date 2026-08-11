@@ -118,7 +118,7 @@ function scheduleOptionsForCase(caseId: number): BuildCreditorRepaymentOptions {
     ...creditors.map((c) => (typeof c.paymentCount === 'number' ? c.paymentCount : 0)),
   )
   const maxInst = Math.min(10, maxPc || 0)
-  const paying = creditors.some((c) => c.status === '弁済中' || c.status === '和解済')
+  const paying = creditors.some((c) => c.status === '弁護士和解済 返済中' || c.status === '和解済')
   const paid = paying ? Math.min(5, Math.max(0, Math.floor(maxInst / 2))) : 0
   return { maxInstallmentsPerCreditor: maxInst || 0, paidInstallments: paid }
 }

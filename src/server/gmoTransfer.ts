@@ -7,7 +7,10 @@
  *   - 整形: コードのゼロ埋め(金融機関4/支店3/口座7)、預金種目(普通1/当座2/他4)、ASC半角化、振込依頼人名
  */
 import { prisma } from './db.js'
-import { GMO_TRANSFER_TARGET_STATUSES } from '../constants/fieldOptions.js'
+import {
+  GMO_TRANSFER_TARGET_STATUSES,
+  SETTLED_CREDITOR_STATUSES,
+} from '../constants/fieldOptions.js'
 
 // ── 全角→半角（Excel ASC 相当） ──────────────────────────
 const KATA_MAP: Record<string, string> = {
@@ -284,7 +287,7 @@ export async function buildGmoTransfers(
 // ============================================================
 // 未整備検知（弁済対象なのに支払条件・振込先が未入力の債権者）
 // GMO対象から漏れる原因を能動的に検知して、案件詳細で補完できるようにする。
-// 対象: 停止/終了でない（repaymentTarget=null）かつ「弁済対象」＝和解済/弁済中/完済
+// 対象: 停止/終了でない（repaymentTarget=null）かつ「弁済対象」＝和解成立のステータス
 //       または和解日ありの債権者で、支払条件 or 振込先口座のいずれかが欠損。
 //
 // targetMonth(YYYY-MM) を渡すと「その月に支払いが必要な債権者のみ」に絞る。
@@ -326,7 +329,7 @@ export async function buildIncompleteRepayments(
         {
           OR: [
             { settlementDate: { not: null } },
-            { status: { in: ['和解済', '弁済中', '完済'] } },
+            { status: { in: [...SETTLED_CREDITOR_STATUSES] } },
           ],
         },
         {

@@ -319,15 +319,25 @@ function parsePaymentSheet(buf: Buffer): Record<string, unknown>[] {
     const amount = (rec.plannedAmount as number | undefined) ?? 0
     if (!rec.plannedDate || amount <= 0) continue
 
-    const count = (rec.repaymentCount as number | undefined) ?? 0
-    if (rec.handlingFee == null) rec.handlingFee = count * HANDLING_FEE_UNIT
-    if (rec.plannedPoolAllocation == null) {
-      rec.plannedPoolAllocation =
-        amount -
-        (((rec.plannedFeeAllocation as number | undefined) ?? 0) +
-          ((rec.plannedAgentFeeAllocation as number | undefined) ?? 0) +
-          ((rec.plannedRepaymentAllocation as number | undefined) ?? 0) +
-          ((rec.handlingFee as number | undefined) ?? 0))
+    // 手数料・ﾌﾟｰﾙ充当予定額は空欄のことがあるので、恒等式
+    //   入金予定額 = 報酬 + 弁代報酬 + ﾌﾟｰﾙ + 弁済 + 手数料
+    // が必ず成立するように埋める。どちらか一方だけ空欄のときに社数×129で
+    // 埋めてしまうと二重計上になるため、残余から逆算する。
+    const n = (k: string) => (rec[k] as number | undefined) ?? 0
+    const rest = amount - (n('plannedFeeAllocation') + n('plannedAgentFeeAllocation') + n('plannedRepaymentAllocation'))
+    const hasFee = rec.handlingFee != null
+    const hasPool = rec.plannedPoolAllocation != null
+    if (!hasFee && !hasPool) {
+      // どちらも空 … 手数料は社数×単価、残りがﾌﾟｰﾙ
+      const fee = ((rec.repaymentCount as number | undefined) ?? 0) * HANDLING_FEE_UNIT
+      rec.handlingFee = fee
+      rec.plannedPoolAllocation = rest - fee
+    } else if (!hasFee) {
+      // ﾌﾟｰﾙだけ埋まっている … 手数料は残余
+      rec.handlingFee = rest - n('plannedPoolAllocation')
+    } else if (!hasPool) {
+      // 手数料だけ埋まっている … ﾌﾟｰﾙは残余
+      rec.plannedPoolAllocation = rest - n('handlingFee')
     }
     out.push(rec)
   }

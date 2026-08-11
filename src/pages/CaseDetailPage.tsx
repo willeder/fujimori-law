@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { CaseEditContext } from "../context/CaseEditContext";
+import type { CaseEditContextValue } from "../context/CaseEditContext";
+import { useParams, useNavigate, useLocation, useBlocker } from "react-router-dom";
 import type { NavigateFunction } from "react-router-dom";
 import {
   useCase,
@@ -27,7 +29,7 @@ import { CaseMailControl } from "../components/case/CaseMailControl";
 import { CaseChangeHistory } from "../components/case/CaseChangeHistory";
 import { FindModeLauncher } from "../components/case/FindModeLauncher";
 import { LAST_LIST_PATH_KEY } from "../components/AppHeader";
-import type { Case } from "../types";
+import type { Case, Creditor } from "../types";
 import {
   creditorTabAccentSummary,
   creditorTabAccentForName,
@@ -78,10 +80,17 @@ type VAccountFieldsProps = {
   branch: string | null;
   number: string | null;
   onSave: (branch: string | null, number: string | null) => void;
+  /** 編集モードでないときは読み取り専用にする */
+  disabled?: boolean;
 };
 
 /** バーチャル口座：未入力は「-」表示、クリックで編集（空は null で保持） */
-function VAccountFields({ branch, number, onSave }: VAccountFieldsProps) {
+function VAccountFields({
+  branch,
+  number,
+  onSave,
+  disabled = false,
+}: VAccountFieldsProps) {
   const [editing, setEditing] = useState(false);
   const [draftB, setDraftB] = useState(branch ?? "");
   const [draftN, setDraftN] = useState(number ?? "");
@@ -114,29 +123,29 @@ function VAccountFields({ branch, number, onSave }: VAccountFieldsProps) {
   const displayB = (branch ?? "").trim();
   const displayN = (number ?? "").trim();
 
+  const startEdit = () => {
+    if (disabled) return;
+    const b = branch ?? "";
+    const n = number ?? "";
+    setCancelSnapshot({ b, n });
+    setDraftB(b);
+    setDraftN(n);
+    setEditing(true);
+  };
+
   if (!editing) {
     return (
       <div
-        className={`${rowCls} group cursor-pointer rounded px-1 py-0.5 -mx-1 hover:bg-blue-50/70`}
-        onClick={() => {
-          const b = branch ?? "";
-          const n = number ?? "";
-          setCancelSnapshot({ b, n });
-          setDraftB(b);
-          setDraftN(n);
-          setEditing(true);
-        }}
-        role="button"
-        tabIndex={0}
+        className={
+          disabled
+            ? `${rowCls} rounded px-1 py-0.5 -mx-1`
+            : `${rowCls} group cursor-pointer rounded px-1 py-0.5 -mx-1 hover:bg-blue-50/70`
+        }
+        onClick={startEdit}
+        role={disabled ? undefined : "button"}
+        tabIndex={disabled ? undefined : 0}
         onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            const b = branch ?? "";
-            const n = number ?? "";
-            setCancelSnapshot({ b, n });
-            setDraftB(b);
-            setDraftN(n);
-            setEditing(true);
-          }
+          if (e.key === "Enter") startEdit();
         }}
       >
         <span className="inline-flex shrink-0 items-center text-xs font-semibold text-blue-700">
@@ -158,9 +167,11 @@ function VAccountFields({ branch, number, onSave }: VAccountFieldsProps) {
             {displayN || "-"}
           </span>
         </span>
-        <span className="shrink-0 text-xs text-blue-400 opacity-0 transition-opacity group-hover:opacity-100">
-          編集
-        </span>
+        {!disabled && (
+          <span className="shrink-0 text-xs text-blue-400 opacity-0 transition-opacity group-hover:opacity-100">
+            編集
+          </span>
+        )}
       </div>
     );
   }
@@ -307,6 +318,34 @@ function CaseDetailBody({
     return unpaidPayments[0]?.plannedDate ?? null;
   }, [caseLevelPayments]);
   const dispatch = useCaseDispatch();
+  // ── 編集モード ──
+  // 「編集」を押している間だけ項目を触れる。変更は下書きに貯め、
+  // 「編集完了」で案件・債権者をまとめて保存する（押さなければ保存しない）。
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  /** 案件の下書き（DB列名 → 値）。編集完了時にこれを1回のPATCHで送る */
+  const caseDraftRef = useRef<Record<string, unknown>>({});
+  /** 債権者の下書き（債権者ID → 変更列） */
+  const creditorDraftRef = useRef<Map<number, Record<string, unknown>>>(new Map());
+  const [dirty, setDirty] = useState(false);
+  /** 編集モードの現在値（イベントハンドラ内から参照するため ref にも持つ） */
+  const editingRef = useRef(false);
+
+  // 未保存のまま別の画面へ移動しようとしたら引き留める（アプリ内の遷移）
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      dirty && currentLocation.pathname !== nextLocation.pathname,
+  );
+  // タブを閉じる/再読み込みするときはブラウザ標準の確認ダイアログを出す
+  useEffect(() => {
+    if (!dirty) return;
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [dirty]);
   const { user } = useAuth();
   const refreshCases = useRefreshCases();
   const isAdmin = user?.role === "ADMIN";
@@ -461,6 +500,7 @@ function CaseDetailBody({
       if (releaseTimerRef.current) clearTimeout(releaseTimerRef.current);
       releaseTimerRef.current = setTimeout(() => {
         releaseTimerRef.current = null;
+        if (editingRef.current) return; // 編集モード中はロックを保持し続ける
         if (isFormEl(document.activeElement)) return; // 入力に戻っていれば保持継続
         if (claimingRef.current) {
           claimingRef.current = false;
@@ -488,6 +528,25 @@ function CaseDetailBody({
       }
     };
   }, []);
+
+  // 「編集」を押している間は、入力欄にフォーカスしていなくてもロックを主張する。
+  // （他の人が同じ案件を同時に編集して保存が競合するのを防ぐ）
+  useEffect(() => {
+    editingRef.current = editing;
+    if (editing) {
+      if (releaseTimerRef.current) {
+        clearTimeout(releaseTimerRef.current);
+        releaseTimerRef.current = null;
+      }
+      if (!claimingRef.current) {
+        claimingRef.current = true;
+        beatFnRef.current();
+      }
+    } else if (claimingRef.current) {
+      claimingRef.current = false;
+      beatFnRef.current();
+    }
+  }, [editing]);
 
   // 他セッションが同じレコードを開いている間・ロック中は5秒間隔で監視
   // （相手の編集開始を素早く検知し、終了も素早く反映するため）
@@ -727,6 +786,44 @@ function CaseDetailBody({
     );
   }
 
+  /** 案件・債権者の最新値をサーバから取り直して画面へ反映（下書き破棄時に使う） */
+  const reloadCaseFromServer = async () => {
+    const caseId = caseData.id;
+    try {
+      const [full, rows] = await Promise.all([
+        fetch(`/api/cases/${caseId}`).then((r) => (r.ok ? r.json() : null)),
+        fetch(`/api/creditors?caseId=${caseId}`).then((r) =>
+          r.ok ? (r.json() as Promise<Creditor[]>) : null,
+        ),
+      ]);
+      if (full) dispatch({ type: "MERGE_FULL_CASE", payload: full });
+      if (rows)
+        dispatch({ type: "MERGE_CREDITORS", payload: { caseId, rows } });
+    } catch {
+      /* 取り直しに失敗しても画面は壊さない */
+    }
+  };
+
+  /** 下書きを捨てる（サーバの内容に戻す） */
+  const discardDrafts = () => {
+    caseDraftRef.current = {};
+    creditorDraftRef.current.clear();
+    setDirty(false);
+    void reloadCaseFromServer();
+  };
+
+  /** 債権者タブからの変更を下書きへ積む（CreditorTab に context 経由で渡す） */
+  const stageCreditor = (creditor: Creditor, updates: Partial<Creditor>) => {
+    dispatch({ type: "UPDATE_CREDITOR", payload: { ...creditor, ...updates } });
+    if (creditor.id == null) return;
+    const prev = creditorDraftRef.current.get(creditor.id) ?? {};
+    creditorDraftRef.current.set(creditor.id, {
+      ...prev,
+      ...(updates as Record<string, unknown>),
+    });
+    setDirty(true);
+  };
+
   const updateCase = (updates: Partial<Case>) => {
     dispatch({
       type: "UPDATE_CASE",
@@ -736,6 +833,14 @@ function CaseDetailBody({
     // __baseUpdatedAt: 読み込み時点の更新時刻。他ユーザーが先に保存していた場合は
     // サーバが 409 を返し、この保存は反映されない（先勝ち）。
     const cols = flattenCaseUpdate(updates);
+    // 編集モード中は保存せず下書きへ積むだけ（「編集完了」でまとめて保存）
+    if (editing) {
+      if (Object.keys(cols).length > 0) {
+        Object.assign(caseDraftRef.current, cols);
+        setDirty(true);
+      }
+      return;
+    }
     if (Object.keys(cols).length > 0) {
       fetch(`/api/cases/${caseData.id}`, {
         method: "PATCH",
@@ -775,6 +880,86 @@ function CaseDetailBody({
         })
         .catch((e) => console.error("案件更新の通信エラー:", e));
     }
+  };
+
+  /** 「編集完了」：下書きをまとめて保存する */
+  const commitEdit = async () => {
+    if (saving) return;
+    setSaving(true);
+    try {
+      // ① 案件（1回の PATCH）
+      const cols = caseDraftRef.current;
+      if (Object.keys(cols).length > 0) {
+        const r = await fetch(`/api/cases/${caseData.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...cols,
+            __baseUpdatedAt: baseUpdatedAtRef.current,
+            __clientId: clientId,
+          }),
+        });
+        if (r.status === 409) {
+          // 先勝ち。相手の保存が先だったので、こちらの変更は破棄して最新を読み直す
+          const d = (await r.json().catch(() => ({}))) as { editedBy?: string };
+          setConflictBy(d.editedBy ?? "他のユーザー");
+          discardDrafts();
+          setEditing(false);
+          return;
+        }
+        if (!r.ok) {
+          // 通信・サーバエラー。下書きは残したままにして、やり直せるようにする
+          alert(`案件の保存に失敗しました（${r.status}）。もう一度お試しください。`);
+          return;
+        }
+        const d = (await r.json().catch(() => null)) as {
+          case?: { metadata?: { updatedAtExact?: string | null } };
+        } | null;
+        const exact = d?.case?.metadata?.updatedAtExact;
+        if (exact) baseUpdatedAtRef.current = exact;
+      }
+
+      // ② 債権者（変更のあった債権者ごとに PATCH）
+      const failed: number[] = [];
+      for (const [creditorId, updates] of creditorDraftRef.current) {
+        try {
+          const r = await fetch(`/api/creditors/${creditorId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updates),
+          });
+          if (!r.ok) failed.push(creditorId);
+        } catch {
+          failed.push(creditorId);
+        }
+      }
+      if (failed.length > 0) {
+        alert(
+          `債権者 ${failed.length} 件の保存に失敗しました。通信状況を確認してもう一度お試しください。`,
+        );
+        return;
+      }
+
+      caseDraftRef.current = {};
+      creditorDraftRef.current.clear();
+      setDirty(false);
+      setEditing(false);
+      setHistoryRefreshKey((k) => k + 1);
+      // 一覧キャッシュは UPDATE_CASE で楽観更新済みなので再取得はしない
+      // （/api/cases はサマリのみを返すため、ここで上書きすると詳細が欠ける）
+      await reloadCaseFromServer();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  /** 「取消」：下書きを捨てて編集モードを抜ける */
+  const cancelEdit = () => {
+    if (dirty && !window.confirm("編集内容は保存されません。取り消しますか？")) {
+      return;
+    }
+    discardDrafts();
+    setEditing(false);
   };
 
   const updateClientBasicInfo = (
@@ -983,8 +1168,47 @@ function CaseDetailBody({
         ? lineUrlRaw
         : `https://${lineUrlRaw}`
       : null;
+  // 画面全体へ編集モードを配る。EditableField はこれを見て読み取り専用になり、
+  // CreditorTab は stageCreditor があれば下書きへ積む。
+  const editCtx: CaseEditContextValue = { editing, stageCreditor, dirty };
+
   return (
-    <>
+    <CaseEditContext.Provider value={editCtx}>
+      {/* 未保存のまま移動しようとしたときの引き留め */}
+      {blocker.state === "blocked" && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/50">
+          <div className="w-[24rem] max-w-[90vw] rounded-lg bg-white p-4 shadow-xl">
+            <div className="text-sm font-semibold text-amber-700">
+              保存されていない変更があります
+            </div>
+            <div className="mt-2 text-xs leading-relaxed text-slate-600">
+              「編集完了」を押していないため、いま入力した内容はまだ保存されていません。
+              <br />
+              このまま移動すると変更は失われます。
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => blocker.reset?.()}
+                className="rounded bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
+              >
+                編集に戻る
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  discardDrafts();
+                  setEditing(false);
+                  blocker.proceed?.();
+                }}
+                className="rounded border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+              >
+                破棄して移動する
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* 編集中ロック（他セッションが編集中）。inert の外側に置くので操作を受け付ける */}
       {locked && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50">
@@ -1162,6 +1386,38 @@ function CaseDetailBody({
             </span>
           )}
           <span className="flex shrink-0 items-center gap-1.5">
+            {/* 編集モードの切り替え。ここを押している間だけ項目・債権者タブを編集できる */}
+            {editing ? (
+              <>
+                <span className="rounded bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-800">
+                  編集中{dirty ? "（未保存の変更あり）" : ""}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => void commitEdit()}
+                  disabled={saving}
+                  className="rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {saving ? "保存中…" : "編集完了"}
+                </button>
+                <button
+                  type="button"
+                  onClick={cancelEdit}
+                  disabled={saving}
+                  className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                >
+                  取消
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setEditing(true)}
+                className="rounded border border-blue-500 bg-white px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-50"
+              >
+                編集
+              </button>
+            )}
             {/* 全体検索（検索モード）: 案件詳細でも Ctrl+F / Ctrl+Shift+F またはボタンで起動（No.150） */}
             <FindModeLauncher />
             <div className="relative">
@@ -1223,6 +1479,7 @@ function CaseDetailBody({
             )}
             <LineUrlQuickEdit
               lineUrl={caseData.clientBasicInfo.lineUrl}
+              disabled={!editing}
               onSave={(next) =>
                 updateClientBasicInfo(
                   "lineUrl",
@@ -1551,6 +1808,7 @@ function CaseDetailBody({
                                 <VAccountFields
                                   branch={caseData.paymentInfo.vAccountBranch}
                                   number={caseData.paymentInfo.vAccountNumber}
+                                  disabled={!editing}
                                   onSave={(b, n) =>
                                     updateCase({
                                       paymentInfo: {
@@ -2459,6 +2717,6 @@ function CaseDetailBody({
         </div>
       </main>
       </div>
-    </>
+    </CaseEditContext.Provider>
   );
 }
