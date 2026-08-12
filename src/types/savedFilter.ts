@@ -35,6 +35,12 @@ export type CaseListFilterPayload = {
    * 絞り込みごとに2段で並んでいるため、それに合わせられるようにしている。
    */
   sort2?: CaseListSort | null
+  /**
+   * 表示する一覧の列（キーの配列・左から順）。
+   * kintone のビューは「絞り込み＋表示する列」がセットなので、それに合わせる。
+   * 未指定（undefined / null）のときは既定の列セットを使う（旧データ互換）。
+   */
+  columns?: string[] | null
 }
 
 /** 旧形式（version 1）の保存内容 */
@@ -107,6 +113,10 @@ export function normalizeCaseListPayload(value: unknown): CaseListFilterPayload 
   }
   const sort = toSort(v.sort)
   const sort2 = toSort(v.sort2)
+  // 列指定。文字列の配列だけを受け付け、無ければ null（＝既定の列セット）
+  const columns = Array.isArray(v.columns)
+    ? (v.columns as unknown[]).filter((k): k is string => typeof k === 'string' && k !== '')
+    : null
 
   // version 2（現行）
   const rawFilter = v.filter as Record<string, unknown> | undefined
@@ -122,6 +132,7 @@ export function normalizeCaseListPayload(value: unknown): CaseListFilterPayload 
       },
       sort,
       sort2,
+      columns: columns && columns.length > 0 ? columns : null,
     }
   }
 
@@ -139,8 +150,9 @@ export function normalizeCaseListPayload(value: unknown): CaseListFilterPayload 
       },
       sort,
       sort2,
+      columns: columns && columns.length > 0 ? columns : null,
     }
   }
 
-  return { ...emptyCaseListPayload(), quick, sort, sort2 }
+  return { ...emptyCaseListPayload(), quick, sort, sort2, columns: null }
 }

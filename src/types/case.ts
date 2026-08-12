@@ -103,6 +103,7 @@ export interface SettlementInfo {
   plannedPaymentCount: number | null // 予定弁済総数
   plannedAgentCount: number | null // 予定代弁社数
   allSettlementDocSentDate: string | null // 全和解書送付日
+  resignationDate?: string | null // 辞任日
 }
 
 /** 報酬情報 */
@@ -196,7 +197,6 @@ export type CreditorStatus =
   | '弁護士引継ぎ済'
   | '受任対象外'
 
-/** 弁済除外ステータス */
 /** 債権者情報（和解対象債権） */
 export interface Creditor {
   id: number
@@ -205,7 +205,7 @@ export interface Creditor {
   negotiationPartner: string | null // 交渉相手
   declaredAmount: number | null // 申告額
   debtAmount: number | null // 債務額
-  expectedSettlement: number | null // 想定和解（%）
+  expectedSettlement: number | null // 想定和解回数（％ではなく回数）
   expectedSettlementAmount: number | null // 和解予定額（金額）
   expectedPaymentCount: number | null // 和解予定回数
   expectedFutureInterest: string | null // 和解予定利息
@@ -218,10 +218,10 @@ export interface Creditor {
   customerCode: string | null // 顧客コード
   contractDate: string | null // 調査票_契約日
   settlementProposalDate: string | null // 和解提案日
-  settlementProposal?: number | null // 和解提案
+  settlementProposal?: number | null // 和解提案回数
   responseStatus?: string | null // 回答状況
   settlementDate: string | null // 和解日
-  settlementAmount: number | null // 和解金額（= 和解）
+  settlementAmount: number | null // 和解金額（一覧の「和解」列は支払回数なので別物）
   settlementDebtAmount?: number | null // 和解時債務金額
   settlementContentComment?: string | null // 和解内容コメント
   reminder?: string | null // リマインド
@@ -286,9 +286,6 @@ export interface ContactHistory {
   creditorName?: string | null // 債権者の場合
   comment: string | null
 }
-
-/** 弁済対象ステータス */
-export type RepaymentStatus = 'active' | 'suspended' | 'completed' | null
 
 /** 入金遅延統計 */
 export interface PaymentDelayStats {

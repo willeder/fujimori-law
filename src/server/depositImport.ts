@@ -401,17 +401,31 @@ const iso = (d: Date | null): string | null => (d ? d.toISOString().slice(0, 10)
 /** 取込プランを作成（プレビューとコミットで共通） */
 export async function planDepositImport(buf: Buffer): Promise<DepositPreview> {
   const parsed = parseDeposits(buf)
-  const groups: DepositGroupPlan[] = []
   if (!parsed.headerFound) {
     return {
       encoding: parsed.encoding,
       headerFound: false,
       rows: 0,
-      groups,
+      groups: [],
       errorCount: 0,
       unmatchedCount: 0,
     }
   }
+  return await planDepositRows(parsed.rows, parsed.encoding)
+}
+
+/**
+ * 明細行から反映プランを組み立てる（CSV取込・GMO Webhook 共通）。
+ *
+ * CSV取込は parseDeposits() で作った行を、GMOのWebhook（振込入金口座_入金明細通知）は
+ * 通知のJSONから作った行を渡す。どちらも突合・名義照合・充当の判定は同じにする。
+ */
+export async function planDepositRows(
+  rows: DepositRow[],
+  encoding = 'utf-8'
+): Promise<DepositPreview> {
+  const parsed = { rows, encoding }
+  const groups: DepositGroupPlan[] = []
 
   // 口座番号 → 案件 の突合マップ。
   // vAccountNumber には一意制約が無く、実データにも同一番号・別支店の案件が
@@ -640,9 +654,21 @@ export interface DepositCommitResult {
   supplements: number
 }
 
-/** プランどおりに実入金を反映（reflect のみ実行。skip/error/unmatched は変更なし） */
+/** CSV取込：プランを作ってそのまま反映する */
 export async function commitDepositImport(actor: Actor, buf: Buffer): Promise<DepositCommitResult> {
   const plan = await planDepositImport(buf)
+  return await applyDepositPlan(actor, plan, 'deposit-import')
+}
+
+/**
+ * プランどおりに実入金を反映（reflect のみ実行。skip/error/unmatched は変更なし）。
+ * source は監査ログの出所（'deposit-import' / 'gmo-webhook'）。
+ */
+export async function applyDepositPlan(
+  actor: Actor,
+  plan: DepositPreview,
+  source = 'deposit-import'
+): Promise<DepositCommitResult> {
   let reflected = 0
   let supplements = 0
 
@@ -702,8 +728,8 @@ export async function commitDepositImport(actor: Actor, buf: Buffer): Promise<De
     actor,
     action: 'UPDATE',
     entity: 'Payment',
-    summary: `入金データ取込: 反映${reflected}件・補充行${supplements}件・スキップ${plan.groups.filter((g) => g.action === 'skip').length}件・エラー${plan.errorCount}件・未突合${plan.unmatchedCount}件`,
-    metadata: { source: 'deposit-import' },
+    summary: `${source === 'gmo-webhook' ? 'GMO入金通知' : '入金データ取込'}: 反映${reflected}件・補充行${supplements}件・スキップ${plan.groups.filter((g) => g.action === 'skip').length}件・エラー${plan.errorCount}件・未突合${plan.unmatchedCount}件`,
+    metadata: { source },
   })
 
   return {

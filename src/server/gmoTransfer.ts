@@ -302,14 +302,21 @@ export type IncompleteRow = {
   creditorName: string
   status: string
   settlementDate: string | null
-  scheduleMissing: boolean // 支払開始日/金額のいずれか欠損
+  scheduleMissing: boolean // 支払開始日/支払回数/金額のいずれか欠損
   accountMissing: boolean // 振込先（銀行/支店/種別/口座番号/名義）のいずれか欠損
+  /**
+   * 支払開始日が未入力で、そもそも「対象月に支払いが必要か」を判定できない。
+   * 以前はこの条件で丸ごと絞り落としていたため、弁済対象なのに GMO 振込へ
+   * 一度も載らない債権者が警告にも出てこなかった（4,409社・1,610案件）。
+   */
+  monthUnknown: boolean
 }
 export type IncompleteResult = {
   rows: IncompleteRow[]
   count: number
   scheduleMissingCount: number
   accountMissingCount: number
+  monthUnknownCount: number
 }
 
 export async function buildIncompleteRepayments(
@@ -321,10 +328,6 @@ export async function buildIncompleteRepayments(
       // 振込データと同じ条件で受任後ステータスを絞る。
       // 振込対象にならない案件を「未整備」として挙げても対応のしようがないため。
       case: { settlementStatus: { in: [...GMO_TRANSFER_TARGET_STATUSES] } },
-      // 対象月に支払いが必要なもののみ（支払開始日 ≤ 対象月末 ≤ … ≤ 最終支払日）。
-      // 支払開始日/最終支払日は年月日(YYYY-MM-DD)で保持しているため、対象月(YYYY-MM)を
-      // 月初(-01)・月末(-31)の境界文字列に展開して比較する。支払開始日が未入力なら除外。
-      paymentStartMonth: { not: null, lte: `${targetMonth}-31` },
       AND: [
         {
           OR: [
@@ -333,10 +336,25 @@ export async function buildIncompleteRepayments(
           ],
         },
         {
-          // 最終支払日が未入力なら上限なし、入力ありなら対象月以降まで継続中のもの
           OR: [
-            { finalPaymentMonth: null },
-            { finalPaymentMonth: { gte: `${targetMonth}-01` } },
+            // ① 対象月に支払いが必要なもの。
+            //    支払開始日/最終支払日は年月日(YYYY-MM-DD)で保持しているため、
+            //    対象月(YYYY-MM)を月初(-01)・月末(-31)の境界文字列に展開して比較する。
+            {
+              AND: [
+                { paymentStartMonth: { not: null, lte: `${targetMonth}-31` } },
+                {
+                  // 最終支払日が未入力なら上限なし、入力ありなら対象月以降まで継続中のもの
+                  OR: [
+                    { finalPaymentMonth: null },
+                    { finalPaymentMonth: { gte: `${targetMonth}-01` } },
+                  ],
+                },
+              ],
+            },
+            // ② 支払開始日が未入力で対象月を判定できないもの。
+            //    弁済対象なのに GMO 振込へ永久に載らないため、月に関係なく必ず出す。
+            { paymentStartMonth: null },
           ],
         },
       ],
@@ -348,6 +366,7 @@ export async function buildIncompleteRepayments(
       status: true,
       settlementDate: true,
       paymentStartMonth: true,
+      paymentCount: true,
       paymentDay: true,
       firstPaymentAmount: true,
       subsequentPaymentAmount: true,
@@ -367,9 +386,13 @@ export async function buildIncompleteRepayments(
   for (const c of creditors) {
     // 支払日項目は廃止（支払開始日から約定日を導出）。支払条件の欠損は
     // 支払開始日が空、または初回/2回目以降の金額がいずれも空、で判定する。
+    // 支払回数が空だと creditorSchedule.ts が弁済予定を1行も生成しないため、
+    // 支払開始日・金額と同じく「支払条件の不足」として扱う。
     const scheduleMissing =
       empty(c.paymentStartMonth) ||
+      c.paymentCount == null ||
       (c.firstPaymentAmount == null && c.subsequentPaymentAmount == null)
+    const monthUnknown = c.paymentStartMonth == null
     const accountMissing =
       empty(c.financialInstitutionCode) ||
       empty(c.branchCode) ||
@@ -389,6 +412,7 @@ export async function buildIncompleteRepayments(
         : null,
       scheduleMissing,
       accountMissing,
+      monthUnknown,
     })
   }
   rows.sort(
@@ -401,6 +425,7 @@ export async function buildIncompleteRepayments(
     count: rows.length,
     scheduleMissingCount: rows.filter((r) => r.scheduleMissing).length,
     accountMissingCount: rows.filter((r) => r.accountMissing).length,
+    monthUnknownCount: rows.filter((r) => r.monthUnknown).length,
   }
 }
 

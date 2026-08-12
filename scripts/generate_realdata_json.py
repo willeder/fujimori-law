@@ -39,7 +39,8 @@ ADJUSTMENT_ALLOWED = {"任意整理", "自己破産", "個人再生"}
 # すべて「受任通知発送待ち」になり、GMO振込の対象からも外れていた。
 CREDITOR_STATUS_ALLOWED = {
     "受任通知発送待ち", "債権調査票待ち", "求償先調査票待ち",
-    "和解提案書作成待ち", "和解提案書発送待ち", "和解提案書発送済", "和解稟議中",
+    "和解提案書作成待ち", "和解提案書発送待ち", "和解提案書発送済",
+    "和解再提案待ち", "和解稟議中",
     "和解済", "弁護士和解済 返済中", "和解後完済済",
     "破産申立待ち", "破産申立済", "弁護士引継ぎ待ち", "弁護士引継ぎ済",
     "受任対象外",
@@ -264,6 +265,7 @@ def emit_cases(order_ids, master, id_to_case):
                 "proposalDate": iso_date(g("和解提案予定日")),
                 "settlementCount": i(g("和解弁済総数")),
                 "postSettlementPaymentCount": i(g("和解後代弁社数")),
+                "resignationDate": iso_date(g("辞任日")),
                 "plannedPaymentCount": i(g("予定弁済総数")),
                 "plannedAgentCount": i(g("予定代弁社数")),
                 "allSettlementDocSentDate": iso_date(g("全和解書送付日")),
@@ -358,12 +360,39 @@ def emit_payments(id_to_case):
     return out
 
 
+# 和解内容コメント（例: 「【和解内容】和解金額：536,112円 ※将来利息0％ 支払回数：60回 …」）
+# から和解金額を取り出す。和解内容詳細と突合できた行で照合したところ
+# 4,962/4,999 件（99.3%）で詳細の和解金額と一致したため、フォールバックとして信頼できる。
+_SETTLE_AMOUNT_RE = re.compile(r"和解金額[：:]\s*([0-9,]+)\s*円")
+
+
+def settlement_amount_from_comment(text):
+    m = _SETTLE_AMOUNT_RE.search(text or "")
+    if not m:
+        return None
+    try:
+        return int(m.group(1).replace(",", ""))
+    except ValueError:
+        return None
+
+
 def _build_creditor(cid, case_id, name, r, d):
     """1債権者レコードを生成。r=和解対象債権者一覧 行（補助情報）, d=和解内容詳細 行（弁済スケジュール）。
     どちらか一方が {} でも可。"""
+    # 和解金額。
+    # 一覧（和解対象債権一覧.csv）の「和解」列は **金額ではなく支払回数** で、
+    # 突合できた行で照合すると 5,106/5,138 件（99.4%）が詳細の「支払回数」と一致する。
+    # ここを金額のフォールバックにしていたため、詳細と債権者名が一致しない行
+    # （4,346 件）で「37」「60」といった回数が和解金額として表示されていた。
+    # 金額は次の順に補う：
+    #   ① 和解内容詳細の「和解金額」（正）
+    #   ② 和解内容コメント内の「和解金額：X円」（詳細と 99.3% 一致）
+    #   ③ 一覧の「和解時債務金額」（詳細と 98.7% 一致）
     settlement_amount = i(d.get("和解金額"))
     if settlement_amount is None:
-        settlement_amount = i(r.get("和解"))
+        settlement_amount = settlement_amount_from_comment(r.get("和解内容コメント"))
+    if settlement_amount is None:
+        settlement_amount = i(r.get("和解時債務金額"))
     status = creditor_status(r.get("債権者別ステータス"))
     # 一覧にステータスが無く、和解詳細にスケジュール/和解日があれば和解済とみなす
     if not status and (s(d.get("支払開始月")) or s(d.get("和解日"))):

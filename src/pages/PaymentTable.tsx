@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useCaseEdit } from '../context/CaseEditContext'
 import { useCaseDispatch, usePaymentsByCaseId } from '../store/useCaseStore'
 import { DataTable, type Column } from '../components'
 import type { PaymentRecord } from '../types'
@@ -81,6 +82,8 @@ export function PaymentTable({
   payments,
   scheduleCreditorId,
 }: PaymentTableProps) {
+  // ロック中（他セッションが編集中）は行の編集・追加・削除を無効化する
+  const { locked } = useCaseEdit()
   const dispatch = useCaseDispatch()
   const allCasePayments = usePaymentsByCaseId(caseId)
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -757,7 +760,9 @@ export function PaymentTable({
           <button
             type="button"
             onClick={() => handleEdit(item)}
-            className="rounded px-2 py-0.5 text-xs text-blue-600 hover:bg-blue-50"
+            disabled={locked}
+            title={locked ? '他の人が編集中のため、いまは変更できません' : undefined}
+            className="rounded px-2 py-0.5 text-xs text-blue-600 hover:bg-blue-50 disabled:text-slate-300 disabled:hover:bg-transparent"
           >
             編集
           </button>
@@ -843,6 +848,8 @@ export function PaymentTable({
 
       <button
         type="button"
+        disabled={locked}
+        title={locked ? '他の人が編集中のため、いまは変更できません' : undefined}
         onClick={() => {
           const newId = Math.max(0, ...allCasePayments.map((p) => p.id)) + 1
           const lastPayment = sortedPayments[sortedPayments.length - 1]

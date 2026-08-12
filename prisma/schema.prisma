@@ -99,6 +99,8 @@ model Case {
   plannedPaymentCount        Int?
   plannedAgentCount          Int?
   allSettlementDocSentDate   DateTime? @db.Date
+  /// 辞任日（kintone 基本情報.csv の「辞任日」。411件で入力あり）
+  resignationDate            DateTime? @db.Date
 
   // --- 報酬情報 ---
   normalFee              Int?
@@ -560,6 +562,36 @@ model GmoApiToken {
   updatedAt    DateTime  @updatedAt
 
   @@map("gmo_api_tokens")
+}
+
+// GMOあおぞらAPI の Webhook（振込入金口座_入金明細通知）の受信記録。
+// 目的は3つ:
+//   1. 二重反映の防止（eventKey で一意）
+//   2. 反映できなかった通知を後から人が見て手当てできるようにする
+//   3. 仕様書受領前でも生ペイロードを保全し、項目名が判明したら再処理できるようにする
+model GmoWebhookEvent {
+  id          Int       @id @default(autoincrement())
+  /** 通知の一意キー。明細IDが取れればそれ、取れなければ本文のSHA-256 */
+  eventKey    String    @unique
+  /** 通知種別（ペイロードから取れた場合のみ） */
+  eventType   String?
+  sourceIp    String?
+  /** 受信した生JSON（項目名が仕様と違っても失われないように丸ごと保存） */
+  payload     Json
+  /** received / applied / no-target / unparsed / rejected / failed */
+  status      String    @default("received")
+  /** 抽出できた明細件数 */
+  parsedRows  Int       @default(0)
+  /** 実際に入金予定へ反映した件数 */
+  reflected   Int       @default(0)
+  /** 人向けの結果メッセージ */
+  message     String?
+  receivedAt  DateTime  @default(now())
+  processedAt DateTime?
+
+  @@index([receivedAt])
+  @@index([status])
+  @@map("gmo_webhook_events")
 }
 
 // 債権者資料（各社タブのファイル格納）。No.8

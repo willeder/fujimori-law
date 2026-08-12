@@ -27,6 +27,13 @@ export type CaseEditContextValue = {
   stageCreditor?: (creditor: Creditor, updates: Partial<Creditor>) => void
   /** 未保存の変更があるか（離脱時の警告に使う） */
   dirty: boolean
+  /**
+   * 他セッションが編集中でロックされているか。
+   * true の間は「閲覧はできるが、あらゆる更新操作は不可」。
+   * 行ごとの編集ボタン（入金スケジュール・接触履歴）や追加・削除も
+   * このフラグを見て無効化する。
+   */
+  locked: boolean
 }
 
 /**
@@ -37,6 +44,7 @@ export type CaseEditContextValue = {
 const DEFAULT: CaseEditContextValue = {
   editing: true,
   dirty: false,
+  locked: false,
 }
 
 export const CaseEditContext = createContext<CaseEditContextValue>(DEFAULT)

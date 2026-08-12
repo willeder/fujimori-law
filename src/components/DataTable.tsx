@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 // 検索条件の比較パーサ（数値・日付、>= <= > < = と範囲 a..b / a〜b）は共有ユーティリティに集約。
 // 比較式でなければ null（→部分一致にフォールバック）。サーバの横断検索とも同一記法。
 import {
@@ -157,6 +157,19 @@ interface DataTableProps<T> {
    */
   sortKey2?: string | null
   sortOrder2?: 'asc' | 'desc'
+  /**
+   * 行の下に展開表示する内容（kintone の関連レコード一覧の「表示する▶」相当）。
+   * isRowExpanded が true を返した行だけ、直後に全幅の行として描画する。
+   */
+  renderExpandedRow?: (item: T) => React.ReactNode
+  /** その行が展開中かどうか */
+  isRowExpanded?: (item: T) => boolean
+  /**
+   * 表示はしないが並び替えには使える列。
+   * kintone は一覧に出していない項目でもソートできるため、非表示にした列を
+   * ここに渡しておくと sortKey / sortKey2 の対象にできる。
+   */
+  sortOnlyColumns?: Column<T>[]
 }
 
 export function DataTable<T>({
@@ -186,6 +199,9 @@ export function DataTable<T>({
   onSortChange,
   sortKey2 = null,
   sortOrder2 = 'asc',
+  sortOnlyColumns,
+  renderExpandedRow,
+  isRowExpanded,
 }: DataTableProps<T>) {
   // onSortChange が渡されたときだけ「親が並び順を持つ」制御モードになる。
   // 渡されない従来の使い方では、これまでどおり内部状態＋persistKey で保持する。
@@ -405,8 +421,12 @@ export function DataTable<T>({
   }
 
   // 並び替え用の列定義（sortValue を持つ列だけ新しい比較ロジックを使う）
-  const sortColumn = sortKey ? columns.find((c) => String(c.key) === sortKey) : undefined
-  const sortColumn2 = sortKey2 ? columns.find((c) => String(c.key) === sortKey2) : undefined
+  // 表示中の列に無ければ、並び替え専用に渡された列からも探す
+  const findSortColumn = (key: string): Column<T> | undefined =>
+    columns.find((c) => String(c.key) === key) ??
+    sortOnlyColumns?.find((c) => String(c.key) === key)
+  const sortColumn = sortKey ? findSortColumn(sortKey) : undefined
+  const sortColumn2 = sortKey2 ? findSortColumn(sortKey2) : undefined
 
   /** 1つのキーで2行を比べる。同点なら 0 */
   const compareBy = (a: T, b: T, key: string, col: Column<T> | undefined, order: 'asc' | 'desc') => {
@@ -1021,9 +1041,10 @@ export function DataTable<T>({
           ) : (
             pageData.map((item, index) => {
               const customRowClass = getRowClassName?.(item, index) ?? ''
+              const expanded = !!renderExpandedRow && isRowExpanded?.(item) === true
               return (
+              <Fragment key={String(getValue(item, String(keyField)))}>
               <tr
-                key={String(getValue(item, String(keyField)))}
                 className={`border-b border-slate-100 ${onRowClick ? 'cursor-pointer hover:bg-blue-50' : ''} ${index % 2 === 1 && !customRowClass ? 'bg-slate-200/50' : ''} ${customRowClass}`}
                 onClick={() => onRowClick?.(item)}
               >
@@ -1058,6 +1079,14 @@ export function DataTable<T>({
                   )
                 })}
               </tr>
+              {expanded && (
+                <tr className="border-b border-slate-200 bg-slate-50">
+                  <td colSpan={columns.length} className="p-0 align-top">
+                    {renderExpandedRow!(item)}
+                  </td>
+                </tr>
+              )}
+              </Fragment>
               )
             })
           )}

@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
+import { useCaseEdit } from '../context/CaseEditContext'
 import { DataTable, type Column } from '../components'
 import { SuggestInput } from '../components/SuggestInput'
 import { useCreditorNames } from '../hooks/useCreditorNames'
@@ -20,6 +21,8 @@ export function ContactHistoryTable({
   histories,
   targetType,
 }: ContactHistoryTableProps) {
+  // ロック中（他セッションが編集中）は行の編集・追加・削除を無効化する
+  const { locked } = useCaseEdit()
   const dispatch = useCaseDispatch()
   const { contactHistories } = useCaseState()
   const { accountName } = useUserSettings()
@@ -329,14 +332,18 @@ export function ContactHistoryTable({
             <button
               type="button"
               onClick={() => handleEdit(h)}
-              className="rounded px-2 py-0.5 text-xs text-blue-500 hover:bg-blue-50 hover:text-blue-600"
+              disabled={locked}
+              title={locked ? '他の人が編集中のため、いまは変更できません' : undefined}
+              className="rounded px-2 py-0.5 text-xs text-blue-500 hover:bg-blue-50 hover:text-blue-600 disabled:text-slate-300 disabled:hover:bg-transparent"
             >
               編集
             </button>
             <button
               type="button"
               onClick={() => handleDelete(h)}
-              className="rounded px-2 py-0.5 text-xs text-rose-500 hover:bg-rose-50 hover:text-rose-600"
+              disabled={locked}
+              title={locked ? '他の人が編集中のため、いまは変更できません' : undefined}
+              className="rounded px-2 py-0.5 text-xs text-rose-500 hover:bg-rose-50 hover:text-rose-600 disabled:text-slate-300 disabled:hover:bg-transparent"
             >
               削除
             </button>
@@ -403,7 +410,9 @@ export function ContactHistoryTable({
               })
               scrollToBottom()
             }}
-            className="min-h-[1.75rem] rounded-md border border-slate-100/80 bg-slate-50/60 px-2 py-0.5 text-xs leading-none text-blue-600 transition-colors hover:bg-blue-50"
+            disabled={locked}
+            title={locked ? '他の人が編集中のため、いまは変更できません' : undefined}
+            className="min-h-[1.75rem] rounded-md border border-slate-100/80 bg-slate-50/60 px-2 py-0.5 text-xs leading-none text-blue-600 transition-colors hover:bg-blue-50 disabled:text-slate-300 disabled:hover:bg-slate-50/60"
           >
             + 接触履歴を追加
           </button>

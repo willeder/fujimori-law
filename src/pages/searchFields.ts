@@ -2,6 +2,7 @@
 import {
   BICYCLE_OPTIONS,
   CASE_STATUS_OPTIONS,
+  CREDITOR_STATUS_OPTIONS,
   DEBT_ADJUSTMENT_TYPE_OPTIONS,
   PAYMENT_DELAY_OPTIONS,
   PENSION_OPTIONS,
@@ -53,7 +54,49 @@ export const SEARCH_FIELDS: SearchFieldDef[] = [
   { field: 'employerName', label: '勤務先' },
   { field: 'listCategory', label: 'リスト区分' },
   { field: 'creditorName', label: '債権者名', type: 'creditor' },
+  // 債権者別ステータス（債権者1社ごとの進捗）。案件の「受任後ステータス」とは別項目。
+  {
+    field: 'creditorStatus',
+    label: '債権者別ステータス',
+    type: 'choice',
+    options: CREDITOR_STATUS_OPTIONS,
+  },
+  // 入金明細（入金情報テーブル）の日付・差異。取込直後のチェックに使う。
+  { field: 'paymentActualDate', label: '実入金日（入金明細）', type: 'date' },
+  { field: 'paymentPlannedDate', label: '入金予定日（入金明細）', type: 'date' },
+  {
+    field: 'paymentAmountMismatch',
+    label: '額（予定と実入金の差異）',
+    type: 'choice',
+    options: ['差異あり', '差異なし'],
+  },
+  { field: 'paymentRepaymentDate', label: '弁済日（入金明細）', type: 'date' },
+  {
+    field: 'paymentRepaymentMismatch',
+    label: '確認（弁済の予定と実績の差異）',
+    type: 'choice',
+    options: ['差異あり', '差異なし'],
+  },
+  // 債権者の支払開始日（和解内容詳細の「支払開始月」。中身は年月日）。
+  // 「◯月以前に支払いが始まる債権者を持つ案件」の抽出に使う。
+  { field: 'creditorPaymentStartMonth', label: '支払開始月（債権者）', type: 'date' },
+  // 債権者の CHECK 欄（kintone の和解対象債権一覧の CHECK）。
+  // 「CHECK」を選ぶとチェック済みの債権者を持つ案件、「--」でチェック無しの案件。
+  { field: 'creditorCheck', label: 'CHECK（債権者）', type: 'choice', options: ['CHECK', '--'] },
   { field: 'declaredDebtAmount', label: '申告債務額', type: 'number' },
+  { field: 'payDay', label: '給与日' },
+  { field: 'vAccountBranch', label: 'V口座-支店' },
+  { field: 'vAccountNumber', label: 'V口座-番号' },
+  { field: 'basePaymentAmount', label: '基本入金額', type: 'number' },
+  { field: 'resignationDate', label: '辞任日', type: 'date' },
+  { field: 'elapsedDays', label: '経過日数', type: 'number' },
+  { field: 'cAcceptancePromotionDate', label: 'C受任昇格日', type: 'date' },
+  { field: 'age', label: '年齢', type: 'number' },
+  { field: 'installmentCount', label: '報酬分割回数', type: 'number' },
+  { field: 'firstPaymentWithinTenDays', label: '10日以内' },
+  { field: 'preRequestPayment', label: '依頼前 返済額', type: 'number' },
+  { field: 'postRequestPayment', label: '依頼後 返済額', type: 'number' },
+  { field: 'uncollectedFee', label: '報酬未回収額', type: 'number' },
   { field: 'creditorCount', label: '債権社数', type: 'number' },
   // 「新規入力漏れチェック」で空欄を洗い出すために追加した項目
   { field: 'paymentDelay', label: '遅れ', type: 'choice', options: PAYMENT_DELAY_OPTIONS },
@@ -74,6 +117,13 @@ export const SEARCH_FIELDS: SearchFieldDef[] = [
   },
   { field: 'cumulativePlannedPoolAllocation', label: '累)ﾌﾟｰﾙ充当予定額', type: 'number' },
   { field: 'cumulativeHandlingFee', label: '累)手数料', type: 'number' },
+  { field: 'cumulativePlannedPayment', label: '累)入金予定額', type: 'number' },
+  { field: 'cumulativePaymentAmount', label: '累)入金金額', type: 'number' },
+  { field: 'cumulativeFeeAllocation', label: '累)報酬充当額', type: 'number' },
+  { field: 'cumulativeAgentFeeAllocation', label: '累)弁代報酬充当額', type: 'number' },
+  { field: 'cumulativePoolAllocation', label: '累)ﾌﾟｰﾙ充当額', type: 'number' },
+  { field: 'cumulativePlannedRepaymentAllocation', label: '累)弁済充当予定額', type: 'number' },
+  { field: 'cumulativeRepaymentAllocation', label: '累)弁済充当額', type: 'number' },
 ]
 
 /** フィールドコード → 定義 */

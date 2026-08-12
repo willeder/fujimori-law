@@ -1170,7 +1170,13 @@ function CaseDetailBody({
       : null;
   // 画面全体へ編集モードを配る。EditableField はこれを見て読み取り専用になり、
   // CreditorTab は stageCreditor があれば下書きへ積む。
-  const editCtx: CaseEditContextValue = { editing, stageCreditor, dirty };
+  const readOnly = locked != null;
+  const editCtx: CaseEditContextValue = {
+    editing: editing && !readOnly,
+    stageCreditor,
+    dirty,
+    locked: readOnly,
+  };
 
   return (
     <CaseEditContext.Provider value={editCtx}>
@@ -1209,31 +1215,14 @@ function CaseDetailBody({
           </div>
         </div>
       )}
-      {/* 編集中ロック（他セッションが編集中）。inert の外側に置くので操作を受け付ける */}
-      {locked && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50">
-          <div className="w-[26rem] max-w-[90vw] rounded-lg bg-white p-5 shadow-xl">
-            <div className="flex items-center gap-2 text-sm font-semibold text-red-600">
-              <span className="inline-block h-2.5 w-2.5 animate-pulse rounded-full bg-red-500" />
-              {locked.sameAccount
-                ? "同じアカウントの別のウィンドウで編集中です"
-                : `${locked.name} さんが編集しているので編集ができません`}
-            </div>
-            <div className="mt-3 text-xs leading-relaxed text-slate-600">
-              {locked.sameAccount
-                ? "同じアカウントで開いている別のウィンドウが先に編集を始めています。そちらの編集が終わると、この表示は自動で閉じて最新の内容に更新されます。"
-                : `${locked.name} さんの編集が終わると、この表示は自動で閉じて最新の内容に更新されます。そのままお待ちください。`}
-            </div>
-          </div>
-        </div>
-      )}
-      <div
-        // ロック中は入力・フォーカス・キー操作をまとめて無効化する。
-        // 以前はオーバーレイを重ねるだけで、フォーカス済みの入力欄には
-        // キーボードから入力でき、そのまま保存もできてしまっていた。
-        inert={locked != null}
-        className="flex min-h-screen min-h-0 flex-col bg-slate-200"
-      >
+      {/*
+        ロック中は「閲覧はできるが更新はできない」状態にする。
+        以前は inert でページ全体を止めていたが、それだとスクロールも
+        テキスト選択（コピー）もできず、内容を確認することすらできなかった。
+        いまは編集モードに入れないようにしたうえで、行ごとの編集・追加・削除
+        ボタンを CaseEditContext の locked で個別に無効化している。
+      */}
+      <div className="flex min-h-screen min-h-0 flex-col bg-slate-200">
       {/* 案件削除の確認ダイアログ */}
       {confirmDelete && (
         <div
@@ -1306,6 +1295,26 @@ function CaseDetailBody({
                 OK
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* 編集中ロック（他セッションが編集中）。
+          ポップアップは出さず、赤バナーで知らせつつ inert で編集だけ止める */}
+      {locked && (
+        <div className="sticky top-0 z-50 border-b-2 border-red-800 bg-red-600 px-4 py-2 text-white shadow-md">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="inline-block h-3 w-3 shrink-0 animate-pulse rounded-full bg-white" />
+            <span className="rounded bg-white/25 px-2 py-0.5 text-xs font-black tracking-wide">
+              編集中
+            </span>
+            <span className="text-sm font-bold">
+              {locked.sameAccount
+                ? "同じアカウントの別のウィンドウで編集中です"
+                : `${locked.name} さんが編集中です`}
+            </span>
+            <span className="text-xs font-semibold text-red-100">
+              編集が終わると自動で解除され、最新の内容に更新されます
+            </span>
           </div>
         </div>
       )}
@@ -1413,7 +1422,13 @@ function CaseDetailBody({
               <button
                 type="button"
                 onClick={() => setEditing(true)}
-                className="rounded border border-blue-500 bg-white px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-50"
+                disabled={locked != null}
+                title={
+                  locked != null
+                    ? "他の人が編集中のため、いまは編集できません"
+                    : undefined
+                }
+                className="rounded border border-blue-500 bg-white px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-50 disabled:border-slate-300 disabled:text-slate-400 disabled:hover:bg-white"
               >
                 編集
               </button>
@@ -1491,8 +1506,13 @@ function CaseDetailBody({
               <button
                 type="button"
                 onClick={() => setConfirmDelete(true)}
-                title="この案件を削除（管理者のみ）"
-                className="ml-1 rounded border border-red-300 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+                disabled={locked != null}
+                title={
+                  locked != null
+                    ? "他の人が編集中のため、いまは削除できません"
+                    : "この案件を削除（管理者のみ）"
+                }
+                className="ml-1 rounded border border-red-300 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 disabled:border-slate-300 disabled:text-slate-400 disabled:hover:bg-white"
               >
                 削除
               </button>
@@ -1886,7 +1906,7 @@ function CaseDetailBody({
                           density="dense"
                           tabBodyScroll="guest"
                           guestExpandToParent={(id) => id === "all"}
-                          reorderable
+                          reorderable={locked == null}
                           onReorder={handleReorderCreditors}
                         />
                       ),

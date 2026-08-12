@@ -19,12 +19,38 @@ type IncompleteRow = {
   settlementDate: string | null
   scheduleMissing: boolean
   accountMissing: boolean
+  /** 支払開始日が未入力で、対象月に支払いが必要かを判定できない */
+  monthUnknown: boolean
 }
 type IncompleteResult = {
   rows: IncompleteRow[]
   count: number
   scheduleMissingCount: number
   accountMissingCount: number
+  monthUnknownCount: number
+}
+
+type WebhookEventRow = {
+  id: number
+  eventKey: string
+  eventType: string | null
+  sourceIp: string | null
+  status: string
+  parsedRows: number
+  reflected: number
+  message: string | null
+  receivedAt: string
+}
+type WebhookEvents = {
+  rows: WebhookEventRow[]
+  counts: {
+    total: number
+    applied: number
+    unparsed: number
+    failed: number
+    noTarget: number
+    rejected: number
+  }
 }
 
 type GmoRow = {
@@ -99,6 +125,39 @@ export function GmoTransferPage() {
     }
   }
 
+  // GMO からの入金通知（Webhook）の受信履歴。
+  // 受け口は api/gmo/webhook.ts。ここでは「届いているか」「反映できたか」を見る。
+  const [events, setEvents] = useState<WebhookEvents | null>(null)
+  const [showEvents, setShowEvents] = useState(false)
+  const [eventsKey, setEventsKey] = useState(0)
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/gmo/webhook/events?limit=50')
+      .then((r) => (r.ok ? (r.json() as Promise<WebhookEvents>) : null))
+      .then((d) => {
+        if (!cancelled) setEvents(d)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [eventsKey])
+
+  const reprocessEvent = async (id: number) => {
+    try {
+      const r = await fetch('/api/gmo/webhook/reprocess', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+      const d = (await r.json()) as { ok?: boolean; message?: string }
+      window.alert(d.message ?? (d.ok ? '再処理しました' : '再処理に失敗しました'))
+      setEventsKey((k) => k + 1)
+    } catch (e) {
+      window.alert(`再処理に失敗しました: ${e instanceof Error ? e.message : String(e)}`)
+    }
+  }
+
   // 要対応（その月に支払いが必要なのに支払条件・振込先が未入力）の検知。
   // 対象月に連動して取得する（対象期間の開始月を変えると再取得）。
   const [incomplete, setIncomplete] = useState<IncompleteResult | null>(null)
@@ -133,6 +192,11 @@ export function GmoTransferPage() {
           )}
           {r.accountMissing && (
             <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] text-red-700">振込先口座</span>
+          )}
+          {r.monthUnknown && (
+            <span className="rounded bg-rose-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+              支払開始日なし
+            </span>
           )}
         </span>
       ),
@@ -255,6 +319,114 @@ export function GmoTransferPage() {
           </div>
         )}
 
+        {/* GMO入金通知（Webhook）の受信状況。届いているか・反映できたかをここで見る */}
+        {events && (
+          <div className="mb-3 rounded-lg border border-slate-200 bg-white shadow-sm">
+            <button
+              type="button"
+              onClick={() => setShowEvents((v) => !v)}
+              className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left"
+            >
+              <span className="text-sm font-semibold text-slate-700">
+                GMO入金通知（Webhook）
+                <span className="ml-2 text-xs font-normal text-slate-500">
+                  受信 {events.counts.total} 件（反映 {events.counts.applied} / 未突合{' '}
+                  {events.counts.noTarget}
+                  {events.counts.unparsed > 0 && (
+                    <> / <b className="text-amber-700">未解析 {events.counts.unparsed}</b></>
+                  )}
+                  {events.counts.failed > 0 && (
+                    <> / <b className="text-red-600">失敗 {events.counts.failed}</b></>
+                  )}
+                  {events.counts.rejected > 0 && (
+                    <> / <b className="text-red-600">認証拒否 {events.counts.rejected}</b></>
+                  )}
+                  ）
+                </span>
+              </span>
+              <span className="shrink-0 text-xs text-slate-500">
+                {showEvents ? '閉じる ▲' : '履歴を開く ▼'}
+              </span>
+            </button>
+            {showEvents && (
+              <div className="border-t border-slate-200 p-2">
+                {events.rows.length === 0 ? (
+                  <p className="px-1 py-2 text-[11px] text-slate-500">
+                    まだ通知を受信していません。GMOのイベント通知設定に{' '}
+                    <code className="rounded bg-slate-100 px-1">
+                      {location.origin}/api/gmo/webhook
+                    </code>{' '}
+                    を登録してください。
+                  </p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-[11px]">
+                      <thead className="bg-slate-50 text-slate-500">
+                        <tr>
+                          <th className="px-2 py-1 text-left">受信日時</th>
+                          <th className="px-2 py-1 text-left">状態</th>
+                          <th className="px-2 py-1 text-right">明細</th>
+                          <th className="px-2 py-1 text-right">反映</th>
+                          <th className="px-2 py-1 text-left">内容</th>
+                          <th className="px-2 py-1"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {events.rows.map((r) => (
+                          <tr key={r.id} className="border-t border-slate-100">
+                            <td className="whitespace-nowrap px-2 py-1 tabular-nums text-slate-600">
+                              {r.receivedAt.slice(0, 16).replace('T', ' ')}
+                            </td>
+                            <td className="px-2 py-1">
+                              <span
+                                className={`rounded px-1.5 py-0.5 text-[10px] ${
+                                  r.status === 'applied'
+                                    ? 'bg-emerald-100 text-emerald-800'
+                                    : r.status === 'failed' || r.status === 'rejected'
+                                      ? 'bg-red-100 text-red-700'
+                                      : r.status === 'unparsed'
+                                        ? 'bg-amber-100 text-amber-800'
+                                        : 'bg-slate-100 text-slate-600'
+                                }`}
+                              >
+                                {r.status === 'applied'
+                                  ? '反映済'
+                                  : r.status === 'no-target'
+                                    ? '未突合'
+                                    : r.status === 'unparsed'
+                                      ? '未解析'
+                                      : r.status === 'failed'
+                                        ? '失敗'
+                                        : r.status === 'rejected'
+                                          ? '認証拒否'
+                                          : r.status}
+                              </span>
+                            </td>
+                            <td className="px-2 py-1 text-right tabular-nums">{r.parsedRows}</td>
+                            <td className="px-2 py-1 text-right tabular-nums">{r.reflected}</td>
+                            <td className="px-2 py-1 text-slate-600">{r.message ?? '-'}</td>
+                            <td className="px-2 py-1 text-right">
+                              {r.status !== 'applied' && r.status !== 'rejected' && (
+                                <button
+                                  type="button"
+                                  onClick={() => void reprocessEvent(r.id)}
+                                  className="rounded border border-slate-300 px-2 py-0.5 text-[10px] text-slate-600 hover:bg-slate-50"
+                                >
+                                  再処理
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* 要対応：弁済対象なのに支払条件・振込先が未入力（GMO対象から漏れる原因） */}
         {incomplete && incomplete.count > 0 && (
           <div className="mb-3 rounded-lg border border-amber-300 bg-amber-50 shadow-sm">
@@ -264,10 +436,14 @@ export function GmoTransferPage() {
               className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left"
             >
               <span className="text-sm font-semibold text-amber-900">
-                ⚠ 要対応：{month} に支払いが必要なのに支払条件・振込先が未入力{' '}
+                ⚠ 要対応：弁済対象なのに支払条件・振込先が未入力{' '}
                 <b className="tabular-nums">{incomplete.count}</b> 件
                 <span className="ml-2 text-xs font-normal text-amber-700">
-                  （支払条件不足 {incomplete.scheduleMissingCount} / 振込先不足 {incomplete.accountMissingCount}）
+                  （支払条件不足 {incomplete.scheduleMissingCount} / 振込先不足 {incomplete.accountMissingCount}
+                  {incomplete.monthUnknownCount > 0 && (
+                    <> / <b className="text-rose-700">支払開始日なし {incomplete.monthUnknownCount}</b></>
+                  )}
+                  ）
                 </span>
               </span>
               <span className="shrink-0 text-xs text-amber-700">
@@ -277,7 +453,13 @@ export function GmoTransferPage() {
             {showIncomplete && (
               <div className="border-t border-amber-200 p-2">
                 <p className="mb-2 px-1 text-[11px] text-amber-700">
-                  これらは {month} に支払いが必要（支払開始日 ≤ {month} ≤ 最終支払日）な弁済対象なのに、金額か振込先口座が未入力のため、GMO振込の対象になりません。行をクリックすると案件詳細を開いて入力できます。※支払開始日そのものが未入力の債権者は対象月を判定できないためここには表示されません。
+                  弁済対象なのに支払条件（支払開始日・支払回数・金額）か振込先口座が未入力のため、GMO振込の対象にならない債権者です。行をクリックすると案件詳細を開いて入力できます。
+                  <br />
+                  対象は次の2種類です。
+                  <b>①</b> {month} に支払いが必要（支払開始日 ≤ {month} ≤ 最終支払日）なもの。
+                  <b className="text-rose-700">②「支払開始日なし」</b>
+                  … 支払開始日が未入力で対象月を判定できず、このままでは
+                  <b>どの月の振込にも一度も載りません</b>。月に関係なく常に表示します。
                 </p>
                 <div className="overflow-hidden rounded border border-amber-200 bg-white">
                   <DataTable

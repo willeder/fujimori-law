@@ -37,6 +37,7 @@ import * as paymentSummary from '../src/server/paymentSummary.js'
 import * as intake from '../src/server/intakeImport.js'
 import * as deposits from '../src/server/depositImport.js'
 import * as gmoApi from '../src/server/gmoApi.js'
+import * as gmoWebhook from '../src/server/gmoWebhook.js'
 import * as creditorFiles from '../src/server/creditorFiles.js'
 import * as mail from '../src/server/mail.js'
 import { getSessionToken, getSessionUser } from '../src/server/auth.js'
@@ -242,6 +243,25 @@ export default async function handler(
       )
       res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${name}`)
       res.end(buf)
+      return
+    }
+
+    // ── GMO: 入金通知（Webhook）の受信履歴 ──
+    // 受け口そのものは api/gmo/webhook.ts（認証不要・IP制限）。ここは画面表示用。
+    if (path === '/api/gmo/webhook/events' && method === 'GET') {
+      json(await gmoWebhook.listWebhookEvents(Number(query.get('limit') ?? '50')))
+      return
+    }
+    // 保存済み通知の再処理（V口座を登録し直した後などに使う）
+    if (path === '/api/gmo/webhook/reprocess' && method === 'POST') {
+      const body = JSON.parse((await getRawBody(req)).toString('utf8') || '{}') as {
+        id?: number
+      }
+      if (!body.id) {
+        json({ error: 'id が必要です' }, 400)
+        return
+      }
+      json(await gmoWebhook.reprocessWebhookEvent(editActor, body.id))
       return
     }
 
