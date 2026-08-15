@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useCaseDispatch, usePaymentsByCaseId } from '../store/useCaseStore'
 import { useFoundSet } from '../store/FoundSet'
 import { useCaseEdit } from '../context/CaseEditContext'
+import { settlementTotals } from '../lib/settlementTotals'
 import { EditableField, StatusBadge, DataTable, type Column } from '../components'
 import { CreditorFiles } from '../components/case/CreditorFiles'
 import type { Creditor } from '../types'
@@ -123,6 +124,10 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       (sum, c) => sum + (c.settlementAmount ?? 0),
       0
     )
+    // 和解状況の4項目（旧・手入力）。債権者データから機械的に出せるので画面で計算する。
+    // 定義は src/lib/settlementTotals.ts を参照。
+    const totals = settlementTotals(creditors)
+
     // 弁済の進捗（合算）。個別の債権者タブ（弁済予定履歴）と同じ定義で合計する。
     //   ・和解済（和解日あり）は和解内容の金額・回数、未和解は見込み値を使う
     //   ・累計は「弁済日が入っている行」の合計。未和解は実績が立たないので 0 とする
@@ -354,6 +359,40 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
               {progress.remainCount}回
             </div>
           </div>
+        </div>
+
+        {/* 和解状況（自動計算）。kintone では手入力だった4項目を債権者から算出する */}
+        <div className="grid grid-cols-2 gap-2 rounded bg-blue-50/60 p-2 sm:grid-cols-4">
+          <div>
+            <div className="text-xs font-medium leading-tight text-slate-500">予定代弁社数</div>
+            <div className="text-sm font-bold tabular-nums text-slate-800">
+              {totals.plannedAgentCount}社
+            </div>
+          </div>
+          <div>
+            <div className="text-xs font-medium leading-tight text-slate-500">予定弁済総数</div>
+            <div className="text-sm font-bold tabular-nums text-slate-800">
+              {totals.plannedPaymentCount}回
+            </div>
+          </div>
+          <div>
+            <div className="text-xs font-medium leading-tight text-slate-500">和解後代弁社数</div>
+            <div className="text-sm font-bold tabular-nums text-slate-800">
+              {totals.postSettlementPaymentCount}社
+            </div>
+          </div>
+          <div>
+            <div className="text-xs font-medium leading-tight text-slate-500">和解弁済総数</div>
+            <div className="text-sm font-bold tabular-nums text-slate-800">
+              {totals.settlementCount}回
+            </div>
+          </div>
+          {totals.missingPaymentCount > 0 && (
+            <div className="col-span-full text-[11px] text-amber-700">
+              ※ 弁済対象 {totals.missingPaymentCount} 社は支払回数が未入力のため、
+              回数の合計は実態より少なく出ています（債権者名の読み替えが済むと解消します）
+            </div>
+          )}
         </div>
 
         <DataTable

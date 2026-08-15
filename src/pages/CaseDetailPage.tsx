@@ -36,6 +36,7 @@ import {
 } from "../lib/creditorTabAccent";
 import { joinAddress, stripPrefecture } from "../utils/address";
 import { getClientId } from "../utils/clientId";
+import { settlementTotals } from "../lib/settlementTotals";
 import {
   CASE_STATUS_OPTIONS,
   DEBT_ADJUSTMENT_TYPE_OPTIONS,
@@ -646,6 +647,13 @@ function CaseDetailBody({
    * 「済」は和解成立ではなく、その債権者の弁済予定がすべて入金済みのときだけ付ける。
    * 弁済予定が無い（未スケジュール）の債権者は完済とみなさない。
    */
+  /**
+   * 和解状況の4項目（和解弁済総数・和解後代弁社数・予定弁済総数・予定代弁社数）。
+   * kintone では手入力だったが、債権者データから機械的に出せるため画面で計算する。
+   * 定義は src/lib/settlementTotals.ts を参照。
+   */
+  const settlementSummary = useMemo(() => settlementTotals(creditors), [creditors]);
+
   const creditorFullyRepaid = useMemo(() => {
     const m = new Map<number, boolean>();
     for (const c of creditors) {
@@ -2579,12 +2587,11 @@ function CaseDetailBody({
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
+                          {/* 債権者から自動計算（手入力しない）。定義は settlementTotals.ts */}
                           <EditableField
                             label="予定弁済総数"
-                            value={caseData.settlementInfo.plannedPaymentCount}
-                            onChange={(v) =>
-                              updateSettlementInfo("plannedPaymentCount", v)
-                            }
+                            value={settlementSummary.plannedPaymentCount}
+                            onChange={() => {}}
                             type="number"
                             suffix="回"
                             compact
@@ -2592,6 +2599,7 @@ function CaseDetailBody({
                             bordered
                             truncateValue
                             fillWidth
+                            disabled
                           />
                         </div>
                         <div className="min-w-0 col-span-2">
