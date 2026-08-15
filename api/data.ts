@@ -38,6 +38,8 @@ import * as intake from '../src/server/intakeImport.js'
 import * as deposits from '../src/server/depositImport.js'
 import * as gmoApi from '../src/server/gmoApi.js'
 import * as gmoWebhook from '../src/server/gmoWebhook.js'
+import * as gmoNotify from '../src/server/gmoNotify.js'
+import { writeAudit } from '../src/server/audit.js'
 import * as creditorFiles from '../src/server/creditorFiles.js'
 import * as mail from '../src/server/mail.js'
 import { getSessionToken, getSessionUser } from '../src/server/auth.js'
@@ -265,6 +267,30 @@ export default async function handler(
       return
     }
 
+    // ── GMO: イベント通知の配信制御（仕様書 イベント通知編 v1.8.0）──
+    // 受け口を用意しただけでは通知は届かない。ここで「配信開始」を要求する。
+    if (path === '/api/gmo/webhook/subscribe' && method === 'POST') {
+      const body = JSON.parse((await getRawBody(req)).toString('utf8') || '{}') as {
+        start?: boolean
+      }
+      const start = body.start !== false
+      const r = await gmoNotify.subscribe(start)
+      await writeAudit({
+        actor: editActor,
+        action: 'UPDATE',
+        entity: 'GmoWebhook',
+        summary: `GMOイベント通知の${start ? '配信開始' : '配信停止'}を要求: ${r.ok ? '成功' : '失敗'} ${r.message}`,
+      })
+      json(r, r.ok ? 200 : 502)
+      return
+    }
+    // 配信が止まっていた間に溜まった明細を回収して反映する
+    if (path === '/api/gmo/webhook/unsent' && method === 'POST') {
+      const r = await gmoNotify.fetchUnsentAndApply()
+      json(r, r.ok ? 200 : 502)
+      return
+    }
+
     // ── GMO: 未整備（支払条件・振込先 未入力）検知 ──
     if (path === '/api/gmo/incomplete' && method === 'GET') {
       // month(YYYY-MM)＝対象月。未指定なら当月。その月に支払いが必要な未整備のみ返す
@@ -281,6 +307,11 @@ export default async function handler(
       const result = await gmo.buildGmoTransfers(start, end)
       if (path === '/api/gmo/transfers/file') {
         const outputCount = result.count - result.incompleteCount
+        // 出力＝振込実行の確定。弁済日・弁済充当額・社数・振)手数料 を入金行へ書き戻す。
+        // 記録結果はヘッダーで返し、画面で件数を出す（本文はCSV/ZIPなので入れられない）。
+        const rec = await gmo.recordTransferResult(editActor, result)
+        res.setHeader('X-Repayment-Record', encodeURIComponent(JSON.stringify(rec)))
+        res.setHeader('Access-Control-Expose-Headers', 'X-Repayment-Record')
         if (outputCount > 999) {
           res.setHeader('Content-Type', 'application/zip')
           res.setHeader('Content-Disposition', `attachment; filename="gmo_transfer_${start}.zip"`)

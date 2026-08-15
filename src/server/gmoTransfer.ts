@@ -7,6 +7,8 @@
  *   - 整形: コードのゼロ埋め(金融機関4/支店3/口座7)、預金種目(普通1/当座2/他4)、ASC半角化、振込依頼人名
  */
 import { prisma } from './db.js'
+import { writeAudit, writeChange, type Actor } from './audit.js'
+import { HANDLING_FEE_UNIT } from './paymentSummary.js'
 import {
   GMO_TRANSFER_TARGET_STATUSES,
   SETTLED_CREDITOR_STATUSES,
@@ -426,6 +428,192 @@ export async function buildIncompleteRepayments(
     scheduleMissingCount: rows.filter((r) => r.scheduleMissing).length,
     accountMissingCount: rows.filter((r) => r.accountMissing).length,
     monthUnknownCount: rows.filter((r) => r.monthUnknown).length,
+  }
+}
+
+// ============================================================
+// 振込実行の記録（弁済実績の書き戻し）
+// ------------------------------------------------------------
+// 事務所と確認した運用:
+//   ・振込ファイルを出力した時点で「弁済済み」として確定させる
+//   ・ある月に債権者へ振り込む原資は、依頼者の【同じ月】の入金
+//
+// これまでは振込ファイルを出しても何も記録されず、弁済日・弁済充当額・
+// 社数（実績）・振)手数料 を担当者が入金スケジュールへ手入力していた。
+// 出力時に確定している値（社数・金額・振込日）をそのまま書き戻して、
+// 手入力を無くす。
+//
+// 安全策:
+//   ・すでに弁済日が入っている行は上書きしない（再ダウンロードで二重計上しない）
+//   ・変更履歴（ChangeLog）に before/after を残すので、間違えたら取り消せる
+//   ・口座情報不足で CSV から除外された行は集計に含めない
+//     （実際に振り込まれないため）
+// ============================================================
+
+export type TransferRecordResult = {
+  ok: boolean
+  /** 記録対象になった案件×月の組み合わせ数 */
+  groups: number
+  /** 実際に書き込んだ入金行の数 */
+  written: number
+  /** すでに弁済日が入っていて上書きしなかった数 */
+  skipped: number
+  /** 対応する入金行が見つからなかった数 */
+  notFound: number
+  /** 見つからなかった案件のID（画面で補完してもらう） */
+  notFoundIds: string[]
+  /** 書き込んだ弁済充当額の合計 */
+  totalAmount: number
+  /** 書き込んだ社数の合計 */
+  totalCount: number
+  message: string
+}
+
+/** YYYY-MM から その月の初日・翌月初日 を作る */
+function monthRange(ym: string): { from: Date; to: Date } {
+  const [y, m] = ym.split('-').map(Number)
+  return {
+    from: new Date(Date.UTC(y, m - 1, 1)),
+    to: new Date(Date.UTC(m === 12 ? y + 1 : y, m === 12 ? 0 : m, 1)),
+  }
+}
+
+/**
+ * 振込ファイルの内容を、案件の入金スケジュールへ「弁済実績」として書き戻す。
+ * 出力（ダウンロード）と同じ GmoResult を渡すこと。
+ */
+export async function recordTransferResult(
+  actor: Actor,
+  result: GmoResult
+): Promise<TransferRecordResult> {
+  // 実際に振り込まれる行だけを対象にする（口座情報不足は CSV から除外されている）
+  const rows = result.rows.filter((r) => !r.incomplete && r.amount != null)
+
+  // 案件 × 振込月 で集約する。対象期間が月をまたぐ場合に混ざらないようにする。
+  type Group = {
+    caseId: number
+    externalId: string | null
+    month: string
+    amount: number
+    count: number
+    lastDate: string
+  }
+  const groups = new Map<string, Group>()
+  for (const r of rows) {
+    const month = r.transferDate.slice(0, 7)
+    const key = `${r.caseId}|${month}`
+    const g = groups.get(key)
+    if (g) {
+      g.amount += r.amount ?? 0
+      g.count += 1
+      if (r.transferDate > g.lastDate) g.lastDate = r.transferDate
+    } else {
+      groups.set(key, {
+        caseId: r.caseId,
+        externalId: r.externalId,
+        month,
+        amount: r.amount ?? 0,
+        count: 1,
+        lastDate: r.transferDate,
+      })
+    }
+  }
+
+  let written = 0
+  let skipped = 0
+  let totalAmount = 0
+  let totalCount = 0
+  const notFoundIds: string[] = []
+
+  for (const g of groups.values()) {
+    const { from, to } = monthRange(g.month)
+    // 同じ月の案件全体行（creditorId=null）。
+    // 実入金がある行を優先し、無ければその月の最初の予定行を使う。
+    const candidates = await prisma.payment.findMany({
+      where: {
+        caseId: g.caseId,
+        creditorId: null,
+        plannedDate: { gte: from, lt: to },
+      },
+      orderBy: [{ plannedDate: 'asc' }, { id: 'asc' }],
+      select: {
+        id: true,
+        plannedDate: true,
+        actualDate: true,
+        repaymentDate: true,
+        actualRepaymentAllocation: true,
+        actualRepaymentCount: true,
+        actualHandlingFee: true,
+      },
+    })
+    const target = candidates.find((p) => p.actualDate != null) ?? candidates[0]
+    if (!target) {
+      notFoundIds.push(g.externalId ?? `caseId:${g.caseId}`)
+      continue
+    }
+    if (target.repaymentDate != null) {
+      skipped += 1
+      continue
+    }
+
+    const before = {
+      repaymentDate: target.repaymentDate,
+      actualRepaymentAllocation: target.actualRepaymentAllocation,
+      actualRepaymentCount: target.actualRepaymentCount,
+      actualHandlingFee: target.actualHandlingFee,
+    }
+    const after = {
+      repaymentDate: new Date(`${g.lastDate}T00:00:00Z`),
+      actualRepaymentAllocation: g.amount,
+      actualRepaymentCount: g.count,
+      // 手数料 = 社数 × 129円（入金管理ファイルの検算式と同じ）
+      actualHandlingFee: g.count * HANDLING_FEE_UNIT,
+    }
+    await prisma.payment.update({ where: { id: target.id }, data: after })
+    await writeChange({
+      actor,
+      entity: 'Payment',
+      entityId: String(target.id),
+      action: 'UPDATE',
+      before,
+      after,
+    })
+    written += 1
+    totalAmount += g.amount
+    totalCount += g.count
+  }
+
+  const message =
+    `振込${result.periodStart}〜${result.periodEnd}: ` +
+    `${written}件の入金行へ弁済実績を記録` +
+    (skipped > 0 ? `・記録済みでスキップ${skipped}件` : '') +
+    (notFoundIds.length > 0 ? `・対応する入金行なし${notFoundIds.length}件` : '')
+
+  await writeAudit({
+    actor,
+    action: 'UPDATE',
+    entity: 'Payment',
+    summary: message,
+    metadata: {
+      source: 'gmo-transfer',
+      periodStart: result.periodStart,
+      periodEnd: result.periodEnd,
+      totalAmount,
+      totalCount,
+      notFoundIds: notFoundIds.slice(0, 50),
+    },
+  })
+
+  return {
+    ok: true,
+    groups: groups.size,
+    written,
+    skipped,
+    notFound: notFoundIds.length,
+    notFoundIds,
+    totalAmount,
+    totalCount,
+    message,
   }
 }
 

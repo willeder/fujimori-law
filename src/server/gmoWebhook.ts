@@ -6,26 +6,38 @@
  *   これまでは月次で入金明細CSVを取り込んでいたが、その処理をそのまま再利用する
  *   （突合・名義照合・充当のルールを2系統に分けないため）。
  *
- * 安全策（docs/infra/gmo-proxy/構築手順書.md の設計どおり HTTPS + Basic認証を主にする）:
- *   1. Basic認証     … GMO_WEBHOOK_USER / GMO_WEBHOOK_PASS。GMO のイベント通知設定に
- *                       登録した資格情報と突き合わせる（タイミング安全比較）
- *   2. 送信元IP制限   … GMO から通知された配信元グローバルIPのみ受け付ける
+ * 準拠仕様: docs/reference/api-spec-webhooks.pdf
+ *   「オープンAPI仕様書 イベント通知編 Version 1.8.0」
+ *   ＡＰＩ：振込入金口座_入金明細通知（x-eventType: va-deposit-transaction）
+ *
+ * 仕様書が定めるセキュリティ対策と、本実装の対応:
+ *   1. アクセストークン（必須）… x-access-token ヘッダー。GMO_WEBHOOK_ACCESS_TOKEN と照合
+ *   2. シグネチャ（任意）    … x-webhook-signature ヘッダー。
+ *                              Base64( HMAC-SHA256( 生ボディ, クライアントシークレット ) )
+ *                              GMO_WEBHOOK_SIGNING_SECRET（未設定なら GMO_CLIENT_SECRET）で検証
+ *   3. Basic認証（任意）     … Authorization ヘッダー。GMO_WEBHOOK_USER / GMO_WEBHOOK_PASS
+ *
+ * 事務所の運用として上乗せしている対策:
+ *   4. 送信元IP制限   … 配信元グローバルIPのみ受け付ける
  *                       （開発 18.182.233.135 / 本番 13.115.136.151）
  *                       GMO_WEBHOOK_ENFORCE_IP=0 で無効化できる
- *   3. 共通シークレット … GMO_WEBHOOK_SECRET を設定した場合のみ x-webhook-secret を必須にする
- *   4. フェイルクローズ … 1〜3 がどれも設定されていない場合は全て拒否する
+ *   5. 共通シークレット … GMO_WEBHOOK_SECRET を設定した場合のみ x-webhook-secret を必須にする
+ *   6. フェイルクローズ … 1〜5 がどれも効いていない場合は全て拒否する
  *                       （設定漏れのまま誰でも入金実績を書き換えられる状態を作らない）
- *   5. 冪等性         … eventKey（明細ID or 本文のSHA-256）でユニーク。再送されても二重反映しない
- *   6. 生ログ保全     … 反映可否によらず受信JSONを丸ごと gmo_webhook_events に保存する
+ *   7. 冪等性         … eventKey（明細キー itemKey / messageId、無ければ本文のSHA-256）で
+ *                       ユニーク。仕様書に「重複配信される場合がある」と明記されているため必須
+ *   8. 生ログ保全     … 反映可否によらず受信JSONを丸ごと gmo_webhook_events に保存する
  *                       （拒否した通信も記録するので、送信元IPの想定違いに気づける）
  *
- * ⚠ 通知ペイロードの項目名について
- *   本実装時点で「イベント通知（Webhook）」の仕様書は未入手のため、項目名を断定していない。
- *   よくある表記ゆれ（accountNumber / account_no / 口座番号 など）を許容する
- *   ゆるいマッパー pickDeposits() で取り出し、取り出せなかった通知は status='unparsed'
- *   として生JSONを残す。仕様書を受領したら FIELD_ALIASES を確定させて再処理すればよい。
+ * 仕様書に明記されている運用上の注意（画面に出して気づけるようにすること）:
+ *   ・アクセストークンが期限切れになると配信が止まり、その間の明細は再送されない
+ *     → 振込入金口座入金明細照会API で取りに行く必要がある
+ *   ・配信エラーが1時間続くと自動的に配信停止状態へ移行する → /subscribe で再開が必要
+ *   ・配信停止のまま14日経過したメッセージは削除される（復旧不能）
+ *   ・通知の順序は保証されない
+ *   ・法人口座および個人事業主口座のみ対象（個人口座は対象外）
  */
-import { createHash, timingSafeEqual } from 'node:crypto'
+import { createHash, createHmac, timingSafeEqual } from 'node:crypto'
 import { prisma } from './db.js'
 import { writeAudit, type Actor } from './audit.js'
 import {
@@ -84,6 +96,53 @@ function checkBasicAuth(
 }
 
 /**
+ * アクセストークンの検証（仕様書では必須ヘッダー x-access-token）。
+ * GMO_WEBHOOK_ACCESS_TOKEN が未設定なら null（検証しない）を返す。
+ */
+function checkAccessToken(
+  headers: Record<string, string | string[] | undefined>
+): 'ok' | 'ng' | null {
+  const expected = process.env.GMO_WEBHOOK_ACCESS_TOKEN ?? ''
+  if (expected === '') return null
+  const raw = headers['x-access-token'] ?? headers['X-Access-Token']
+  const v = Array.isArray(raw) ? raw[0] : raw
+  if (typeof v !== 'string' || v === '') return 'ng'
+  return safeEqual(v, expected) ? 'ok' : 'ng'
+}
+
+/**
+ * シグネチャの検証（仕様書のオプション機能）。
+ *   x-webhook-signature = Base64( HMAC-SHA256( 生ボディ, クライアントシークレット ) )
+ * 検証鍵は GMO_WEBHOOK_SIGNING_SECRET、無ければ GMO_CLIENT_SECRET を使う。
+ * どちらも未設定なら null（検証しない）を返す。
+ */
+function checkSignature(
+  rawBody: string,
+  headers: Record<string, string | string[] | undefined>
+): 'ok' | 'ng' | null {
+  const key = process.env.GMO_WEBHOOK_SIGNING_SECRET || process.env.GMO_CLIENT_SECRET || ''
+  if (key === '') return null
+  const raw = headers['x-webhook-signature'] ?? headers['X-Webhook-Signature']
+  const v = Array.isArray(raw) ? raw[0] : raw
+  if (typeof v !== 'string' || v === '') return 'ng'
+  const expected = createHmac('sha256', key).update(rawBody, 'utf8').digest('base64')
+  return safeEqual(v, expected) ? 'ok' : 'ng'
+}
+
+/** 仕様書のイベント種別。ヘッダー x-eventType に入る */
+export const EVENT_TYPE_VA_DEPOSIT = 'va-deposit-transaction'
+
+/** ヘッダーの値を1つ取り出す（配列で来る場合に備える） */
+function headerOf(
+  headers: Record<string, string | string[] | undefined>,
+  name: string
+): string | null {
+  const raw = headers[name] ?? headers[name.toLowerCase()]
+  const v = Array.isArray(raw) ? raw[0] : raw
+  return typeof v === 'string' && v !== '' ? v : null
+}
+
+/**
  * x-forwarded-for から実クライアントIPを取り出す。
  * Vercel は "client, proxy1, proxy2" の順で積むため先頭を採用する。
  */
@@ -99,28 +158,60 @@ export type WebhookResult = { status: number; body: Record<string, unknown> }
 // ============================================================
 // ペイロードからの明細抽出
 // ------------------------------------------------------------
-// 仕様書未入手のため、想定される項目名を並べて先に見つかったものを採用する。
-// 大文字小文字・アンダースコアは無視して比較する。
+// 「GMOあおぞらネット銀行 オープンAPI仕様書 イベント通知編 v1.8.0」
+// ＡＰＩ：振込入金口座_入金明細通知 のボディ定義に合わせて取り出す。
+//
+//   {
+//     "messageId": "0000000000123456789",
+//     "timestamp": "2018-11-09T17:59:59+09:00",
+//     "account":       { raId, raBranchCode, raBranchNameKana,
+//                        raAccountNumber, raHolderName, baseDate, baseTime },
+//     "vaTransaction": { vaId, transactionDate, valueDate,
+//                        vaBranchCode, vaBranchNameKana, vaAccountNumber,
+//                        vaAccountNameKana, depositAmount, remitterNameKana,
+//                        paymentBankName, paymentBranchName, partnerName,
+//                        remarks, itemKey }
+//   }
+//
+// 1通知＝1明細（vaTransaction はオブジェクト）。将来まとめて配信される場合に
+// 備えて配列でも受けられるようにしてある。
+// 仕様外の形で届いた場合は LEGACY_ALIASES によるゆるい探索へフォールバックし、
+// それでも取れなければ status='unparsed' として生JSONを残す。
 // ============================================================
-const FIELD_ALIASES = {
+
+/**
+ * 仕様外の形で届いたときの保険。項目名の候補を並べて先に見つかったものを採用する。
+ * 大文字小文字・アンダースコア・ハイフンは無視して比較する。
+ */
+const LEGACY_ALIASES = {
   /** 明細の配列が入っているキー */
-  list: ['depositList', 'deposits', 'details', 'detailList', 'transactions', 'items', 'data', '明細'],
+  list: [
+    'vaTransactions',
+    'depositList',
+    'deposits',
+    'details',
+    'detailList',
+    'transactions',
+    'items',
+    'data',
+    '明細',
+  ],
   /** 明細ごとの一意ID（冪等キーに使う） */
-  id: ['transactionId', 'detailId', 'depositId', 'id', 'referenceNumber', 'ediInfo'],
+  id: ['itemKey', 'messageId', 'transactionId', 'detailId', 'depositId', 'id', 'referenceNumber'],
   /** 入金日 */
   date: ['transactionDate', 'depositDate', 'valueDate', 'date', 'transferDate', '入金日'],
   /** 入金額 */
   amount: ['depositAmount', 'transferAmount', 'amount', 'value', '入金額'],
   /** 振込入金口座（V口座）の口座番号 */
-  account: ['accountNumber', 'virtualAccountNumber', 'accountNo', 'vaccountNumber', '口座番号'],
+  account: ['vaAccountNumber', 'accountNumber', 'virtualAccountNumber', 'accountNo', '口座番号'],
   /** 振込入金口座の支店名 */
-  branch: ['branchName', 'virtualBranchName', 'branch', '支店名'],
+  branch: ['vaBranchNameKana', 'branchName', 'virtualBranchName', 'branch', '支店名'],
   /** 支店コード（支店名が来ない場合の手がかり） */
-  branchCode: ['branchCode', 'virtualBranchCode', '支店コード'],
+  branchCode: ['vaBranchCode', 'branchCode', 'virtualBranchCode', '支店コード'],
   /** 振込依頼人名 */
-  payer: ['remitterName', 'payerName', 'senderName', 'remitter', '振込依頼人名', '依頼人名'],
+  payer: ['remitterNameKana', 'remitterName', 'payerName', 'senderName', '振込依頼人名', '依頼人名'],
   /** 摘要（分解前の文字列が来る場合） */
-  summary: ['summary', 'description', 'remarks', 'itemName', '摘要'],
+  summary: ['remarks', 'summary', 'description', 'itemName', '摘要'],
 } as const
 
 const normKey = (k: string): string => k.replace(/[_\-\s]/g, '').toLowerCase()
@@ -147,10 +238,11 @@ const asInt = (v: unknown): number | null => {
 
 /** ペイロードの中から「明細っぽい配列」を探す（入れ子1段まで） */
 function findDetailArray(payload: unknown): Record<string, unknown>[] {
-  if (Array.isArray(payload)) return payload.filter((x) => x && typeof x === 'object') as Record<string, unknown>[]
+  if (Array.isArray(payload))
+    return payload.filter((x) => x && typeof x === 'object') as Record<string, unknown>[]
   if (!payload || typeof payload !== 'object') return []
   const obj = payload as Record<string, unknown>
-  const direct = pick(obj, FIELD_ALIASES.list)
+  const direct = pick(obj, LEGACY_ALIASES.list)
   if (Array.isArray(direct)) {
     return direct.filter((x) => x && typeof x === 'object') as Record<string, unknown>[]
   }
@@ -160,36 +252,88 @@ function findDetailArray(payload: unknown): Record<string, unknown>[] {
       return v.filter((x) => x && typeof x === 'object') as Record<string, unknown>[]
     }
     if (v && typeof v === 'object') {
-      const nested = pick(v as Record<string, unknown>, FIELD_ALIASES.list)
+      const nested = pick(v as Record<string, unknown>, LEGACY_ALIASES.list)
       if (Array.isArray(nested)) {
         return nested.filter((x) => x && typeof x === 'object') as Record<string, unknown>[]
       }
     }
   }
   // 明細1件がそのまま来る形（配列でない）にも備える
-  if (asInt(pick(obj, FIELD_ALIASES.amount)) != null) return [obj]
+  if (asInt(pick(obj, LEGACY_ALIASES.amount)) != null) return [obj]
   return []
 }
 
 export type Extracted = { rows: DepositRow[]; ids: string[] }
 
+/** 仕様書どおりの明細（vaTransaction 1件）から取込用の1行を作る */
+function rowFromVaTransaction(t: Record<string, unknown>, rowNo: number): DepositRow | null {
+  const date = toIsoDate(asStr(t['transactionDate']) ?? asStr(t['valueDate']) ?? '')
+  const amount = asInt(t['depositAmount'])
+  if (!date || amount == null || amount <= 0) return null
+  return {
+    rowNo,
+    date,
+    amount,
+    accountNumber: asStr(t['vaAccountNumber']),
+    // 支店は「ｱｼﾞｻｲ」のような半角カナで届く。DB 側は「あじさい支店」なので
+    // 突合時に normalizeBranchName() で表記を揃える（depositImport.ts）。
+    branch: asStr(t['vaBranchNameKana']) ?? asStr(t['vaBranchCode']),
+    payerName: asStr(t['remitterNameKana']),
+    rawSummary: asStr(t['remarks']),
+  }
+}
+
 /**
  * 通知ペイロードを、CSV取込と同じ DepositRow[] に変換する。
+ * まず仕様書どおりの形（vaTransaction）で読み、取れなければゆるい探索に落とす。
  * 日付・金額が取れない行は捨てる（後段の突合が成立しないため）。
  */
 export function pickDeposits(payload: unknown): Extracted {
+  const rows: DepositRow[] = []
+  const ids: string[] = []
+
+  // ── 1. 仕様書どおりの形 ──
+  const notifications: Record<string, unknown>[] = Array.isArray(payload)
+    ? (payload.filter((x) => x && typeof x === 'object') as Record<string, unknown>[])
+    : payload && typeof payload === 'object'
+      ? [payload as Record<string, unknown>]
+      : []
+  for (const n of notifications) {
+    const raw = n['vaTransaction']
+    const list = Array.isArray(raw)
+      ? (raw.filter((x) => x && typeof x === 'object') as Record<string, unknown>[])
+      : raw && typeof raw === 'object'
+        ? [raw as Record<string, unknown>]
+        : []
+    for (const t of list) {
+      const row = rowFromVaTransaction(t, rows.length + 1)
+      if (!row) continue
+      rows.push(row)
+      // 明細キー（口座ID毎に一意）→ 無ければメッセージID を冪等キーに使う
+      const id = asStr(t['itemKey']) ?? asStr(n['messageId'])
+      if (id) ids.push(id)
+    }
+  }
+  if (rows.length > 0) return { rows, ids }
+
+  // ── 2. 仕様外の形（フォールバック）──
+  return pickDepositsLoose(payload)
+}
+
+/** 項目名が仕様と違う形で届いた場合の保険 */
+function pickDepositsLoose(payload: unknown): Extracted {
   const details = findDetailArray(payload)
   const rows: DepositRow[] = []
   const ids: string[] = []
   details.forEach((d, i) => {
-    const date = toIsoDate(asStr(pick(d, FIELD_ALIASES.date)) ?? '')
-    const amount = asInt(pick(d, FIELD_ALIASES.amount))
+    const date = toIsoDate(asStr(pick(d, LEGACY_ALIASES.date)) ?? '')
+    const amount = asInt(pick(d, LEGACY_ALIASES.amount))
     if (!date || amount == null || amount <= 0) return
 
-    let account = asStr(pick(d, FIELD_ALIASES.account))
-    let branch = asStr(pick(d, FIELD_ALIASES.branch))
-    let payer = asStr(pick(d, FIELD_ALIASES.payer))
-    const summary = asStr(pick(d, FIELD_ALIASES.summary))
+    let account = asStr(pick(d, LEGACY_ALIASES.account))
+    let branch = asStr(pick(d, LEGACY_ALIASES.branch)) ?? asStr(pick(d, LEGACY_ALIASES.branchCode))
+    let payer = asStr(pick(d, LEGACY_ALIASES.payer))
+    const summary = asStr(pick(d, LEGACY_ALIASES.summary))
 
     // 口座番号や支店が個別項目で来ず、摘要にまとまっている形にも対応する
     // （CSV取込と同じ「振込 ◯◯ ◯◯支店 1234567」の分解を通す）
@@ -209,13 +353,19 @@ export function pickDeposits(payload: unknown): Extracted {
       payerName: payer,
       rawSummary: summary ?? null,
     })
-    const id = asStr(pick(d, FIELD_ALIASES.id))
+    const id = asStr(pick(d, LEGACY_ALIASES.id))
     if (id) ids.push(id)
   })
   return { rows, ids }
 }
 
-/** 通知全体の一意キー。明細IDが取れればそれを連結、無ければ本文のハッシュ */
+/**
+ * 通知全体の一意キー。
+ * 仕様書の「明細キー（itemKey）」または「メッセージID（messageId）」が取れれば
+ * それを連結し、取れなければ本文のハッシュを使う。
+ * 仕様書に「同一のメッセージが重複して配信される場合があります」と明記されているため、
+ * このキーによる二重反映の防止は必須。
+ */
 function buildEventKey(rawBody: string, ids: string[]): string {
   if (ids.length > 0) return 'ids:' + ids.join(',').slice(0, 200)
   return 'sha256:' + createHash('sha256').update(rawBody).digest('hex')
@@ -236,7 +386,21 @@ export async function handleGmoWebhook(
 ): Promise<WebhookResult> {
   const ip = clientIpOf(headers)
 
-  // ── 1. Basic認証（GMOのイベント通知設定に登録した資格情報）──
+  // ── 1. アクセストークン（仕様書の必須ヘッダー x-access-token）──
+  const token = checkAccessToken(headers)
+  if (token === 'ng') {
+    await recordRejection(rawBody, ip, 'x-access-token が一致しません')
+    return { status: 401, body: { error: 'unauthorized', reason: 'access token mismatch' } }
+  }
+
+  // ── 2. シグネチャ（仕様書のオプション機能 x-webhook-signature）──
+  const signature = checkSignature(rawBody, headers)
+  if (signature === 'ng') {
+    await recordRejection(rawBody, ip, 'x-webhook-signature の検証に失敗しました')
+    return { status: 401, body: { error: 'unauthorized', reason: 'signature mismatch' } }
+  }
+
+  // ── 3. Basic認証（GMOのイベント通知設定に登録した資格情報）──
   const basic = checkBasicAuth(headers)
   if (basic === 'ng') {
     await recordRejection(rawBody, ip, 'Basic認証に失敗しました')
@@ -246,7 +410,7 @@ export async function handleGmoWebhook(
     }
   }
 
-  // ── 2. 共通シークレット（設定時のみ必須）──
+  // ── 4. 共通シークレット（設定時のみ必須）──
   const expected = process.env.GMO_WEBHOOK_SECRET ?? ''
   const secretUsed = expected !== ''
   if (secretUsed) {
@@ -258,7 +422,7 @@ export async function handleGmoWebhook(
     }
   }
 
-  // ── 3. 送信元IP制限 ──
+  // ── 5. 送信元IP制限 ──
   const ipUsed = ipCheckEnabled()
   if (ipUsed && (!ip || !allowedIps().includes(ip))) {
     // 想定と違うIPから届いていること自体が調査の手がかりになるので記録する
@@ -266,21 +430,21 @@ export async function handleGmoWebhook(
     return { status: 403, body: { error: 'forbidden', reason: 'source ip not allowed' } }
   }
 
-  // ── 4. フェイルクローズ ──
-  // Basic認証・シークレット・IP制限のどれも効いていない状態は、誰でも入金実績を
-  // 書き換えられることを意味するため受け付けない。
-  if (basic === null && !secretUsed && !ipUsed) {
+  // ── 6. フェイルクローズ ──
+  // アクセストークン・シグネチャ・Basic認証・共通シークレット・IP制限のどれも
+  // 効いていない状態は、誰でも入金実績を書き換えられることを意味するため受け付けない。
+  if (token === null && signature === null && basic === null && !secretUsed && !ipUsed) {
     return {
       status: 503,
       body: {
         error: 'not-configured',
         reason:
-          'GMO_WEBHOOK_USER / GMO_WEBHOOK_PASS（Basic認証）が未設定です。設定するまで受信しません',
+          'GMO_WEBHOOK_ACCESS_TOKEN（推奨）または GMO_WEBHOOK_USER / GMO_WEBHOOK_PASS が未設定です。設定するまで受信しません',
       },
     }
   }
 
-  // ── 3. JSON パース ──
+  // ── 7. JSON パース ──
   let payload: unknown
   try {
     payload = JSON.parse(rawBody || '{}')
@@ -301,12 +465,15 @@ export async function handleGmoWebhook(
 
   const { rows, ids } = pickDeposits(payload)
   const eventKey = buildEventKey(rawBody, ids)
+  // イベント種別は仕様書どおりヘッダー（x-eventType）から取る。
+  // 届かない場合に備えて本文側も見る。
   const eventType =
-    payload && typeof payload === 'object'
+    headerOf(headers, 'x-eventType') ??
+    (payload && typeof payload === 'object'
       ? asStr(pick(payload as Record<string, unknown>, ['eventType', 'notificationType', 'type']))
-      : null
+      : null)
 
-  // ── 4. 冪等性チェック（同じ通知の再送は何もしない）──
+  // ── 8. 冪等性チェック（同じ通知の再送は何もしない）──
   const existing = await prisma.gmoWebhookEvent.findUnique({ where: { eventKey } })
   if (existing) {
     return {
@@ -315,7 +482,7 @@ export async function handleGmoWebhook(
     }
   }
 
-  // ── 5. 明細が取れなければ生ログだけ残す ──
+  // ── 9. 明細が取れなければ生ログだけ残す ──
   if (rows.length === 0) {
     const ev = await saveEvent({
       eventKey,
@@ -331,7 +498,7 @@ export async function handleGmoWebhook(
     return { status: 200, body: { ok: true, stored: true, parsed: false, eventId: ev.id } }
   }
 
-  // ── 6. CSV取込と同じ判定・反映 ──
+  // ── 10. CSV取込と同じ判定・反映 ──
   try {
     const plan = await planDepositRows(rows, 'json')
     const result = await applyDepositPlan(WEBHOOK_ACTOR, plan, 'gmo-webhook')

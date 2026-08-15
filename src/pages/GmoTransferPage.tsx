@@ -143,6 +143,48 @@ export function GmoTransferPage() {
     }
   }, [eventsKey])
 
+  // 配信制御（仕様書「イベント通知編 v1.8.0」）。
+  // 受け口を用意しただけでは通知は届かないため、ここから配信開始を要求する。
+  const [notifyBusy, setNotifyBusy] = useState<'' | 'subscribe' | 'unsubscribe' | 'unsent'>('')
+
+  const controlSubscription = async (start: boolean) => {
+    if (
+      !start &&
+      !window.confirm(
+        '配信を停止すると、以降の入金がシステムに自動反映されなくなります。停止しますか？'
+      )
+    )
+      return
+    setNotifyBusy(start ? 'subscribe' : 'unsubscribe')
+    try {
+      const r = await fetch('/api/gmo/webhook/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ start }),
+      })
+      const d = (await r.json()) as { ok?: boolean; message?: string }
+      window.alert(d.message ?? (d.ok ? '要求しました' : '要求に失敗しました'))
+    } catch (e) {
+      window.alert(`要求に失敗しました: ${e instanceof Error ? e.message : String(e)}`)
+    } finally {
+      setNotifyBusy('')
+    }
+  }
+
+  const collectUnsent = async () => {
+    setNotifyBusy('unsent')
+    try {
+      const r = await fetch('/api/gmo/webhook/unsent', { method: 'POST' })
+      const d = (await r.json()) as { ok?: boolean; message?: string }
+      window.alert(d.message ?? (d.ok ? '回収しました' : '回収に失敗しました'))
+      setEventsKey((k) => k + 1)
+    } catch (e) {
+      window.alert(`回収に失敗しました: ${e instanceof Error ? e.message : String(e)}`)
+    } finally {
+      setNotifyBusy('')
+    }
+  }
+
   const reprocessEvent = async (id: number) => {
     try {
       const r = await fetch('/api/gmo/webhook/reprocess', {
@@ -217,8 +259,77 @@ export function GmoTransferPage() {
     }
   }
 
-  const download = () => {
-    window.location.href = `/api/gmo/transfers/file?start=${start}&end=${end}`
+  /**
+   * 振込ファイルのダウンロード。
+   *
+   * 事務所と確認した運用により、**出力＝振込実行の確定**として扱う。
+   * サーバ側で弁済日・弁済充当額・社数（実績）・振)手数料 を入金スケジュールへ
+   * 書き戻すため、押す前に必ず確認を挟む。
+   * 記録結果は X-Repayment-Record ヘッダーで返るので、件数を画面に出す。
+   */
+  const [downloading, setDownloading] = useState(false)
+
+  const download = async () => {
+    const outputCount = (result?.count ?? 0) - (result?.incompleteCount ?? 0)
+    if (
+      !window.confirm(
+        `振込ファイルを出力します。\n\n` +
+          `出力と同時に、対象案件の入金スケジュールへ弁済実績（弁済日・弁済充当額・社数・振)手数料）を記録します。\n` +
+          `対象 ${outputCount} 件。\n\n` +
+          `※すでに弁済日が入っている行は上書きしません。\n` +
+          `※記録は変更履歴に残るので、間違えたら取り消せます。\n\n` +
+          `続けますか？`
+      )
+    )
+      return
+    setDownloading(true)
+    try {
+      const r = await fetch(`/api/gmo/transfers/file?start=${start}&end=${end}`)
+      if (!r.ok) throw new Error(`HTTP ${r.status}`)
+      const raw = r.headers.get('X-Repayment-Record')
+      const blob = await r.blob()
+      const isZip = (r.headers.get('Content-Type') ?? '').includes('zip')
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `gmo_transfer_${start}.${isZip ? 'zip' : 'csv'}`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+
+      if (raw) {
+        const rec = JSON.parse(decodeURIComponent(raw)) as {
+          written: number
+          skipped: number
+          notFound: number
+          notFoundIds: string[]
+          totalAmount: number
+          totalCount: number
+        }
+        const lines = [
+          `弁済実績を記録しました。`,
+          ``,
+          `記録した入金行 : ${rec.written} 件`,
+          `弁済充当額     : ${rec.totalAmount.toLocaleString()} 円`,
+          `社数（実績）   : ${rec.totalCount} 社`,
+          `振)手数料      : ${(rec.totalCount * 129).toLocaleString()} 円`,
+        ]
+        if (rec.skipped > 0) lines.push(``, `記録済みのためスキップ: ${rec.skipped} 件`)
+        if (rec.notFound > 0)
+          lines.push(
+            ``,
+            `⚠ 対応する入金行が見つからなかった案件: ${rec.notFound} 件`,
+            rec.notFoundIds.slice(0, 20).join(', '),
+            `→ 該当案件の入金スケジュールに、その月の予定行があるか確認してください`
+          )
+        window.alert(lines.join('\n'))
+      }
+    } catch (e) {
+      window.alert(`出力に失敗しました: ${e instanceof Error ? e.message : String(e)}`)
+    } finally {
+      setDownloading(false)
+    }
   }
 
   const rows = useMemo<Row[]>(() => {
@@ -279,13 +390,15 @@ export function GmoTransferPage() {
           </button>
           <button
             type="button"
-            onClick={download}
-            disabled={!result || outputCount === 0}
+            onClick={() => void download()}
+            disabled={!result || outputCount === 0 || downloading}
             className="rounded bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-40"
           >
-            {fileCount > 1
-              ? `ZIP一括ダウンロード（${outputCount}件・${fileCount}ファイル）`
-              : `CSVダウンロード（${outputCount}件）`}
+            {downloading
+              ? '出力中…'
+              : fileCount > 1
+                ? `ZIP一括ダウンロード（${outputCount}件・${fileCount}ファイル）`
+                : `CSVダウンロード（${outputCount}件）`}
           </button>
         </div>
       </AppHeader>
@@ -348,6 +461,39 @@ export function GmoTransferPage() {
                 {showEvents ? '閉じる ▲' : '履歴を開く ▼'}
               </span>
             </button>
+            {/* 配信制御。GMO側の設定だけでは通知は始まらないので、ここから開始を要求する */}
+            <div className="flex flex-wrap items-center gap-2 border-t border-slate-200 bg-slate-50 px-3 py-2 text-[11px]">
+              <span className="font-semibold text-slate-600">配信制御</span>
+              <button
+                type="button"
+                disabled={notifyBusy !== ''}
+                onClick={() => void controlSubscription(true)}
+                className="rounded bg-blue-600 px-2 py-1 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+              >
+                {notifyBusy === 'subscribe' ? '要求中…' : '配信開始を要求'}
+              </button>
+              <button
+                type="button"
+                disabled={notifyBusy !== ''}
+                onClick={() => void controlSubscription(false)}
+                className="rounded border border-slate-300 bg-white px-2 py-1 text-slate-600 hover:bg-slate-100 disabled:opacity-50"
+              >
+                {notifyBusy === 'unsubscribe' ? '要求中…' : '配信停止'}
+              </button>
+              <button
+                type="button"
+                disabled={notifyBusy !== ''}
+                onClick={() => void collectUnsent()}
+                className="rounded border border-slate-300 bg-white px-2 py-1 text-slate-600 hover:bg-slate-100 disabled:opacity-50"
+              >
+                {notifyBusy === 'unsent' ? '回収中…' : '未送信明細を回収して反映'}
+              </button>
+              <span className="text-[10px] text-slate-500">
+                配信エラーが1時間続くと銀行側で自動停止します。停止中の明細は「回収」で取り込めますが、
+                <b className="text-red-600">14日を過ぎると銀行側から削除され復旧できません</b>。
+              </span>
+            </div>
+
             {showEvents && (
               <div className="border-t border-slate-200 p-2">
                 {events.rows.length === 0 ? (

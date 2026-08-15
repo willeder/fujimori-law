@@ -156,6 +156,29 @@ function dbApiPlugin(): Plugin {
             return
           }
 
+          // ── GMO入金通知（Webhook）の受信。本番は api/gmo/webhook.ts ──
+          // 認証（アクセストークン・シグネチャ・Basic）はログインセッションとは
+          // 無関係なので、この認証チェックより前に処理する。
+          if (url === '/api/gmo/webhook' && req.method === 'POST') {
+            const { handleGmoWebhook } = (await server.ssrLoadModule(
+              '/src/server/gmoWebhook.ts'
+            )) as typeof import('./src/server/gmoWebhook')
+            const rawBody = await readRawBody(req)
+            const headers: Record<string, string | string[] | undefined> = {}
+            for (const [k, v] of Object.entries(req.headers)) headers[k.toLowerCase()] = v
+            const result = await handleGmoWebhook(rawBody, headers)
+            res.statusCode = result.status
+            res.setHeader('Content-Type', 'application/json; charset=utf-8')
+            res.end(JSON.stringify(result.body))
+            return
+          }
+          if (url === '/api/gmo/webhook' && req.method === 'GET') {
+            res.statusCode = 200
+            res.setHeader('Content-Type', 'application/json; charset=utf-8')
+            res.end(JSON.stringify({ ok: true, endpoint: 'gmo-webhook' }))
+            return
+          }
+
           // ── 入金予定リマインド（手動実行用。本番は Vercel Cron） ──
           if (url === '/api/cron/payment-reminder') {
             const secret = process.env.CRON_SECRET
@@ -680,6 +703,13 @@ function dbApiPlugin(): Plugin {
             const result = await gmo.buildGmoTransfers(start, end)
             if (url === '/api/gmo/transfers/file') {
               const outputCount = result.count - result.incompleteCount
+              // 出力＝振込実行の確定。弁済実績を入金行へ書き戻す（本番と同じ挙動）
+              const rec = await gmo.recordTransferResult(
+                { id: sessionUser.id, email: sessionUser.email },
+                result
+              )
+              res.setHeader('X-Repayment-Record', encodeURIComponent(JSON.stringify(rec)))
+              res.setHeader('Access-Control-Expose-Headers', 'X-Repayment-Record')
               if (outputCount > 999) {
                 // 999件/ファイル上限で分割し ZIP で一括ダウンロード
                 const zip = gmo.buildZip(gmo.gmoCsvChunks(result))

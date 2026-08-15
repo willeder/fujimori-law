@@ -398,6 +398,37 @@ type PaymentRow = {
 
 const iso = (d: Date | null): string | null => (d ? d.toISOString().slice(0, 10) : null)
 
+/**
+ * 支店名の表記ゆれを吸収する。
+ *
+ * 同じ支店が経路によって違う表記で届く:
+ *   DB（kintone由来） … 「あじさい支店」「アドレス支店」
+ *   Webhook（仕様書）  … 「ｱｼﾞｻｲ」（vaBranchNameKana・半角カナ・「支店」なし）
+ *   CSV（銀行明細）    … 「ｱｼﾞｻｲｼﾃﾝ」など
+ *
+ * NFKC で半角カナを全角へ、ひらがなをカタカナへ寄せ、「支店」を落として比較する。
+ * さらに、銀行の半角カナは小書き文字（ｬｭｮｯ等）を大書きに変換する慣習があるため
+ * （「ちきゅう支店」に対して「ﾁｷﾕｳ」が届く）、小書きも大書きへ寄せてから比較する。
+ * 数字だけ（支店コード "502" など）の場合はそのまま返す。
+ */
+const SMALL_KANA_MAP: Record<string, string> = {
+  ァ: 'ア', ィ: 'イ', ゥ: 'ウ', ェ: 'エ', ォ: 'オ',
+  ッ: 'ツ', ャ: 'ヤ', ュ: 'ユ', ョ: 'ヨ', ヮ: 'ワ',
+  ヵ: 'カ', ヶ: 'ケ',
+}
+
+export function normalizeBranchName(s: string | null | undefined): string {
+  if (!s) return ''
+  let t = String(s).normalize('NFKC')
+  // ひらがな → カタカナ
+  t = t.replace(/[\u3041-\u3096]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 0x60))
+  // 小書き → 大書き（全銀の半角カナに小書きが無いため）
+  t = t.replace(/[ァィゥェォッャュョヮヵヶ]/g, (c) => SMALL_KANA_MAP[c] ?? c)
+  t = t.replace(/支店|シテン/g, '')
+  t = t.replace(/[\s\u3000ー・（）()]/g, '')
+  return t
+}
+
 /** 取込プランを作成（プレビューとコミットで共通） */
 export async function planDepositImport(buf: Buffer): Promise<DepositPreview> {
   const parsed = parseDeposits(buf)
@@ -430,6 +461,9 @@ export async function planDepositRows(
   // 口座番号 → 案件 の突合マップ。
   // vAccountNumber には一意制約が無く、実データにも同一番号・別支店の案件が
   // 存在するため、支店名まで含めた複合キーを優先して突合する。
+  //
+  // 支店名の表記は経路によって違う（DB「あじさい支店」／Webhook「ｱｼﾞｻｲ」／CSV「ｱｼﾞｻｲｼﾃﾝ」）ため、
+  // normalizeBranchName() でカタカナに揃えてから突き合わせる。
   const accts = [...new Set(parsed.rows.map((r) => r.accountNumber).filter((s): s is string => !!s))]
   const cases = accts.length
     ? await prisma.case.findMany({
@@ -449,7 +483,7 @@ export async function planDepositRows(
   const byAcctOnly = new Map<string, CaseRow[]>()
   for (const c of cases) {
     const num = c.vAccountNumber as string
-    if (c.vAccountBranch) byBranchAcct.set(c.vAccountBranch + '|' + num, c)
+    if (c.vAccountBranch) byBranchAcct.set(normalizeBranchName(c.vAccountBranch) + '|' + num, c)
     const list = byAcctOnly.get(num) ?? []
     list.push(c)
     byAcctOnly.set(num, list)
@@ -461,7 +495,7 @@ export async function planDepositRows(
   ): { kase: CaseRow | null; ambiguous: boolean } => {
     if (!accountNumber) return { kase: null, ambiguous: false }
     if (branch) {
-      const hit = byBranchAcct.get(branch + '|' + accountNumber)
+      const hit = byBranchAcct.get(normalizeBranchName(branch) + '|' + accountNumber)
       if (hit) return { kase: hit, ambiguous: false }
     }
     const list = byAcctOnly.get(accountNumber) ?? []
@@ -472,7 +506,11 @@ export async function planDepositRows(
 
   // 同一案件（支店＋口座）・同一日でグループ化（a〜e は「同一日」の単位で判定）
   const keyOf = (r: DepositRow) =>
-    (r.branch ?? '') + '|' + (r.accountNumber ?? '?' + (r.payerName ?? '')) + ' ' + r.date
+    normalizeBranchName(r.branch) +
+    '|' +
+    (r.accountNumber ?? '?' + (r.payerName ?? '')) +
+    ' ' +
+    r.date
   const grouped = new Map<string, DepositRow[]>()
   for (const r of parsed.rows) {
     const k = keyOf(r)
@@ -660,9 +698,16 @@ export async function commitDepositImport(actor: Actor, buf: Buffer): Promise<De
   return await applyDepositPlan(actor, plan, 'deposit-import')
 }
 
+/** 監査ログに出す取込元の表示名 */
+const SOURCE_LABELS: Record<string, string> = {
+  'deposit-import': '入金データ取込',
+  'gmo-webhook': 'GMO入金通知',
+  'gmo-unsent-list': 'GMO未送信明細の回収',
+}
+
 /**
  * プランどおりに実入金を反映（reflect のみ実行。skip/error/unmatched は変更なし）。
- * source は監査ログの出所（'deposit-import' / 'gmo-webhook'）。
+ * source は監査ログの出所（'deposit-import' / 'gmo-webhook' / 'gmo-unsent-list'）。
  */
 export async function applyDepositPlan(
   actor: Actor,
@@ -728,7 +773,7 @@ export async function applyDepositPlan(
     actor,
     action: 'UPDATE',
     entity: 'Payment',
-    summary: `${source === 'gmo-webhook' ? 'GMO入金通知' : '入金データ取込'}: 反映${reflected}件・補充行${supplements}件・スキップ${plan.groups.filter((g) => g.action === 'skip').length}件・エラー${plan.errorCount}件・未突合${plan.unmatchedCount}件`,
+    summary: `${SOURCE_LABELS[source] ?? '入金データ取込'}: 反映${reflected}件・補充行${supplements}件・スキップ${plan.groups.filter((g) => g.action === 'skip').length}件・エラー${plan.errorCount}件・未突合${plan.unmatchedCount}件`,
     metadata: { source },
   })
 
