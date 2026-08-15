@@ -276,6 +276,8 @@ export function GmoTransferPage() {
         `振込ファイルを出力します。\n\n` +
           `出力と同時に、対象案件の入金スケジュールへ弁済実績（弁済日・弁済充当額・社数・振)手数料）を記録します。\n` +
           `対象 ${outputCount} 件。\n\n` +
+          `※記録するのは、依頼者の入金が確認できている案件だけです。\n` +
+          `  未入金の案件は見送り、入金後に再度出力したときに記録されます。\n` +
           `※すでに弁済日が入っている行は上書きしません。\n` +
           `※記録は変更履歴に残るので、間違えたら取り消せます。\n\n` +
           `続けますか？`
@@ -302,6 +304,8 @@ export function GmoTransferPage() {
         const rec = JSON.parse(decodeURIComponent(raw)) as {
           written: number
           skipped: number
+          noDeposit: number
+          noDepositIds: string[]
           notFound: number
           notFoundIds: string[]
           totalAmount: number
@@ -316,6 +320,12 @@ export function GmoTransferPage() {
           `振)手数料      : ${(rec.totalCount * 129).toLocaleString()} 円`,
         ]
         if (rec.skipped > 0) lines.push(``, `記録済みのためスキップ: ${rec.skipped} 件`)
+        if (rec.noDeposit > 0)
+          lines.push(
+            ``,
+            `未入金のため見送り: ${rec.noDeposit} 件`,
+            `→ 依頼者の入金を取り込んだあと、同じ期間で再度出力すると記録されます`
+          )
         if (rec.notFound > 0)
           lines.push(
             ``,

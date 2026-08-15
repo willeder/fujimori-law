@@ -437,6 +437,10 @@ export async function buildIncompleteRepayments(
 // 事務所と確認した運用:
 //   ・振込ファイルを出力した時点で「弁済済み」として確定させる
 //   ・ある月に債権者へ振り込む原資は、依頼者の【同じ月】の入金
+//   ・振込ファイルは依頼者の入金を待たずに（予定ベースで）先に出す
+//     → そのため【実入金がある行にだけ】記録する。入金が無い案件は
+//       原資が無く実際には振り込まれないので、記録すると請求額が狂う。
+//       入金後に再度出力すれば、そのときに記録される。
 //
 // これまでは振込ファイルを出しても何も記録されず、弁済日・弁済充当額・
 // 社数（実績）・振)手数料 を担当者が入金スケジュールへ手入力していた。
@@ -458,6 +462,10 @@ export type TransferRecordResult = {
   written: number
   /** すでに弁済日が入っていて上書きしなかった数 */
   skipped: number
+  /** その月の実入金がまだ無いため記録を見送った数 */
+  noDeposit: number
+  /** 見送った案件のID（入金後に再出力すれば記録される） */
+  noDepositIds: string[]
   /** 対応する入金行が見つからなかった数 */
   notFound: number
   /** 見つからなかった案件のID（画面で補完してもらう） */
@@ -524,6 +532,7 @@ export async function recordTransferResult(
   let totalAmount = 0
   let totalCount = 0
   const notFoundIds: string[] = []
+  const noDepositIds: string[] = []
 
   for (const g of groups.values()) {
     const { from, to } = monthRange(g.month)
@@ -546,9 +555,15 @@ export async function recordTransferResult(
         actualHandlingFee: true,
       },
     })
-    const target = candidates.find((p) => p.actualDate != null) ?? candidates[0]
-    if (!target) {
+    if (candidates.length === 0) {
       notFoundIds.push(g.externalId ?? `caseId:${g.caseId}`)
+      continue
+    }
+    // 実入金がある行にだけ記録する。振込ファイルは入金を待たずに出すため、
+    // 入金前に記録してしまうと「原資が無いのに弁済済み」になってしまう。
+    const target = candidates.find((p) => p.actualDate != null)
+    if (!target) {
+      noDepositIds.push(g.externalId ?? `caseId:${g.caseId}`)
       continue
     }
     if (target.repaymentDate != null) {
@@ -587,6 +602,7 @@ export async function recordTransferResult(
     `振込${result.periodStart}〜${result.periodEnd}: ` +
     `${written}件の入金行へ弁済実績を記録` +
     (skipped > 0 ? `・記録済みでスキップ${skipped}件` : '') +
+    (noDepositIds.length > 0 ? `・未入金のため見送り${noDepositIds.length}件` : '') +
     (notFoundIds.length > 0 ? `・対応する入金行なし${notFoundIds.length}件` : '')
 
   await writeAudit({
@@ -600,6 +616,7 @@ export async function recordTransferResult(
       periodEnd: result.periodEnd,
       totalAmount,
       totalCount,
+      noDepositIds: noDepositIds.slice(0, 50),
       notFoundIds: notFoundIds.slice(0, 50),
     },
   })
@@ -609,6 +626,8 @@ export async function recordTransferResult(
     groups: groups.size,
     written,
     skipped,
+    noDeposit: noDepositIds.length,
+    noDepositIds,
     notFound: notFoundIds.length,
     notFoundIds,
     totalAmount,
