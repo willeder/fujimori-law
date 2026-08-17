@@ -24,6 +24,27 @@ interface CreditorTabProps {
 // 債権者名の入力候補（DB全体の既存債権者名）。表記ゆれ防止のため
 // ドロップダウン選択＋自由入力の両方を可能にする。取得は1回だけ（モジュール内キャッシュ）。
 let __creditorNameSuggestions: string[] | null = null
+let __partnerSuggestions: string[] | null = null
+
+/**
+ * 一覧セルの金額表示。
+ *
+ * ここは以前 `{v?.toLocaleString() ?? '-'}{v && <span>円</span>}` と書いていたが、
+ * JavaScript では 0 が falsy なため `0 && <span/>` が **0 そのもの**を返し、
+ * React がそれを描画して「00」と出ていた（合算で和解金額が 0 の債権者で発生）。
+ *
+ * あわせて 0 は「-」で表示する。合算元の債権者は和解金額・和解時債務金額とも 0 で
+ * 取り込まれており、「0円で和解した」と誤読されるのを避けるため。
+ */
+function renderYen(v: number | null | undefined) {
+  if (v == null || v === 0) return <span className="text-slate-300">-</span>
+  return (
+    <span className="tabular-nums">
+      {v.toLocaleString()}
+      <span className="ml-0.5 text-[8px] text-slate-400">円</span>
+    </span>
+  )
+}
 
 export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
   const dispatch = useCaseDispatch()
@@ -37,15 +58,23 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
   const [creditorNameSuggestions, setCreditorNameSuggestions] = useState<string[]>(
     () => __creditorNameSuggestions ?? []
   )
+  const [negotiationPartnerSuggestions, setNegotiationPartnerSuggestions] = useState<string[]>(
+    () => __partnerSuggestions ?? []
+  )
   useEffect(() => {
     if (__creditorNameSuggestions) return
     let alive = true
     fetch('/api/creditors/names')
       .then((r) => (r.ok ? r.json() : null))
-      .then((d: { names?: string[] } | null) => {
+      .then((d: { names?: string[]; partners?: string[] } | null) => {
         const names = [...new Set(d?.names ?? [])]
+        const partners = [...new Set(d?.partners ?? [])]
         __creditorNameSuggestions = names
-        if (alive) setCreditorNameSuggestions(names)
+        __partnerSuggestions = partners
+        if (alive) {
+          setCreditorNameSuggestions(names)
+          setNegotiationPartnerSuggestions(partners)
+        }
       })
       .catch(() => {})
     return () => {
@@ -226,24 +255,14 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         header: '申告額',
         width: '100px',
         align: 'right',
-        render: (item) => (
-          <span className="tabular-nums">
-            {item.declaredAmount?.toLocaleString() ?? '-'}
-            {item.declaredAmount && <span className="ml-0.5 text-[8px] text-slate-400">円</span>}
-          </span>
-        ),
+        render: (item) => renderYen(item.declaredAmount),
       },
       {
         key: 'debtAmount',
         header: '債務額',
         width: '100px',
         align: 'right',
-        render: (item) => (
-          <span className="tabular-nums">
-            {item.debtAmount?.toLocaleString() ?? '-'}
-            {item.debtAmount && <span className="ml-0.5 text-[8px] text-slate-400">円</span>}
-          </span>
-        ),
+        render: (item) => renderYen(item.debtAmount),
       },
       {
         key: 'difference',
@@ -268,12 +287,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         header: '和解時債務金額',
         width: '120px',
         align: 'right',
-        render: (item) => (
-          <span className="tabular-nums">
-            {item.settlementDebtAmount?.toLocaleString() ?? '-'}
-            {item.settlementDebtAmount && <span className="ml-0.5 text-[8px] text-slate-400">円</span>}
-          </span>
-        ),
+        render: (item) => renderYen(item.settlementDebtAmount),
       },
       {
         key: 'settlementAmount',
@@ -473,7 +487,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         />
       </div>
 
-      {/* 2行目: 債権者(2), 申告額(1), 想定和解(1), 受任通知送付日(1) */}
+      {/* 2行目: 債権者(2), 交渉相手(1), 申告額(1), 想定和解(1) */}
       <div className="min-w-0 col-span-2">
         <EditableField
           label="債権者"
@@ -482,6 +496,23 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
             updateCreditor(creditor, { creditorName: v || '' })
           }
           suggestions={creditorNameSuggestions}
+          compact
+          compactLayout="inline"
+          bordered
+          truncateValue
+          fillWidth
+        />
+      </div>
+      {/* 交渉相手（kintone の「交渉先」）。債権回収会社などが窓口になる場合に入れる */}
+      <div className="min-w-0 col-span-1">
+        <EditableField
+          label="交渉相手"
+          value={creditor.negotiationPartner}
+          onChange={(v) =>
+            updateCreditor(creditor, { negotiationPartner: v || null })
+          }
+          suggestions={negotiationPartnerSuggestions}
+          placeholder="直接"
           compact
           compactLayout="inline"
           bordered

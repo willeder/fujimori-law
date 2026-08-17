@@ -1187,6 +1187,13 @@ export const createContactHistory = (actor: EditActor, raw: string, meta: EditMe
   createRow('ContactHistory', CONTACT_FIELD_TYPE, actor, raw, meta)
 export const deleteContactHistory = (actor: EditActor, id: number, meta: EditMeta) =>
   deleteRow('ContactHistory', CONTACT_FIELD_TYPE, actor, id, meta)
+/**
+ * 入金予定・弁済予定の行の削除。
+ * 辞任などで予定が大幅に不要になる場合に使う。
+ * 変更履歴に before を残すので、誤って消しても内容は追える。
+ */
+export const deletePayment = (actor: EditActor, id: number, meta: EditMeta) =>
+  deleteRow('Payment', PAYMENT_FIELD_TYPE, actor, id, meta)
 
 /**
  * 案件（Case）の削除。ADMIN ロール限定。
@@ -1337,12 +1344,26 @@ export async function revertChange(
 }
 /** 重複を除いた債権者名の一覧（検索ドロップダウン用・軽量） */
 export async function getCreditorNames() {
-  const rows = await prisma.creditor.findMany({
-    distinct: ['creditorName'],
-    select: { creditorName: true },
-    orderBy: { creditorName: 'asc' },
-  })
-  return { names: rows.map((r) => r.creditorName).filter((n): n is string => !!n) }
+  const [rows, partners] = await Promise.all([
+    prisma.creditor.findMany({
+      distinct: ['creditorName'],
+      select: { creditorName: true },
+      orderBy: { creditorName: 'asc' },
+    }),
+    // 交渉相手（債権回収会社など）の入力候補。表記ゆれを防ぐため既存値から出す
+    prisma.creditor.findMany({
+      where: { negotiationPartner: { not: null } },
+      distinct: ['negotiationPartner'],
+      select: { negotiationPartner: true },
+      orderBy: { negotiationPartner: 'asc' },
+    }),
+  ])
+  return {
+    names: rows.map((r) => r.creditorName).filter((n): n is string => !!n),
+    partners: partners
+      .map((r) => r.negotiationPartner)
+      .filter((n): n is string => !!n && n.trim() !== ''),
+  }
 }
 
 /**

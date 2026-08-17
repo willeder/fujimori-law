@@ -24,6 +24,7 @@ import {
   createContactHistory,
   updateContactHistoryField,
   deleteContactHistory,
+  deletePayment,
   deleteCase,
   getCaseChanges,
   revertChange,
@@ -472,6 +473,11 @@ export default async function handler(
     if (paymentEdit && method === 'PATCH') {
       const raw = (await getRawBody(req)).toString('utf8')
       const r = await updatePaymentField(editActor, Number(paymentEdit[1]), raw, meta)
+      json(r.body, r.status)
+      return
+    }
+    if (paymentEdit && method === 'DELETE') {
+      const r = await deletePayment(editActor, Number(paymentEdit[1]), meta)
       json(r.body, r.status)
       return
     }

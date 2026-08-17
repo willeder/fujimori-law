@@ -91,6 +91,11 @@ function dbApiPlugin(): Plugin {
               id: number,
               meta: { ip?: string | null; userAgent?: string | null }
             ) => Promise<{ status: number; body: unknown }>
+            deletePayment: (
+              actor: { id: string; email: string },
+              id: number,
+              meta: { ip?: string | null; userAgent?: string | null }
+            ) => Promise<{ status: number; body: unknown }>
             deleteCase: (
               actor: { id: string; email: string; role?: string | null },
               id: number,
@@ -491,6 +496,13 @@ function dbApiPlugin(): Plugin {
                 await readRawBody(req),
                 meta
               )
+              res.statusCode = r.status
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify(r.body))
+              return
+            }
+            if (paymentEdit && req.method === 'DELETE') {
+              const r = await mod.deletePayment(editActor, Number(paymentEdit[1]), meta)
               res.statusCode = r.status
               res.setHeader('Content-Type', 'application/json; charset=utf-8')
               res.end(JSON.stringify(r.body))

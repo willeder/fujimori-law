@@ -3,6 +3,7 @@ import { useCaseEdit } from '../context/CaseEditContext'
 import { useCaseDispatch, usePaymentsByCaseId } from '../store/useCaseStore'
 import { DataTable, type Column } from '../components'
 import type { PaymentRecord } from '../types'
+import { nextPlannedDate } from '../lib/paymentRows'
 
 interface PaymentTableProps {
   caseId: number
@@ -228,6 +229,25 @@ export function PaymentTable({
         }
       })
       .catch((e) => console.error('入金の作成に失敗:', e))
+  }
+
+  /**
+   * 入金予定行の削除。
+   * 辞任などで予定が大幅に不要になる場合に使う。
+   * 実入金が入っている行は記録が失われるため、警告文を変えて二重に確認する。
+   */
+  const deletePaymentRow = (record: PaymentRecord) => {
+    const hasActual = record.actualDate != null || (record.actualAmount ?? 0) !== 0
+    const msg = hasActual
+      ? `この行には実入金（${record.actualDate ?? ''} ${(record.actualAmount ?? 0).toLocaleString()}円）が記録されています。\n\n削除すると入金の記録が失われます。本当に削除しますか？`
+      : `${record.plannedDate ?? ''} の入金予定（${(record.plannedAmount ?? 0).toLocaleString()}円）を削除します。よろしいですか？`
+    if (!window.confirm(msg)) return
+    dispatch({ type: 'DELETE_PAYMENT', payload: record.id })
+    if (record.id != null) {
+      void fetch(`/api/payments/${record.id}`, { method: 'DELETE' }).catch((e) =>
+        console.error('入金行の削除に失敗:', e)
+      )
+    }
   }
 
   /**
@@ -731,7 +751,7 @@ export function PaymentTable({
     {
       key: 'actions',
       header: '',
-      width: '5rem',
+      width: '6.5rem',
       cellTruncate: false,
       sortable: false,
       headerClassName: 'bg-blue-50',
@@ -757,15 +777,26 @@ export function PaymentTable({
           )
         }
         return (
-          <button
-            type="button"
-            onClick={() => handleEdit(item)}
-            disabled={locked}
-            title={locked ? '他の人が編集中のため、いまは変更できません' : undefined}
-            className="rounded px-2 py-0.5 text-xs text-blue-600 hover:bg-blue-50 disabled:text-slate-300 disabled:hover:bg-transparent"
-          >
-            編集
-          </button>
+          <div className="flex shrink-0 flex-nowrap items-center gap-0.5">
+            <button
+              type="button"
+              onClick={() => handleEdit(item)}
+              disabled={locked}
+              title={locked ? '他の人が編集中のため、いまは変更できません' : undefined}
+              className="rounded px-1.5 py-0.5 text-xs text-blue-600 hover:bg-blue-50 disabled:text-slate-300 disabled:hover:bg-transparent"
+            >
+              編集
+            </button>
+            <button
+              type="button"
+              onClick={() => deletePaymentRow(item)}
+              disabled={locked}
+              title={locked ? '他の人が編集中のため、いまは変更できません' : 'この行を削除'}
+              className="rounded px-1.5 py-0.5 text-xs text-red-600 hover:bg-red-50 disabled:text-slate-300 disabled:hover:bg-transparent"
+            >
+              削除
+            </button>
+          </div>
         )
       },
     },
@@ -866,7 +897,9 @@ export function PaymentTable({
             caseId,
             creditorId: scopeCreditorId,
             creditorInstallmentIndex,
-            plannedDate: null,
+            // 日付を空のまま作ると「中身の無い行」と判定されて画面に出ない。
+            // 直近の予定日の翌月（予定が無ければ当日）を初期値として入れる。
+            plannedDate: nextPlannedDate(payments),
             plannedAmount: lastPayment?.plannedAmount ?? null,
             plannedFeeAllocation: lastPayment?.plannedFeeAllocation ?? null,
             plannedAgentFeeAllocation: lastPayment?.plannedAgentFeeAllocation ?? null,
@@ -886,7 +919,7 @@ export function PaymentTable({
             cumulativePool: null,
           })
         }}
-        className="w-full rounded border border-dashed border-blue-300 py-1 text-[11px] text-blue-600 transition-colors hover:bg-blue-50"
+        className="w-full rounded border border-dashed border-blue-300 py-1 text-[11px] text-blue-600 transition-colors hover:bg-blue-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-300 disabled:hover:bg-transparent"
       >
         + 入金予定を追加
       </button>

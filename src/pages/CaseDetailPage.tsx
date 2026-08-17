@@ -37,6 +37,7 @@ import {
 import { joinAddress, stripPrefecture } from "../utils/address";
 import { getClientId } from "../utils/clientId";
 import { settlementTotals } from "../lib/settlementTotals";
+import { isEmptyRow } from "../lib/paymentRows";
 import {
   CASE_STATUS_OPTIONS,
   DEBT_ADJUSTMENT_TYPE_OPTIONS,
@@ -306,9 +307,14 @@ function CaseDetailBody({
   const creditors = useCreditorsByCaseId(Number(id));
   const contactHistories = useContactHistoriesByCaseId(Number(id));
   const payments = usePaymentsByCaseId(Number(id));
-  // 案件全体行（creditorId == null）から合計行（plannedDate == null）を除外
+  // 案件全体行（creditorId == null）から「合計行」だけを除外する。
+  //
+  // ★以前は「入金予定日が無い行＝合計行」として除外していたが、それでは
+  //   予定外に入金された行（入金予定日が無く実入金日だけある行）まで消えていた。
+  //   実データで 302行・205案件・約1,301万円 が画面から欠落していたため、
+  //   「予定日も実入金日も無い行」だけを合計行とみなすように直した。
   const caseLevelPayments = useMemo(
-    () => payments.filter((p) => p.creditorId == null && p.plannedDate != null),
+    () => payments.filter((p) => p.creditorId == null && !isEmptyRow(p)),
     [payments],
   );
   // 次回入金日：実入金日が未入力の最初の入金予定日（※ early return より前で算出すること）
@@ -1157,7 +1163,7 @@ function CaseDetailBody({
   );
 
   // 累計入金額：全入金スケジュール（合計行を除く）の実入金額の合計
-  const paymentsWithoutSummary = payments.filter((p) => p.plannedDate != null);
+  const paymentsWithoutSummary = payments.filter((p) => !isEmptyRow(p));
   const cumulativePaid = paymentsWithoutSummary.reduce(
     (s, p) => s + (p.actualAmount ?? 0),
     0,

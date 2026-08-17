@@ -10,6 +10,7 @@
  */
 import { useEffect, useState } from 'react'
 import type { ContactHistory, Creditor, PaymentRecord } from '../types'
+import { isEmptyRow } from '../lib/paymentRows'
 
 type Props = {
   caseId: number
@@ -95,8 +96,9 @@ export function CaseRowDetail({
   // 依頼者ぶんだけを出す（債権者への接触は「和解対象債権一覧」側の話なので混ぜない）
   const clientContacts = (contacts ?? []).filter((h) => h.targetType !== '債権者')
   // 案件全体の入金予定だけを出す（債権者別の弁済予定は表示時に生成される別物）。
-  // 合計行（入金予定日が無い行）も除く。
-  const caseRows = (payments ?? []).filter((p) => p.creditorId == null && p.plannedDate != null)
+  // 合計行（予定日も実入金日も無い行）だけを除く。
+  // 入金予定日が無くても実入金がある行（予定外入金）は表示する。
+  const caseRows = (payments ?? []).filter((p) => p.creditorId == null && !isEmptyRow(p))
   // 和解内容詳細は「和解が成立している債権者」だけを出す（支払条件が決まっているもの）
   const settled = (creditors ?? []).filter(
     (c) => c.settlementDate != null || c.paymentStartMonth != null || c.paymentCount != null
