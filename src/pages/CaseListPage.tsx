@@ -3,12 +3,12 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useCaseState } from '../store/useCaseStore'
 import { DataTable, type Column, StatusBadge } from '../components'
 import { AppHeader } from '../components/AppHeader'
-import { LineBroadcastModal, LineHistoryModal } from '../components/case/LineBroadcastModal'
 import { SEARCH_FIELDS, type Condition } from './searchFields'
 import { useSessionState } from '../hooks/useSessionState'
 import { useCreditorNames } from '../hooks/useCreditorNames'
 import { loadFilterHistory, saveFilterHistory, filterHistoryLabel } from '../utils/findHistory'
 import { SavedFilterBar } from '../components/SavedFilterBar'
+import { CaseRowDetail } from '../components/CaseRowDetail'
 import { FilterModal } from '../components/FilterModal'
 import {
   compactFilterQuery,
@@ -33,13 +33,15 @@ const SEARCH_FIELD_LABEL: Record<string, string> = Object.fromEntries(
 /**
  * 列ごとの並び替え用の値。Case はネスト構造なので、列定義とは別に取り出し方を持つ。
  * ここに載っている列だけが（絞り込み中に限り）ヘッダークリックで並び替えできる。
- * 選択チェック・LINE連携済/未・LINE@URL は並び替えの意味がないため対象外。
+ * LINE連携済/未・LINE@URL は並び替えの意味がないため対象外。
  */
 const SORT_VALUE: Record<
   string,
   ((c: Case) => string | number | null | undefined) | undefined
 > = {
   id: (c) => c.metadata.externalId ?? '',
+  // kintone の「レコード番号」。ID（103436E のような文字列）とは別物
+  recordNumber: (c) => c.clientBasicInfo.recordNumber ?? null,
   acceptanceDate: (c) => c.appointmentInfo.acceptanceDate ?? '',
   cautionRank: (c) => c.clientBasicInfo.cautionRank ?? '',
   listRegisteredDate: (c) => c.metadata.listRegisteredDate ?? '',
@@ -52,6 +54,31 @@ const SORT_VALUE: Record<
   furigana: (c) => c.clientBasicInfo.furigana ?? '',
   phone: (c) => c.clientBasicInfo.phone ?? '',
   creditorCount: (c) => c.debtInfo.creditorCount,
+  reminderDate: (c) => c.reminderInfo?.reminderDate ?? '',
+  nextResponseDate: (c) => c.reminderInfo?.nextResponseDate ?? '',
+  // 既定では非表示の追加列も、保存した絞り込みから並び替えに指定できるようにする
+  settlementProposalDate: (c) => c.settlementInfo.proposalDate ?? '',
+  postSettlementPaymentCount: (c) => c.settlementInfo.postSettlementPaymentCount,
+  nextPaymentDate: (c) => c.paymentInfo.nextPaymentDate ?? '',
+  monthlyPaymentDay: (c) => c.paymentInfo.monthlyPaymentDay ?? '',
+  paymentDelay: (c) => c.clientBasicInfo.paymentDelay ?? '',
+  bicycleNote: (c) => c.clientBasicInfo.bicycleNote ?? '',
+  pension: (c) => c.clientBasicInfo.pension ?? '',
+  lineUrl: (c) => c.clientBasicInfo.lineUrl ?? '',
+  payDay: (c) => c.clientBasicInfo.payDay ?? '',
+  birthDate: (c) => c.clientBasicInfo.birthDate ?? '',
+  vAccountBranch: (c) => c.paymentInfo.vAccountBranch ?? '',
+  vAccountNumber: (c) => c.paymentInfo.vAccountNumber ?? '',
+  basePaymentAmount: (c) => c.paymentInfo.basePaymentAmount,
+  resignationDate: (c) => c.settlementInfo.resignationDate ?? '',
+  elapsedDays: (c) => c.appointmentInfo.elapsedDays,
+  cAcceptancePromotionDate: (c) => c.appointmentInfo.cAcceptancePromotionDate ?? '',
+  age: (c) => c.clientBasicInfo.age,
+  installmentCount: (c) => c.feeInfo.installmentCount,
+  firstPaymentWithinTenDays: (c) => c.paymentInfo.firstPaymentWithinTenDays ?? '',
+  preRequestPayment: (c) => c.debtInfo.preRequestPayment,
+  postRequestPayment: (c) => c.debtInfo.postRequestPayment,
+  uncollectedFee: (c) => c.feeInfo.uncollectedFee,
   declaredDebtAmount: (c) => c.debtInfo.declaredDebtAmount,
   officeFee: (c) => c.feeInfo.officeFee,
   cumulativePlannedFeeAllocation: (c) => c.paymentInfo.cumulativePlannedFeeAllocation,
@@ -60,9 +87,36 @@ const SORT_VALUE: Record<
     c.paymentInfo.cumulativePlannedAgentFeeAllocation,
   cumulativePlannedPoolAllocation: (c) => c.paymentInfo.cumulativePlannedPoolAllocation,
   cumulativeHandlingFee: (c) => c.paymentInfo.cumulativeHandlingFee,
+  cumulativePlannedPayment: (c) => c.paymentInfo.cumulativePlannedPayment,
+  cumulativePaymentAmount: (c) => c.paymentInfo.cumulativePaymentAmount,
+  cumulativeFeeAllocation: (c) => c.paymentInfo.cumulativeFeeAllocation,
+  cumulativeAgentFeeAllocation: (c) => c.paymentInfo.cumulativeAgentFeeAllocation,
+  cumulativePoolAllocation: (c) => c.paymentInfo.cumulativePoolAllocation,
+  cumulativePlannedRepaymentAllocation: (c) => c.paymentInfo.cumulativePlannedRepaymentAllocation,
+  cumulativeRepaymentAllocation: (c) => c.paymentInfo.cumulativeRepaymentAllocation,
   appointmentStaff: (c) => c.appointmentInfo.appointmentStaff ?? '',
   interviewStaff: (c) => c.appointmentInfo.interviewStaff ?? '',
 }
+
+/** 2段目の並び替えに指定できる列（SORT_VALUE を持つ列と同じ並び） */
+const SORT2_OPTIONS: { key: string; label: string }[] = [
+  { key: 'id', label: 'ID' },
+  { key: 'recordNumber', label: 'レコード番号' },
+  { key: 'acceptanceDate', label: '受任日' },
+  { key: 'listRegisteredDate', label: 'リスト登録日' },
+  { key: 'name', label: '名前（フリガナ順）' },
+  { key: 'furigana', label: 'フリガナ' },
+  { key: 'status', label: '受任後ステータス' },
+  { key: 'debtAdjustmentType', label: '債務整理区分' },
+  { key: 'creditorCount', label: '債権社数' },
+  { key: 'reminderDate', label: 'リマインド日' },
+  { key: 'settlementProposalDate', label: '和解提案予定日' },
+  { key: 'nextPaymentDate', label: '次回入金日' },
+  { key: 'declaredDebtAmount', label: '申告債務額' },
+  { key: 'officeFee', label: '事務所報酬（通常）' },
+  { key: 'appointmentStaff', label: 'アポ担当' },
+  { key: 'interviewStaff', label: '面談担当' },
+]
 
 /**
  * 一覧の文字列セルを「空白含む n 文字まで」に切り詰める。
@@ -92,18 +146,74 @@ export function CaseListPage() {
   const [searching, setSearching] = useState(false)
   // 並び順。絞り込み中だけ有効（未絞り込みのときは常に No 昇順に固定する）
   const [sort, setSort] = useSessionState<CaseListSort | null>('caseList.sort', null)
+  // 2段目の並び順。1段目が同じ値の行だけをさらに並べ替える
+  // （kintone の「受任日の新しい順、同じ日ならID順」に合わせるため）
+  const [sort2, setSort2] = useSessionState<CaseListSort | null>('caseList.sort2', null)
   // 適用中の保存条件（プルダウンの選択状態と「適用中」バッジに使う）
   const [activeFilterId, setActiveFilterId] = useSessionState<string | null>(
     'caseList.savedFilterId',
     null
   )
 
-  // 金額列（報酬・弁代・プールチェック用）の表示切替。
-  // 常時表示すると一覧が横に長くなるため既定は非表示。sessionStorage に保持する。
-  const [showFeeColumns, setShowFeeColumns] = useSessionState<boolean>(
-    'caseList.showFeeColumns',
-    false
+  /**
+   * 表示する列（キーの配列・左から順）。null は既定の列セット。
+   * kintone のビューと同じく、保存した絞り込みごとに列を切り替えられるようにする。
+   * 以前は金額列だけを真偽値トグルで出し分けていたが、列指定に一本化した。
+   */
+  const [columnKeys, setColumnKeys] = useSessionState<string[] | null>(
+    'caseList.columns',
+    null
   )
+  const [columnMenuOpen, setColumnMenuOpen] = useState(false)
+
+  /**
+   * 行の展開（kintone の関連レコード一覧「表示する▶ / 閉じる▾」）。
+   * 一度に1案件だけ開く。接触履歴と債権一覧は同時に開ける。
+   */
+  const [expanded, setExpanded] = useState<{
+    caseId: number
+    contacts: boolean
+    creditors: boolean
+    payments: boolean
+    settlement: boolean
+  } | null>(null)
+  const toggleExpand = (
+    caseId: number,
+    kind: 'contacts' | 'creditors' | 'payments' | 'settlement'
+  ) => {
+    setExpanded((prev) => {
+      if (!prev || prev.caseId !== caseId) {
+        return {
+          caseId,
+          contacts: kind === 'contacts',
+          creditors: kind === 'creditors',
+          payments: kind === 'payments',
+          settlement: kind === 'settlement',
+        }
+      }
+      const next = { ...prev, [kind]: !prev[kind] }
+      return next.contacts || next.creditors || next.payments || next.settlement ? next : null
+    })
+  }
+  /** 展開リンク（行クリックの画面遷移を止めてから開閉する） */
+  const expandLink = (
+    item: Case,
+    kind: 'contacts' | 'creditors' | 'payments' | 'settlement'
+  ) => {
+    const open = expanded?.caseId === item.id && expanded[kind]
+    return (
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation()
+          toggleExpand(item.id, kind)
+        }}
+        className="whitespace-nowrap text-[11px] text-blue-600 hover:underline"
+      >
+        {open ? '閉じる ▾' : '表示する ▶'}
+      </button>
+    )
+  }
 
   // 絞り込み履歴（直近10件）No.147
   const [filterHistory, setFilterHistory] = useState<FilterQuery[]>(() => loadFilterHistory())
@@ -148,11 +258,15 @@ export function CaseListPage() {
     setSearchValue('')
     setActiveFilterId(null)
     setSort(null)
+    setSort2(null)
+    setColumnKeys(null)
   }
 
   // ── 保存した絞り込み条件（共有フィルタ）──────────────────────
-  // 絞り込み中かどうか。未絞り込みのときは並び替えを無効にし、常に No 昇順で表示する
-  const filtering = !!searchValue.trim() || results != null
+  // 絞り込み中かどうか。未絞り込みのときは並び替えを無効にし、常に No 昇順で表示する。
+  // 保存した絞り込みを適用しているときは、条件が「すべてのレコード」（条件ゼロ）でも
+  // その並び順を効かせる（kintone のビューは条件なし＋並び順だけ、という形もあるため）。
+  const filtering = !!searchValue.trim() || results != null || activeFilterId != null
 
   /** いま画面に出ている絞り込み状態（「この条件を保存」で保存される内容） */
   const currentPayload: CaseListFilterPayload = useMemo(
@@ -161,8 +275,10 @@ export function CaseListPage() {
       quick: { field: searchField, value: searchValue },
       filter: compactFilterQuery(filter),
       sort: filtering ? sort : null,
+      sort2: filtering ? sort2 : null,
+      columns: columnKeys,
     }),
-    [searchField, searchValue, filter, sort, filtering]
+    [searchField, searchValue, filter, sort, sort2, filtering, columnKeys]
   )
 
   /** 保存条件を画面に適用する */
@@ -172,6 +288,8 @@ export function CaseListPage() {
     setSearchField((payload.quick.field ?? 'all') as SearchField)
     setSearchValue(payload.quick.value ?? '')
     setSort(payload.sort)
+    setSort2(payload.sort2 ?? null)
+    setColumnKeys(payload.columns ?? null)
     setFilter(payload.filter)
     if (payload.filter.conditions.length > 0) void runFilter(payload.filter)
     else setResults(null)
@@ -180,6 +298,7 @@ export function CaseListPage() {
   // 絞り込みが外れたら並び順も既定（No 昇順）に戻す
   useEffect(() => {
     if (!filtering && sort !== null) setSort(null)
+    if (!filtering && sort2 !== null) setSort2(null)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtering])
 
@@ -251,40 +370,6 @@ export function CaseListPage() {
     return sortedCases
   }, [results, sortedCases])
 
-  // ── LINE一斉送信: 行選択 ──
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(() => new Set())
-  const [broadcastOpen, setBroadcastOpen] = useState(false)
-  const [historyOpen, setHistoryOpen] = useState(false)
-  const caseById = useMemo(() => new Map(cases.map((c) => [c.id, c])), [cases])
-  const recipients = useMemo(
-    () =>
-      [...selectedIds]
-        .map((id) => caseById.get(id))
-        .filter((c): c is Case => !!c)
-        .map((c) => ({
-          id: c.id,
-          name: c.clientBasicInfo.name,
-          lineLinked: !!c.metadata.lineLinked,
-        })),
-    [selectedIds, caseById]
-  )
-  const toggleSel = (id: number) =>
-    setSelectedIds((prev) => {
-      const n = new Set(prev)
-      if (n.has(id)) n.delete(id)
-      else n.add(id)
-      return n
-    })
-  const allDisplayedSelected =
-    displayed.length > 0 && displayed.every((c) => selectedIds.has(c.id))
-  const toggleAllDisplayed = () =>
-    setSelectedIds((prev) => {
-      const n = new Set(prev)
-      if (allDisplayedSelected) displayed.forEach((c) => n.delete(c.id))
-      else displayed.forEach((c) => n.add(c.id))
-      return n
-    })
-
   const yen = (n: number | null | undefined) =>
     n != null ? (
       <span>
@@ -300,6 +385,83 @@ export function CaseListPage() {
    * 事務所報酬（通常）は常時表示の列なのでここには含めない。
    */
   const feeColumns: Column<Case>[] = [
+    {
+      key: 'cumulativePlannedPayment',
+      header: '累)入金予定額',
+      width: '124px',
+      align: 'right',
+      sortable: false,
+      render: (item) => yen(item.paymentInfo.cumulativePlannedPayment),
+      filterValue: (item) =>
+        item.paymentInfo.cumulativePlannedPayment != null ? String(item.paymentInfo.cumulativePlannedPayment) : '',
+      filterNumber: (item) => item.paymentInfo.cumulativePlannedPayment,
+    },
+    {
+      key: 'cumulativePaymentAmount',
+      header: '累)入金金額',
+      width: '124px',
+      align: 'right',
+      sortable: false,
+      render: (item) => yen(item.paymentInfo.cumulativePaymentAmount),
+      filterValue: (item) =>
+        item.paymentInfo.cumulativePaymentAmount != null ? String(item.paymentInfo.cumulativePaymentAmount) : '',
+      filterNumber: (item) => item.paymentInfo.cumulativePaymentAmount,
+    },
+    {
+      key: 'cumulativeFeeAllocation',
+      header: '累)報酬充当額',
+      width: '124px',
+      align: 'right',
+      sortable: false,
+      render: (item) => yen(item.paymentInfo.cumulativeFeeAllocation),
+      filterValue: (item) =>
+        item.paymentInfo.cumulativeFeeAllocation != null ? String(item.paymentInfo.cumulativeFeeAllocation) : '',
+      filterNumber: (item) => item.paymentInfo.cumulativeFeeAllocation,
+    },
+    {
+      key: 'cumulativeAgentFeeAllocation',
+      header: '累)弁代報酬充当額',
+      width: '124px',
+      align: 'right',
+      sortable: false,
+      render: (item) => yen(item.paymentInfo.cumulativeAgentFeeAllocation),
+      filterValue: (item) =>
+        item.paymentInfo.cumulativeAgentFeeAllocation != null ? String(item.paymentInfo.cumulativeAgentFeeAllocation) : '',
+      filterNumber: (item) => item.paymentInfo.cumulativeAgentFeeAllocation,
+    },
+    {
+      key: 'cumulativePoolAllocation',
+      header: '累)ﾌﾟｰﾙ充当額',
+      width: '124px',
+      align: 'right',
+      sortable: false,
+      render: (item) => yen(item.paymentInfo.cumulativePoolAllocation),
+      filterValue: (item) =>
+        item.paymentInfo.cumulativePoolAllocation != null ? String(item.paymentInfo.cumulativePoolAllocation) : '',
+      filterNumber: (item) => item.paymentInfo.cumulativePoolAllocation,
+    },
+    {
+      key: 'cumulativePlannedRepaymentAllocation',
+      header: '累)弁済充当予定額',
+      width: '124px',
+      align: 'right',
+      sortable: false,
+      render: (item) => yen(item.paymentInfo.cumulativePlannedRepaymentAllocation),
+      filterValue: (item) =>
+        item.paymentInfo.cumulativePlannedRepaymentAllocation != null ? String(item.paymentInfo.cumulativePlannedRepaymentAllocation) : '',
+      filterNumber: (item) => item.paymentInfo.cumulativePlannedRepaymentAllocation,
+    },
+    {
+      key: 'cumulativeRepaymentAllocation',
+      header: '累)弁済充当額',
+      width: '124px',
+      align: 'right',
+      sortable: false,
+      render: (item) => yen(item.paymentInfo.cumulativeRepaymentAllocation),
+      filterValue: (item) =>
+        item.paymentInfo.cumulativeRepaymentAllocation != null ? String(item.paymentInfo.cumulativeRepaymentAllocation) : '',
+      filterNumber: (item) => item.paymentInfo.cumulativeRepaymentAllocation,
+    },
     {
       key: 'cumulativePlannedFeeAllocation',
       header: '累)報酬充当予定額',
@@ -367,22 +529,283 @@ export function CaseListPage() {
     },
   ]
 
-  const columns: Column<Case>[] = [
+  /**
+   * 既定では出さない追加の列（kintone の各ビューに合わせて用意したもの）。
+   * 保存した絞り込みが列を指定していればそれに従って表示される。
+   */
+  const checkColumns: Column<Case>[] = [
     {
-      key: '_sel',
-      header: '選択',
-      width: '40px',
+      key: 'reminderDate',
+      header: 'リマインド日',
+      width: '92px',
+      sortable: false,
+      render: (item) => item.reminderInfo?.reminderDate ?? '-',
+      filterValue: (item) => item.reminderInfo?.reminderDate ?? '',
+    },
+    {
+      key: 'nextResponseDate',
+      header: '次回対応日',
+      width: '92px',
+      sortable: false,
+      render: (item) => item.reminderInfo?.nextResponseDate ?? '-',
+      filterValue: (item) => item.reminderInfo?.nextResponseDate ?? '',
+    },
+    {
+      key: 'birthDate',
+      header: '生年月日',
+      width: '92px',
+      sortable: false,
+      render: (item) => item.clientBasicInfo.birthDate ?? '-',
+      filterValue: (item) => item.clientBasicInfo.birthDate ?? '',
+    },
+    {
+      key: '_settlementDetail',
+      header: '和解内容詳細',
+      width: '92px',
       align: 'center',
       sortable: false,
-      render: (item) => (
-        <input
-          type="checkbox"
-          checked={selectedIds.has(item.id)}
-          onClick={(e) => e.stopPropagation()}
-          onChange={() => toggleSel(item.id)}
-        />
-      ),
+      cellTruncate: false,
+      render: (item) => expandLink(item, 'settlement'),
+      filterValue: () => '',
     },
+    {
+      key: 'resignationDate',
+      header: '辞任日',
+      width: '88px',
+      sortable: false,
+      render: (item) => item.settlementInfo.resignationDate ?? '-',
+      filterValue: (item) => item.settlementInfo.resignationDate ?? '',
+    },
+    {
+      key: 'elapsedDays',
+      header: '経過日数',
+      width: '72px',
+      align: 'right',
+      sortable: false,
+      render: (item) =>
+        item.appointmentInfo.elapsedDays != null ? `${item.appointmentInfo.elapsedDays}日` : '-',
+      filterValue: (item) =>
+        item.appointmentInfo.elapsedDays != null ? String(item.appointmentInfo.elapsedDays) : '',
+      filterNumber: (item) => item.appointmentInfo.elapsedDays,
+    },
+    {
+      key: 'cAcceptancePromotionDate',
+      header: 'C受任昇格日',
+      width: '96px',
+      sortable: false,
+      render: (item) => item.appointmentInfo.cAcceptancePromotionDate ?? '-',
+      filterValue: (item) => item.appointmentInfo.cAcceptancePromotionDate ?? '',
+    },
+    {
+      key: 'age',
+      header: '年齢',
+      width: '52px',
+      align: 'right',
+      sortable: false,
+      render: (item) => (item.clientBasicInfo.age != null ? `${item.clientBasicInfo.age}` : '-'),
+      filterValue: (item) =>
+        item.clientBasicInfo.age != null ? String(item.clientBasicInfo.age) : '',
+      filterNumber: (item) => item.clientBasicInfo.age,
+    },
+    {
+      key: 'installmentCount',
+      header: '報酬分割回数',
+      width: '92px',
+      align: 'right',
+      sortable: false,
+      render: (item) =>
+        item.feeInfo.installmentCount != null ? `${item.feeInfo.installmentCount}回` : '-',
+      filterValue: (item) =>
+        item.feeInfo.installmentCount != null ? String(item.feeInfo.installmentCount) : '',
+      filterNumber: (item) => item.feeInfo.installmentCount,
+    },
+    {
+      key: 'firstPaymentWithinTenDays',
+      header: '10日以内',
+      width: '72px',
+      sortable: false,
+      render: (item) => item.paymentInfo.firstPaymentWithinTenDays ?? '-',
+      filterValue: (item) => item.paymentInfo.firstPaymentWithinTenDays ?? '',
+    },
+    {
+      key: 'preRequestPayment',
+      header: '依頼前 返済額',
+      width: '104px',
+      align: 'right',
+      sortable: false,
+      render: (item) => yen(item.debtInfo.preRequestPayment),
+      filterValue: (item) =>
+        item.debtInfo.preRequestPayment != null ? String(item.debtInfo.preRequestPayment) : '',
+      filterNumber: (item) => item.debtInfo.preRequestPayment,
+    },
+    {
+      key: 'postRequestPayment',
+      header: '依頼後 返済額',
+      width: '104px',
+      align: 'right',
+      sortable: false,
+      render: (item) => yen(item.debtInfo.postRequestPayment),
+      filterValue: (item) =>
+        item.debtInfo.postRequestPayment != null ? String(item.debtInfo.postRequestPayment) : '',
+      filterNumber: (item) => item.debtInfo.postRequestPayment,
+    },
+    {
+      key: 'vAccountBranch',
+      header: 'V口座-支店',
+      width: '96px',
+      sortable: false,
+      render: (item) => item.paymentInfo.vAccountBranch ?? '-',
+      filterValue: (item) => item.paymentInfo.vAccountBranch ?? '',
+    },
+    {
+      key: 'vAccountNumber',
+      header: 'V口座-番号',
+      width: '96px',
+      sortable: false,
+      render: (item) => item.paymentInfo.vAccountNumber ?? '-',
+      filterValue: (item) => item.paymentInfo.vAccountNumber ?? '',
+    },
+    {
+      key: 'basePaymentAmount',
+      header: '基本入金額',
+      width: '92px',
+      align: 'right',
+      sortable: false,
+      render: (item) => yen(item.paymentInfo.basePaymentAmount),
+      filterValue: (item) =>
+        item.paymentInfo.basePaymentAmount != null
+          ? String(item.paymentInfo.basePaymentAmount)
+          : '',
+      filterNumber: (item) => item.paymentInfo.basePaymentAmount,
+    },
+    {
+      key: 'payDay',
+      header: '給与日',
+      width: '64px',
+      sortable: false,
+      render: (item) => item.clientBasicInfo.payDay ?? '-',
+      filterValue: (item) => item.clientBasicInfo.payDay ?? '',
+    },
+    {
+      key: 'uncollectedFee',
+      header: '報酬未回収額',
+      width: '96px',
+      align: 'right',
+      sortable: false,
+      render: (item) => yen(item.feeInfo.uncollectedFee),
+      filterValue: (item) =>
+        item.feeInfo.uncollectedFee != null ? String(item.feeInfo.uncollectedFee) : '',
+      filterNumber: (item) => item.feeInfo.uncollectedFee,
+    },
+    {
+      key: '_payments',
+      header: '入金情報',
+      width: '80px',
+      align: 'center',
+      sortable: false,
+      cellTruncate: false,
+      render: (item) => expandLink(item, 'payments'),
+      filterValue: () => '',
+    },
+    {
+      key: '_contactHistories',
+      header: '依頼者 接触履歴',
+      width: '92px',
+      align: 'center',
+      sortable: false,
+      cellTruncate: false,
+      render: (item) => expandLink(item, 'contacts'),
+      filterValue: () => '',
+    },
+    {
+      key: '_creditorList',
+      header: '和解対象債権一覧',
+      width: '104px',
+      align: 'center',
+      sortable: false,
+      cellTruncate: false,
+      render: (item) => expandLink(item, 'creditors'),
+      filterValue: () => '',
+    },
+    {
+      key: 'recordNumber',
+      header: 'レコード番号',
+      width: '84px',
+      align: 'right',
+      sortable: false,
+      render: (item) => item.clientBasicInfo.recordNumber ?? '-',
+      filterValue: (item) =>
+        item.clientBasicInfo.recordNumber != null ? String(item.clientBasicInfo.recordNumber) : '',
+      filterNumber: (item) => item.clientBasicInfo.recordNumber,
+    },
+    {
+      key: 'paymentDelay',
+      header: '遅れ',
+      width: '56px',
+      sortable: false,
+      render: (item) => item.clientBasicInfo.paymentDelay ?? '-',
+      filterValue: (item) => item.clientBasicInfo.paymentDelay ?? '',
+    },
+    {
+      key: 'bicycleNote',
+      header: '自転車',
+      width: '56px',
+      sortable: false,
+      render: (item) => item.clientBasicInfo.bicycleNote ?? '-',
+      filterValue: (item) => item.clientBasicInfo.bicycleNote ?? '',
+    },
+    {
+      key: 'pension',
+      header: '年金',
+      width: '64px',
+      sortable: false,
+      render: (item) => item.clientBasicInfo.pension ?? '-',
+      filterValue: (item) => item.clientBasicInfo.pension ?? '',
+    },
+    {
+      key: 'monthlyPaymentDay',
+      header: '毎月入金日',
+      width: '80px',
+      sortable: false,
+      render: (item) => item.paymentInfo.monthlyPaymentDay ?? '-',
+      filterValue: (item) => item.paymentInfo.monthlyPaymentDay ?? '',
+    },
+    {
+      key: 'settlementProposalDate',
+      header: '和解提案予定日',
+      width: '100px',
+      sortable: false,
+      render: (item) => item.settlementInfo.proposalDate ?? '-',
+      filterValue: (item) => item.settlementInfo.proposalDate ?? '',
+    },
+    {
+      key: 'postSettlementPaymentCount',
+      header: '和解後代弁社数',
+      width: '104px',
+      align: 'right',
+      sortable: false,
+      render: (item) =>
+        item.settlementInfo.postSettlementPaymentCount != null
+          ? `${item.settlementInfo.postSettlementPaymentCount}社`
+          : '-',
+      filterValue: (item) =>
+        item.settlementInfo.postSettlementPaymentCount != null
+          ? String(item.settlementInfo.postSettlementPaymentCount)
+          : '',
+      filterNumber: (item) => item.settlementInfo.postSettlementPaymentCount,
+    },
+    {
+      key: 'nextPaymentDate',
+      header: '次回入金日',
+      width: '88px',
+      sortable: false,
+      render: (item) => item.paymentInfo.nextPaymentDate ?? '-',
+      filterValue: (item) => item.paymentInfo.nextPaymentDate ?? '',
+    },
+  ]
+
+  /** 常時定義しておく基本の列（表示するかは columnKeys で決める） */
+  const baseColumns: Column<Case>[] = [
     {
       key: 'id',
       header: 'ID',
@@ -415,8 +838,8 @@ export function CaseListPage() {
     },
     {
       key: 'cautionRank',
-      header: '要注意',
-      width: '52px',
+      header: '要注意ランク',
+      width: '76px',
       align: 'center',
       sortable: false,
       render: (item) => <StatusBadge status={item.clientBasicInfo.cautionRank} size="sm" />,
@@ -519,7 +942,7 @@ export function CaseListPage() {
     },
     {
       key: 'creditorCount',
-      header: '債権者',
+      header: '債権社数',
       width: '52px',
       align: 'right',
       sortable: false,
@@ -552,8 +975,6 @@ export function CaseListPage() {
       filterValue: (item) => (item.feeInfo.officeFee != null ? String(item.feeInfo.officeFee) : ''),
       filterNumber: (item) => item.feeInfo.officeFee,
     },
-    // 「報酬・弁代・プールチェック」用の金額列。ヘッダーの「報酬・プール列」で表示を切り替える。
-    ...(showFeeColumns ? feeColumns : []),
     {
       key: 'appointmentStaff',
       header: 'アポ担当',
@@ -586,6 +1007,47 @@ export function CaseListPage() {
     },
   ]
 
+  // 表示する列を決める。
+  //   ・保存した絞り込みが列を指定していれば、その順番どおりに並べる
+  //   ・指定が無ければ既定（基本の列のみ・金額列と入力漏れチェック列は非表示）
+  const columnPool = new Map<string, Column<Case>>()
+  for (const c of [...baseColumns, ...feeColumns, ...checkColumns]) {
+    columnPool.set(String(c.key), c)
+  }
+  const columns: Column<Case>[] =
+    columnKeys == null
+      ? baseColumns
+      : columnKeys.map((k) => columnPool.get(k)).filter((c): c is Column<Case> => !!c)
+  // 非表示の列でも並び替えの対象にできるようにする（kintone と同じ挙動）
+  const shownKeys = new Set(columns.map((c) => String(c.key)))
+  const hiddenSortColumns: Column<Case>[] = [...columnPool.values()]
+    .filter((c) => !shownKeys.has(String(c.key)))
+    .map((col) => {
+      const sortValue = SORT_VALUE[String(col.key)]
+      return sortValue ? { ...col, sortValue } : col
+    })
+
+  /** 列の選択メニューに出す一覧（グループつき） */
+  const columnGroups: { label: string; cols: Column<Case>[] }[] = [
+    { label: '基本', cols: baseColumns },
+    { label: '追加の項目', cols: checkColumns },
+    { label: '報酬・弁代・プール', cols: feeColumns },
+  ]
+  /** いま選択されている列キー（null のときは既定＝基本の列） */
+  const selectedKeys = columnKeys ?? baseColumns.map((c) => String(c.key))
+  /** 列のオン/オフ。オンにしたときは「基本 → チェック → 金額」の定義順に差し込む */
+  const toggleColumn = (key: string) => {
+    const order = [...baseColumns, ...feeColumns, ...checkColumns].map((c) => String(c.key))
+    const orderIndex = (k: string) => {
+      const i = order.indexOf(k)
+      return i < 0 ? order.length : i
+    }
+    const next = selectedKeys.includes(key)
+      ? selectedKeys.filter((k) => k !== key)
+      : [...selectedKeys, key].sort((a, b) => orderIndex(a) - orderIndex(b))
+    setColumnKeys(next)
+  }
+
   // 絞り込み中だけヘッダークリックで並び替えできるようにする。
   // 未絞り込みのときは従来どおり No（id）昇順で固定（順序を変えさせない）。
   const sortableColumns: Column<Case>[] = columns.map((col) => {
@@ -595,12 +1057,6 @@ export function CaseListPage() {
 
   return (
     <div className="min-h-screen bg-slate-100">
-      <LineBroadcastModal
-        open={broadcastOpen}
-        onClose={() => setBroadcastOpen(false)}
-        recipients={recipients}
-      />
-      <LineHistoryModal open={historyOpen} onClose={() => setHistoryOpen(false)} />
       {/* 絞り込みモーダル（kintone の「絞り込む」相当） */}
       <FilterModal
         open={filterOpen}
@@ -671,18 +1127,105 @@ export function CaseListPage() {
               </button>
             )}
 
-            <button
-              type="button"
-              onClick={() => setShowFeeColumns((v) => !v)}
-              title="事務所報酬（通常）の右に、報酬・弁代・プールの金額列を表示します"
-              className={`rounded border px-2 py-1.5 text-xs font-medium ${
-                showFeeColumns
-                  ? 'border-blue-600 bg-blue-600 text-white'
-                  : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              報酬・プール列
-            </button>
+            {/* 表示する列。保存した絞り込みごとに切り替わる（kintone のビュー相当） */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setColumnMenuOpen((v) => !v)}
+                title="一覧に表示する列を選びます。「この条件を保存」で絞り込みと一緒に保存されます"
+                className={`rounded border px-2 py-1.5 text-xs font-medium ${
+                  columnKeys != null
+                    ? 'border-blue-600 bg-blue-600 text-white'
+                    : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                表示する列{columnKeys != null ? `（${selectedKeys.length}）` : ''}
+              </button>
+              {columnMenuOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setColumnMenuOpen(false)}
+                    aria-hidden
+                  />
+                  <div className="absolute right-0 z-50 mt-1 max-h-[70vh] w-64 overflow-y-auto rounded-lg border border-slate-200 bg-white p-2 text-left shadow-lg">
+                    <div className="flex items-center justify-between px-1 pb-1">
+                      <span className="text-xs font-semibold text-slate-700">表示する列</span>
+                      <button
+                        type="button"
+                        onClick={() => setColumnKeys(null)}
+                        className="text-[10px] text-blue-600 hover:underline"
+                      >
+                        既定に戻す
+                      </button>
+                    </div>
+                    {columnGroups.map((g) => (
+                      <div key={g.label} className="mb-1">
+                        <div className="px-1 py-0.5 text-[10px] font-medium text-slate-400">
+                          {g.label}
+                        </div>
+                        {g.cols.map((c) => {
+                          const key = String(c.key)
+                          return (
+                            <label
+                              key={key}
+                              className="flex cursor-pointer items-center gap-1.5 rounded px-1 py-0.5 text-xs text-slate-700 hover:bg-slate-50"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={selectedKeys.includes(key)}
+                                onChange={() => toggleColumn(key)}
+                              />
+                              {c.header}
+                            </label>
+                          )
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* 2段目の並び順。1段目（ヘッダークリック）が同じ値の行だけを並べ替える */}
+            {filtering && sort && (
+              <>
+                <span className="mx-1 h-4 w-px bg-slate-300" />
+                <label className="flex items-center gap-1 text-xs text-slate-500">
+                  同順のとき
+                  <select
+                    value={sort2?.key ?? ''}
+                    onChange={(e) =>
+                      setSort2(
+                        e.target.value
+                          ? { key: e.target.value, order: sort2?.order ?? 'asc' }
+                          : null
+                      )
+                    }
+                    className="rounded border border-slate-300 bg-white px-1.5 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">指定なし</option>
+                    {SORT2_OPTIONS.filter((o) => o.key !== sort.key).map((o) => (
+                      <option key={o.key} value={o.key}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                  {sort2 && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setSort2({ key: sort2.key, order: sort2.order === 'asc' ? 'desc' : 'asc' })
+                      }
+                      title="2段目の昇順・降順を切り替える"
+                      className="rounded border border-slate-300 bg-white px-1.5 py-1 text-xs text-slate-600 hover:bg-slate-100"
+                    >
+                      {sort2.order === 'asc' ? '昇順' : '降順'}
+                    </button>
+                  )}
+                </label>
+              </>
+            )}
 
             <span className="mx-1 h-4 w-px bg-slate-300" />
             {/* 保存した絞り込み条件（全体共有 / 個人用） */}
@@ -695,29 +1238,6 @@ export function CaseListPage() {
               saveRequestToken={saveRequestedAt}
             />
 
-            <span className="mx-1 h-4 w-px bg-slate-300" />
-            <button
-              type="button"
-              onClick={toggleAllDisplayed}
-              className="rounded border border-slate-300 bg-white px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100"
-            >
-              {allDisplayedSelected ? '選択解除' : '表示中を全選択'}
-            </button>
-            <button
-              type="button"
-              onClick={() => setBroadcastOpen(true)}
-              disabled={selectedIds.size === 0}
-              className="rounded bg-emerald-700 px-2.5 py-1.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-40"
-            >
-              LINE送信{selectedIds.size > 0 ? `（${selectedIds.size}）` : ''}
-            </button>
-            <button
-              type="button"
-              onClick={() => setHistoryOpen(true)}
-              className="rounded border border-slate-300 bg-white px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100"
-            >
-              送信履歴
-            </button>
             <div className="flex-1" />
             <span className="text-xs text-slate-500">
               {searching
@@ -762,6 +1282,19 @@ export function CaseListPage() {
             sortKey={filtering ? (sort?.key ?? null) : null}
             sortOrder={sort?.order ?? 'asc'}
             onSortChange={(key, order) => setSort(key ? { key, order } : null)}
+            sortKey2={filtering ? (sort2?.key ?? null) : null}
+            sortOrder2={sort2?.order ?? 'asc'}
+            sortOnlyColumns={hiddenSortColumns}
+            isRowExpanded={(item) => expanded?.caseId === item.id}
+            renderExpandedRow={(item) => (
+              <CaseRowDetail
+                caseId={item.id}
+                showContacts={expanded?.contacts === true}
+                showCreditors={expanded?.creditors === true}
+                showPayments={expanded?.payments === true}
+                showSettlement={expanded?.settlement === true}
+              />
+            )}
             onRowClick={(item) => navigate(`/cases/${item.id}`)}
             emptyMessage="該当する案件がありません"
             density="compact"

@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { useCaseEdit } from '../context/CaseEditContext'
 import { useCaseDispatch, usePaymentsByCaseId } from '../store/useCaseStore'
 import { DataTable, type Column } from '../components'
 import type { PaymentRecord } from '../types'
+import { nextPlannedDate } from '../lib/paymentRows'
 
 interface PaymentTableProps {
   caseId: number
@@ -81,6 +83,8 @@ export function PaymentTable({
   payments,
   scheduleCreditorId,
 }: PaymentTableProps) {
+  // ロック中（他セッションが編集中）は行の編集・追加・削除を無効化する
+  const { locked } = useCaseEdit()
   const dispatch = useCaseDispatch()
   const allCasePayments = usePaymentsByCaseId(caseId)
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -226,6 +230,67 @@ export function PaymentTable({
       })
       .catch((e) => console.error('入金の作成に失敗:', e))
   }
+
+  /**
+   * 入金予定行の削除。
+   * 辞任などで予定が大幅に不要になる場合に使う。
+   * 実入金が入っている行は記録が失われるため、警告文を変えて二重に確認する。
+   */
+  const deletePaymentRow = (record: PaymentRecord) => {
+    const hasActual = record.actualDate != null || (record.actualAmount ?? 0) !== 0
+    const msg = hasActual
+      ? `この行には実入金（${record.actualDate ?? ''} ${(record.actualAmount ?? 0).toLocaleString()}円）が記録されています。\n\n削除すると入金の記録が失われます。本当に削除しますか？`
+      : `${record.plannedDate ?? ''} の入金予定（${(record.plannedAmount ?? 0).toLocaleString()}円）を削除します。よろしいですか？`
+    if (!window.confirm(msg)) return
+    dispatch({ type: 'DELETE_PAYMENT', payload: record.id })
+    if (record.id != null) {
+      void fetch(`/api/payments/${record.id}`, { method: 'DELETE' }).catch((e) =>
+        console.error('入金行の削除に失敗:', e)
+      )
+    }
+  }
+
+  /**
+   * 行ごとのプール残高（実プール充当額の累計）。
+   * 実入金が不足したときはこの残高から取り崩すため、担当者が残高を追えるようにする。
+   * 予定日順（＝表示順）に積み上げる。
+   */
+  const poolBalanceById = (() => {
+    const m = new Map<number, number>()
+    let run = 0
+    for (const p of sortedPayments) {
+      run += p.actualPoolAllocation ?? 0
+      m.set(p.id, run)
+    }
+    return m
+  })()
+
+  /** 合計行に出す値 */
+  const totals = sortedPayments.reduce(
+    (t, p) => ({
+      plannedAmount: t.plannedAmount + (p.plannedAmount ?? 0),
+      plannedFee: t.plannedFee + (p.plannedFeeAllocation ?? 0),
+      plannedAgentFee: t.plannedAgentFee + (p.plannedAgentFeeAllocation ?? 0),
+      plannedPool: t.plannedPool + (p.plannedPoolAllocation ?? 0),
+      handlingFee: t.handlingFee + (p.handlingFee ?? 0),
+      plannedRepayment: t.plannedRepayment + (p.plannedRepaymentAllocation ?? 0),
+      actualAmount: t.actualAmount + (p.actualAmount ?? 0),
+      actualFee: t.actualFee + (p.actualFeeAllocation ?? 0),
+      actualAgentFee: t.actualAgentFee + (p.actualAgentFeeAllocation ?? 0),
+      actualPool: t.actualPool + (p.actualPoolAllocation ?? 0),
+      actualHandlingFee: t.actualHandlingFee + (p.actualHandlingFee ?? 0),
+      actualRepayment: t.actualRepayment + (p.actualRepaymentAllocation ?? 0),
+    }),
+    {
+      plannedAmount: 0, plannedFee: 0, plannedAgentFee: 0, plannedPool: 0,
+      handlingFee: 0, plannedRepayment: 0, actualAmount: 0, actualFee: 0,
+      actualAgentFee: 0, actualPool: 0, actualHandlingFee: 0, actualRepayment: 0,
+    }
+  )
+  /** 実入金がある行だけの予定額（差額の分母。未入金の行は差額に含めない） */
+  const paidPlannedTotal = sortedPayments
+    .filter((p) => p.actualDate)
+    .reduce((sum, p) => sum + (p.plannedAmount ?? 0), 0)
 
   const inputCls =
     'box-border w-full min-w-0 max-w-full rounded border border-blue-300 px-1.5 py-0.5 text-xs leading-tight [color-scheme:light]'
@@ -490,6 +555,26 @@ export function PaymentTable({
       },
     },
     {
+      key: '__diff',
+      header: '差額',
+      width: '4rem',
+      align: 'right',
+      sortable: false,
+      headerClassName: 'bg-blue-50',
+      // 実入金額 − 入金予定額。未入金の行は空欄。
+      render: (item) => {
+        if (!item.actualDate) return <span className="text-slate-300">-</span>
+        const d = (item.actualAmount ?? 0) - (item.plannedAmount ?? 0)
+        if (d === 0) return <span className="text-slate-400">0</span>
+        return (
+          <span className={d < 0 ? 'font-semibold text-red-600' : 'font-semibold text-blue-600'}>
+            {d > 0 ? '+' : ''}
+            {d.toLocaleString()}
+          </span>
+        )
+      },
+    },
+    {
       key: 'actualFeeAllocation',
       header: '報酬充当',
       width: '4rem',
@@ -647,9 +732,26 @@ export function PaymentTable({
       },
     },
     {
+      key: '__poolBalance',
+      header: 'プール残高',
+      width: '5rem',
+      align: 'right',
+      sortable: false,
+      headerClassName: 'bg-blue-50 whitespace-nowrap',
+      // 実プール充当額の累計。不足入金のときはここから取り崩す。
+      render: (item) => {
+        const v = poolBalanceById.get(item.id) ?? 0
+        return (
+          <span className={v < 0 ? 'font-semibold text-red-600' : 'tabular-nums text-slate-700'}>
+            {v.toLocaleString()}
+          </span>
+        )
+      },
+    },
+    {
       key: 'actions',
       header: '',
-      width: '5rem',
+      width: '6.5rem',
       cellTruncate: false,
       sortable: false,
       headerClassName: 'bg-blue-50',
@@ -675,20 +777,82 @@ export function PaymentTable({
           )
         }
         return (
-          <button
-            type="button"
-            onClick={() => handleEdit(item)}
-            className="rounded px-2 py-0.5 text-xs text-blue-600 hover:bg-blue-50"
-          >
-            編集
-          </button>
+          <div className="flex shrink-0 flex-nowrap items-center gap-0.5">
+            <button
+              type="button"
+              onClick={() => handleEdit(item)}
+              disabled={locked}
+              title={locked ? '他の人が編集中のため、いまは変更できません' : undefined}
+              className="rounded px-1.5 py-0.5 text-xs text-blue-600 hover:bg-blue-50 disabled:text-slate-300 disabled:hover:bg-transparent"
+            >
+              編集
+            </button>
+            <button
+              type="button"
+              onClick={() => deletePaymentRow(item)}
+              disabled={locked}
+              title={locked ? '他の人が編集中のため、いまは変更できません' : 'この行を削除'}
+              className="rounded px-1.5 py-0.5 text-xs text-red-600 hover:bg-red-50 disabled:text-slate-300 disabled:hover:bg-transparent"
+            >
+              削除
+            </button>
+          </div>
         )
       },
     },
   ]
 
+  const yen = (n: number) => n.toLocaleString()
+  const diffTotal = totals.actualAmount - paidPlannedTotal
+
   return (
     <div className="min-h-0 space-y-3">
+      {/* 合計（表示中の行の合計。予定と実績を並べて出す） */}
+      <div className="overflow-x-auto rounded-md border border-slate-200 bg-slate-50/70 px-2 py-1">
+        <div className="flex w-max items-center gap-x-5 whitespace-nowrap text-[11px] leading-none text-slate-700">
+          <span className="font-semibold text-slate-500">合計（{sortedPayments.length}行）</span>
+          <span>
+            入金予定額 <b className="tabular-nums">{yen(totals.plannedAmount)}</b>
+          </span>
+          <span>
+            実入金額 <b className="tabular-nums text-blue-700">{yen(totals.actualAmount)}</b>
+          </span>
+          <span>
+            差額{' '}
+            <b
+              className={`tabular-nums ${diffTotal < 0 ? 'text-red-600' : diffTotal > 0 ? 'text-blue-600' : 'text-slate-500'}`}
+            >
+              {diffTotal > 0 ? '+' : ''}
+              {yen(diffTotal)}
+            </b>
+          </span>
+          <span className="h-3 w-px bg-slate-300" aria-hidden />
+          <span>
+            報酬 <b className="tabular-nums">{yen(totals.actualFee)}</b>
+            <span className="text-slate-400">／予定 {yen(totals.plannedFee)}</span>
+          </span>
+          <span>
+            弁代報酬 <b className="tabular-nums">{yen(totals.actualAgentFee)}</b>
+            <span className="text-slate-400">／予定 {yen(totals.plannedAgentFee)}</span>
+          </span>
+          <span>
+            弁済 <b className="tabular-nums">{yen(totals.actualRepayment)}</b>
+            <span className="text-slate-400">／予定 {yen(totals.plannedRepayment)}</span>
+          </span>
+          <span>
+            手数料 <b className="tabular-nums">{yen(totals.actualHandlingFee)}</b>
+            <span className="text-slate-400">／予定 {yen(totals.handlingFee)}</span>
+          </span>
+          <span className="h-3 w-px bg-slate-300" aria-hidden />
+          <span>
+            プール残高{' '}
+            <b className={`tabular-nums ${totals.actualPool < 0 ? 'text-red-600' : 'text-emerald-700'}`}>
+              {yen(totals.actualPool)}
+            </b>
+          </span>
+        </div>
+      </div>
+
       <DataTable
         data={sortedPayments}
         columns={columns}
@@ -715,6 +879,8 @@ export function PaymentTable({
 
       <button
         type="button"
+        disabled={locked}
+        title={locked ? '他の人が編集中のため、いまは変更できません' : undefined}
         onClick={() => {
           const newId = Math.max(0, ...allCasePayments.map((p) => p.id)) + 1
           const lastPayment = sortedPayments[sortedPayments.length - 1]
@@ -731,7 +897,9 @@ export function PaymentTable({
             caseId,
             creditorId: scopeCreditorId,
             creditorInstallmentIndex,
-            plannedDate: null,
+            // 日付を空のまま作ると「中身の無い行」と判定されて画面に出ない。
+            // 直近の予定日の翌月（予定が無ければ当日）を初期値として入れる。
+            plannedDate: nextPlannedDate(payments),
             plannedAmount: lastPayment?.plannedAmount ?? null,
             plannedFeeAllocation: lastPayment?.plannedFeeAllocation ?? null,
             plannedAgentFeeAllocation: lastPayment?.plannedAgentFeeAllocation ?? null,
@@ -751,7 +919,7 @@ export function PaymentTable({
             cumulativePool: null,
           })
         }}
-        className="w-full rounded border border-dashed border-blue-300 py-1 text-[11px] text-blue-600 transition-colors hover:bg-blue-50"
+        className="w-full rounded border border-dashed border-blue-300 py-1 text-[11px] text-blue-600 transition-colors hover:bg-blue-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-300 disabled:hover:bg-transparent"
       >
         + 入金予定を追加
       </button>

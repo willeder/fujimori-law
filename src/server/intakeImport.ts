@@ -82,6 +82,16 @@ const CASE_COLUMNS: ColMap[] = [
   { header: 'V口座-番号', field: 'vAccountNumber', type: 'string' },
 ]
 
+/** 和解内容コメントから「和解金額：X円」を取り出す */
+const SETTLE_AMOUNT_RE = /和解金額[：:]\s*([0-9,]+)\s*円/
+export function settlementAmountFromComment(text: unknown): number | null {
+  if (typeof text !== 'string') return null
+  const m = SETTLE_AMOUNT_RE.exec(text)
+  if (!m) return null
+  const n = Number(m[1].replace(/,/g, ''))
+  return Number.isFinite(n) ? n : null
+}
+
 const CREDITOR_COLUMNS: ColMap[] = [
   { header: '債権者', field: 'creditorName', type: 'string' },
   { header: '交渉相手', field: 'negotiationPartner', type: 'string' },
@@ -99,7 +109,10 @@ const CREDITOR_COLUMNS: ColMap[] = [
   { header: '和解提案', field: 'settlementProposal', type: 'int' },
   { header: '回答状況', field: 'responseStatus', type: 'string' },
   { header: '和解日', field: 'settlementDate', type: 'date' },
-  { header: '和解', field: 'settlementAmount', type: 'int' },
+  // 相談票の「和解」列は **金額ではなく支払回数**（kintone の和解対象債権一覧と同じ）。
+  // 元データ 5,138 行で照合すると 5,106 行（99.4%）が和解内容詳細の「支払回数」と一致する。
+  // 以前ここを settlementAmount に入れていたため、和解金額に「60」等の回数が入っていた。
+  { header: '和解', field: 'paymentCount', type: 'int' },
   { header: '和解時債務金額', field: 'settlementDebtAmount', type: 'int' },
   { header: '和解内容コメント', field: 'settlementContentComment', type: 'string' },
 ]
@@ -319,15 +332,25 @@ function parsePaymentSheet(buf: Buffer): Record<string, unknown>[] {
     const amount = (rec.plannedAmount as number | undefined) ?? 0
     if (!rec.plannedDate || amount <= 0) continue
 
-    const count = (rec.repaymentCount as number | undefined) ?? 0
-    if (rec.handlingFee == null) rec.handlingFee = count * HANDLING_FEE_UNIT
-    if (rec.plannedPoolAllocation == null) {
-      rec.plannedPoolAllocation =
-        amount -
-        (((rec.plannedFeeAllocation as number | undefined) ?? 0) +
-          ((rec.plannedAgentFeeAllocation as number | undefined) ?? 0) +
-          ((rec.plannedRepaymentAllocation as number | undefined) ?? 0) +
-          ((rec.handlingFee as number | undefined) ?? 0))
+    // 手数料・ﾌﾟｰﾙ充当予定額は空欄のことがあるので、恒等式
+    //   入金予定額 = 報酬 + 弁代報酬 + ﾌﾟｰﾙ + 弁済 + 手数料
+    // が必ず成立するように埋める。どちらか一方だけ空欄のときに社数×129で
+    // 埋めてしまうと二重計上になるため、残余から逆算する。
+    const n = (k: string) => (rec[k] as number | undefined) ?? 0
+    const rest = amount - (n('plannedFeeAllocation') + n('plannedAgentFeeAllocation') + n('plannedRepaymentAllocation'))
+    const hasFee = rec.handlingFee != null
+    const hasPool = rec.plannedPoolAllocation != null
+    if (!hasFee && !hasPool) {
+      // どちらも空 … 手数料は社数×単価、残りがﾌﾟｰﾙ
+      const fee = ((rec.repaymentCount as number | undefined) ?? 0) * HANDLING_FEE_UNIT
+      rec.handlingFee = fee
+      rec.plannedPoolAllocation = rest - fee
+    } else if (!hasFee) {
+      // ﾌﾟｰﾙだけ埋まっている … 手数料は残余
+      rec.handlingFee = rest - n('plannedPoolAllocation')
+    } else if (!hasPool) {
+      // 手数料だけ埋まっている … ﾌﾟｰﾙは残余
+      rec.plannedPoolAllocation = rest - n('handlingFee')
     }
     out.push(rec)
   }
@@ -420,6 +443,13 @@ export function parseIntake(buf: Buffer): ParseResult {
         if (val !== null) cr[col.field] = val
       }
       if (cr.status == null) cr.status = DEFAULT_CREDITOR_STATUS
+      // 和解金額は相談票に専用の列がないため、和解内容コメント
+      // （例:「和解金額：536,112円 … 支払回数：60回」）から拾う。
+      // コメントが無ければ和解時債務金額で代用する（元データでは 98.7% 一致）。
+      if (cr.settlementAmount == null) {
+        const fromComment = settlementAmountFromComment(cr.settlementContentComment)
+        cr.settlementAmount = fromComment ?? cr.settlementDebtAmount ?? null
+      }
       cur.creditors.push(cr)
     }
   })

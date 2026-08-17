@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { SuggestInput } from "./SuggestInput";
+import { useCaseEdit } from "../context/CaseEditContext";
 
 interface EditableFieldProps {
   label: string;
@@ -62,6 +63,36 @@ function formatJapaneseEraDate(iso: string): string | null {
   }
 }
 
+/**
+ * いま編集中の入力欄から見て、文書順で前後にある「編集可能な項目」を探す。
+ * 表示状態の項目には data-ef-trigger を付けてあるので、それを辿る。
+ */
+function findAdjacentField(
+  from: HTMLElement | null,
+  dir: 1 | -1,
+): HTMLElement | null {
+  if (!from) return null;
+  const all = Array.from(
+    document.querySelectorAll<HTMLElement>('[data-ef-trigger="1"]'),
+  );
+  if (dir === 1) {
+    for (const el of all) {
+      if (
+        from.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING
+      )
+        return el;
+    }
+    return null;
+  }
+  let prev: HTMLElement | null = null;
+  for (const el of all) {
+    if (from.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_PRECEDING)
+      prev = el;
+    else break;
+  }
+  return prev;
+}
+
 export function EditableField({
   label,
   value,
@@ -70,7 +101,7 @@ export function EditableField({
   options,
   suffix,
   placeholder,
-  disabled = false,
+  disabled: disabledProp = false,
   compact = false,
   compactSize = "md",
   compactLayout = "inline",
@@ -82,6 +113,10 @@ export function EditableField({
   fillWidth = false,
   suggestions,
 }: EditableFieldProps) {
+  // 案件詳細の「編集モード」。編集ボタンを押していない間は読み取り専用にする。
+  // （プロバイダの外側では editing=true なので、他画面の挙動は変わらない）
+  const { editing: editModeOn } = useCaseEdit();
+  const disabled = disabledProp || !editModeOn;
   const labelWithColon =
     label.endsWith("：") || label.endsWith(":") ? label : `${label}：`;
 
@@ -125,8 +160,25 @@ export function EditableField({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && type !== "textarea") {
       handleSave();
-    } else if (e.key === "Escape") {
+      return;
+    }
+    if (e.key === "Escape") {
       handleCancel();
+      return;
+    }
+    // Tab: 値を確定して「次の項目」を開く。
+    // 編集中の入力欄は確定と同時に DOM から消えるため、そのままだとフォーカスが
+    // 迷子になり無関係な場所へ飛ぶ。消える前に次の項目を特定しておく。
+    if (e.key === "Tab" && type !== "textarea") {
+      const next = findAdjacentField(inputRef.current, e.shiftKey ? -1 : 1);
+      handleSave();
+      if (next) {
+        e.preventDefault();
+        requestAnimationFrame(() => {
+          next.focus();
+          next.click(); // そのまま入力を続けられるように編集状態で開く
+        });
+      }
     }
   };
 
@@ -192,11 +244,39 @@ export function EditableField({
     : "flex-1 text-xs border border-blue-300 rounded px-1.5 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500";
 
   const isStacked = compact && compactLayout === "stacked";
+
+  /**
+   * 表示状態の項目を Tab で辿れるようにするための共通プロパティ。
+   *
+   * これまでは表示状態が単なる <div onClick> だったため、Tab キーが項目を
+   * すべて読み飛ばし、次に見つかった別のボタン（「ファイル追加」など）へ
+   * 飛んでいた。tabIndex を与えてキーボードでも開けるようにする。
+   */
+  const openForEdit = () => {
+    setEditValue(String(value ?? ""));
+    setIsEditing(true);
+  };
+  const triggerProps = {
+    "data-ef-trigger": "1",
+    role: "button" as const,
+    tabIndex: 0,
+    onClick: openForEdit,
+    onKeyDown: (e: React.KeyboardEvent) => {
+      // Enter / Space で編集開始。Tab はブラウザ既定のまま次の項目へ進む
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openForEdit();
+      }
+    },
+  };
   const showDateToggle = type === "date" && dateDisplayToggle && !isEditing;
   const toggleLabel = dateDisplayMode === "gregorian" ? "和暦" : "西暦";
   const toggleButton = showDateToggle ? (
     <button
       type="button"
+      // 表示切替はタブ順に入れない。入れると項目の間に余計な停止位置ができ、
+      // Tab で次の入力欄へ進めなくなる。
+      tabIndex={-1}
       className={`shrink-0 rounded bg-slate-100 px-1 py-0.5 font-medium text-slate-600 hover:bg-slate-200 ${compactToggleClass}`}
       onClick={(e) => {
         e.stopPropagation();
@@ -279,11 +359,8 @@ export function EditableField({
               {labelWithColon}
             </div>
             <div
-              className={`group min-w-0 cursor-pointer rounded px-0.5 py-0.5 -mx-0.5 leading-tight text-slate-700 hover:bg-blue-50/80 ${compactValueClass}`}
-              onClick={() => {
-                setEditValue(String(value ?? ""));
-                setIsEditing(true);
-              }}
+              {...triggerProps}
+              className={`group min-w-0 cursor-pointer rounded px-0.5 py-0.5 -mx-0.5 leading-tight text-slate-700 hover:bg-blue-50/80 focus:outline-none focus:ring-2 focus:ring-blue-400 ${compactValueClass}`}
             >
               <div className="flex min-w-0 items-center gap-1">
                 <span className={`min-w-0 flex-1 whitespace-normal break-words ${negativeTextClass}`}>
@@ -324,11 +401,8 @@ export function EditableField({
             {label}
           </span>
           <div
-            className={valueContainerClass}
-            onClick={() => {
-              setEditValue(String(value ?? ""));
-              setIsEditing(true);
-            }}
+            {...triggerProps}
+            className={`${valueContainerClass} focus:outline-none focus:ring-2 focus:ring-blue-400`}
           >
             <span className={`${valueSpanClass} ${negativeTextClass}`}>
               {displayText}
@@ -347,11 +421,8 @@ export function EditableField({
     return (
       <div className="flex min-w-0 flex-col gap-0.5">
         <div
-          className="flex min-w-0 cursor-pointer items-baseline gap-1 rounded py-0.5 transition-colors group hover:bg-blue-50"
-          onClick={() => {
-            setEditValue(String(value ?? ""));
-            setIsEditing(true);
-          }}
+          {...triggerProps}
+          className="flex min-w-0 cursor-pointer items-baseline gap-1 rounded py-0.5 transition-colors group hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
           <span className="shrink-0 text-[11px] font-medium text-slate-500">
             {labelWithColon}

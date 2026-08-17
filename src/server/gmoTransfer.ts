@@ -7,7 +7,12 @@
  *   - 整形: コードのゼロ埋め(金融機関4/支店3/口座7)、預金種目(普通1/当座2/他4)、ASC半角化、振込依頼人名
  */
 import { prisma } from './db.js'
-import { GMO_TRANSFER_TARGET_STATUSES } from '../constants/fieldOptions.js'
+import { writeAudit, writeChange, type Actor } from './audit.js'
+import { HANDLING_FEE_UNIT } from './paymentSummary.js'
+import {
+  GMO_TRANSFER_TARGET_STATUSES,
+  SETTLED_CREDITOR_STATUSES,
+} from '../constants/fieldOptions.js'
 
 // ── 全角→半角（Excel ASC 相当） ──────────────────────────
 const KATA_MAP: Record<string, string> = {
@@ -284,7 +289,7 @@ export async function buildGmoTransfers(
 // ============================================================
 // 未整備検知（弁済対象なのに支払条件・振込先が未入力の債権者）
 // GMO対象から漏れる原因を能動的に検知して、案件詳細で補完できるようにする。
-// 対象: 停止/終了でない（repaymentTarget=null）かつ「弁済対象」＝和解済/弁済中/完済
+// 対象: 停止/終了でない（repaymentTarget=null）かつ「弁済対象」＝和解成立のステータス
 //       または和解日ありの債権者で、支払条件 or 振込先口座のいずれかが欠損。
 //
 // targetMonth(YYYY-MM) を渡すと「その月に支払いが必要な債権者のみ」に絞る。
@@ -299,14 +304,21 @@ export type IncompleteRow = {
   creditorName: string
   status: string
   settlementDate: string | null
-  scheduleMissing: boolean // 支払開始日/金額のいずれか欠損
+  scheduleMissing: boolean // 支払開始日/支払回数/金額のいずれか欠損
   accountMissing: boolean // 振込先（銀行/支店/種別/口座番号/名義）のいずれか欠損
+  /**
+   * 支払開始日が未入力で、そもそも「対象月に支払いが必要か」を判定できない。
+   * 以前はこの条件で丸ごと絞り落としていたため、弁済対象なのに GMO 振込へ
+   * 一度も載らない債権者が警告にも出てこなかった（4,409社・1,610案件）。
+   */
+  monthUnknown: boolean
 }
 export type IncompleteResult = {
   rows: IncompleteRow[]
   count: number
   scheduleMissingCount: number
   accountMissingCount: number
+  monthUnknownCount: number
 }
 
 export async function buildIncompleteRepayments(
@@ -318,22 +330,33 @@ export async function buildIncompleteRepayments(
       // 振込データと同じ条件で受任後ステータスを絞る。
       // 振込対象にならない案件を「未整備」として挙げても対応のしようがないため。
       case: { settlementStatus: { in: [...GMO_TRANSFER_TARGET_STATUSES] } },
-      // 対象月に支払いが必要なもののみ（支払開始日 ≤ 対象月末 ≤ … ≤ 最終支払日）。
-      // 支払開始日/最終支払日は年月日(YYYY-MM-DD)で保持しているため、対象月(YYYY-MM)を
-      // 月初(-01)・月末(-31)の境界文字列に展開して比較する。支払開始日が未入力なら除外。
-      paymentStartMonth: { not: null, lte: `${targetMonth}-31` },
       AND: [
         {
           OR: [
             { settlementDate: { not: null } },
-            { status: { in: ['和解済', '弁済中', '完済'] } },
+            { status: { in: [...SETTLED_CREDITOR_STATUSES] } },
           ],
         },
         {
-          // 最終支払日が未入力なら上限なし、入力ありなら対象月以降まで継続中のもの
           OR: [
-            { finalPaymentMonth: null },
-            { finalPaymentMonth: { gte: `${targetMonth}-01` } },
+            // ① 対象月に支払いが必要なもの。
+            //    支払開始日/最終支払日は年月日(YYYY-MM-DD)で保持しているため、
+            //    対象月(YYYY-MM)を月初(-01)・月末(-31)の境界文字列に展開して比較する。
+            {
+              AND: [
+                { paymentStartMonth: { not: null, lte: `${targetMonth}-31` } },
+                {
+                  // 最終支払日が未入力なら上限なし、入力ありなら対象月以降まで継続中のもの
+                  OR: [
+                    { finalPaymentMonth: null },
+                    { finalPaymentMonth: { gte: `${targetMonth}-01` } },
+                  ],
+                },
+              ],
+            },
+            // ② 支払開始日が未入力で対象月を判定できないもの。
+            //    弁済対象なのに GMO 振込へ永久に載らないため、月に関係なく必ず出す。
+            { paymentStartMonth: null },
           ],
         },
       ],
@@ -345,6 +368,7 @@ export async function buildIncompleteRepayments(
       status: true,
       settlementDate: true,
       paymentStartMonth: true,
+      paymentCount: true,
       paymentDay: true,
       firstPaymentAmount: true,
       subsequentPaymentAmount: true,
@@ -364,9 +388,13 @@ export async function buildIncompleteRepayments(
   for (const c of creditors) {
     // 支払日項目は廃止（支払開始日から約定日を導出）。支払条件の欠損は
     // 支払開始日が空、または初回/2回目以降の金額がいずれも空、で判定する。
+    // 支払回数が空だと creditorSchedule.ts が弁済予定を1行も生成しないため、
+    // 支払開始日・金額と同じく「支払条件の不足」として扱う。
     const scheduleMissing =
       empty(c.paymentStartMonth) ||
+      c.paymentCount == null ||
       (c.firstPaymentAmount == null && c.subsequentPaymentAmount == null)
+    const monthUnknown = c.paymentStartMonth == null
     const accountMissing =
       empty(c.financialInstitutionCode) ||
       empty(c.branchCode) ||
@@ -386,6 +414,7 @@ export async function buildIncompleteRepayments(
         : null,
       scheduleMissing,
       accountMissing,
+      monthUnknown,
     })
   }
   rows.sort(
@@ -398,6 +427,212 @@ export async function buildIncompleteRepayments(
     count: rows.length,
     scheduleMissingCount: rows.filter((r) => r.scheduleMissing).length,
     accountMissingCount: rows.filter((r) => r.accountMissing).length,
+    monthUnknownCount: rows.filter((r) => r.monthUnknown).length,
+  }
+}
+
+// ============================================================
+// 振込実行の記録（弁済実績の書き戻し）
+// ------------------------------------------------------------
+// 事務所と確認した運用:
+//   ・振込ファイルを出力した時点で「弁済済み」として確定させる
+//   ・ある月に債権者へ振り込む原資は、依頼者の【同じ月】の入金
+//   ・振込ファイルは依頼者の入金を待たずに（予定ベースで）先に出す
+//     → そのため【実入金がある行にだけ】記録する。入金が無い案件は
+//       原資が無く実際には振り込まれないので、記録すると請求額が狂う。
+//       入金後に再度出力すれば、そのときに記録される。
+//
+// これまでは振込ファイルを出しても何も記録されず、弁済日・弁済充当額・
+// 社数（実績）・振)手数料 を担当者が入金スケジュールへ手入力していた。
+// 出力時に確定している値（社数・金額・振込日）をそのまま書き戻して、
+// 手入力を無くす。
+//
+// 安全策:
+//   ・すでに弁済日が入っている行は上書きしない（再ダウンロードで二重計上しない）
+//   ・変更履歴（ChangeLog）に before/after を残すので、間違えたら取り消せる
+//   ・口座情報不足で CSV から除外された行は集計に含めない
+//     （実際に振り込まれないため）
+// ============================================================
+
+export type TransferRecordResult = {
+  ok: boolean
+  /** 記録対象になった案件×月の組み合わせ数 */
+  groups: number
+  /** 実際に書き込んだ入金行の数 */
+  written: number
+  /** すでに弁済日が入っていて上書きしなかった数 */
+  skipped: number
+  /** その月の実入金がまだ無いため記録を見送った数 */
+  noDeposit: number
+  /** 見送った案件のID（入金後に再出力すれば記録される） */
+  noDepositIds: string[]
+  /** 対応する入金行が見つからなかった数 */
+  notFound: number
+  /** 見つからなかった案件のID（画面で補完してもらう） */
+  notFoundIds: string[]
+  /** 書き込んだ弁済充当額の合計 */
+  totalAmount: number
+  /** 書き込んだ社数の合計 */
+  totalCount: number
+  message: string
+}
+
+/** YYYY-MM から その月の初日・翌月初日 を作る */
+function monthRange(ym: string): { from: Date; to: Date } {
+  const [y, m] = ym.split('-').map(Number)
+  return {
+    from: new Date(Date.UTC(y, m - 1, 1)),
+    to: new Date(Date.UTC(m === 12 ? y + 1 : y, m === 12 ? 0 : m, 1)),
+  }
+}
+
+/**
+ * 振込ファイルの内容を、案件の入金スケジュールへ「弁済実績」として書き戻す。
+ * 出力（ダウンロード）と同じ GmoResult を渡すこと。
+ */
+export async function recordTransferResult(
+  actor: Actor,
+  result: GmoResult
+): Promise<TransferRecordResult> {
+  // 実際に振り込まれる行だけを対象にする（口座情報不足は CSV から除外されている）
+  const rows = result.rows.filter((r) => !r.incomplete && r.amount != null)
+
+  // 案件 × 振込月 で集約する。対象期間が月をまたぐ場合に混ざらないようにする。
+  type Group = {
+    caseId: number
+    externalId: string | null
+    month: string
+    amount: number
+    count: number
+    lastDate: string
+  }
+  const groups = new Map<string, Group>()
+  for (const r of rows) {
+    const month = r.transferDate.slice(0, 7)
+    const key = `${r.caseId}|${month}`
+    const g = groups.get(key)
+    if (g) {
+      g.amount += r.amount ?? 0
+      g.count += 1
+      if (r.transferDate > g.lastDate) g.lastDate = r.transferDate
+    } else {
+      groups.set(key, {
+        caseId: r.caseId,
+        externalId: r.externalId,
+        month,
+        amount: r.amount ?? 0,
+        count: 1,
+        lastDate: r.transferDate,
+      })
+    }
+  }
+
+  let written = 0
+  let skipped = 0
+  let totalAmount = 0
+  let totalCount = 0
+  const notFoundIds: string[] = []
+  const noDepositIds: string[] = []
+
+  for (const g of groups.values()) {
+    const { from, to } = monthRange(g.month)
+    // 同じ月の案件全体行（creditorId=null）。
+    // 実入金がある行を優先し、無ければその月の最初の予定行を使う。
+    const candidates = await prisma.payment.findMany({
+      where: {
+        caseId: g.caseId,
+        creditorId: null,
+        plannedDate: { gte: from, lt: to },
+      },
+      orderBy: [{ plannedDate: 'asc' }, { id: 'asc' }],
+      select: {
+        id: true,
+        plannedDate: true,
+        actualDate: true,
+        repaymentDate: true,
+        actualRepaymentAllocation: true,
+        actualRepaymentCount: true,
+        actualHandlingFee: true,
+      },
+    })
+    if (candidates.length === 0) {
+      notFoundIds.push(g.externalId ?? `caseId:${g.caseId}`)
+      continue
+    }
+    // 実入金がある行にだけ記録する。振込ファイルは入金を待たずに出すため、
+    // 入金前に記録してしまうと「原資が無いのに弁済済み」になってしまう。
+    const target = candidates.find((p) => p.actualDate != null)
+    if (!target) {
+      noDepositIds.push(g.externalId ?? `caseId:${g.caseId}`)
+      continue
+    }
+    if (target.repaymentDate != null) {
+      skipped += 1
+      continue
+    }
+
+    const before = {
+      repaymentDate: target.repaymentDate,
+      actualRepaymentAllocation: target.actualRepaymentAllocation,
+      actualRepaymentCount: target.actualRepaymentCount,
+      actualHandlingFee: target.actualHandlingFee,
+    }
+    const after = {
+      repaymentDate: new Date(`${g.lastDate}T00:00:00Z`),
+      actualRepaymentAllocation: g.amount,
+      actualRepaymentCount: g.count,
+      // 手数料 = 社数 × 129円（入金管理ファイルの検算式と同じ）
+      actualHandlingFee: g.count * HANDLING_FEE_UNIT,
+    }
+    await prisma.payment.update({ where: { id: target.id }, data: after })
+    await writeChange({
+      actor,
+      entity: 'Payment',
+      entityId: String(target.id),
+      action: 'UPDATE',
+      before,
+      after,
+    })
+    written += 1
+    totalAmount += g.amount
+    totalCount += g.count
+  }
+
+  const message =
+    `振込${result.periodStart}〜${result.periodEnd}: ` +
+    `${written}件の入金行へ弁済実績を記録` +
+    (skipped > 0 ? `・記録済みでスキップ${skipped}件` : '') +
+    (noDepositIds.length > 0 ? `・未入金のため見送り${noDepositIds.length}件` : '') +
+    (notFoundIds.length > 0 ? `・対応する入金行なし${notFoundIds.length}件` : '')
+
+  await writeAudit({
+    actor,
+    action: 'UPDATE',
+    entity: 'Payment',
+    summary: message,
+    metadata: {
+      source: 'gmo-transfer',
+      periodStart: result.periodStart,
+      periodEnd: result.periodEnd,
+      totalAmount,
+      totalCount,
+      noDepositIds: noDepositIds.slice(0, 50),
+      notFoundIds: notFoundIds.slice(0, 50),
+    },
+  })
+
+  return {
+    ok: true,
+    groups: groups.size,
+    written,
+    skipped,
+    noDeposit: noDepositIds.length,
+    noDepositIds,
+    notFound: notFoundIds.length,
+    notFoundIds,
+    totalAmount,
+    totalCount,
+    message,
   }
 }
 

@@ -91,6 +91,11 @@ function dbApiPlugin(): Plugin {
               id: number,
               meta: { ip?: string | null; userAgent?: string | null }
             ) => Promise<{ status: number; body: unknown }>
+            deletePayment: (
+              actor: { id: string; email: string },
+              id: number,
+              meta: { ip?: string | null; userAgent?: string | null }
+            ) => Promise<{ status: number; body: unknown }>
             deleteCase: (
               actor: { id: string; email: string; role?: string | null },
               id: number,
@@ -153,6 +158,29 @@ function dbApiPlugin(): Plugin {
                 ? JSON.stringify({ message: result.body })
                 : JSON.stringify(result.body)
             )
+            return
+          }
+
+          // ── GMO入金通知（Webhook）の受信。本番は api/gmo/webhook.ts ──
+          // 認証（アクセストークン・シグネチャ・Basic）はログインセッションとは
+          // 無関係なので、この認証チェックより前に処理する。
+          if (url === '/api/gmo/webhook' && req.method === 'POST') {
+            const { handleGmoWebhook } = (await server.ssrLoadModule(
+              '/src/server/gmoWebhook.ts'
+            )) as typeof import('./src/server/gmoWebhook')
+            const rawBody = await readRawBody(req)
+            const headers: Record<string, string | string[] | undefined> = {}
+            for (const [k, v] of Object.entries(req.headers)) headers[k.toLowerCase()] = v
+            const result = await handleGmoWebhook(rawBody, headers)
+            res.statusCode = result.status
+            res.setHeader('Content-Type', 'application/json; charset=utf-8')
+            res.end(JSON.stringify(result.body))
+            return
+          }
+          if (url === '/api/gmo/webhook' && req.method === 'GET') {
+            res.statusCode = 200
+            res.setHeader('Content-Type', 'application/json; charset=utf-8')
+            res.end(JSON.stringify({ ok: true, endpoint: 'gmo-webhook' }))
             return
           }
 
@@ -307,27 +335,6 @@ function dbApiPlugin(): Plugin {
             res.statusCode = r.status
             res.setHeader('Content-Type', 'application/json; charset=utf-8')
             res.end(JSON.stringify(r.body))
-            return
-          }
-
-          // ── LINE 一斉送信・送信履歴 ──
-          if (
-            (url === '/api/line/broadcast' && req.method === 'POST') ||
-            (url === '/api/line/broadcast-history' && req.method === 'GET')
-          ) {
-            const lb = (await server.ssrLoadModule(
-              '/src/server/lineBroadcast.ts'
-            )) as typeof import('./src/server/lineBroadcast')
-            const editActor = { id: sessionUser.id, email: sessionUser.email }
-            if (url === '/api/line/broadcast') {
-              const r = await lb.sendLineBroadcast(editActor, await readRawBody(req), meta)
-              res.statusCode = r.status
-              res.setHeader('Content-Type', 'application/json; charset=utf-8')
-              res.end(JSON.stringify(r.body))
-              return
-            }
-            res.setHeader('Content-Type', 'application/json; charset=utf-8')
-            res.end(JSON.stringify(await lb.getLineBroadcastHistory()))
             return
           }
 
@@ -489,6 +496,13 @@ function dbApiPlugin(): Plugin {
                 await readRawBody(req),
                 meta
               )
+              res.statusCode = r.status
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify(r.body))
+              return
+            }
+            if (paymentEdit && req.method === 'DELETE') {
+              const r = await mod.deletePayment(editActor, Number(paymentEdit[1]), meta)
               res.statusCode = r.status
               res.setHeader('Content-Type', 'application/json; charset=utf-8')
               res.end(JSON.stringify(r.body))
@@ -701,6 +715,13 @@ function dbApiPlugin(): Plugin {
             const result = await gmo.buildGmoTransfers(start, end)
             if (url === '/api/gmo/transfers/file') {
               const outputCount = result.count - result.incompleteCount
+              // 出力＝振込実行の確定。弁済実績を入金行へ書き戻す（本番と同じ挙動）
+              const rec = await gmo.recordTransferResult(
+                { id: sessionUser.id, email: sessionUser.email },
+                result
+              )
+              res.setHeader('X-Repayment-Record', encodeURIComponent(JSON.stringify(rec)))
+              res.setHeader('Access-Control-Expose-Headers', 'X-Repayment-Record')
               if (outputCount > 999) {
                 // 999件/ファイル上限で分割し ZIP で一括ダウンロード
                 const zip = gmo.buildZip(gmo.gmoCsvChunks(result))

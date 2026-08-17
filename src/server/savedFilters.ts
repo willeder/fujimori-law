@@ -49,6 +49,10 @@ const ALLOWED_OPERATORS = [
   'empty',
   'notEmpty',
 ]
+/** 表示列の上限（一覧の全列数より十分大きい値） */
+const MAX_COLUMNS = 100
+/** 列キー1つあたりの文字数上限 */
+const MAX_COLUMN_KEY_LENGTH = 64
 const MAX_NAME_LENGTH = 80
 const MAX_DESCRIPTION_LENGTH = 500
 
@@ -104,12 +108,28 @@ function normalizePayload(input: unknown): CaseListFilterPayload | null {
     value: asString(rawQuick.value),
   }
 
-  let sort: CaseListFilterPayload['sort'] = null
-  if (src.sort && typeof src.sort === 'object') {
-    const s = src.sort as Record<string, unknown>
-    if (typeof s.key === 'string' && s.key) {
-      sort = { key: s.key, order: s.order === 'desc' ? 'desc' : 'asc' }
+  const toSort = (raw: unknown): CaseListFilterPayload['sort'] => {
+    if (!raw || typeof raw !== 'object') return null
+    const s = raw as Record<string, unknown>
+    if (typeof s.key !== 'string' || !s.key) return null
+    return { key: s.key, order: s.order === 'desc' ? 'desc' : 'asc' }
+  }
+  const sort = toSort(src.sort)
+  // 2段目の並び順。以前はここで組み立てから漏れていて、保存しても失われていた
+  const sort2 = toSort(src.sort2)
+
+  // 表示する列（キーの配列・左から順）。kintone のビューと同じく絞り込みとセットで持つ。
+  // 実在する列かどうかは画面側が突き合わせるため、ここでは型と件数だけ見る。
+  let columns: string[] | null = null
+  if (Array.isArray(src.columns)) {
+    if (src.columns.length > MAX_COLUMNS) return null
+    const list: string[] = []
+    for (const c of src.columns) {
+      if (typeof c !== 'string') return null
+      if (c.length > MAX_COLUMN_KEY_LENGTH) return null
+      if (c !== '') list.push(c)
     }
+    columns = list.length > 0 ? list : null
   }
 
   const payload = {
@@ -117,6 +137,8 @@ function normalizePayload(input: unknown): CaseListFilterPayload | null {
     quick,
     filter: { logic: rawFilter.logic === 'or' ? 'or' : 'and', conditions },
     sort,
+    sort2,
+    columns,
   } as unknown as CaseListFilterPayload
   if (Buffer.byteLength(JSON.stringify(payload), 'utf8') > MAX_PAYLOAD_BYTES) return null
   return payload

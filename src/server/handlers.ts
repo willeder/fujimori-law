@@ -93,6 +93,7 @@ function toCaseJson(c: Record<string, any>) {
       plannedPaymentCount: c.plannedPaymentCount,
       plannedAgentCount: c.plannedAgentCount,
       allSettlementDocSentDate: ds(c.allSettlementDocSentDate),
+      resignationDate: ds(c.resignationDate),
     },
     feeInfo: {
       normalFee: c.normalFee,
@@ -193,6 +194,12 @@ function toCaseSummaryJson(c: Record<string, any>) {
       prefecture: c.prefecture,
       payDay: c.payDay,
       cautionRank: c.cautionRank,
+      recordNumber: c.recordNumber,
+      age: c.age,
+      birthDate: ds(c.birthDate),
+      paymentDelay: c.paymentDelay,
+      bicycleNote: c.bicycleNote,
+      pension: c.pension,
     },
     appointmentInfo: {
       acceptanceDate: ds(c.acceptanceDate),
@@ -201,25 +208,50 @@ function toCaseSummaryJson(c: Record<string, any>) {
       appointmentStaff: c.appointmentStaff,
       interviewStaff: c.interviewStaff,
       judicialScrivener: c.judicialScrivener,
+      elapsedDays: c.elapsedDays,
+      cAcceptancePromotionDate: ds(c.cAcceptancePromotionDate),
     },
     debtInfo: {
       creditorCount: c.creditorCount,
       declaredDebtAmount: c.declaredDebtAmount,
+      preRequestPayment: c.preRequestPayment,
+      postRequestPayment: c.postRequestPayment,
     },
-    settlementInfo: { status: c.settlementStatus },
+    settlementInfo: {
+      status: c.settlementStatus,
+      proposalDate: ds(c.settlementProposalDate),
+      postSettlementPaymentCount: c.postSettlementPaymentCount,
+      resignationDate: ds(c.resignationDate),
+    },
     feeInfo: {
       officeFee: c.officeFee,
       uncollectedFee: c.uncollectedFee,
       plannedPaymentFeeTotal: c.plannedPaymentFeeTotal,
+      installmentCount: c.installmentCount,
     },
     paymentInfo: {
       nextPaymentDate: ds(c.nextPaymentDate),
+      monthlyPaymentDay: c.monthlyPaymentDay,
+      firstPaymentWithinTenDays: c.firstPaymentWithinTenDays,
+      basePaymentAmount: c.basePaymentAmount,
+      vAccountBranch: c.vAccountBranch,
+      vAccountNumber: c.vAccountNumber,
+      cumulativePlannedPayment: c.cumulativePlannedPayment,
+      cumulativePaymentAmount: c.cumulativePaymentAmount,
       cumulativePlannedFeeAllocation: c.cumulativePlannedFeeAllocation,
+      cumulativeFeeAllocation: c.cumulativeFeeAllocation,
       cumulativePlannedAgentFeeAllocation: c.cumulativePlannedAgentFeeAllocation,
+      cumulativeAgentFeeAllocation: c.cumulativeAgentFeeAllocation,
       cumulativePlannedPoolAllocation: c.cumulativePlannedPoolAllocation,
+      cumulativePoolAllocation: c.cumulativePoolAllocation,
+      cumulativePlannedRepaymentAllocation: c.cumulativePlannedRepaymentAllocation,
+      cumulativeRepaymentAllocation: c.cumulativeRepaymentAllocation,
       cumulativeHandlingFee: c.cumulativeHandlingFee,
     },
-    reminderInfo: { reminderDate: ds(c.reminderDate) },
+    reminderInfo: {
+      reminderDate: ds(c.reminderDate),
+      nextResponseDate: ds(c.nextResponseDate),
+    },
     metadata: {
       externalId: c.externalId,
       listCategory: c.listCategory,
@@ -260,6 +292,35 @@ const CASE_SUMMARY_SELECT = {
   reminderDate: true,
   listCategory: true,
   listRegisteredDate: true,
+  // kintone の各ビュー（保存した絞り込み）で列に出せるようにする項目。
+  // ここに入れ忘れると一覧の列が全行 "-" になるので、列を足したら必ず追加する。
+  recordNumber: true,
+  age: true,
+  birthDate: true,
+  paymentDelay: true,
+  bicycleNote: true,
+  pension: true,
+  elapsedDays: true,
+  cAcceptancePromotionDate: true,
+  preRequestPayment: true,
+  postRequestPayment: true,
+  settlementProposalDate: true,
+  postSettlementPaymentCount: true,
+  resignationDate: true,
+  installmentCount: true,
+  monthlyPaymentDay: true,
+  firstPaymentWithinTenDays: true,
+  basePaymentAmount: true,
+  vAccountBranch: true,
+  vAccountNumber: true,
+  cumulativePlannedPayment: true,
+  cumulativePaymentAmount: true,
+  cumulativeFeeAllocation: true,
+  cumulativeAgentFeeAllocation: true,
+  cumulativePoolAllocation: true,
+  cumulativePlannedRepaymentAllocation: true,
+  cumulativeRepaymentAllocation: true,
+  nextResponseDate: true,
   lineLink: { select: { status: true } },
 } as const
 
@@ -427,6 +488,140 @@ export function buildConditionWhere(
   const op = cond.operator ?? ''
   const values = (cond.values ?? []).map((v) => String(v ?? '').trim())
   const filled = values.filter((v) => v !== '')
+
+  // 債権者の支払開始日（リレーション）。
+  // 列は文字列 'YYYY-MM-DD' で保持しているため、日付として比較できる形に揃えて比べる。
+  // 「弁代代行対象」のように "支払開始月が◯◯以前で、かつ空でない債権者を持つ案件" を引く。
+  if (field === 'creditorPaymentStartMonth') {
+    const col = `cr."paymentStartMonth"`
+    const notEmptyCol = `${col} IS NOT NULL AND ${col} <> ''`
+    const wrap = (extra: string) =>
+      `EXISTS (SELECT 1 FROM creditors cr WHERE cr."caseId" = c.id AND ${notEmptyCol}${extra})`
+    if (op === 'empty') return `NOT ${wrap('')}`
+    if (op === 'notEmpty') return wrap('')
+    if (filled.length === 0) return null
+    if (op === 'between' && filled.length >= 2) {
+      params.push(filled[0], filled[1])
+      return wrap(
+        ` AND ${col}::date BETWEEN $${params.length - 1}::date AND $${params.length}::date`
+      )
+    }
+    const CMP: Record<string, string> = {
+      lte: '<=',
+      lt: '<',
+      gte: '>=',
+      gt: '>',
+      eq: '=',
+      ne: '<>',
+    }
+    const cmp = CMP[op] ?? '='
+    params.push(filled[0])
+    return wrap(` AND ${col}::date ${cmp} $${params.length}::date`)
+  }
+
+  // 入金明細の実入金日（リレーション）。
+  // 「昨日以降に入金があった案件」のように、取込直後の確認で使う。
+  // 相対指定（今日・昨日・今月…）にも対応する。対象は案件全体行のみ
+  // （債権者別の弁済予定は表示時に生成する別物なので除く）。
+  if (
+    field === 'paymentActualDate' ||
+    field === 'paymentPlannedDate' ||
+    field === 'paymentRepaymentDate'
+  ) {
+    const col =
+      field === 'paymentActualDate'
+        ? `p."actualDate"`
+        : field === 'paymentPlannedDate'
+          ? `p."plannedDate"`
+          : `p."repaymentDate"`
+    const wrap = (extra: string) =>
+      `EXISTS (SELECT 1 FROM payments p WHERE p."caseId" = c.id AND p."creditorId" IS NULL${extra})`
+    if (op === 'empty') return `NOT ${wrap(` AND ${col} IS NOT NULL`)}`
+    if (op === 'notEmpty') return wrap(` AND ${col} IS NOT NULL`)
+    if (filled.length === 0) return null
+    const range = resolveDateValue(filled[0])
+    if (!range) return null
+    if (op === 'between' && filled.length >= 2) {
+      const r2 = resolveDateValue(filled[1])
+      if (!r2) return null
+      params.push(range.from, r2.to)
+      return wrap(
+        ` AND CAST(${col} AS DATE) BETWEEN $${params.length - 1}::date AND $${params.length}::date`
+      )
+    }
+    // 相対トークンは期間になるため、比較の向きに合わせて端を使う
+    if (op === 'gte' || op === 'gt') {
+      params.push(op === 'gte' ? range.from : range.to)
+      return wrap(` AND CAST(${col} AS DATE) ${op === 'gte' ? '>=' : '>'} $${params.length}::date`)
+    }
+    if (op === 'lte' || op === 'lt') {
+      params.push(op === 'lte' ? range.to : range.from)
+      return wrap(` AND CAST(${col} AS DATE) ${op === 'lte' ? '<=' : '<'} $${params.length}::date`)
+    }
+    params.push(range.from, range.to)
+    const inRange = ` AND CAST(${col} AS DATE) BETWEEN $${params.length - 1}::date AND $${params.length}::date`
+    return op === 'ne' ? `NOT ${wrap(inRange)}` : wrap(inRange)
+  }
+
+  // 入金明細の「額」欄（kintone の入金情報テーブル）。
+  // 入金予定額と実入金額が食い違う行に「額違」が入る計算項目なので、
+  // こちらでは予定額と実入金額を直接突き合わせて同じ意味にする。
+  if (field === 'paymentAmountMismatch') {
+    const exists =
+      `EXISTS (SELECT 1 FROM payments p WHERE p."caseId" = c.id AND p."creditorId" IS NULL` +
+      ` AND p."actualAmount" IS NOT NULL` +
+      ` AND COALESCE(p."plannedAmount", 0) <> COALESCE(p."actualAmount", 0))`
+    // 「差異あり」＝そういう行がある / 「差異なし」「空である」＝1行も無い
+    if (op === 'empty' || op === 'notIn' || op === 'notContains') return `NOT ${exists}`
+    if (op === 'notEmpty' || filled.length === 0) return exists
+    const wantsMismatch = filled.some((v) => v.includes('あり') || v === '額違')
+    return wantsMismatch ? exists : `NOT ${exists}`
+  }
+
+  // 入金明細の「確認」欄（kintone の入金情報テーブル）。
+  // 弁済充当予定額と弁済充当額が食い違う行に「違」が入る計算項目。
+  // 元CSVで照合したところ 147,217行／45,229行が完全に一致したので、
+  // こちらでは予定と実績を直接突き合わせて同じ意味にする。
+  if (field === 'paymentRepaymentMismatch') {
+    const exists =
+      `EXISTS (SELECT 1 FROM payments p WHERE p."caseId" = c.id AND p."creditorId" IS NULL` +
+      ` AND COALESCE(p."plannedRepaymentAllocation", 0) <> COALESCE(p."actualRepaymentAllocation", 0))`
+    if (op === 'empty' || op === 'notIn' || op === 'notContains') return `NOT ${exists}`
+    if (op === 'notEmpty' || filled.length === 0) return exists
+    const wantsMismatch = filled.some((v) => v.includes('あり') || v === '違')
+    return wantsMismatch ? exists : `NOT ${exists}`
+  }
+
+  // 債権者別ステータス（リレーション）。
+  // 案件の「受任後ステータス」とは別で、債権者1社ごとの進捗。
+  // 「受任通知発送待ちの債権者を1社でも持つ案件」のような絞り込みに使う。
+  if (field === 'creditorStatus') {
+    const anyStatus = `EXISTS (SELECT 1 FROM creditors cr WHERE cr."caseId" = c.id AND COALESCE(cr."status", '') <> '')`
+    if (op === 'empty') return `NOT ${anyStatus}`
+    if (op === 'notEmpty') return anyStatus
+    if (filled.length === 0) return null
+    const placeholders = filled
+      .map((v) => {
+        params.push(v)
+        return `$${params.length}`
+      })
+      .join(', ')
+    const exists = `EXISTS (SELECT 1 FROM creditors cr WHERE cr."caseId" = c.id AND cr."status" IN (${placeholders}))`
+    return op === 'notIn' || op === 'notContains' || op === 'ne' ? `NOT ${exists}` : exists
+  }
+
+  // 債権者の CHECK（リレーション）。
+  // kintone の「和解対象債権一覧」テーブル内の CHECK 欄で、チェック済みは "1" が入る。
+  // 案件一覧では「CHECK が付いた債権者を持つ案件」を絞り込むために使う。
+  if (field === 'creditorCheck') {
+    const exists = `EXISTS (SELECT 1 FROM creditors cr WHERE cr."caseId" = c.id AND COALESCE(cr."check", '') <> '')`
+    // 「いずれかを含む: CHECK」＝チェックあり、「空である」＝チェックなし
+    if (op === 'empty' || op === 'notIn' || op === 'notContains') return `NOT ${exists}`
+    if (op === 'notEmpty' || filled.length === 0) return exists
+    // 値が指定されている場合（"CHECK" / "--"）は、その意味に読み替える
+    const wantsChecked = filled.some((v) => v !== '--' && v !== '')
+    return wantsChecked ? exists : `NOT ${exists}`
+  }
 
   // 債権者名（リレーション）
   if (field === 'creditorName') {
@@ -992,6 +1187,13 @@ export const createContactHistory = (actor: EditActor, raw: string, meta: EditMe
   createRow('ContactHistory', CONTACT_FIELD_TYPE, actor, raw, meta)
 export const deleteContactHistory = (actor: EditActor, id: number, meta: EditMeta) =>
   deleteRow('ContactHistory', CONTACT_FIELD_TYPE, actor, id, meta)
+/**
+ * 入金予定・弁済予定の行の削除。
+ * 辞任などで予定が大幅に不要になる場合に使う。
+ * 変更履歴に before を残すので、誤って消しても内容は追える。
+ */
+export const deletePayment = (actor: EditActor, id: number, meta: EditMeta) =>
+  deleteRow('Payment', PAYMENT_FIELD_TYPE, actor, id, meta)
 
 /**
  * 案件（Case）の削除。ADMIN ロール限定。
@@ -1142,12 +1344,26 @@ export async function revertChange(
 }
 /** 重複を除いた債権者名の一覧（検索ドロップダウン用・軽量） */
 export async function getCreditorNames() {
-  const rows = await prisma.creditor.findMany({
-    distinct: ['creditorName'],
-    select: { creditorName: true },
-    orderBy: { creditorName: 'asc' },
-  })
-  return { names: rows.map((r) => r.creditorName).filter((n): n is string => !!n) }
+  const [rows, partners] = await Promise.all([
+    prisma.creditor.findMany({
+      distinct: ['creditorName'],
+      select: { creditorName: true },
+      orderBy: { creditorName: 'asc' },
+    }),
+    // 交渉相手（債権回収会社など）の入力候補。表記ゆれを防ぐため既存値から出す
+    prisma.creditor.findMany({
+      where: { negotiationPartner: { not: null } },
+      distinct: ['negotiationPartner'],
+      select: { negotiationPartner: true },
+      orderBy: { negotiationPartner: 'asc' },
+    }),
+  ])
+  return {
+    names: rows.map((r) => r.creditorName).filter((n): n is string => !!n),
+    partners: partners
+      .map((r) => r.negotiationPartner)
+      .filter((n): n is string => !!n && n.trim() !== ''),
+  }
 }
 
 /**

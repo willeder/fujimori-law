@@ -121,6 +121,8 @@ function flattenCase(c: CaseJson) {
     plannedPaymentCount: s.plannedPaymentCount ?? null,
     plannedAgentCount: s.plannedAgentCount ?? null,
     allSettlementDocSentDate: d(s.allSettlementDocSentDate),
+    // 辞任日。ここに書き忘れると列だけできて中身が全件 null になる
+    resignationDate: d(s.resignationDate),
     // 報酬
     normalFee: fee.normalFee ?? null,
     officeFee: fee.officeFee ?? null,

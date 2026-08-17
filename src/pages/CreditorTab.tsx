@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useCaseDispatch } from '../store/useCaseStore'
+import { useCaseDispatch, usePaymentsByCaseId } from '../store/useCaseStore'
 import { useFoundSet } from '../store/FoundSet'
+import { useCaseEdit } from '../context/CaseEditContext'
+import { settlementTotals } from '../lib/settlementTotals'
 import { EditableField, StatusBadge, DataTable, type Column } from '../components'
 import { CreditorFiles } from '../components/case/CreditorFiles'
 import type { Creditor } from '../types'
 import {
   ACCOUNT_TYPE_OPTIONS,
   CREDITOR_STATUS_OPTIONS,
+  SETTLED_CREDITOR_STATUSES,
   YES_NO_OPTIONS,
   toSelectOptions,
 } from '../constants/fieldOptions'
@@ -21,24 +24,57 @@ interface CreditorTabProps {
 // 債権者名の入力候補（DB全体の既存債権者名）。表記ゆれ防止のため
 // ドロップダウン選択＋自由入力の両方を可能にする。取得は1回だけ（モジュール内キャッシュ）。
 let __creditorNameSuggestions: string[] | null = null
+let __partnerSuggestions: string[] | null = null
+
+/**
+ * 一覧セルの金額表示。
+ *
+ * ここは以前 `{v?.toLocaleString() ?? '-'}{v && <span>円</span>}` と書いていたが、
+ * JavaScript では 0 が falsy なため `0 && <span/>` が **0 そのもの**を返し、
+ * React がそれを描画して「00」と出ていた（合算で和解金額が 0 の債権者で発生）。
+ *
+ * あわせて 0 は「-」で表示する。合算元の債権者は和解金額・和解時債務金額とも 0 で
+ * 取り込まれており、「0円で和解した」と誤読されるのを避けるため。
+ */
+function renderYen(v: number | null | undefined) {
+  if (v == null || v === 0) return <span className="text-slate-300">-</span>
+  return (
+    <span className="tabular-nums">
+      {v.toLocaleString()}
+      <span className="ml-0.5 text-[8px] text-slate-400">円</span>
+    </span>
+  )
+}
 
 export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
   const dispatch = useCaseDispatch()
   const navigate = useNavigate()
   const { setFoundSet } = useFoundSet()
+  // 編集モード中は下書きに貯めるだけ（「編集完了」でまとめて保存される）
+  const { stageCreditor } = useCaseEdit()
+  // 弁済の進捗（合算）用。債権者別の弁済予定は表示時に生成される（creditorSchedule.ts）
+  const casePayments = usePaymentsByCaseId(caseId)
 
   const [creditorNameSuggestions, setCreditorNameSuggestions] = useState<string[]>(
     () => __creditorNameSuggestions ?? []
+  )
+  const [negotiationPartnerSuggestions, setNegotiationPartnerSuggestions] = useState<string[]>(
+    () => __partnerSuggestions ?? []
   )
   useEffect(() => {
     if (__creditorNameSuggestions) return
     let alive = true
     fetch('/api/creditors/names')
       .then((r) => (r.ok ? r.json() : null))
-      .then((d: { names?: string[] } | null) => {
+      .then((d: { names?: string[]; partners?: string[] } | null) => {
         const names = [...new Set(d?.names ?? [])]
+        const partners = [...new Set(d?.partners ?? [])]
         __creditorNameSuggestions = names
-        if (alive) setCreditorNameSuggestions(names)
+        __partnerSuggestions = partners
+        if (alive) {
+          setCreditorNameSuggestions(names)
+          setNegotiationPartnerSuggestions(partners)
+        }
       })
       .catch(() => {})
     return () => {
@@ -78,6 +114,11 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
   }
 
   const updateCreditor = (creditor: Creditor, updates: Partial<Creditor>) => {
+    // 案件詳細の編集モード配下では、その場で保存せず下書きへ積む
+    if (stageCreditor) {
+      stageCreditor(creditor, updates)
+      return
+    }
     // 楽観的にローカル反映
     dispatch({
       type: 'UPDATE_CREDITOR',
@@ -98,7 +139,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
     // 受任対象外は明細テーブルには表示するが、サマリの件数・合計には含めない。
     const accepted = creditors.filter((c) => c.status !== '受任対象外')
     const settledCount = accepted.filter((c) =>
-      ['和解済', '弁済中', '完済'].includes(c.status)
+      (SETTLED_CREDITOR_STATUSES as readonly string[]).includes(c.status)
     ).length
     const totalDeclared = accepted.reduce(
       (sum, c) => sum + (c.declaredAmount ?? 0),
@@ -112,6 +153,36 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       (sum, c) => sum + (c.settlementAmount ?? 0),
       0
     )
+    // 和解状況の4項目（旧・手入力）。債権者データから機械的に出せるので画面で計算する。
+    // 定義は src/lib/settlementTotals.ts を参照。
+    const totals = settlementTotals(creditors)
+
+    // 弁済の進捗（合算）。個別の債権者タブ（弁済予定履歴）と同じ定義で合計する。
+    //   ・和解済（和解日あり）は和解内容の金額・回数、未和解は見込み値を使う
+    //   ・累計は「弁済日が入っている行」の合計。未和解は実績が立たないので 0 とする
+    const progress = accepted.reduce(
+      (acc, c) => {
+        const isSettled = c.settlementDate != null
+        const amount =
+          (isSettled ? c.settlementAmount : c.expectedSettlementAmount) ?? 0
+        const count = (isSettled ? c.paymentCount : c.expectedPaymentCount) ?? 0
+        const paidRows = casePayments.filter(
+          (p) => p.creditorId === c.id && p.actualDate != null
+        )
+        const paidAmount = isSettled
+          ? paidRows.reduce((sum, p) => sum + (p.actualAmount ?? 0), 0)
+          : 0
+        const paidCount = isSettled ? paidRows.length : 0
+        acc.amount += amount
+        acc.paidAmount += paidAmount
+        acc.remainAmount += amount - paidAmount
+        acc.count += count
+        acc.paidCount += paidCount
+        acc.remainCount += count - paidCount
+        return acc
+      },
+      { amount: 0, paidAmount: 0, remainAmount: 0, count: 0, paidCount: 0, remainCount: 0 }
+    )
 
     const columns: Column<Creditor>[] = [
       {
@@ -123,10 +194,9 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       },
       {
         // 個別画面の「弁済対象」・GMO送金の対象判定（gmoTransfer.ts）と同じ
-        // repaymentTarget を参照する。repaymentExcluded は移行時に常に null が
-        // 入る未使用項目で、以前はこの列だけが空欄になっていた。
+        // repaymentTarget を参照する（旧 repaymentExcluded 列は未使用のため廃止）。
         key: 'repaymentTarget',
-        header: '弁済除外',
+        header: '弁済対象',
         width: '80px',
         cellTruncate: false,
         render: (item) => {
@@ -185,32 +255,24 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         header: '申告額',
         width: '100px',
         align: 'right',
-        render: (item) => (
-          <span className="tabular-nums">
-            {item.declaredAmount?.toLocaleString() ?? '-'}
-            {item.declaredAmount && <span className="ml-0.5 text-[8px] text-slate-400">円</span>}
-          </span>
-        ),
+        render: (item) => renderYen(item.declaredAmount),
       },
       {
         key: 'debtAmount',
         header: '債務額',
         width: '100px',
         align: 'right',
-        render: (item) => (
-          <span className="tabular-nums">
-            {item.debtAmount?.toLocaleString() ?? '-'}
-            {item.debtAmount && <span className="ml-0.5 text-[8px] text-slate-400">円</span>}
-          </span>
-        ),
+        render: (item) => renderYen(item.debtAmount),
       },
       {
         key: 'difference',
         header: '差額',
         width: '100px',
         align: 'right',
+        // kintone の「差額」は 申告額 − 債務額（元データ11,727行すべてでこの式）。
+        // 以前は逆向き（債務額 − 申告額）で計算していて符号が反転していた。
         render: (item) => {
-          const diff = (item.debtAmount ?? 0) - (item.declaredAmount ?? 0)
+          const diff = (item.declaredAmount ?? 0) - (item.debtAmount ?? 0)
           const isNegative = diff < 0
           return (
             <span className={`tabular-nums ${isNegative ? 'text-red-600' : ''}`}>
@@ -225,17 +287,12 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         header: '和解時債務金額',
         width: '120px',
         align: 'right',
-        render: (item) => (
-          <span className="tabular-nums">
-            {item.settlementDebtAmount?.toLocaleString() ?? '-'}
-            {item.settlementDebtAmount && <span className="ml-0.5 text-[8px] text-slate-400">円</span>}
-          </span>
-        ),
+        render: (item) => renderYen(item.settlementDebtAmount),
       },
       {
         key: 'settlementAmount',
-        header: '和解',
-        width: '100px',
+        header: '和解金額',
+        width: '110px',
         align: 'right',
         render: (item) =>
           item.settlementAmount ? (
@@ -259,7 +316,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           （うち和解済：{settledCount}社）・案件ID: {caseId}
         </div>
         {/* 合計サマリ（入金スケジュールのサマリ相当の読みやすさ） */}
-        <div className="grid grid-cols-2 gap-2 rounded bg-slate-50 p-2 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 rounded bg-slate-50 p-2 sm:grid-cols-5">
           <div>
             <div className="text-xs font-medium leading-tight text-slate-500">債権者数</div>
             <div className="text-sm font-bold tabular-nums text-slate-800">
@@ -286,6 +343,70 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
               {totalSettlement.toLocaleString()}円
             </div>
           </div>
+          <div>
+            <div className="text-xs font-medium leading-tight text-slate-500">累計弁済額</div>
+            <div className="text-sm font-bold tabular-nums text-slate-800">
+              {progress.paidAmount.toLocaleString()}円
+            </div>
+          </div>
+          <div>
+            <div className="text-xs font-medium leading-tight text-slate-500">弁済残金額</div>
+            <div className="text-sm font-bold tabular-nums text-slate-800">
+              {progress.remainAmount.toLocaleString()}円
+            </div>
+          </div>
+          <div>
+            <div className="text-xs font-medium leading-tight text-slate-500">弁済回数（予定）</div>
+            <div className="text-sm font-bold tabular-nums text-slate-800">
+              {progress.count}回
+            </div>
+          </div>
+          <div>
+            <div className="text-xs font-medium leading-tight text-slate-500">累計弁済回数</div>
+            <div className="text-sm font-bold tabular-nums text-slate-800">
+              {progress.paidCount}回
+            </div>
+          </div>
+          <div>
+            <div className="text-xs font-medium leading-tight text-slate-500">弁済残回数</div>
+            <div className="text-sm font-bold tabular-nums text-slate-800">
+              {progress.remainCount}回
+            </div>
+          </div>
+        </div>
+
+        {/* 和解状況（自動計算）。kintone では手入力だった4項目を債権者から算出する */}
+        <div className="grid grid-cols-2 gap-2 rounded bg-blue-50/60 p-2 sm:grid-cols-4">
+          <div>
+            <div className="text-xs font-medium leading-tight text-slate-500">予定代弁社数</div>
+            <div className="text-sm font-bold tabular-nums text-slate-800">
+              {totals.plannedAgentCount}社
+            </div>
+          </div>
+          <div>
+            <div className="text-xs font-medium leading-tight text-slate-500">予定弁済総数</div>
+            <div className="text-sm font-bold tabular-nums text-slate-800">
+              {totals.plannedPaymentCount}回
+            </div>
+          </div>
+          <div>
+            <div className="text-xs font-medium leading-tight text-slate-500">和解後代弁社数</div>
+            <div className="text-sm font-bold tabular-nums text-slate-800">
+              {totals.postSettlementPaymentCount}社
+            </div>
+          </div>
+          <div>
+            <div className="text-xs font-medium leading-tight text-slate-500">和解弁済総数</div>
+            <div className="text-sm font-bold tabular-nums text-slate-800">
+              {totals.settlementCount}回
+            </div>
+          </div>
+          {totals.missingPaymentCount > 0 && (
+            <div className="col-span-full text-[11px] text-amber-700">
+              ※ 弁済対象 {totals.missingPaymentCount} 社は支払回数が未入力のため、
+              回数の合計は実態より少なく出ています（債権者名の読み替えが済むと解消します）
+            </div>
+          )}
         </div>
 
         <DataTable
@@ -307,7 +428,8 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
   const creditor = creditors[0]
   if (!creditor) return null
 
-  const debtDifference = (creditor.debtAmount ?? 0) - (creditor.declaredAmount ?? 0)
+  // kintone の「差額」は 申告額 − 債務額
+  const debtDifference = (creditor.declaredAmount ?? 0) - (creditor.debtAmount ?? 0)
 
   return (
     <div className="grid w-full max-w-full grid-cols-5 content-start gap-x-0.5 gap-y-0.5 self-start">
@@ -365,7 +487,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         />
       </div>
 
-      {/* 2行目: 債権者(2), 申告額(1), 想定和解(1), 受任通知送付日(1) */}
+      {/* 2行目: 債権者(2), 交渉相手(1), 申告額(1), 想定和解(1) */}
       <div className="min-w-0 col-span-2">
         <EditableField
           label="債権者"
@@ -374,6 +496,23 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
             updateCreditor(creditor, { creditorName: v || '' })
           }
           suggestions={creditorNameSuggestions}
+          compact
+          compactLayout="inline"
+          bordered
+          truncateValue
+          fillWidth
+        />
+      </div>
+      {/* 交渉相手（kintone の「交渉先」）。債権回収会社などが窓口になる場合に入れる */}
+      <div className="min-w-0 col-span-1">
+        <EditableField
+          label="交渉相手"
+          value={creditor.negotiationPartner}
+          onChange={(v) =>
+            updateCreditor(creditor, { negotiationPartner: v || null })
+          }
+          suggestions={negotiationPartnerSuggestions}
+          placeholder="直接"
           compact
           compactLayout="inline"
           bordered
@@ -399,7 +538,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       </div>
       <div className="min-w-0 col-span-1">
         <EditableField
-          label="想定和解"
+          label="想定和解回数"
           value={creditor.expectedSettlement}
           onChange={(v) =>
             updateCreditor(creditor, { expectedSettlement: Number(v) || null })
@@ -524,7 +663,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       </div>
       <div className="min-w-0 col-span-1">
         <EditableField
-          label="和解提案"
+          label="和解提案回数"
           value={creditor.settlementProposal}
           onChange={(v) =>
             updateCreditor(creditor, { settlementProposal: Number(v) || null })
@@ -572,13 +711,13 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       </div>
       <div className="min-w-0 col-span-1">
         <EditableField
-          label="和解"
+          label="和解金額"
           value={creditor.settlementAmount}
           onChange={(v) =>
             updateCreditor(creditor, { settlementAmount: Number(v) || null })
           }
           type="number"
-          suffix="回"
+          suffix="円"
           compact
           compactLayout="inline"
           bordered
