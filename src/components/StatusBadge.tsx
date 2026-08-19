@@ -25,6 +25,8 @@ const statusColors: Record<string, string> = {
   '債権調査票待ち': 'bg-amber-100 text-amber-700',
   '求償先調査票待ち': 'bg-amber-50 text-amber-700',
   // 時効援用のルート（和解とは別系統なのでオレンジ系で区別する）
+  // ※ この4つは kintone のフォーム定義にまだ無い（事務所のご要望分）。
+  //   kintone に追加されたら fieldOptions の選択肢にも足す。色は先に用意しておく。
   '援用通知作成待ち': 'bg-orange-50 text-orange-700',
   '援用通知発送待ち': 'bg-orange-100 text-orange-700',
   '援用通知発送済': 'bg-orange-200 text-orange-800',
@@ -35,6 +37,7 @@ const statusColors: Record<string, string> = {
   '和解再提案待ち': 'bg-rose-100 text-rose-700',
   '和解稟議中': 'bg-fuchsia-100 text-fuchsia-700',
   '和解済': 'bg-green-100 text-green-700',
+  '和解後返済中': 'bg-green-200 text-green-800',
   '弁護士和解済 返済中': 'bg-emerald-100 text-emerald-700',
   '和解後完済済': 'bg-teal-100 text-teal-700',
   '弁護士引継ぎ待ち': 'bg-sky-100 text-sky-700',

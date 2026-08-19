@@ -45,3 +45,6 @@ dist-ssr/
 # ステージング用アーカイブと、マウント経由で削除できないファイルの退避先
 __claude_stage*.tar.gz
 /_to_delete/
+
+# kintone から取得した生データ（個人情報・添付ファイルを含むためコミットしない）
+docs/data/kintone/

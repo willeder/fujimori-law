@@ -42,27 +42,34 @@ export const GMO_TRANSFER_TARGET_STATUSES = [
 ] as const
 
 /** 債権者ステータス（Creditor.status） */
+/**
+ * 債権者ステータス。**kintone のフォーム定義（アプリ4）と同一**にすること。
+ * 値も並び順もここを正とし、独自の追加はしない。
+ * 事務所から追加のご要望が出た場合は、まず kintone 側に足していただき、
+ * そのうえでここへ反映する（先に足すと取込時に食い違うため）。
+ *
+ * 現時点で未反映のご要望（藤川様 2026-08-08）:
+ *   和解提案書作成済 / 援用通知作成待ち / 援用通知発送待ち / 援用通知発送済
+ *   → kintone 側に追加されしだい、ここにも追加する。
+ */
 export const CREDITOR_STATUS_OPTIONS = [
   '受任通知発送待ち',
   '債権調査票待ち',
   '求償先調査票待ち',
-  // 時効援用のルート（和解を経ずに終わる）
-  '援用通知作成待ち',
-  '援用通知発送待ち',
-  '援用通知発送済',
   '和解提案書作成待ち',
-  '和解提案書作成済',
   '和解提案書発送待ち',
   '和解提案書発送済',
   '和解再提案待ち',
   '和解稟議中',
   '和解済',
-  '弁護士和解済 返済中',
+  '和解後返済中',
   '和解後完済済',
-  '破産申立待ち',
-  '破産申立済',
   '弁護士引継ぎ待ち',
   '弁護士引継ぎ済',
+  '弁護士和解済 返済中',
+  '破産申立済',
+  '破産申立待ち',
+  // kintone には無いが、相談票取込で「受任対象外」の債権者を保持するために必要
   '受任対象外',
 ] as const
 
@@ -73,11 +80,26 @@ export const CREDITOR_STATUS_OPTIONS = [
  */
 export const SETTLED_CREDITOR_STATUSES = [
   '和解済',
+  '和解後返済中',
   '弁護士和解済 返済中',
   '和解後完済済',
 ] as const
 
-/** 受任ランク / 要注意ランク（Case.acceptanceRank / Case.cautionRank） */
+/**
+ * 受任ランク（Case.acceptanceRank）。
+ * kintone の実データには「C通常」が280件ある。取込の許可リストから漏れていて
+ * 全件 null になっていたため、選択肢・取込の両方に追加した。
+ */
+export const ACCEPTANCE_RANK_OPTIONS = ['A', 'B', 'C', 'C通常'] as const
+
+/**
+ * 要注意ランク（Case.cautionRank）。
+ * kintone の実データには「S」が32件ある（受任ランクには無い）。
+ * 受任ランクとは選択肢が違うので別々に持つ。
+ */
+export const CAUTION_RANK_OPTIONS = ['S', 'A', 'B', 'C'] as const
+
+/** @deprecated 受任・要注意で選択肢が異なるため、上の2つを使う */
 export const RANK_OPTIONS = ['A', 'B', 'C'] as const
 
 /** 遅れ（Case.paymentDelay） */
@@ -90,21 +112,27 @@ export const BICYCLE_OPTIONS = ['あり', 'なし'] as const
 export const PENSION_OPTIONS = ['未受給', '受給中', '受給予定'] as const
 
 /** 債務整理区分（Case.debtAdjustmentType） */
-export const DEBT_ADJUSTMENT_TYPE_OPTIONS = ['任意整理', '自己破産', '個人再生'] as const
+export const DEBT_ADJUSTMENT_TYPE_OPTIONS = [
+  '任意整理',
+  '自己破産',
+  '個人再生',
+  '過払金請求',
+  '時効援用',
+] as const
 
 /** 性別（Case.gender） */
-export const GENDER_OPTIONS = ['男', '女'] as const
+export const GENDER_OPTIONS = ['男', '女', '不明'] as const
 
 /** 婚姻状況（Case.maritalStatus） */
-export const MARITAL_STATUS_OPTIONS = ['既婚', '未婚', '離婚'] as const
+export const MARITAL_STATUS_OPTIONS = ['未婚', '既婚', '離婚', '死別'] as const
 
 /** 居住形態（Case.residenceType） */
 export const RESIDENCE_TYPE_OPTIONS = [
-  '持家(ﾛｰﾝ無)',
   '持家(ﾛｰﾝ有)',
+  '持家(ﾛｰﾝ無)',
   '賃貸',
-  '社宅',
   '実家',
+  '社宅',
 ] as const
 
 /** 勤務形態（Case.employmentType） */
@@ -112,11 +140,98 @@ export const EMPLOYMENT_TYPE_OPTIONS = [
   '会社員・公務員',
   'バイト(パート)・派遣',
   '自営・会社経営',
+  '専業主婦・家事手伝い',
+  '学生',
   '無職',
 ] as const
 
 /** あり／なし（弁済代行・将来利息など） */
 export const YES_NO_OPTIONS = ['あり', 'なし'] as const
+
+/** 弁済対象（Creditor.repaymentTarget）。空欄＝弁済対象。停止／終了は対象外 */
+export const REPAYMENT_TARGET_OPTIONS = ['停止', '終了', '変則'] as const
+
+/** 回答状況（Creditor.responseStatus） */
+export const RESPONSE_STATUS_OPTIONS = ['待ち', '保留', '受理'] as const
+
+/** リスト区分（Case.listCategory） */
+export const LIST_CATEGORY_OPTIONS = [
+  '共同①',
+  '共同②',
+  '共同③',
+  '共同④',
+  'アンブレロ',
+  '円陣',
+  'ヤマト',
+  'わたこり',
+  'コナトス',
+  'ファーストエディション',
+  'サムライアドウェイズ',
+] as const
+
+/** 他事務所相談（Case.otherOfficeConsultation） */
+export const OTHER_OFFICE_CONSULTATION_OPTIONS = [
+  '依頼なし',
+  '依頼歴あり',
+  '依頼中',
+  '依頼済',
+  '未聴取',
+] as const
+
+/** 10日以内（Case.firstPaymentWithinTenDays） */
+export const WITHIN_TEN_DAYS_OPTIONS = ['〇', '×'] as const
+
+/** 対応要否（Case.correspondenceRequired） */
+export const CORRESPONDENCE_REQUIRED_OPTIONS = ['対応停止'] as const
+
+/**
+ * 接触履歴のツール。依頼者と債権者で選択肢が違う（kintone のフォーム定義どおり）。
+ * 以前は共通の LINE/電話/メール/SMS/その他 だったため、実データにある
+ * 固定・郵送・zoom フォン・携帯・FAX が選べなかった。
+ */
+export const CONTACT_TOOL_CLIENT_OPTIONS = [
+  '携帯',
+  '固定',
+  'zoom フォン',
+  'LINE',
+  'メール',
+  'SMS',
+  'FAX',
+  '郵送',
+] as const
+export const CONTACT_TOOL_CREDITOR_OPTIONS = ['固定', '携帯', '郵送', 'FAX'] as const
+
+/**
+ * 担当者。kintone のフォーム定義から取得。
+ * 退職などで選択肢から外れた担当者が既存データに残っているため、
+ * 入力欄では「現在値が選択肢に無ければ先頭に足す」処理を入れてある
+ * （EditableField 参照）。過去の記録が消えないようにするため。
+ */
+export const CONTACT_STAFF_OPTIONS = [
+  '土橋満', '三田村恭瑛', '中川晃行', '森武', '竹谷香乃', '赤松瑠果',
+  '大瀧　瑛一', '園山啓太', '森下真司', '前田　菜奈美', '宮武　愛海',
+  '石原　暉', '宮川綾奈', '堀本和代', '藤川拓己', '藤原恵利',
+] as const
+
+export const APPOINTMENT_STAFF_OPTIONS = [
+  '三田村　恭瑛', '森　武', '赤松　瑠果', '大瀧　瑛一', '園山　啓太',
+  '森下　真司', '宮武　愛海', '石原　暉', '末原　理央', '朝田　楓花',
+  '大石　加奈子', '川越　紗耶加', '内山　瞳', '紹介',
+] as const
+
+export const FOLLOW_UP_STAFF_OPTIONS = [
+  '三田村　恭瑛', '森　武', '赤松　瑠果', '竹谷　香乃', '大瀧　瑛一',
+  '園山　啓太', '森下　真司', '宮武　愛海', '石原　暉', '末原　理央',
+  '朝田　楓花', '大石　加奈子', '川越　紗耶加', '内山　瞳', '宮川　綾奈',
+  '堀本　和代', '藤川　拓己', '藤原　恵利', '即アポ', '土橋　満',
+] as const
+
+export const INTERVIEW_STAFF_OPTIONS = [
+  '三田村　恭瑛', '森　武', '赤松　瑠果', '大瀧　瑛一', '園山　啓太',
+  '森下　真司', '宮武　愛海', '石原　暉',
+] as const
+
+export const JUDICIAL_SCRIVENER_OPTIONS = ['中川　晃行'] as const
 
 /** 口座種別（Creditor 振込先） */
 export const ACCOUNT_TYPE_OPTIONS = ['普通', '当座'] as const

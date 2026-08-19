@@ -30,19 +30,22 @@ OUT = ROOT / "public/data"
 
 csv.field_size_limit(min(sys.maxsize, 2**31 - 1))
 
-GENDER_ALLOWED = {"男", "女"}
-MARITAL_ALLOWED = {"既婚", "未婚", "離婚"}
-RANK_ALLOWED = {"A", "B", "C"}
-ADJUSTMENT_ALLOWED = {"任意整理", "自己破産", "個人再生"}
+GENDER_ALLOWED = {"男", "女", "不明"}
+MARITAL_ALLOWED = {"既婚", "未婚", "離婚", "死別"}
+# 受任ランクと要注意ランクは選択肢が違う。
+# 以前は共通の {A,B,C} で絞っていたため、受任ランクの「C通常」280件と
+# 要注意ランクの「S」32件が全件 null になっていた。
+ACCEPTANCE_RANK_ALLOWED = {"A", "B", "C", "C通常"}
+CAUTION_RANK_ALLOWED = {"S", "A", "B", "C"}
+ADJUSTMENT_ALLOWED = {"任意整理", "自己破産", "個人再生", "過払金請求", "時効援用"}
 # 債権者別ステータスは kintone の値をそのまま保持する。
 # 以前は7種類に丸めていたため「和解後完済済」「弁護士和解済 返済中」などが
 # すべて「受任通知発送待ち」になり、GMO振込の対象からも外れていた。
 CREDITOR_STATUS_ALLOWED = {
     "受任通知発送待ち", "債権調査票待ち", "求償先調査票待ち",
-    "援用通知作成待ち", "援用通知発送待ち", "援用通知発送済",
-    "和解提案書作成待ち", "和解提案書作成済", "和解提案書発送待ち", "和解提案書発送済",
+    "和解提案書作成待ち", "和解提案書発送待ち", "和解提案書発送済",
     "和解再提案待ち", "和解稟議中",
-    "和解済", "弁護士和解済 返済中", "和解後完済済",
+    "和解済", "和解後返済中", "弁護士和解済 返済中", "和解後完済済",
     "破産申立待ち", "破産申立済", "弁護士引継ぎ待ち", "弁護士引継ぎ済",
     "受任対象外",
 }
@@ -219,7 +222,7 @@ def emit_cases(order_ids, master, id_to_case):
                 "monthlyIncome": i(g("月収(手取)")),
                 "payDay": s(g("給与日")),
                 "employmentType": s(g("勤務形態")),
-                "cautionRank": pick(g("要注意ランク"), RANK_ALLOWED),
+                "cautionRank": pick(g("要注意ランク"), CAUTION_RANK_ALLOWED),
                 "recordNumber": i(g("レコード番号")),
                 "correspondenceRequired": s(g("対応要否")),
                 "correspondenceHours": s(g("対応時間")),
@@ -246,7 +249,7 @@ def emit_cases(order_ids, master, id_to_case):
                 "interviewStaff": s(g("面談担当")),
                 "judicialScrivener": s(g("担当司法書士")),
                 "debtAdjustmentType": pick(g("債務整理区分"), ADJUSTMENT_ALLOWED),
-                "acceptanceRank": pick(g("受任ランク"), RANK_ALLOWED),
+                "acceptanceRank": pick(g("受任ランク"), ACCEPTANCE_RANK_ALLOWED),
                 "acceptanceDate": iso_date(g("受任日")),
                 "elapsedDays": i(g("経過日数")),
                 "cAcceptancePromotionDate": iso_date(g("C受任昇格日")),

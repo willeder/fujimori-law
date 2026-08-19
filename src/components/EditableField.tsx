@@ -243,6 +243,21 @@ export function EditableField({
     ? compactInputBase
     : "flex-1 text-xs border border-blue-300 rounded px-1.5 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500";
 
+  /**
+   * 選択肢に無い現在値を消さないための保険。
+   *
+   * kintone のドロップダウンは、退職した担当者などを選択肢から外しても
+   * 既存レコードには値が残る。選択肢だけで <select> を組むと、その値が
+   * 表示されず、開いて閉じただけで空欄に書き換わってしまう。
+   * 現在値が選択肢に無ければ先頭に足して、過去の記録を守る。
+   */
+  const selectOptions = (() => {
+    if (type !== "select" || !options) return options;
+    const cur = value == null ? "" : String(value);
+    if (cur === "" || options.some((o) => o.value === cur)) return options;
+    return [{ value: cur, label: `${cur}（現在の値）` }, ...options];
+  })();
+
   const isStacked = compact && compactLayout === "stacked";
 
   /**
@@ -460,7 +475,7 @@ export function EditableField({
                 className={inputBase}
               >
                 <option value="">選択してください</option>
-                {options.map((opt) => (
+                {(selectOptions ?? []).map((opt) => (
                   <option key={opt.value} value={opt.value}>
                     {opt.label}
                   </option>
@@ -552,7 +567,7 @@ export function EditableField({
               className={inputBase}
             >
               <option value="">選択してください</option>
-              {options.map((opt) => (
+              {(selectOptions ?? []).map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
                 </option>
@@ -643,7 +658,7 @@ export function EditableField({
               className="flex-1 text-xs border border-blue-300 rounded px-1.5 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">選択してください</option>
-              {options.map((opt) => (
+              {(selectOptions ?? []).map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
                 </option>

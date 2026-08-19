@@ -7,7 +7,13 @@ import {
   PAYMENT_DELAY_OPTIONS,
   PENSION_OPTIONS,
   PREFECTURE_OPTIONS,
-  RANK_OPTIONS,
+  ACCEPTANCE_RANK_OPTIONS,
+  CAUTION_RANK_OPTIONS,
+  RESPONSE_STATUS_OPTIONS,
+  LIST_CATEGORY_OPTIONS,
+  OTHER_OFFICE_CONSULTATION_OPTIONS,
+  WITHIN_TEN_DAYS_OPTIONS,
+  REPAYMENT_TARGET_OPTIONS,
 } from '../constants/fieldOptions'
 import type { FilterFieldType } from '../types/filter'
 
@@ -46,13 +52,13 @@ export const SEARCH_FIELDS: SearchFieldDef[] = [
     type: 'choice',
     options: DEBT_ADJUSTMENT_TYPE_OPTIONS,
   },
-  { field: 'cautionRank', label: '要注意ランク', type: 'choice', options: RANK_OPTIONS },
-  { field: 'acceptanceRank', label: '受任ランク', type: 'choice', options: RANK_OPTIONS },
+  { field: 'cautionRank', label: '要注意ランク', type: 'choice', options: CAUTION_RANK_OPTIONS },
+  { field: 'acceptanceRank', label: '受任ランク', type: 'choice', options: ACCEPTANCE_RANK_OPTIONS },
   { field: 'appointmentStaff', label: 'アポ担当' },
   { field: 'interviewStaff', label: '面談担当' },
   { field: 'judicialScrivener', label: '担当司法書士' },
   { field: 'employerName', label: '勤務先' },
-  { field: 'listCategory', label: 'リスト区分' },
+  { field: 'listCategory', label: 'リスト区分', type: 'choice', options: LIST_CATEGORY_OPTIONS },
   { field: 'creditorName', label: '債権者名', type: 'creditor' },
   // 債権者別ステータス（債権者1社ごとの進捗）。案件の「受任後ステータス」とは別項目。
   {
@@ -93,7 +99,10 @@ export const SEARCH_FIELDS: SearchFieldDef[] = [
   { field: 'cAcceptancePromotionDate', label: 'C受任昇格日', type: 'date' },
   { field: 'age', label: '年齢', type: 'number' },
   { field: 'installmentCount', label: '報酬分割回数', type: 'number' },
-  { field: 'firstPaymentWithinTenDays', label: '10日以内' },
+  { field: 'firstPaymentWithinTenDays', label: '10日以内', type: 'choice', options: WITHIN_TEN_DAYS_OPTIONS },
+  { field: 'creditorResponseStatus', label: '回答状況（債権者）', type: 'choice', options: RESPONSE_STATUS_OPTIONS },
+  { field: 'creditorRepaymentTarget', label: '弁済対象（債権者）', type: 'choice', options: REPAYMENT_TARGET_OPTIONS },
+  { field: 'otherOfficeConsultation', label: '他事務所相談', type: 'choice', options: OTHER_OFFICE_CONSULTATION_OPTIONS },
   { field: 'preRequestPayment', label: '依頼前 返済額', type: 'number' },
   { field: 'postRequestPayment', label: '依頼後 返済額', type: 'number' },
   { field: 'uncollectedFee', label: '報酬未回収額', type: 'number' },

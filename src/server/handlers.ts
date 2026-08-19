@@ -595,6 +595,23 @@ export function buildConditionWhere(
   // 債権者別ステータス（リレーション）。
   // 案件の「受任後ステータス」とは別で、債権者1社ごとの進捗。
   // 「受任通知発送待ちの債権者を1社でも持つ案件」のような絞り込みに使う。
+  // 債権者の「回答状況」「弁済対象」で案件を絞る（1社でも該当すればヒット）
+  if (field === 'creditorResponseStatus' || field === 'creditorRepaymentTarget') {
+    const col = field === 'creditorResponseStatus' ? 'responseStatus' : 'repaymentTarget'
+    const anyVal = `EXISTS (SELECT 1 FROM creditors cr WHERE cr."caseId" = c.id AND COALESCE(cr."${col}", '') <> '')`
+    if (op === 'empty') return `NOT ${anyVal}`
+    if (op === 'notEmpty') return anyVal
+    if (filled.length === 0) return null
+    const ph = filled
+      .map((v) => {
+        params.push(v)
+        return `$${params.length}`
+      })
+      .join(', ')
+    const exists = `EXISTS (SELECT 1 FROM creditors cr WHERE cr."caseId" = c.id AND cr."${col}" IN (${ph}))`
+    return op === 'notIn' || op === 'notContains' || op === 'ne' ? `NOT ${exists}` : exists
+  }
+
   if (field === 'creditorStatus') {
     const anyStatus = `EXISTS (SELECT 1 FROM creditors cr WHERE cr."caseId" = c.id AND COALESCE(cr."status", '') <> '')`
     if (op === 'empty') return `NOT ${anyStatus}`
