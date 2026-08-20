@@ -70,6 +70,9 @@ export const SEARCH_FIELDS: SearchFieldDef[] = [
   // 入金明細（入金情報テーブル）の日付・差異。取込直後のチェックに使う。
   { field: 'paymentActualDate', label: '実入金日（入金明細）', type: 'date' },
   { field: 'paymentPlannedDate', label: '入金予定日（入金明細）', type: 'date' },
+  // kintone の入金情報サブテーブルのチェックボックス。
+  // ビュー「受任後入金管理」の絞り込みに使われている。
+  { field: 'paymentCheck', label: '入金check（入金情報）' },
   {
     field: 'paymentAmountMismatch',
     label: '額（予定と実入金の差異）',

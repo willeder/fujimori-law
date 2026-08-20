@@ -42,6 +42,8 @@ import * as gmoWebhook from '../src/server/gmoWebhook.js'
 import * as gmoNotify from '../src/server/gmoNotify.js'
 import { writeAudit } from '../src/server/audit.js'
 import * as creditorFiles from '../src/server/creditorFiles.js'
+import * as caseFiles from '../src/server/caseFiles.js'
+import * as caseReminders from '../src/server/caseReminders.js'
 import * as mail from '../src/server/mail.js'
 import { getSessionToken, getSessionUser } from '../src/server/auth.js'
 import * as savedFilters from '../src/server/savedFilters.js'
@@ -384,6 +386,64 @@ export default async function handler(
     }
     if (path === '/api/mail/status' && method === 'GET') {
       json(mail.mailConfigured())
+      return
+    }
+
+    // ── リマインド（kintone の「★リマインド」行を独立させたもの）──
+    const remindersDue = path === '/api/reminders/due'
+    if (remindersDue && method === 'GET') {
+      const within = Number(query.get('within') ?? '7')
+      json(await caseReminders.listDueReminders(Number.isFinite(within) ? within : 7))
+      return
+    }
+    const caseRemindersList = path.match(/^\/api\/cases\/(\d+)\/reminders$/)
+    if (caseRemindersList) {
+      const cid = Number(caseRemindersList[1])
+      if (method === 'GET') {
+        json(await caseReminders.listCaseReminders(cid))
+        return
+      }
+      if (method === 'POST') {
+        const r = await caseReminders.createCaseReminder(
+          editActor,
+          cid,
+          (await getRawBody(req)).toString('utf8'),
+        )
+        json(r.body, r.status)
+        return
+      }
+    }
+    const caseReminderById = path.match(/^\/api\/reminders\/(\d+)$/)
+    if (caseReminderById) {
+      const rid = Number(caseReminderById[1])
+      if (method === 'PATCH') {
+        const r = await caseReminders.updateCaseReminder(
+          editActor,
+          rid,
+          (await getRawBody(req)).toString('utf8'),
+        )
+        json(r.body, r.status)
+        return
+      }
+      if (method === 'DELETE') {
+        const r = await caseReminders.deleteCaseReminder(editActor, rid)
+        json(r.body, r.status)
+        return
+      }
+    }
+
+    // ── 案件添付（kintone の「相談票添付」「和解ファイル」）──
+    // 実体は Supabase Storage。ここは一覧と署名付きURLの発行だけを担う。
+    const caseFilesList = path.match(/^\/api\/cases\/(\d+)\/files$/)
+    if (caseFilesList && method === 'GET') {
+      json(await caseFiles.listCaseFiles(Number(caseFilesList[1])))
+      return
+    }
+    const caseFileSign = path.match(/^\/api\/cases\/files\/(\d+)\/url$/)
+    if (caseFileSign && method === 'GET') {
+      const download = query.get('download') === '1'
+      const r = await caseFiles.signCaseFile(editActor, Number(caseFileSign[1]), download)
+      json(r.body, r.status)
       return
     }
 

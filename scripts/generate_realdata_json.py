@@ -20,13 +20,17 @@ from __future__ import annotations
 
 import csv
 import json
+import os
 import re
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SRC = ROOT / "docs/data/source"
-OUT = ROOT / "public/data"
+# 差分取込（kintone API から起こした CSV）でも同じロジックを使えるよう、
+# 入出力先を環境変数で差し替えられるようにしてある。
+#   REALDATA_SRC=docs/data/kintone/csv REALDATA_OUT=/tmp/newcases python3 scripts/generate_realdata_json.py
+SRC = Path(os.environ.get("REALDATA_SRC") or (ROOT / "docs/data/source"))
+OUT = Path(os.environ.get("REALDATA_OUT") or (ROOT / "public/data"))
 
 csv.field_size_limit(min(sys.maxsize, 2**31 - 1))
 
@@ -354,6 +358,8 @@ def emit_payments(id_to_case):
             "actualRepaymentAllocation": i(r.get("弁済充当額")),
             "handlingFee": i(r.get("手数料")),
             "repaymentCount": i(r.get("社数")),
+            # 入金情報のチェックボックス。ビュー「受任後入金管理」の条件に使う
+            "check": s(r.get("check[check]")),
             # 実績側（kintone は予定と別項目）。予定値の流用をやめてこちらを使う。
             "repaymentDate": iso_date(r.get("弁済日")),
             "actualRepaymentCount": i(r.get("数")),
@@ -470,6 +476,9 @@ def emit_creditors(id_to_case):
     cid_seq = 1
     matched = set()
 
+    # 「★リマインド」等の行は債権者ではなく事務員向けのメモ（いつ・何をする）。
+    # 債権者として数えると債権社数・申告額の集計が狂うのでここでは捨てる。
+    # 中身のある334行は scripts/import_kintone_reminders.mjs で case_reminders へ移す。
     # 1) 和解詳細の各行＝弁済プランを必ず出力（弁済の正）
     for d in read_csv("和解内容詳細.csv"):
         eid = d["ID"].strip()

@@ -7,7 +7,7 @@
 // 金額=Int（円・整数）/ 日付=DateTime @db.Date / 日時=DateTime
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   // Vercel(AWS Lambda / Amazon Linux, Node18+→OpenSSL3) 実行環境向けエンジンを同梱。
   // これが無いと本番で「Query engine ... could not be found」→ FUNCTION_INVOCATION_FAILED。
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
@@ -111,29 +111,29 @@ model Case {
   uncollectedFee         Int?
 
   // --- 入金情報（案件サマリ） ---
-  firstPaymentDate               DateTime? @db.Date
-  firstPaymentWithinTenDays      String?
-  firstPaymentAmount             Int?
-  monthlyPaymentDay              String?
-  basePaymentAmount              Int?
-  nextPaymentDate                DateTime? @db.Date
-  cumulativePaymentAmount        Int?
-  cumulativePlannedPayment       Int?
-  cumulativeFeeAllocation        Int?
-  cumulativePlannedFeeAllocation Int?
-  cumulativePoolAllocation       Int?
-  cumulativeRepaymentAllocation  Int?
+  firstPaymentDate                     DateTime? @db.Date
+  firstPaymentWithinTenDays            String?
+  firstPaymentAmount                   Int?
+  monthlyPaymentDay                    String?
+  basePaymentAmount                    Int?
+  nextPaymentDate                      DateTime? @db.Date
+  cumulativePaymentAmount              Int?
+  cumulativePlannedPayment             Int?
+  cumulativeFeeAllocation              Int?
+  cumulativePlannedFeeAllocation       Int?
+  cumulativePoolAllocation             Int?
+  cumulativeRepaymentAllocation        Int?
   // 2026-08-07 追加。kintone「基本情報」にはあるが未移行だった累計値
   // （報酬・弁代・プールチェック一覧で使用）
-  cumulativePlannedAgentFeeAllocation Int? // 累)弁代報酬充当予定額
-  cumulativeAgentFeeAllocation        Int? // 累)弁代報酬充当額
-  cumulativePlannedPoolAllocation     Int? // 累)ﾌﾟｰﾙ充当予定額
+  cumulativePlannedAgentFeeAllocation  Int? // 累)弁代報酬充当予定額
+  cumulativeAgentFeeAllocation         Int? // 累)弁代報酬充当額
+  cumulativePlannedPoolAllocation      Int? // 累)ﾌﾟｰﾙ充当予定額
   cumulativePlannedRepaymentAllocation Int? // 累)弁済充当予定額
-  cumulativeHandlingFee               Int? // 累)手数料
-  totalMinusPoolMinusRepayment   Int?
-  notificationExcluded           String? // 除外 / null
-  vAccountBranch                 String?
-  vAccountNumber                 String?
+  cumulativeHandlingFee                Int? // 累)手数料
+  totalMinusPoolMinusRepayment         Int?
+  notificationExcluded                 String? // 除外 / null
+  vAccountBranch                       String?
+  vAccountNumber                       String?
 
   // --- リマインド ---
   reminderDate     DateTime? @db.Date
@@ -160,6 +160,8 @@ model Case {
   contactHistories ContactHistory[]
   lineLink         LineLink?
   notificationLogs LineNotificationLog[]
+  files            CaseFile[]
+  reminders        CaseReminder[]
 
   @@index([cautionRank])
   @@index([settlementStatus])
@@ -252,14 +254,17 @@ model Payment {
   actualAgentFeeAllocation   Int?
   actualPoolAllocation       Int?
   actualRepaymentAllocation  Int?
-  handlingFee                Int?  // 手数料（予定）
-  repaymentCount             Int?  // 社数（予定）
+  handlingFee                Int? // 手数料（予定）
+  repaymentCount             Int? // 社数（予定）
   // 実績側。kintone は予定と実績で別項目を持つ（数 / 振)手数料 / 弁済日）。
   // 以前は予定側の列を実績にも流用していたため、社数・手数料の集計が実態とずれていた。
   repaymentDate              DateTime? @db.Date // 弁済日
-  actualRepaymentCount       Int?  // 数（実績の社数）
-  actualHandlingFee          Int?  // 振)手数料（実績の手数料）
+  actualRepaymentCount       Int? // 数（実績の社数）
+  actualHandlingFee          Int? // 振)手数料（実績の手数料）
   cumulativePool             Int?
+  // 入金情報サブテーブルのチェックボックス（kintone: check[check]）。
+  // ビュー「受任後入金管理」の絞り込み条件に使われている。
+  check                      String?
 
   @@index([caseId])
   @@index([creditorId])
@@ -531,15 +536,15 @@ model ChangeLog {
 // クライアントが滞在中にハートビートで upsert し、離脱時に削除。TTL超過は自動掃除。
 // ============================================================
 model EditPresence {
-  id       Int    @id @default(autoincrement())
-  entity   String // 例: "Case"
-  entityId Int
+  id           Int       @id @default(autoincrement())
+  entity       String // 例: "Case"
+  entityId     Int
   // タブ単位の識別子。これで識別することで、同じアカウントを別ウィンドウで開いている
   // 場合も「別のセッション」として検知できる（旧: email をキーにしていたため検知不可だった）
-  clientId String
-  email    String // 編集中ユーザーのメール（表示と同一アカウント判定に使う）
-  name     String @default("") // 表示名（アカウント名）
-  editing  Boolean @default(false) // 編集中フラグ（閲覧のみ=false）
+  clientId     String
+  email        String // 編集中ユーザーのメール（表示と同一アカウント判定に使う）
+  name         String    @default("") // 表示名（アカウント名）
+  editing      Boolean   @default(false) // 編集中フラグ（閲覧のみ=false）
   // 編集を開始した時刻。これが最も早いセッションがロック保持者（先着優先）
   editingSince DateTime?
   startedAt    DateTime  @default(now())
@@ -571,20 +576,34 @@ model GmoApiToken {
 //   3. 仕様書受領前でも生ペイロードを保全し、項目名が判明したら再処理できるようにする
 model GmoWebhookEvent {
   id          Int       @id @default(autoincrement())
-  /** 通知の一意キー。明細IDが取れればそれ、取れなければ本文のSHA-256 */
+  /**
+   * 通知の一意キー。明細IDが取れればそれ、取れなければ本文のSHA-256
+   */
   eventKey    String    @unique
-  /** 通知種別（ペイロードから取れた場合のみ） */
+  /**
+   * 通知種別（ペイロードから取れた場合のみ）
+   */
   eventType   String?
   sourceIp    String?
-  /** 受信した生JSON（項目名が仕様と違っても失われないように丸ごと保存） */
+  /**
+   * 受信した生JSON（項目名が仕様と違っても失われないように丸ごと保存）
+   */
   payload     Json
-  /** received / applied / no-target / unparsed / rejected / failed */
+  /**
+   * received / applied / no-target / unparsed / rejected / failed
+   */
   status      String    @default("received")
-  /** 抽出できた明細件数 */
+  /**
+   * 抽出できた明細件数
+   */
   parsedRows  Int       @default(0)
-  /** 実際に入金予定へ反映した件数 */
+  /**
+   * 実際に入金予定へ反映した件数
+   */
   reflected   Int       @default(0)
-  /** 人向けの結果メッセージ */
+  /**
+   * 人向けの結果メッセージ
+   */
   message     String?
   receivedAt  DateTime  @default(now())
   processedAt DateTime?
@@ -608,6 +627,89 @@ model CreditorFile {
 
   @@index([creditorId])
   @@map("creditor_files")
+}
+
+// ============================================================
+// 案件の添付ファイル（kintone の「相談票添付」「和解ファイル」）
+// ============================================================
+// 実体は Supabase Storage（バケット case-files）に置き、DBには置き場所だけ持つ。
+// 34,477件・26.3GB あるため creditor_files のように Bytes 列へ入れると
+// DB容量・バックアップ・取得速度のいずれも成り立たない。
+model CaseFile {
+  id     Int  @id @default(autoincrement())
+  caseId Int
+  case   Case @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  /**
+   * kintone のフィールド名。「相談票添付」または「和解ファイル」
+   */
+  field String
+  /**
+   * 表示用のファイル名（kintone 上の名前をそのまま持つ）
+   */
+  name  String
+  mime  String @default("application/octet-stream")
+  size  Int
+
+  /**
+   * Supabase Storage 上のキー。例: cases/118823E/和解ファイル/<fileKey>.jpg
+   */
+  storagePath    String  @unique
+  /**
+   * 移行元 kintone の fileKey。再実行時の突合・重複防止に使う
+   */
+  kintoneFileKey String? @unique
+
+  uploadedBy String   @default("")
+  createdAt  DateTime @default(now())
+
+  @@index([caseId])
+  @@index([caseId, field])
+  @@map("case_files")
+}
+
+// ============================================================
+// リマインド（案件ごとの「いつ・何をする」）
+// ============================================================
+// kintone では和解対象債権のサブテーブルに債権者名「★リマインド」の行を作り、
+//   次回処理日時 = いつやるか / 交渉相手の欄 = やること
+// として運用していた。債権者の行に混ざっているため債権社数の集計が狂うので、
+// こちらでは独立した表として持つ。
+// 移行対象は中身のある 334 行・296 案件（残り1,083行は債権者名だけの空枠）。
+model CaseReminder {
+  id     Int  @id @default(autoincrement())
+  caseId Int
+  case   Case @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  /**
+   * 期日。kintone の「次回処理日時」
+   */
+  dueDate DateTime? @db.Date
+  /**
+   * やること。kintone では「交渉相手」の欄に書かれていた
+   */
+  body    String
+  /**
+   * 対応済み。kintone の check 列に相当
+   */
+  done    Boolean   @default(false)
+  doneAt  DateTime?
+  doneBy  String?
+
+  /**
+   * 移行由来か手入力かの区別（kintone-migration / 空欄＝画面から追加）
+   */
+  source String @default("")
+
+  createdBy String   @default("")
+  updatedBy String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([caseId])
+  @@index([dueDate])
+  @@index([done, dueDate])
+  @@map("case_reminders")
 }
 
 // メール送信履歴（No.92/93）

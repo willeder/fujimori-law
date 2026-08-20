@@ -384,7 +384,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         </div>
 
         {/* 和解状況（自動計算）。kintone では手入力だった4項目を債権者から算出する */}
-        <div className="grid grid-cols-2 gap-2 rounded bg-blue-50/60 p-2 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 rounded bg-blue-50/60 p-2 sm:grid-cols-5">
           <div>
             <div className="text-xs font-medium leading-tight text-slate-500">予定代弁社数</div>
             <div className="text-sm font-bold tabular-nums text-slate-800">
@@ -407,6 +407,20 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
             <div className="text-xs font-medium leading-tight text-slate-500">和解弁済総数</div>
             <div className="text-sm font-bold tabular-nums text-slate-800">
               {totals.settlementCount}回
+            </div>
+          </div>
+          <div>
+            {/* 差額合計。符号は個別債権者の「差額」と同じ 申告額 − 債務額 で揃える。
+                申告より実際の債務が多い（＝聞き取りと乖離）と マイナス になる。 */}
+            <div className="text-xs font-medium leading-tight text-slate-500">
+              差額合計（申告−債務）
+            </div>
+            <div
+              className={`text-sm font-bold tabular-nums ${
+                totalDeclared - totalDebt < 0 ? 'text-red-600' : 'text-slate-800'
+              }`}
+            >
+              {(totalDeclared - totalDebt).toLocaleString()}円
             </div>
           </div>
           {totals.missingPaymentCount > 0 && (

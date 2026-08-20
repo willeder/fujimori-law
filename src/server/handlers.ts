@@ -324,9 +324,21 @@ const CASE_SUMMARY_SELECT = {
   lineLink: { select: { status: true } },
 } as const
 
+/**
+ * 案件一覧の既定の並び順。
+ * kintone のビュー「全件一覧」に合わせて 受任日の新しい順 → レコード番号の新しい順。
+ * 以前は id 昇順だったため、新しく取り込んだ案件が一覧の最後に埋もれていた
+ * （事務所から「取り込んだ新規案件が一覧に出てこない」というご指摘）。
+ */
+const CASE_LIST_ORDER = [
+  { acceptanceDate: 'desc' as const },
+  { recordNumber: 'desc' as const },
+  { id: 'desc' as const },
+]
+
 export async function getCasesSummary() {
   const rows = await prisma.case.findMany({
-    orderBy: { id: 'asc' },
+    orderBy: CASE_LIST_ORDER,
     select: CASE_SUMMARY_SELECT,
   })
   return rows.map(toCaseSummaryJson)
@@ -566,6 +578,15 @@ export function buildConditionWhere(
   // 入金明細の「額」欄（kintone の入金情報テーブル）。
   // 入金予定額と実入金額が食い違う行に「額違」が入る計算項目なので、
   // こちらでは予定額と実入金額を直接突き合わせて同じ意味にする。
+  // 入金情報のチェックボックス（kintone: check[check]）が付いた行を持つ案件。
+  // ビュー「受任後入金管理」の条件「入金check not in ("")」に対応する。
+  if (field === 'paymentCheck') {
+    const exists = `EXISTS (SELECT 1 FROM payments p WHERE p."caseId" = c.id AND COALESCE(p."check", '') <> '')`
+    return op === 'empty' || op === 'notIn' || op === 'ne' || op === 'notContains'
+      ? `NOT ${exists}`
+      : exists
+  }
+
   if (field === 'paymentAmountMismatch') {
     const exists =
       `EXISTS (SELECT 1 FROM payments p WHERE p."caseId" = c.id AND p."creditorId" IS NULL` +
@@ -824,13 +845,13 @@ export async function searchCases(raw: string) {
 
   const sql = `SELECT c.id FROM cases c${
     wheres.length ? ' WHERE ' + wheres.join(` ${logic} `) : ''
-  } ORDER BY c.id ASC LIMIT 5000`
+  } ORDER BY c."acceptanceDate" DESC NULLS LAST, c."recordNumber" DESC NULLS LAST, c.id DESC LIMIT 5000`
   const idRows = await prisma.$queryRawUnsafe<{ id: number }[]>(sql, ...params)
   const ids = idRows.map((r) => r.id)
   if (ids.length === 0) return []
   const rows = await prisma.case.findMany({
     where: { id: { in: ids } },
-    orderBy: { id: 'asc' },
+    orderBy: CASE_LIST_ORDER,
     select: CASE_SUMMARY_SELECT,
   })
   return rows.map(toCaseSummaryJson)
@@ -1107,7 +1128,108 @@ async function updateRowField(
     ip: meta.ip,
     userAgent: meta.userAgent,
   })
+  // 日付の入力に連動してステータスを進める（事務所のご要望）
+  if (model === 'Creditor') {
+    await applyCreditorStatusAutomation(actor, updated as Record<string, unknown>, after, meta)
+  }
+
   return { status: 200, body: { changed: true, row: rowToJson(model, updated) } }
+}
+
+/**
+ * 日付を入れたらステータスが自動で進む仕組み（藤川様 2026-08-08 のご要望）。
+ *
+ *   ① 債権調査到着日を入れた
+ *        → その債権者を「和解提案書作成待ち」へ
+ *          （「債権調査票待ち」「求償先調査票待ち」のときだけ。既に先へ進んでいる
+ *            債権者を巻き戻さない）
+ *   ② 受任通知送付日を入れた
+ *        → 案件の受任後ステータスを「全社受任通知発送済」か「一部受任通知発送済」へ
+ *          （受任対象外の債権者は数えない。案件が和解済・辞任などに進んでいる場合は
+ *            触らない）
+ *
+ * 自動で変えた分も変更履歴に残すので、意図と違えば取り消せる。
+ * 日付を消したときにステータスを戻すことはしない（担当者の判断を上書きしないため）。
+ */
+async function applyCreditorStatusAutomation(
+  actor: EditActor,
+  updated: Record<string, unknown>,
+  changed: Record<string, unknown>,
+  meta: EditMeta
+) {
+  const creditorId = Number(updated.id)
+  const caseId = Number(updated.caseId)
+
+  // ── ① 債権調査到着日 → 和解提案書作成待ち ──
+  if ('debtInquiryArrivalDate' in changed && updated.debtInquiryArrivalDate != null) {
+    const cur = String(updated.status ?? '')
+    if (cur === '債権調査票待ち' || cur === '求償先調査票待ち') {
+      await prisma.creditor.update({
+        where: { id: creditorId },
+        data: { status: '和解提案書作成待ち' },
+      })
+      await writeChange({
+        actor,
+        entity: 'Creditor',
+        entityId: String(creditorId),
+        action: 'UPDATE',
+        before: { status: cur },
+        after: { status: '和解提案書作成待ち' },
+      })
+      await writeAudit({
+        actor,
+        action: 'UPDATE',
+        entity: 'Creditor',
+        entityId: String(creditorId),
+        summary: `債権調査到着日の入力により「${cur}」から「和解提案書作成待ち」へ自動更新`,
+        metadata: { auto: true, caseId },
+        ip: meta.ip,
+        userAgent: meta.userAgent,
+      })
+    }
+  }
+
+  // ── ② 受任通知送付日 → 案件の受任後ステータス ──
+  if ('acceptanceNoticeSentDate' in changed && updated.acceptanceNoticeSentDate != null) {
+    const kase = await prisma.case.findUnique({
+      where: { id: caseId },
+      select: { id: true, settlementStatus: true },
+    })
+    const cur = kase?.settlementStatus ?? ''
+    // 受任通知の段階にいる案件だけを対象にする（和解済・辞任などは触らない）
+    if (cur === '受任通知発送待ち' || cur === '一部受任通知発送済') {
+      const targets = await prisma.creditor.findMany({
+        where: { caseId, status: { not: '受任対象外' } },
+        select: { acceptanceNoticeSentDate: true },
+      })
+      if (targets.length > 0) {
+        const sent = targets.filter((c) => c.acceptanceNoticeSentDate != null).length
+        const next =
+          sent === targets.length ? '全社受任通知発送済' : sent > 0 ? '一部受任通知発送済' : null
+        if (next && next !== cur) {
+          await prisma.case.update({ where: { id: caseId }, data: { settlementStatus: next } })
+          await writeChange({
+            actor,
+            entity: 'Case',
+            entityId: String(caseId),
+            action: 'UPDATE',
+            before: { settlementStatus: cur },
+            after: { settlementStatus: next },
+          })
+          await writeAudit({
+            actor,
+            action: 'UPDATE',
+            entity: 'Case',
+            entityId: String(caseId),
+            summary: `受任通知送付日の入力により受任後ステータスを「${cur}」から「${next}」へ自動更新（${sent}/${targets.length}社）`,
+            metadata: { auto: true, sent, total: targets.length },
+            ip: meta.ip,
+            userAgent: meta.userAgent,
+          })
+        }
+      }
+    }
+  }
 }
 
 /** 子テーブル行の追加（変更履歴 CREATE ＋監査） */

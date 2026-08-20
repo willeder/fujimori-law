@@ -131,9 +131,24 @@ export function ContactHistoryTable({
     }
   }
 
+  /**
+   * 取消。
+   * 「+ 接触履歴を追加」で作った行はまだサーバに存在しない仮の行なので、
+   * 取消したら行ごと消す（残すと空欄だけの枠が一覧に居座る＝修正依頼㉟）。
+   * 既存行の編集を取り消した場合は行を消さず、編集内容だけ破棄する。
+   */
   const handleCancel = () => {
+    const id = editingId
     setEditingId(null)
     setEditData({})
+    if (id != null && newIds.has(id)) {
+      dispatch({ type: 'DELETE_CONTACT_HISTORY', payload: id })
+      setNewIds((prev) => {
+        const n = new Set(prev)
+        n.delete(id)
+        return n
+      })
+    }
   }
 
   const handleDelete = (h: ContactHistory) => {

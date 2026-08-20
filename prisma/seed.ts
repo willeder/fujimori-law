@@ -7,6 +7,16 @@
  * 実行:   npx prisma db seed   （package.json の prisma.seed に tsx 等を設定）
  *
  * データ位置は DATA_DIR で上書き可（既定: public/data）。
+ *
+ * ★ 2つのモードがある
+ *   既定 (SEED_MODE 未設定)  … 全入れ替え。**破壊的**。
+ *       TRUNCATE "payments","contact_histories","creditors","cases" RESTART IDENTITY CASCADE
+ *       を実行するので、事務所が画面から入れた実入金・接触履歴・LINE連携が全部消える。
+ *       本番運用が始まった後は実行しないこと。
+ *   SEED_MODE=append        … 差分追加。TRUNCATE しない。
+ *       kintone のレコード番号（または ID）で既にDBに居る案件は飛ばし、
+ *       居ないものだけを追加する。id は採番済みの列と衝突しないようDBに振らせる。
+ *       例) DATA_DIR=/tmp/knew SEED_MODE=append npx tsx prisma/seed.ts
  */
 import { PrismaClient, ContactTarget } from '@prisma/client'
 import { readFileSync } from 'node:fs'
@@ -175,6 +185,111 @@ async function resetSequence(table: string) {
   )
 }
 
+/**
+ * 差分追加モード。
+ * 既にDBに居る案件（kintone のレコード番号、無ければ ID で判定）は飛ばし、
+ * 残りだけを入れる。JSON側の id は連番なので使わず、DBに採番させる。
+ */
+async function appendOnly(
+  cases: CaseJson[],
+  creditors: any[],
+  payments: any[],
+  contacts: any[]
+) {
+  const existing = await prisma.case.findMany({
+    select: { recordNumber: true, externalId: true },
+  })
+  const haveRn = new Set(existing.map((c) => c.recordNumber).filter((v) => v != null))
+  const haveExt = new Set(
+    existing.map((c) => (c.externalId ?? '').trim()).filter((v) => v !== '')
+  )
+
+  const isNew = (c: CaseJson) => {
+    const rn = (c.clientBasicInfo as any).recordNumber as number | null
+    const ext = String(((c.metadata as any).externalId ?? '')).trim()
+    if (rn != null && haveRn.has(rn)) return false
+    // レコード番号が無い場合だけ ID で見る（IDは事務所側で直されるため信頼度が低い）
+    if (rn == null && ext && haveExt.has(ext)) return false
+    return true
+  }
+
+  const targets = cases.filter(isNew)
+  const skipped = cases.length - targets.length
+  console.log(`追加対象 ${targets.length} 件（既にDBにある ${skipped} 件は飛ばします）`)
+  if (targets.length === 0) return
+
+  // JSON上の caseId → DBが採番した実 id
+  const idMap = new Map<number, number>()
+  for (const c of targets) {
+    const { id: _localId, ...flat } = flattenCase(c)
+    const created = await prisma.case.create({ data: flat, select: { id: true } })
+    idMap.set(c.id, created.id)
+    console.log(
+      `  + ${(c.clientBasicInfo as any).recordNumber} / ` +
+        `${(c.metadata as any).externalId} / ${(c.clientBasicInfo as any).name}` +
+        ` → id ${created.id}`
+    )
+  }
+
+  const mine = <T extends { caseId: number }>(rows: T[]) =>
+    rows.filter((r) => idMap.has(r.caseId))
+
+  const newCreditors = mine(creditors)
+  console.log(`creditors: ${newCreditors.length}`)
+  for (const part of chunk(
+    newCreditors.map(({ id: _drop, ...c }) => ({
+      ...c,
+      caseId: idMap.get(c.caseId)!,
+      nextProcessDate: d(c.nextProcessDate),
+      acceptanceNoticeSentDate: d(c.acceptanceNoticeSentDate),
+      debtInquiryArrivalDate: d(c.debtInquiryArrivalDate),
+      contractDate: d(c.contractDate),
+      settlementProposalDate: d(c.settlementProposalDate),
+      settlementDate: d(c.settlementDate),
+    })),
+    1000
+  )) {
+    await prisma.creditor.createMany({ data: part })
+  }
+
+  const newPayments = mine(payments)
+  console.log(`payments: ${newPayments.length}`)
+  for (const part of chunk(
+    // creditorId も JSON 上の連番なので、紐付けは持ち込まない（案件単位で足りる）
+    newPayments.map(({ id: _drop, creditorId: _c, ...p }) => ({
+      ...p,
+      caseId: idMap.get(p.caseId)!,
+      plannedDate: d(p.plannedDate),
+      actualDate: d(p.actualDate),
+      repaymentDate: d(p.repaymentDate),
+    })),
+    3000
+  )) {
+    await prisma.payment.createMany({ data: part })
+  }
+
+  const newContacts = mine(contacts)
+  console.log(`contactHistories: ${newContacts.length}`)
+  for (const part of chunk(
+    newContacts.map((h) => ({
+      caseId: idMap.get(h.caseId)!,
+      contactDate: d(h.contactDate),
+      contactTime: h.contactTime ?? null,
+      staff: h.staff ?? null,
+      tool: h.tool ?? null,
+      targetType:
+        h.targetType === '債権者' ? ContactTarget.CREDITOR : ContactTarget.CLIENT,
+      creditorName: h.creditorName ?? null,
+      comment: h.comment ?? null,
+    })),
+    5000
+  )) {
+    await prisma.contactHistory.createMany({ data: part })
+  }
+
+  console.log('done (append).')
+}
+
 async function main() {
   console.log('DATA_DIR =', DATA_DIR)
 
@@ -182,6 +297,11 @@ async function main() {
   const creditors = read<any[]>('creditors.json')
   const payments = read<any[]>('payments.json')
   const contacts = read<any[]>('contactHistories.json')
+
+  if (process.env.SEED_MODE === 'append') {
+    await appendOnly(cases, creditors, payments, contacts)
+    return
+  }
 
   console.log('truncating...')
   await prisma.$executeRawUnsafe(

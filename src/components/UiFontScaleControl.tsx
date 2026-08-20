@@ -6,6 +6,7 @@ type UiFontScaleControlProps = {
 }
 
 const OPTIONS: { value: UiFontScale; label: string }[] = [
+  { value: 'large', label: '大' },
   { value: 'standard', label: '標準' },
   { value: 'compact', label: 'やや小' },
   { value: 'dense', label: '小' },

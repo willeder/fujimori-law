@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { SuggestInput } from "./SuggestInput";
 import { useCaseEdit } from "../context/CaseEditContext";
+import { formatYmdInput, isValidYmd } from "../lib/dateInput";
 
 interface EditableFieldProps {
   label: string;
@@ -142,6 +143,13 @@ export function EditableField({
 
   // 値を確定して編集終了（候補選択時は選択値を直接渡す）
   const commit = (v: string) => {
+    // 日付は「空」か「実在する YYYY-MM-DD」のときだけ保存する。
+    // 途中まで打って離れた場合に不正な値が入るのを防ぐ。
+    if (type === "date" && v !== "" && !isValidYmd(v)) {
+      setEditValue(String(value ?? ""));
+      setIsEditing(false);
+      return;
+    }
     if (confirmMessage) {
       if (!window.confirm(confirmMessage)) {
         return;
@@ -506,9 +514,14 @@ export function EditableField({
             ) : (
               <input
                 ref={inputRef as React.RefObject<HTMLInputElement>}
-                type={type}
+                type={type === "date" ? "text" : type}
+                inputMode={type === "date" || type === "number" ? "numeric" : undefined}
                 value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
+                onChange={(e) =>
+                  setEditValue(
+                    type === "date" ? formatYmdInput(e.target.value) : e.target.value,
+                  )
+                }
                 onBlur={handleSave}
                 onKeyDown={handleKeyDown}
                 placeholder={placeholder}
@@ -599,9 +612,14 @@ export function EditableField({
             ) : (
               <input
                 ref={inputRef as React.RefObject<HTMLInputElement>}
-                type={type}
+                type={type === "date" ? "text" : type}
+                inputMode={type === "date" || type === "number" ? "numeric" : undefined}
                 value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
+                onChange={(e) =>
+                  setEditValue(
+                    type === "date" ? formatYmdInput(e.target.value) : e.target.value,
+                  )
+                }
                 onBlur={handleSave}
                 onKeyDown={handleKeyDown}
                 placeholder={placeholder}
@@ -689,9 +707,14 @@ export function EditableField({
           ) : (
             <input
               ref={inputRef as React.RefObject<HTMLInputElement>}
-              type={type}
+              type={type === "date" ? "text" : type}
+              inputMode={type === "date" || type === "number" ? "numeric" : undefined}
               value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
+              onChange={(e) =>
+                setEditValue(
+                  type === "date" ? formatYmdInput(e.target.value) : e.target.value,
+                )
+              }
               onBlur={handleSave}
               onKeyDown={handleKeyDown}
               placeholder={placeholder}
