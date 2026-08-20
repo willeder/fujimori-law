@@ -22,6 +22,7 @@ import {
   type SavedFilter,
 } from '../types/savedFilter'
 import type { Case } from '../types'
+import { normalizeNameText, includesNormalized } from '../lib/nameSearch'
 
 type SearchField = 'all' | 'name' | 'phone' | 'prefecture' | 'status' | 'staff'
 
@@ -329,10 +330,14 @@ export function CaseListPage() {
     // （以前は数字だけに正規化していたため「90169E」が電話番号の「90169」に化けて
     //   別案件を巻き込んでいた。その挙動を廃止。）
     const inc = (s: string | null | undefined) => (s ?? '').toLowerCase().includes(query)
+    // 氏名・フリガナだけは空白と半角カナ／ひらがなの差を吸収して照合する。
+    // 「ヤマダタロウ」と続けて打っても「ヤマダ＿タロウ」（＿は全角スペース）に当たるようにするため（修正依頼⑱）。
+    const nq = normalizeNameText(searchValue)
+    const incName = (s: string | null | undefined) => includesNormalized(s, nq)
     return cases.filter((c) => {
       switch (searchField) {
         case 'name':
-          return inc(c.clientBasicInfo.name) || inc(c.clientBasicInfo.furigana)
+          return incName(c.clientBasicInfo.name) || incName(c.clientBasicInfo.furigana)
         case 'phone':
           return inc(c.clientBasicInfo.phone)
         case 'prefecture':
@@ -348,8 +353,8 @@ export function CaseListPage() {
         default:
           return (
             inc(c.metadata?.externalId) ||
-            inc(c.clientBasicInfo.name) ||
-            inc(c.clientBasicInfo.furigana) ||
+            incName(c.clientBasicInfo.name) ||
+            incName(c.clientBasicInfo.furigana) ||
             inc(c.clientBasicInfo.prefecture) ||
             inc(c.settlementInfo.status) ||
             inc(c.appointmentInfo.judicialScrivener) ||
@@ -1103,6 +1108,8 @@ export function CaseListPage() {
                 クリア
               </button>
             )}
+            {/* クイック検索と絞り込みの区切り。役割が違うものが並んで見えるという指摘への対応 */}
+            <span aria-hidden className="mx-1 h-5 w-px self-center bg-slate-300" />
             <button
               type="button"
               onClick={() => setFilterOpen(true)}

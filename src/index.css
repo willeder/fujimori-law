@@ -12,6 +12,11 @@ html {
   font-size: 100%;
 }
 
+/* 「大」。全体的に文字が小さく読みづらいというご要望（堀本様 2026-08-11） */
+html[data-ui-font-scale='large'] {
+  font-size: 112.5%;
+}
+
 html[data-ui-font-scale='compact'] {
   font-size: 93.75%;
 }

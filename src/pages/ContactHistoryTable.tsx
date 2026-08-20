@@ -14,7 +14,13 @@ interface ContactHistoryTableProps {
   targetType: '依頼者' | '債権者'
 }
 
-const toolOptions = ['LINE', '電話', 'メール', 'SMS', 'その他'] as const
+// ツールと担当は kintone のフォーム定義（アプリ4）に合わせる。
+// ツールは依頼者と債権者で選択肢が違う点に注意。
+import {
+  CONTACT_TOOL_CLIENT_OPTIONS,
+  CONTACT_TOOL_CREDITOR_OPTIONS,
+  CONTACT_STAFF_OPTIONS,
+} from '../constants/fieldOptions'
 
 export function ContactHistoryTable({
   caseId,
@@ -24,6 +30,8 @@ export function ContactHistoryTable({
   // ロック中（他セッションが編集中）は行の編集・追加・削除を無効化する
   const { locked } = useCaseEdit()
   const dispatch = useCaseDispatch()
+  const toolOptions =
+    targetType === '債権者' ? CONTACT_TOOL_CREDITOR_OPTIONS : CONTACT_TOOL_CLIENT_OPTIONS
   const { contactHistories } = useCaseState()
   const { accountName } = useUserSettings()
   // 債権者名の候補（検索モードの条件入力・行編集のドロップダウン用）
@@ -123,9 +131,24 @@ export function ContactHistoryTable({
     }
   }
 
+  /**
+   * 取消。
+   * 「+ 接触履歴を追加」で作った行はまだサーバに存在しない仮の行なので、
+   * 取消したら行ごと消す（残すと空欄だけの枠が一覧に居座る＝修正依頼㉟）。
+   * 既存行の編集を取り消した場合は行を消さず、編集内容だけ破棄する。
+   */
   const handleCancel = () => {
+    const id = editingId
     setEditingId(null)
     setEditData({})
+    if (id != null && newIds.has(id)) {
+      dispatch({ type: 'DELETE_CONTACT_HISTORY', payload: id })
+      setNewIds((prev) => {
+        const n = new Set(prev)
+        n.delete(id)
+        return n
+      })
+    }
   }
 
   const handleDelete = (h: ContactHistory) => {
@@ -233,12 +256,23 @@ export function ContactHistoryTable({
       sortable: false,
       render: (h) =>
         editingId === h.id ? (
-          <input
+          <select
             value={editData.staff ?? ''}
-            onChange={(e) => setEditData({ ...editData, staff: e.target.value })}
+            onChange={(e) => setEditData({ ...editData, staff: e.target.value || null })}
             className={cellIn}
-            placeholder="担当"
-          />
+          >
+            <option value="">-</option>
+            {/* 退職などで選択肢から外れた担当が既存データに残っているため、
+                現在値が一覧に無ければ先頭に足して記録を消さない */}
+            {editData.staff && !CONTACT_STAFF_OPTIONS.includes(editData.staff as never) && (
+              <option value={editData.staff}>{editData.staff}（現在の値）</option>
+            )}
+            {CONTACT_STAFF_OPTIONS.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
         ) : (
           <span className={!h.staff ? 'text-slate-300' : ''}>{h.staff ?? '-'}</span>
         ),
@@ -256,6 +290,9 @@ export function ContactHistoryTable({
             className={cellIn}
           >
             <option value="">-</option>
+            {editData.tool && !toolOptions.includes(editData.tool as never) && (
+              <option value={editData.tool}>{editData.tool}（現在の値）</option>
+            )}
             {toolOptions.map((t) => (
               <option key={t} value={t}>
                 {t}

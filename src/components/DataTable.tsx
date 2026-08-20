@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
 // 検索条件の比較パーサ（数値・日付、>= <= > < = と範囲 a..b / a〜b）は共有ユーティリティに集約。
 // 比較式でなければ null（→部分一致にフォールバック）。サーバの横断検索とも同一記法。
 import {
@@ -686,6 +686,35 @@ export function DataTable<T>({
     right: 'text-right',
   }
 
+  // ---- 行クリックの判定（修正依頼⑰・㊿）---------------------------------
+  // 事務所からの指摘:
+  //   「セルの文字をドラッグしてコピーしようとすると詳細に飛んでしまう」
+  //   「遷移は左端の項目からだけにしてほしい」
+  // 対応:
+  //   1) 左端の列（td の cellIndex が 0）を押したときだけ遷移する
+  //   2) 押した位置から 4px 以上動いていたら「ドラッグ＝選択」とみなして遷移しない
+  //   3) 文字が選択されている状態のクリックも遷移しない
+  //   4) セル内のボタン・リンク・入力欄を押したときは、その部品の動作を優先する
+  const rowPressRef = useRef<{ x: number; y: number } | null>(null)
+  const handleRowMouseDown = (e: ReactMouseEvent<HTMLTableRowElement>) => {
+    rowPressRef.current = { x: e.clientX, y: e.clientY }
+  }
+  const handleRowClick = (e: ReactMouseEvent<HTMLTableRowElement>, item: T) => {
+    const start = rowPressRef.current
+    rowPressRef.current = null
+    if (start) {
+      const moved = Math.abs(e.clientX - start.x) + Math.abs(e.clientY - start.y)
+      if (moved > 4) return
+    }
+    if ((window.getSelection()?.toString() ?? '').length > 0) return
+    const target = e.target as HTMLElement | null
+    if (!target) return
+    if (target.closest('button, a, input, select, textarea, label, [contenteditable="true"]')) return
+    const td = target.closest('td')
+    if (!td || td.cellIndex !== 0) return
+    onRowClick?.(item)
+  }
+
   const isDense = density === 'dense'
   const isCompact = density === 'compact' || isDense
   const cellPad = isDense
@@ -1045,10 +1074,11 @@ export function DataTable<T>({
               return (
               <Fragment key={String(getValue(item, String(keyField)))}>
               <tr
-                className={`border-b border-slate-100 ${onRowClick ? 'cursor-pointer hover:bg-blue-50' : ''} ${index % 2 === 1 && !customRowClass ? 'bg-slate-200/50' : ''} ${customRowClass}`}
-                onClick={() => onRowClick?.(item)}
+                className={`border-b border-slate-100 ${onRowClick ? 'hover:bg-blue-50' : ''} ${index % 2 === 1 && !customRowClass ? 'bg-slate-200/50' : ''} ${customRowClass}`}
+                onMouseDown={onRowClick ? handleRowMouseDown : undefined}
+                onClick={onRowClick ? (e) => handleRowClick(e, item) : undefined}
               >
-                {columns.map((col) => {
+                {columns.map((col, colIndex) => {
                   const innerClass =
                     !cellSingleLine
                       ? innerCellClassBase
@@ -1062,7 +1092,15 @@ export function DataTable<T>({
                   return (
                   <td
                     key={String(col.key)}
-                    className={`${cellPad} ${alignClass[col.align ?? 'left']} ${bodyCellWrap} tabular-nums ${col.cellClassName ?? ''}`}
+                    // 行遷移は左端の列だけ。他の列は文字を選択してコピーするための場所にする
+                    className={`${cellPad} ${alignClass[col.align ?? 'left']} ${bodyCellWrap} tabular-nums ${
+                      onRowClick && colIndex === 0 ? 'cursor-pointer' : ''
+                    } ${col.cellClassName ?? ''}`}
+                    title={
+                      onRowClick && colIndex === 0
+                        ? 'クリックで開きます（他の列はコピー用に選択できます）'
+                        : undefined
+                    }
                   >
                     {cellNoWrap ? (
                       col.render

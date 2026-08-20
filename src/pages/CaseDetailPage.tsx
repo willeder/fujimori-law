@@ -38,12 +38,15 @@ import { joinAddress, stripPrefecture } from "../utils/address";
 import { getClientId } from "../utils/clientId";
 import { settlementTotals } from "../lib/settlementTotals";
 import { isEmptyRow } from "../lib/paymentRows";
+import { CaseFiles } from "../components/case/CaseFiles";
+import { CaseReminders } from "../components/case/CaseReminders";
 import {
   CASE_STATUS_OPTIONS,
   DEBT_ADJUSTMENT_TYPE_OPTIONS,
   GENDER_OPTIONS,
   MARITAL_STATUS_OPTIONS,
-  RANK_OPTIONS,
+  ACCEPTANCE_RANK_OPTIONS,
+  CAUTION_RANK_OPTIONS,
   toSelectOptions,
 } from '../constants/fieldOptions'
 
@@ -1593,7 +1596,7 @@ function CaseDetailBody({
             value={caseData.clientBasicInfo.cautionRank}
             onChange={(v) => updateClientBasicInfo("cautionRank", v)}
             type="select"
-            options={toSelectOptions(RANK_OPTIONS)}
+            options={toSelectOptions(CAUTION_RANK_OPTIONS)}
             compact
             compactLayout="inline"
             bordered
@@ -1681,7 +1684,7 @@ function CaseDetailBody({
             value={caseData.appointmentInfo.acceptanceRank}
             onChange={(v) => updateAppointmentInfo("acceptanceRank", v)}
             type="select"
-            options={toSelectOptions(RANK_OPTIONS)}
+            options={toSelectOptions(ACCEPTANCE_RANK_OPTIONS)}
             compact
             compactLayout="inline"
             bordered
@@ -1967,6 +1970,19 @@ function CaseDetailBody({
                 />
               </SectionCard>
             </div>
+            {/* kintone で「★リマインド」という債権者の行にしていたもの */}
+            <SectionCard title="リマインド" color="slate" collapsible defaultOpen={false}>
+              <CaseReminders caseId={caseData.id} locked={locked != null} />
+            </SectionCard>
+            {/* kintone の「相談票添付」「和解ファイル」。実体は Supabase Storage */}
+            <SectionCard
+              title="添付ファイル"
+              color="slate"
+              collapsible
+              defaultOpen={false}
+            >
+              <CaseFiles caseId={caseData.id} />
+            </SectionCard>
             <SectionCard
               title="基本情報"
               color="slate"

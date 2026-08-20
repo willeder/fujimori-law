@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react'
 
-export type UiFontScale = 'standard' | 'compact' | 'dense'
+export type UiFontScale = 'large' | 'standard' | 'compact' | 'dense'
 
 const STORAGE_KEY = 'fujimori-law-ui-font-scale'
 
@@ -16,7 +16,7 @@ function readStoredScale(): UiFontScale {
   if (typeof window === 'undefined') return 'standard'
   try {
     const v = window.localStorage.getItem(STORAGE_KEY)
-    if (v === 'compact' || v === 'dense' || v === 'standard') return v
+    if (v === 'large' || v === 'compact' || v === 'dense' || v === 'standard') return v
   } catch {
     /* ignore */
   }

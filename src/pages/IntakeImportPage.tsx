@@ -152,12 +152,6 @@ export function IntakeImportPage() {
             ファイル選択
           </button>
           {fileName && <span className="text-xs text-slate-600">{fileName}</span>}
-          <a
-            href="/api/intake/template"
-            className="rounded border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
-          >
-            テンプレートDL
-          </a>
           <button
             type="button"
             onClick={() => void commit()}
@@ -215,9 +209,8 @@ export function IntakeImportPage() {
             Excelの場合は「<b>システム取込</b>」タブから依頼者・債権者（受任対象外を含む）を、
             「<b>入金情報取込配列</b>」タブから入金スケジュールを読み取ります。
             <br />
-            受任後ステータスは空欄のときに「受任通知発送待ち」を入れます。
+            受任後ステータスは空欄のときに「資格者面談待ち」を入れます。
             形式（CSV/Excel）と文字コード（UTF-8 / Shift-JIS）は自動判定します。
-            フォーマットは「テンプレートDL」で確認できます。
           </div>
         ) : (
           <>

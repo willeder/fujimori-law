@@ -138,7 +138,9 @@ const HANDLING_FEE_UNIT = 129
 const RECORD_START_HEADER = 'レコードの開始行'
 const DEFAULT_CREDITOR_STATUS = '受任通知発送待ち'
 /** 受任後ステータスの既定値（相談票では空欄のため、取込時にこれを入れる） */
-const DEFAULT_CASE_STATUS = '受任通知発送待ち'
+// 相談票では受任後ステータスが空欄で届く。以前は「受任通知発送待ち」を入れていたが、
+// 事務所のご要望（藤川様 2026-08-08）により「資格者面談待ち」を既定にする。
+const DEFAULT_CASE_STATUS = '資格者面談待ち'
 /** 受任対象外（タブ/一覧で常に末尾に並べる） */
 const EXCLUDED_CREDITOR_STATUS = '受任対象外'
 

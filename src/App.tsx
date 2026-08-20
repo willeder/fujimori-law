@@ -20,6 +20,7 @@ import { GmoTransferPage } from './pages/GmoTransferPage'
 import { IntakeImportPage } from './pages/IntakeImportPage'
 import { DepositImportPage } from './pages/DepositImportPage'
 import { PaymentDelayDashboard } from './pages/PaymentDelayDashboard'
+import { ReminderTaskPage } from './pages/ReminderTaskPage'
 import { ClientReminderPage } from './pages/ClientReminderPage'
 import { CreditorReminderPage } from './pages/CreditorReminderPage'
 
@@ -55,6 +56,10 @@ const router = createBrowserRouter([
   {
     path: '/reminder-client',
     element: <ClientReminderPage />,
+  },
+  {
+    path: '/reminder-task',
+    element: <ReminderTaskPage />,
   },
   {
     path: '/reminder-creditor',

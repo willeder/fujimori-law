@@ -10,8 +10,9 @@ import type { Creditor } from '../types'
 import {
   ACCOUNT_TYPE_OPTIONS,
   CREDITOR_STATUS_OPTIONS,
+  REPAYMENT_TARGET_OPTIONS,
+  RESPONSE_STATUS_OPTIONS,
   SETTLED_CREDITOR_STATUSES,
-  YES_NO_OPTIONS,
   toSelectOptions,
 } from '../constants/fieldOptions'
 
@@ -205,7 +206,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
             <select
               value={item.repaymentTarget ?? ''}
               onChange={(e) => {
-                const value = e.target.value as '停止' | '終了' | ''
+                const value = e.target.value
                 updateCreditor(item, {
                   repaymentTarget: value === '' ? null : value,
                 })
@@ -215,8 +216,15 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
               }`}
             >
               <option value="">-</option>
-              <option value="停止" className="font-bold text-red-600">停止</option>
-              <option value="終了" className="font-bold text-red-600">終了</option>
+              {REPAYMENT_TARGET_OPTIONS.map((o) => (
+                <option
+                  key={o}
+                  value={o}
+                  className={o === '変則' ? '' : 'font-bold text-red-600'}
+                >
+                  {o}
+                </option>
+              ))}
             </select>
           )
         },
@@ -376,7 +384,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         </div>
 
         {/* 和解状況（自動計算）。kintone では手入力だった4項目を債権者から算出する */}
-        <div className="grid grid-cols-2 gap-2 rounded bg-blue-50/60 p-2 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 rounded bg-blue-50/60 p-2 sm:grid-cols-5">
           <div>
             <div className="text-xs font-medium leading-tight text-slate-500">予定代弁社数</div>
             <div className="text-sm font-bold tabular-nums text-slate-800">
@@ -399,6 +407,20 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
             <div className="text-xs font-medium leading-tight text-slate-500">和解弁済総数</div>
             <div className="text-sm font-bold tabular-nums text-slate-800">
               {totals.settlementCount}回
+            </div>
+          </div>
+          <div>
+            {/* 差額合計。符号は個別債権者の「差額」と同じ 申告額 − 債務額 で揃える。
+                申告より実際の債務が多い（＝聞き取りと乖離）と マイナス になる。 */}
+            <div className="text-xs font-medium leading-tight text-slate-500">
+              差額合計（申告−債務）
+            </div>
+            <div
+              className={`text-sm font-bold tabular-nums ${
+                totalDeclared - totalDebt < 0 ? 'text-red-600' : 'text-slate-800'
+              }`}
+            >
+              {(totalDeclared - totalDebt).toLocaleString()}円
             </div>
           </div>
           {totals.missingPaymentCount > 0 && (
@@ -680,6 +702,8 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       <div className="min-w-0 col-span-1">
         <EditableField
           label="回答状況"
+          type="select"
+          options={toSelectOptions(RESPONSE_STATUS_OPTIONS)}
           value={creditor.responseStatus}
           onChange={(v) =>
             updateCreditor(creditor, { responseStatus: v || null })
@@ -860,12 +884,18 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       <div className="min-w-0 col-span-1">
         <EditableField
           label="将来利息"
+          // 実データは「なし」または利率（5 / 14.6 など）。
+          // あり／なしのプルダウンでは利率を入れられないため手入力にする。
           value={creditor.futureInterest}
           onChange={(v) =>
             updateCreditor(creditor, { futureInterest: v || null })
           }
-          type="select"
-          options={toSelectOptions(YES_NO_OPTIONS)}
+          placeholder="なし または 利率（例 14.6）"
+          suffix={
+            creditor.futureInterest && /^[0-9.]+$/.test(creditor.futureInterest)
+              ? '％'
+              : undefined
+          }
           compact
           compactLayout="inline"
           bordered
@@ -988,6 +1018,8 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       <div className="min-w-0 col-span-1">
         <EditableField
           label="弁済対象"
+          type="select"
+          options={toSelectOptions(REPAYMENT_TARGET_OPTIONS)}
           value={creditor.repaymentTarget}
           onChange={(v) =>
             updateCreditor(creditor, { repaymentTarget: v || null })
