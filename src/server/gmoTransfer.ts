@@ -553,6 +553,11 @@ export async function recordTransferResult(
         actualRepaymentAllocation: true,
         actualRepaymentCount: true,
         actualHandlingFee: true,
+        // プール充当額の再計算に使う（下のコメント参照）
+        actualAmount: true,
+        actualFeeAllocation: true,
+        actualAgentFeeAllocation: true,
+        actualPoolAllocation: true,
       },
     })
     if (candidates.length === 0) {
@@ -576,13 +581,30 @@ export async function recordTransferResult(
       actualRepaymentAllocation: target.actualRepaymentAllocation,
       actualRepaymentCount: target.actualRepaymentCount,
       actualHandlingFee: target.actualHandlingFee,
+      actualPoolAllocation: target.actualPoolAllocation,
     }
+    const handlingFee = g.count * HANDLING_FEE_UNIT
+    // プール充当額を kintone と同じ式で計算し直す。
+    //   ﾌﾟｰﾙ充当額 = 実入金額 − 報酬充当額 − 弁代報酬充当額 − 弁済充当額 − 振)手数料
+    // （kintone のフォーム定義から取得した式。実データ44,443行のうち44,442行で成立）
+    //
+    // 入金の時点では弁済充当額と振)手数料がまだ入っていないため、ここで
+    // 埋めた分だけプールから引かないと、**支払い済みの金額がプール残高に
+    // 残ったまま**になる。以前はこの再計算をしておらず、振込後のプール残高が
+    // 実際より多く見えていた。
+    const pool =
+      (target.actualAmount ?? 0) -
+      (target.actualFeeAllocation ?? 0) -
+      (target.actualAgentFeeAllocation ?? 0) -
+      g.amount -
+      handlingFee
     const after = {
       repaymentDate: new Date(`${g.lastDate}T00:00:00Z`),
       actualRepaymentAllocation: g.amount,
       actualRepaymentCount: g.count,
       // 手数料 = 社数 × 129円（入金管理ファイルの検算式と同じ）
-      actualHandlingFee: g.count * HANDLING_FEE_UNIT,
+      actualHandlingFee: handlingFee,
+      actualPoolAllocation: pool,
     }
     await prisma.payment.update({ where: { id: target.id }, data: after })
     await writeChange({
