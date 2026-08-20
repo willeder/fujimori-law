@@ -467,16 +467,45 @@ export function DataTable<T>({
   })
 
   // ── ページネーション ──
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState<number>(defaultPageSize)
+  //
+  // 表示件数とページ番号は persistKey ごとに sessionStorage で覚える（修正依頼44）。
+  // 事務所からの指摘:
+  //   「表示件数を変更して案件詳細に行って一覧に戻ると、最初のページに戻ってしまう」
+  // 3ページ目を見ていたなら、戻ったときも3ページ目であってほしい、という趣旨。
+  const pageKey = persistKey ? `${persistKey}.page` : ''
+  const pageSizeKey = persistKey ? `${persistKey}.pageSize` : ''
+  const [page, setPage] = useState(() => {
+    if (!pageKey) return 1
+    const v = Number(sessionStorage.getItem(pageKey))
+    return Number.isFinite(v) && v >= 1 ? v : 1
+  })
+  const [pageSize, setPageSize] = useState<number>(() => {
+    if (!pageSizeKey) return defaultPageSize
+    const v = Number(sessionStorage.getItem(pageSizeKey))
+    return v === 50 || v === 100 ? v : defaultPageSize
+  })
   const total = sortedData.length
   const totalPages = Math.max(1, Math.ceil(total / pageSize))
   const currentPage = Math.min(page, totalPages)
-  // 件数・表示件数が変わったら1ページ目へ（絞り込み変更時など）
+
+  // 件数が変わったら1ページ目へ（絞り込みを変えたときなど）。
+  // ただし**初回だけは戻さない**。データは非同期で入ってくるので件数が
+  // 0 → N と動き、そこで戻してしまうと覚えたページが毎回消える。
+  const lastTotalRef = useRef<number | null>(null)
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    const prev = lastTotalRef.current
+    lastTotalRef.current = total
+    if (prev === null || prev === total) return
     setPage(1)
-  }, [total, pageSize])
+  }, [total])
+
+  // 覚えておく
+  useEffect(() => {
+    if (pageKey) sessionStorage.setItem(pageKey, String(currentPage))
+  }, [pageKey, currentPage])
+  useEffect(() => {
+    if (pageSizeKey) sessionStorage.setItem(pageSizeKey, String(pageSize))
+  }, [pageSizeKey, pageSize])
   const pageData = paginated
     ? sortedData.slice((currentPage - 1) * pageSize, currentPage * pageSize)
     : sortedData
@@ -712,6 +741,19 @@ export function DataTable<T>({
     if (target.closest('button, a, input, select, textarea, label, [contenteditable="true"]')) return
     const td = target.closest('td')
     if (!td || td.cellIndex !== 0) return
+    // 開く直前に、いま見えている並び順を控えておく（修正依頼㉙）。
+    // 詳細画面の「前へ／次へ」で、絞り込みと並び替えを反映した順に辿れるようにするため。
+    // 毎回の描画で書くと重いので、実際に開くこの瞬間だけ書く。
+    if (persistKey) {
+      try {
+        sessionStorage.setItem(
+          `${persistKey}.order`,
+          JSON.stringify(sortedData.map((x) => getValue(x, String(keyField))))
+        )
+      } catch {
+        /* 容量超過などで書けなくても、前後移動が使えないだけなので無視する */
+      }
+    }
     onRowClick?.(item)
   }
 
@@ -825,7 +867,11 @@ export function DataTable<T>({
             表示件数
             <select
               value={pageSize}
-              onChange={(e) => setPageSize(Number(e.target.value))}
+              onChange={(e) => {
+                // 表示件数を変えたときは、見ている位置がずれるので1ページ目に戻す
+                setPageSize(Number(e.target.value))
+                setPage(1)
+              }}
               className="rounded border border-slate-300 bg-white px-1.5 py-0.5"
             >
               <option value={50}>50</option>
@@ -1074,6 +1120,9 @@ export function DataTable<T>({
               return (
               <Fragment key={String(getValue(item, String(keyField)))}>
               <tr
+                // 外から特定の行までスクロールさせるための目印
+                // （入金スケジュールの一括表示から該当行へ飛ぶのに使う）
+                data-row-key={String(getValue(item, String(keyField)))}
                 className={`border-b border-slate-100 ${onRowClick ? 'hover:bg-blue-50' : ''} ${index % 2 === 1 && !customRowClass ? 'bg-slate-200/50' : ''} ${customRowClass}`}
                 onMouseDown={onRowClick ? handleRowMouseDown : undefined}
                 onClick={onRowClick ? (e) => handleRowClick(e, item) : undefined}

@@ -439,6 +439,32 @@ export default async function handler(
       json(await caseFiles.listCaseFiles(Number(caseFilesList[1])))
       return
     }
+    // 受任資料のアップロード（署名付きURLを出して、実体はブラウザ→Storageへ直送）
+    const caseFileUploadUrl = path.match(/^\/api\/cases\/(\d+)\/files\/upload-url$/)
+    if (caseFileUploadUrl && method === 'POST') {
+      const r = await caseFiles.createUploadUrl(
+        Number(caseFileUploadUrl[1]),
+        (await getRawBody(req)).toString('utf8'),
+      )
+      json(r.body, r.status)
+      return
+    }
+    const caseFileRecord = path.match(/^\/api\/cases\/(\d+)\/files$/)
+    if (caseFileRecord && method === 'POST') {
+      const r = await caseFiles.recordUploadedFile(
+        editActor,
+        Number(caseFileRecord[1]),
+        (await getRawBody(req)).toString('utf8'),
+      )
+      json(r.body, r.status)
+      return
+    }
+    const caseFileDelete = path.match(/^\/api\/cases\/files\/(\d+)$/)
+    if (caseFileDelete && method === 'DELETE') {
+      const r = await caseFiles.deleteCaseFile(editActor, Number(caseFileDelete[1]))
+      json(r.body, r.status)
+      return
+    }
     const caseFileSign = path.match(/^\/api\/cases\/files\/(\d+)\/url$/)
     if (caseFileSign && method === 'GET') {
       const download = query.get('download') === '1'

@@ -279,11 +279,34 @@ export function EditableField({
     setEditValue(String(value ?? ""));
     setIsEditing(true);
   };
+
+  /**
+   * ドラッグ判定（修正依頼⑰）。
+   * 事務所からの指摘:
+   *   「面談時備考の文字をコピーしようとしてドラッグすると、急に編集状態になる」
+   * 押した位置から 4px 以上動いていたら選択のためのドラッグとみなし、編集を開かない。
+   * 文字が選択されている状態のクリックも同様に開かない。
+   * 一覧の行クリック（DataTable）と同じ判定に揃えてある。
+   */
+  const pressRef = useRef<{ x: number; y: number } | null>(null);
   const triggerProps = {
     "data-ef-trigger": "1",
     role: "button" as const,
     tabIndex: 0,
-    onClick: openForEdit,
+    onMouseDown: (e: React.MouseEvent) => {
+      pressRef.current = { x: e.clientX, y: e.clientY };
+    },
+    onClick: (e: React.MouseEvent) => {
+      const start = pressRef.current;
+      pressRef.current = null;
+      if (start) {
+        const moved =
+          Math.abs(e.clientX - start.x) + Math.abs(e.clientY - start.y);
+        if (moved > 4) return;
+      }
+      if ((window.getSelection()?.toString() ?? "").length > 0) return;
+      openForEdit();
+    },
     onKeyDown: (e: React.KeyboardEvent) => {
       // Enter / Space で編集開始。Tab はブラウザ既定のまま次の項目へ進む
       if (e.key === "Enter" || e.key === " ") {

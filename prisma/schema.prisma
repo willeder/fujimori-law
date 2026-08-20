@@ -641,15 +641,19 @@ model CaseFile {
   case   Case @relation(fields: [caseId], references: [id], onDelete: Cascade)
 
   /**
-   * kintone のフィールド名。「相談票添付」または「和解ファイル」
+   * kintone のフィールド名。「相談票添付」「和解ファイル」、画面から入れたものは「受任資料」
    */
-  field String
+  field    String
+  /**
+   * 受任資料の区分（身分証明書・委任状・和解書など）。kintone由来の分には入らない
+   */
+  category String?
   /**
    * 表示用のファイル名（kintone 上の名前をそのまま持つ）
    */
-  name  String
-  mime  String @default("application/octet-stream")
-  size  Int
+  name     String
+  mime     String  @default("application/octet-stream")
+  size     Int
 
   /**
    * Supabase Storage 上のキー。例: cases/118823E/和解ファイル/<fileKey>.jpg

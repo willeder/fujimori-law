@@ -105,6 +105,23 @@ export const SEARCH_FIELDS: SearchFieldDef[] = [
   { field: 'firstPaymentWithinTenDays', label: '10日以内', type: 'choice', options: WITHIN_TEN_DAYS_OPTIONS },
   { field: 'creditorResponseStatus', label: '回答状況（債権者）', type: 'choice', options: RESPONSE_STATUS_OPTIONS },
   { field: 'creditorRepaymentTarget', label: '弁済対象（債権者）', type: 'choice', options: REPAYMENT_TARGET_OPTIONS },
+
+  // ── 債権者側の日付（修正依頼㉑「今月完済の人を絞りたい」）──
+  // 完済は「最後の1社が終わったとき」なので、案件全体の最終と、
+  // 1社でも該当すればヒットする条件を分けてある。
+  { field: 'caseFinalPaymentDate', label: '最終支払日（全社完了＝完済日）', type: 'date' },
+  // 完済日が出せない案件を洗い出すための条件。
+  // 和解済なのに支払予定が入っていない社があると完済日が確定しないため、
+  // その案件をここで拾って債権者名の読み替え作業の対象にできる。
+  { field: 'caseFinalPaymentUnknown', label: '完済日が未確定（和解済なのに支払予定が無い社あり）', type: 'choice', options: ['該当する', '該当しない'] },
+  { field: 'creditorFinalPaymentMonth', label: '最終支払日（いずれかの債権者）', type: 'date' },
+  { field: 'creditorPaymentStartMonth', label: '支払開始日（債権者）', type: 'date' },
+  { field: 'creditorSettlementDate', label: '和解日（債権者）', type: 'date' },
+  { field: 'creditorSettlementProposalDate', label: '和解提案日（債権者）', type: 'date' },
+  { field: 'creditorAcceptanceNoticeSentDate', label: '受任通知送付日（債権者）', type: 'date' },
+  { field: 'creditorDebtInquiryArrivalDate', label: '債権調査到着日（債権者）', type: 'date' },
+  { field: 'creditorContractDate', label: '調査票_契約日（債権者）', type: 'date' },
+  { field: 'creditorNextProcessDate', label: '次回処理日時（債権者）', type: 'date' },
   { field: 'otherOfficeConsultation', label: '他事務所相談', type: 'choice', options: OTHER_OFFICE_CONSULTATION_OPTIONS },
   { field: 'preRequestPayment', label: '依頼前 返済額', type: 'number' },
   { field: 'postRequestPayment', label: '依頼後 返済額', type: 'number' },

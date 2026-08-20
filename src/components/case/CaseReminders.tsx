@@ -7,46 +7,18 @@
  *   内容 = kintone の「交渉相手」欄
  *   済   = kintone の check
  */
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
 import { formatYmdInput, isValidYmd } from '../../lib/dateInput'
-
-type Reminder = {
-  id: number
-  caseId: number
-  dueDate: string | null
-  body: string
-  done: boolean
-  doneAt: string | null
-  doneBy: string | null
-  source: string
-  createdAt: string
-}
-
-const todayYmd = () => {
-  const d = new Date()
-  const p = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`
-}
+// 状態は上部のバナーと共有する。別々に持つと、片方で「済」にしても
+// もう片方に残ってしまうため（useCaseReminders 参照）。
+import { useCaseReminders, todayYmd } from '../../hooks/useCaseReminders'
 
 export function CaseReminders({ caseId, locked = false }: { caseId: number; locked?: boolean }) {
-  const [rows, setRows] = useState<Reminder[]>([])
+  const { rows, add: addReminder, patch, remove: removeReminder } = useCaseReminders(caseId)
   const [due, setDue] = useState('')
   const [body, setBody] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
-
-  const load = useCallback(() => {
-    fetch(`/api/cases/${caseId}/reminders`)
-      .then((r) => (r.ok ? (r.json() as Promise<Reminder[]>) : null))
-      .then((d) => {
-        if (d) setRows(d)
-      })
-      .catch(() => {
-        /* 次回の再取得で回復 */
-      })
-  }, [caseId])
-
-  useEffect(load, [load])
 
   const add = async () => {
     const text = body.trim()
@@ -60,40 +32,18 @@ export function CaseReminders({ caseId, locked = false }: { caseId: number; lock
     }
     setBusy(true)
     setError(null)
-    try {
-      const r = await fetch(`/api/cases/${caseId}/reminders`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dueDate: due || null, body: text }),
-      })
-      const d = (await r.json()) as { reminder?: Reminder; error?: string }
-      if (!r.ok || !d.reminder) throw new Error(d.error ?? '追加できませんでした')
-      setRows((prev) => [...prev, d.reminder!])
+    const err = await addReminder(due || null, text)
+    if (err) setError(err)
+    else {
       setDue('')
       setBody('')
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e))
-    } finally {
-      setBusy(false)
     }
-  }
-
-  const patch = async (id: number, data: Partial<Pick<Reminder, 'done' | 'body' | 'dueDate'>>) => {
-    // 先に画面へ反映して、失敗したら読み直す
-    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...data } : r)))
-    const r = await fetch(`/api/reminders/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    }).catch(() => null)
-    if (!r || !r.ok) load()
+    setBusy(false)
   }
 
   const remove = async (id: number) => {
     if (!window.confirm('このリマインドを削除しますか？')) return
-    setRows((prev) => prev.filter((r) => r.id !== id))
-    const r = await fetch(`/api/reminders/${id}`, { method: 'DELETE' }).catch(() => null)
-    if (!r || !r.ok) load()
+    await removeReminder(id)
   }
 
   const today = todayYmd()

@@ -33,6 +33,65 @@ import { fieldTypeOf } from '../pages/searchFields'
 
 const inputCls =
   'rounded border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500'
+/**
+ * 絞り込みの「項目」を選ぶ欄（修正依頼42）。
+ *
+ * 事務所からの指摘:
+ *   「絞り込みの項目をドロップダウンではなく、入力して絞り込んでいく形にしてほしい」
+ * 項目は79件あり、一覧から目で探すのは現実的ではない。
+ * 打ち込むと候補が絞られ、選ぶと確定する形にする。
+ * ラベルは全項目で一意（76件・重複0）なので、表示名から項目を引ける。
+ */
+function FieldPicker({
+  fields,
+  value,
+  onChange,
+  inputCls: cls,
+}: {
+  fields: SearchFieldDef[]
+  value: string
+  onChange: (field: string) => void
+  inputCls: string
+}) {
+  const labelOf = useMemo(
+    () => new Map(fields.map((f) => [f.field, f.label])),
+    [fields]
+  )
+  const fieldOfLabel = useMemo(
+    () => new Map(fields.map((f) => [f.label, f.field])),
+    [fields]
+  )
+  // 外から項目が変わったとき（条件の追加・保存した絞り込みの読み込み）に
+  // 表示を合わせる。effect で setState すると余計な再描画を招くので、
+  // 「前回の value」を持っておいて描画中に気づく形にする。
+  const [text, setText] = useState(labelOf.get(value) ?? '')
+  const [seenValue, setSeenValue] = useState(value)
+  if (seenValue !== value) {
+    setSeenValue(value)
+    setText(labelOf.get(value) ?? '')
+  }
+
+  return (
+    <SuggestInput
+      value={text}
+      onValueChange={setText}
+      onSelect={(v) => {
+        const f = fieldOfLabel.get(v)
+        if (f) onChange(f)
+      }}
+      onBlur={() => {
+        // 選ばずに離れたときは、打ちかけの文字を捨てて元の項目名に戻す
+        const f = fieldOfLabel.get(text)
+        if (f) onChange(f)
+        else setText(labelOf.get(value) ?? '')
+      }}
+      suggestions={fields.map((f) => f.label)}
+      placeholder="項目名を入力（例: 最終支払）"
+      className={`${cls} w-full`}
+    />
+  )
+}
+
 const btnCls =
   'rounded border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-40'
 const btnPrimaryCls =
@@ -193,25 +252,22 @@ export function FilterModal({
                   key={i}
                   className="flex items-start gap-2 rounded border border-slate-200 bg-white px-3 py-2.5"
                 >
-                  {/* フィールド */}
-                  <select
-                    value={cond.field}
-                    onChange={(e) => {
-                      const nextType = fieldTypeOf(e.target.value)
-                      setCond(i, {
-                        field: e.target.value,
-                        operator: OPERATORS_BY_TYPE[nextType][0],
-                        values: [],
-                      })
-                    }}
-                    className={`${inputCls} w-44 shrink-0`}
-                  >
-                    {fields.map((f) => (
-                      <option key={f.field} value={f.field}>
-                        {f.label}
-                      </option>
-                    ))}
-                  </select>
+                  {/* 項目。79項目あるので、打ち込んで絞り込める形にする（修正依頼42） */}
+                  <div className="w-52 shrink-0">
+                    <FieldPicker
+                      fields={fields}
+                      value={cond.field}
+                      onChange={(nextField) => {
+                        const nextType = fieldTypeOf(nextField)
+                        setCond(i, {
+                          field: nextField,
+                          operator: OPERATORS_BY_TYPE[nextType][0],
+                          values: [],
+                        })
+                      }}
+                      inputCls={inputCls}
+                    />
+                  </div>
 
                   {/* 演算子 */}
                   <select
