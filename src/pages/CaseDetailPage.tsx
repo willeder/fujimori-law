@@ -39,6 +39,7 @@ import { getClientId } from "../utils/clientId";
 import { settlementTotals } from "../lib/settlementTotals";
 import { isEmptyRow } from "../lib/paymentRows";
 import { CaseReminders } from "../components/case/CaseReminders";
+import { CaseReminderBanner } from "../components/case/CaseReminderBanner";
 import {
   CASE_STATUS_OPTIONS,
   DEBT_ADJUSTMENT_TYPE_OPTIONS,
@@ -1828,6 +1829,13 @@ function CaseDetailBody({
           />
         </div>
       </header>
+
+      {/*
+        未対応のリマインド。案件を開いた時点で必ず目に入るよう、ヘッダーの直下に出す。
+        下の「リマインド」セクションと同じ状態を共有しているので、
+        どちらでチェックを入れても両方から消える。未対応が無ければ何も出ない。
+      */}
+      <CaseReminderBanner caseId={caseData.id} locked={locked != null} />
 
       {/* Content（ヘッダー以外のみスクロール） */}
       <main className="min-h-0 flex-1 overflow-y-auto">
