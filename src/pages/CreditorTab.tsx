@@ -6,6 +6,7 @@ import { useCaseEdit } from '../context/CaseEditContext'
 import { settlementTotals } from '../lib/settlementTotals'
 import { EditableField, StatusBadge, DataTable, type Column } from '../components'
 import { CreditorFiles } from '../components/case/CreditorFiles'
+import { BankCodeHelper } from '../components/case/BankCodeHelper'
 import type { Creditor } from '../types'
 import {
   ACCOUNT_TYPE_OPTIONS,
@@ -920,6 +921,16 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           truncateValue
           fillWidth
         />
+        {/* 銀行名から金融機関コードを引く。銀行名そのものは書き換えない
+            （辞書は「三井住友」のような略記で、登録済みの「三井住友銀行」より情報が少ないため） */}
+        <BankCodeHelper
+          kind="bank"
+          name={creditor.bankName ?? ''}
+          code={creditor.financialInstitutionCode ?? ''}
+          onApply={(h) =>
+            updateCreditor(creditor, { financialInstitutionCode: h.code })
+          }
+        />
       </div>
       <div className="min-w-0 col-span-1">
         <EditableField
@@ -945,6 +956,14 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           bordered
           truncateValue
           fillWidth
+        />
+        {/* 支店は金融機関コードが決まっていないと絞れない（同名支店が他行に多数あるため） */}
+        <BankCodeHelper
+          kind="branch"
+          name={creditor.branchName ?? ''}
+          code={creditor.branchCode ?? ''}
+          bankCode={creditor.financialInstitutionCode ?? ''}
+          onApply={(h) => updateCreditor(creditor, { branchCode: h.code })}
         />
       </div>
       <div className="min-w-0 col-span-1">
