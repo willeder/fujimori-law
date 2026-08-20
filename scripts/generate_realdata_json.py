@@ -463,18 +463,26 @@ def emit_creditors(id_to_case):
     (ID,債権者名)では結合できない行が多いため、和解詳細の各行を必ず弁済プランとして出力し、
     一覧側の補助情報(申告額/債務額/ステータス等)は名前一致した場合のみ付加する。
     和解詳細に現れない一覧債権者(スケジュール未確定)は表示用に別途出力する。"""
-    # 一覧を (ID,債権者名) -> 行 でインデックス（補助情報・最初の出現を採用）
-    listidx = {}
+    # 一覧を (ID,債権者名) -> 行の**リスト**でインデックスする。
+    #
+    # 以前は setdefault で最初の1件だけを採用していたため、同じ案件に同名の
+    # 債権者が2行ある場合（別契約・別枝番など）に後ろの行が丸ごと消えていた。
+    # 事務所からのご指摘「弁済社数が3なのにタブが存在してない」がこれ。
+    #   例) 148839E 上條様 … SMBCコンシューマーファイナンス×2・アコム×2 → 5行が3タブに
+    #       149201E 今村様 … イオンクレジット×2 → 11行が10タブに
+    # 実データで23行・21案件が消えていた。同名でも別の債権として扱う。
+    listrows = {}
     for r in read_csv("和解対象債権一覧.csv", "和解対象債権者一覧.csv"):
         eid = r["ID"].strip()
         name = s(r.get("債権者"))
         if not name:
             continue
-        listidx.setdefault((eid, name), r)
+        listrows.setdefault((eid, name), []).append(r)
 
     out = []
     cid_seq = 1
-    matched = set()
+    # (ID,債権者名) ごとに、一覧の何行目まで和解詳細へ割り当てたか
+    used = {}
 
     # 「★リマインド」等の行は債権者ではなく事務員向けのメモ（いつ・何をする）。
     # 債権者として数えると債権社数・申告額の集計が狂うのでここでは捨てる。
@@ -486,21 +494,25 @@ def emit_creditors(id_to_case):
         case_id = id_to_case.get(eid)
         if case_id is None or not name or name.startswith("★") or name == "債権者":
             continue
-        r = listidx.get((eid, name))
+        # 同名が複数あるときは、和解詳細の行に対して一覧の行を先頭から1つずつ割り当てる
+        key = (eid, name)
+        rows = listrows.get(key, [])
+        i = used.get(key, 0)
+        r = rows[i] if i < len(rows) else None
         if r is not None:
-            matched.add((eid, name))
+            used[key] = i + 1
         out.append(_build_creditor(cid_seq, case_id, name, r or {}, d))
         cid_seq += 1
 
-    # 2) 和解詳細に無い一覧債権者（スケジュール未確定）も表示用に出力
-    for (eid, name), r in listidx.items():
-        if (eid, name) in matched:
-            continue
+    # 2) 和解詳細に割り当てられなかった一覧の行（スケジュール未確定）も表示用に出力。
+    #    同名が複数あれば、余った行の数だけタブができる。
+    for (eid, name), rows in listrows.items():
         case_id = id_to_case.get(eid)
         if case_id is None or name.startswith("★") or name == "債権者":
             continue
-        out.append(_build_creditor(cid_seq, case_id, name, r, {}))
-        cid_seq += 1
+        for r in rows[used.get((eid, name), 0):]:
+            out.append(_build_creditor(cid_seq, case_id, name, r, {}))
+            cid_seq += 1
 
     return out
 
