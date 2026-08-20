@@ -38,7 +38,6 @@ import { joinAddress, stripPrefecture } from "../utils/address";
 import { getClientId } from "../utils/clientId";
 import { settlementTotals } from "../lib/settlementTotals";
 import { isEmptyRow } from "../lib/paymentRows";
-import { CaseFiles } from "../components/case/CaseFiles";
 import { CaseReminders } from "../components/case/CaseReminders";
 import {
   CASE_STATUS_OPTIONS,
@@ -292,6 +291,23 @@ function lastListPath(): string {
     return sessionStorage.getItem(LAST_LIST_PATH_KEY) || "/";
   } catch {
     return "/";
+  }
+}
+
+/**
+ * 一覧で見えていた並び順（案件IDの配列）。
+ * DataTable が行を開く直前に sessionStorage へ控えている（修正依頼㉙）。
+ * 絞り込みと並び替えを反映した順なので、そのまま前後移動に使える。
+ */
+function listOrder(): number[] {
+  try {
+    const raw = sessionStorage.getItem("caseList.order");
+    const arr = raw ? (JSON.parse(raw) as unknown[]) : [];
+    return Array.isArray(arr)
+      ? arr.map((v) => Number(v)).filter((n) => Number.isFinite(n))
+      : [];
+  } catch {
+    return [];
   }
 }
 
@@ -624,6 +640,15 @@ function CaseDetailBody({
 
   // 検索結果セット（左右ナビで案件を渡り歩く）
   const foundSet = useFoundSet();
+
+  // 一覧での前後の案件（修正依頼㉙「一覧に戻らないと前後が見られない」）。
+  // 検索結果の前後送りが出ているときは、そちらと役割が重なるので出さない。
+  const listIds = useMemo(() => listOrder(), []);
+  const listIdx = listIds.indexOf(Number(id));
+  const prevCaseId = listIdx > 0 ? listIds[listIdx - 1] : null;
+  const nextCaseId =
+    listIdx >= 0 && listIdx < listIds.length - 1 ? listIds[listIdx + 1] : null;
+  const showListNav = foundSet.items.length === 0 && listIdx >= 0;
   const gotoFound = (i: number) => {
     const item = foundSet.items[i];
     if (!item) return;
@@ -1375,6 +1400,31 @@ function CaseDetailBody({
           >
             ← 一覧に戻る
           </button>
+          {showListNav && (
+            <span className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs">
+              <button
+                type="button"
+                onClick={() => prevCaseId != null && navigate(`/cases/${prevCaseId}`)}
+                disabled={prevCaseId == null}
+                className="rounded px-1.5 font-bold text-slate-700 hover:bg-slate-200 disabled:opacity-30"
+                title="一覧での前の依頼者"
+              >
+                ◀
+              </button>
+              <span className="tabular-nums text-slate-600">
+                {listIdx + 1} / {listIds.length}
+              </span>
+              <button
+                type="button"
+                onClick={() => nextCaseId != null && navigate(`/cases/${nextCaseId}`)}
+                disabled={nextCaseId == null}
+                className="rounded px-1.5 font-bold text-slate-700 hover:bg-slate-200 disabled:opacity-30"
+                title="一覧での次の依頼者"
+              >
+                ▶
+              </button>
+            </span>
+          )}
           {foundSet.items.length > 0 && (
             <span className="flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs">
               <button
@@ -1973,15 +2023,6 @@ function CaseDetailBody({
             {/* kintone で「★リマインド」という債権者の行にしていたもの */}
             <SectionCard title="リマインド" color="slate" collapsible defaultOpen={false}>
               <CaseReminders caseId={caseData.id} locked={locked != null} />
-            </SectionCard>
-            {/* kintone の「相談票添付」「和解ファイル」。実体は Supabase Storage */}
-            <SectionCard
-              title="添付ファイル"
-              color="slate"
-              collapsible
-              defaultOpen={false}
-            >
-              <CaseFiles caseId={caseData.id} />
             </SectionCard>
             <SectionCard
               title="基本情報"

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useCaseEdit } from '../context/CaseEditContext'
 import { useCaseDispatch, usePaymentsByCaseId } from '../store/useCaseStore'
 import { DataTable, type Column } from '../components'
@@ -89,6 +89,28 @@ export function PaymentTable({
   const allCasePayments = usePaymentsByCaseId(caseId)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editData, setEditData] = useState<Partial<PaymentRecord>>({})
+
+  // 一括表示（修正依頼㉗・45）。
+  // 事務所からの指摘:
+  //   「入金スケジュールが9〜10ヶ月分しか一度に見えない」
+  //   「一括で見えるポップアップがほしい。選んだ行までスクロールしてほしい」
+  // 表の高さを増やしたうえで、全期間を一度に見るための別窓を用意する。
+  const [allOpen, setAllOpen] = useState(false)
+  const [tall, setTall] = useState(false)
+  const [highlightId, setHighlightId] = useState<number | null>(null)
+  const wrapRef = useRef<HTMLDivElement>(null)
+
+  /** 一括表示で選んだ行まで、表の中をスクロールして光らせる */
+  const jumpTo = (id: number) => {
+    setAllOpen(false)
+    setHighlightId(id)
+    requestAnimationFrame(() => {
+      const row = wrapRef.current?.querySelector<HTMLElement>(`tr[data-row-key="${id}"]`)
+      row?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      // 光らせるのは一時的に。ずっと色が残ると実入金の色分けと紛らわしい
+      window.setTimeout(() => setHighlightId((v) => (v === id ? null : v)), 2500)
+    })
+  }
 
   const sortedPayments = [...payments].sort((a, b) => {
     const dateA = a.plannedDate ?? ''
@@ -853,6 +875,25 @@ export function PaymentTable({
         </div>
       </div>
 
+      <div className="mb-1 flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setAllOpen(true)}
+          className="rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-600 hover:bg-slate-100"
+          title="全期間を別窓で一覧します。行を選ぶとこの表のその行へ移動します"
+        >
+          全期間を一覧（{sortedPayments.length}件）
+        </button>
+        <button
+          type="button"
+          onClick={() => setTall((v) => !v)}
+          className="rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-600 hover:bg-slate-100"
+        >
+          {tall ? '表示を戻す' : '表を広げる'}
+        </button>
+      </div>
+
+      <div ref={wrapRef}>
       <DataTable
         data={sortedPayments}
         columns={columns}
@@ -863,8 +904,10 @@ export function PaymentTable({
         cellSingleLine
         suspendTruncate={editingId !== null}
         enableFind
-        bodyMaxHeightClassName="max-h-[min(60vh,32rem)]"
+        bodyMaxHeightClassName={tall ? 'max-h-[82vh]' : 'max-h-[min(72vh,44rem)]'}
         getRowClassName={(item) => {
+          // 一括表示から飛んできた行を一時的に光らせる
+          if (highlightId === item.id) return 'bg-amber-100'
           // 実入金日がない場合はデフォルト
           if (!item.actualDate) return ''
           const planned = item.plannedAmount ?? 0
@@ -876,6 +919,77 @@ export function PaymentTable({
           return ''
         }}
       />
+      </div>
+
+      {allOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setAllOpen(false)}
+        >
+          <div
+            className="flex max-h-[88vh] w-full max-w-3xl flex-col rounded-lg bg-white shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-slate-200 px-3 py-2">
+              <span className="text-sm font-bold text-slate-800">
+                入金スケジュール（全{sortedPayments.length}件）
+              </span>
+              <button
+                type="button"
+                onClick={() => setAllOpen(false)}
+                className="rounded px-2 py-0.5 text-sm text-slate-500 hover:bg-slate-100"
+              >
+                閉じる
+              </button>
+            </div>
+            <div className="min-h-0 flex-1 overflow-auto">
+              <table className="w-full text-xs">
+                <thead className="sticky top-0 bg-slate-100 text-slate-600">
+                  <tr>
+                    <th className="px-2 py-1 text-left">入金予定日</th>
+                    <th className="px-2 py-1 text-right">入金予定額</th>
+                    <th className="px-2 py-1 text-left">実入金日</th>
+                    <th className="px-2 py-1 text-right">実入金額</th>
+                    <th className="px-2 py-1 text-right">弁済充当額</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedPayments.map((p, i) => (
+                    <tr
+                      key={p.id}
+                      onClick={() => jumpTo(p.id)}
+                      className={`cursor-pointer border-b border-slate-100 hover:bg-blue-50 ${
+                        i % 2 === 1 ? 'bg-slate-50' : ''
+                      }`}
+                      title="この行へ移動します"
+                    >
+                      <td className="px-2 py-1 tabular-nums">{p.plannedDate ?? '-'}</td>
+                      <td className="px-2 py-1 text-right tabular-nums">
+                        {p.plannedAmount != null ? p.plannedAmount.toLocaleString() : '-'}
+                      </td>
+                      <td className="px-2 py-1 tabular-nums">{p.actualDate ?? '-'}</td>
+                      <td
+                        className={`px-2 py-1 text-right tabular-nums ${
+                          p.actualDate && (p.actualAmount ?? 0) < (p.plannedAmount ?? 0)
+                            ? 'text-red-600'
+                            : ''
+                        }`}
+                      >
+                        {p.actualAmount != null ? p.actualAmount.toLocaleString() : '-'}
+                      </td>
+                      <td className="px-2 py-1 text-right tabular-nums">
+                        {p.actualRepaymentAllocation != null
+                          ? p.actualRepaymentAllocation.toLocaleString()
+                          : '-'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
 
       <button
         type="button"

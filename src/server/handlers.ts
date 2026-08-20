@@ -10,6 +10,7 @@ import {
   calculateDelayStats,
   detectPaymentDelays,
 } from '../services/payment/delayDetection.js'
+import { SETTLED_CREDITOR_STATUSES } from '../constants/fieldOptions.js'
 import { writeAudit, writeChange } from './audit.js'
 import { parseFindCriterion, toIsoDate } from '../utils/findCriterion.js'
 
@@ -414,6 +415,80 @@ function yearRange(base: Date, offsetYears: number): { from: string; to: string 
  * 絶対日付（2026-07-29）は from=to のその日。相対トークンはその期間全体。
  * 解決できなければ null。
  */
+/**
+ * 債権者テーブルの日付列で案件を絞るための対応表。
+ * 値は Creditor の列名。1社でも該当すればその案件がヒットする。
+ *
+ * ★ finalPaymentMonth / paymentStartMonth は **text 列**（kintoneでは年月日が
+ *   入っていたり空だったりするため）。そのまま CAST すると、日付でない値が
+ *   1件でも入った瞬間に**その条件だけでなくクエリ全体が落ちる**。
+ *   dateExpr() で「YYYY-MM-DD で始まるときだけ日付として扱う」形に包む。
+ */
+const CREDITOR_DATE_FIELDS: Record<string, string | undefined> = {
+  creditorSettlementDate: 'settlementDate',
+  creditorPaymentStartMonth: 'paymentStartMonth',
+  creditorFinalPaymentMonth: 'finalPaymentMonth',
+  creditorContractDate: 'contractDate',
+  creditorNextProcessDate: 'nextProcessDate',
+  creditorAcceptanceNoticeSentDate: 'acceptanceNoticeSentDate',
+  creditorDebtInquiryArrivalDate: 'debtInquiryArrivalDate',
+  creditorSettlementProposalDate: 'settlementProposalDate',
+}
+
+/**
+ * 「和解が成立していて支払予定があるはずの」債権者ステータス。
+ * SETTLED_CREDITOR_STATUSES と同じ内容を SQL のリテラルにしたもの。
+ */
+const SETTLED_STATUS_SQL = SETTLED_CREDITOR_STATUSES.map((v) => `'${v}'`).join(', ')
+
+/** 上のうち text 型で入っている列。日付として比較する前にガードが要る */
+const CREDITOR_TEXT_DATE_COLUMNS = new Set(['finalPaymentMonth', 'paymentStartMonth'])
+
+/**
+ * 日付として比較できる式にする。
+ * text 列は「YYYY-MM-DD で始まる」ときだけ日付とみなし、それ以外は NULL にする。
+ * （NULL は比較で偽になるので、変な値が混ざっても落ちずに除外されるだけで済む）
+ */
+function dateExpr(col: string, isText: boolean): string {
+  return isText ? `NULLIF(substring(${col} from '^\\d{4}-\\d{2}-\\d{2}'), '')` : col
+}
+
+/**
+ * 日付条件の式を組み立てる。
+ * expr には列名でもスカラサブクエリでも渡せる（例: 配下の債権者の MAX(最終支払日)）。
+ * 相対指定（TODAY / THIS_MONTH / FROM_TODAY:-7:DAYS 等）は期間になるため、
+ * 比較の向きに合わせて期間の端を使う。組めないときは null。
+ */
+function buildDateCondition(
+  expr: string,
+  op: string,
+  filled: string[],
+  params: (string | number)[]
+): string | null {
+  if (op === 'empty') return `${expr} IS NULL`
+  if (op === 'notEmpty') return `${expr} IS NOT NULL`
+  if (filled.length === 0) return null
+  const range = resolveDateValue(filled[0])
+  if (!range) return null
+  if (op === 'between' && filled.length >= 2) {
+    const r2 = resolveDateValue(filled[1])
+    if (!r2) return null
+    params.push(range.from, r2.to)
+    return `CAST(${expr} AS DATE) BETWEEN $${params.length - 1}::date AND $${params.length}::date`
+  }
+  if (op === 'gte' || op === 'gt') {
+    params.push(op === 'gte' ? range.from : range.to)
+    return `CAST(${expr} AS DATE) ${op === 'gte' ? '>=' : '>'} $${params.length}::date`
+  }
+  if (op === 'lte' || op === 'lt') {
+    params.push(op === 'lte' ? range.to : range.from)
+    return `CAST(${expr} AS DATE) ${op === 'lte' ? '<=' : '<'} $${params.length}::date`
+  }
+  params.push(range.from, range.to)
+  const inRange = `CAST(${expr} AS DATE) BETWEEN $${params.length - 1}::date AND $${params.length}::date`
+  return op === 'ne' ? `NOT (${inRange})` : inRange
+}
+
 export function resolveDateValue(
   value: string,
   now: Date = new Date()
@@ -611,6 +686,50 @@ export function buildConditionWhere(
     if (op === 'notEmpty' || filled.length === 0) return exists
     const wantsMismatch = filled.some((v) => v.includes('あり') || v === '違')
     return wantsMismatch ? exists : `NOT ${exists}`
+  }
+
+  // ── 債権者側の日付で案件を絞る（修正依頼㉑）──────────────────
+  // 「今月完済の人を出したい」というご要望に対応するもの。
+  // 完済は「最後の1社が終わったとき」なので、次の2つを分けて用意する。
+  //   最終支払日（全社完了）… 案件配下の最終支払日の最大値。＝いつ完済するか
+  //   最終支払日（いずれか） … 1社でも該当すればヒット。＝その月に何か1本終わる
+  // 前者を使わないと「まだ他社が残っている人」まで完済扱いで出てしまう。
+  if (field === 'caseFinalPaymentDate' || field === 'caseFinalPaymentUnknown') {
+    // ISO(YYYY-MM-DD)の文字列なので MAX の大小は日付の大小と一致する
+    const inner = dateExpr('cr."finalPaymentMonth"', true)
+    // ★ 和解済なのに支払予定が入っていない社が1つでもあると、MAX は
+    //   「まだ残っているのに早い日付」を返す。それを完済日として出すと
+    //   事務所が未完済の依頼者に完済の連絡をしてしまうため、除外する。
+    //   （2026-08時点で 3,110件中 1,712件が該当。債権者名の読み替え待ちのぶん）
+    const unknown =
+      `EXISTS (SELECT 1 FROM creditors cr WHERE cr."caseId" = c.id` +
+      ` AND cr."status" IN (${SETTLED_STATUS_SQL})` +
+      ` AND ${inner} IS NULL)`
+    if (field === 'caseFinalPaymentUnknown') {
+      // 「完済日が出せない案件」を洗い出すための条件（読み替え作業の対象一覧）
+      return op === 'empty' || op === 'notIn' || op === 'ne' || op === 'notContains'
+        ? `NOT ${unknown}`
+        : unknown
+    }
+    const expr = `(SELECT MAX(${inner}) FROM creditors cr WHERE cr."caseId" = c.id)`
+    const cond = buildDateCondition(expr, op, filled, params)
+    if (!cond) return null
+    return `(${cond}) AND NOT ${unknown}`
+  }
+  const creditorDateCol = CREDITOR_DATE_FIELDS[field]
+  if (creditorDateCol) {
+    const col = dateExpr(
+      `cr."${creditorDateCol}"`,
+      CREDITOR_TEXT_DATE_COLUMNS.has(creditorDateCol)
+    )
+    const wrap = (extra: string) =>
+      `EXISTS (SELECT 1 FROM creditors cr WHERE cr."caseId" = c.id AND ${extra})`
+    // 空／空でない は「1件も入っていない」「1件でも入っている」で判定する
+    if (op === 'empty') return `NOT ${wrap(`${col} IS NOT NULL`)}`
+    if (op === 'notEmpty') return wrap(`${col} IS NOT NULL`)
+    const inner = buildDateCondition(col, op, filled, params)
+    if (!inner) return null
+    return wrap(inner)
   }
 
   // 債権者別ステータス（リレーション）。

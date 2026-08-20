@@ -132,6 +132,19 @@ const PAYMENT_COLUMNS: ColMap[] = [
   { header: '手数料', field: 'handlingFee', type: 'int' },
 ]
 
+/**
+ * 「その行に金額が入っているか」を見るための列。
+ * 入金予定額が0でも、ここのどれかに数値があれば実データとして取り込む。
+ */
+const PAYMENT_AMOUNT_FIELDS = [
+  'plannedAmount',
+  'plannedFeeAllocation',
+  'plannedAgentFeeAllocation',
+  'plannedPoolAllocation',
+  'plannedRepaymentAllocation',
+  'handlingFee',
+] as const
+
 /** 1社あたりの振込手数料。相談票では空欄のことが多いので 社数×この単価 で補う */
 const HANDLING_FEE_UNIT = 129
 
@@ -330,15 +343,27 @@ function parsePaymentSheet(buf: Buffer): Record<string, unknown>[] {
       const val = coerce(col.type, i < row.length ? row[i] : '')
       if (val !== null) rec[col.field] = val
     }
-    // 予定日と予定額が揃っている行だけが実データ
+    // 実データかどうかの判定（修正依頼⑫）。
+    // 以前は「入金予定日があり、かつ入金予定額が1円以上」の行だけを取り込んでいた。
+    // そのため事務所からご指摘のとおり、**入金予定額が0円でも弁済充当予定額などに
+    // 数値が入っている行**が丸ごと落ちていた（プール金から充当する月など）。
+    // 判定を「予定日があり、金額のどれか1つでも0でない」に変える。
+    // 100行ぶんの空枠（全部0または空）は、これでも従来どおり除外される。
     const amount = (rec.plannedAmount as number | undefined) ?? 0
-    if (!rec.plannedDate || amount <= 0) continue
+    const n = (k: string) => (rec[k] as number | undefined) ?? 0
+    const hasAnyAmount = PAYMENT_AMOUNT_FIELDS.some((k) => n(k) !== 0)
+    if (!rec.plannedDate || !hasAnyAmount) continue
 
     // 手数料・ﾌﾟｰﾙ充当予定額は空欄のことがあるので、恒等式
     //   入金予定額 = 報酬 + 弁代報酬 + ﾌﾟｰﾙ + 弁済 + 手数料
     // が必ず成立するように埋める。どちらか一方だけ空欄のときに社数×129で
     // 埋めてしまうと二重計上になるため、残余から逆算する。
-    const n = (k: string) => (rec[k] as number | undefined) ?? 0
+    // ただし入金予定額が0の行（プール金からの充当など）は、この恒等式が
+    // 成り立たないので触らない。触るとﾌﾟｰﾙ充当予定額がマイナスになる。
+    if (amount <= 0) {
+      out.push(rec)
+      continue
+    }
     const rest = amount - (n('plannedFeeAllocation') + n('plannedAgentFeeAllocation') + n('plannedRepaymentAllocation'))
     const hasFee = rec.handlingFee != null
     const hasPool = rec.plannedPoolAllocation != null
