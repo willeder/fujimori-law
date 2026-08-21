@@ -23,7 +23,7 @@
 import { randomBytes } from 'node:crypto'
 import { prisma } from './db.js'
 import { writeAudit, type Actor } from './audit.js'
-import { gmoFetch } from './gmoProxy.js'
+import { gmoFetchThrottled } from './gmoProxy.js'
 
 const BASE = () => (process.env.GMO_API_BASE ?? 'https://stg-api.gmo-aozora.com').replace(/\/$/, '')
 const CLIENT_ID = () => process.env.GMO_CLIENT_ID ?? ''
@@ -120,7 +120,7 @@ async function callTokenEndpoint(params: Record<string, string>): Promise<TokenR
     body.set('client_id', CLIENT_ID())
     body.set('client_secret', CLIENT_SECRET())
   }
-  const r = await gmoFetch(`${BASE()}/ganb/api/auth/v1/token`, {
+  const r = await gmoFetchThrottled(`${BASE()}/ganb/api/auth/v1/token`, {
     method: 'POST',
     headers,
     body: body.toString(),
@@ -223,7 +223,7 @@ export async function getStatus(): Promise<{
 export async function gmoGet(path: string, params?: Record<string, string>): Promise<unknown> {
   const token = await getValidAccessToken()
   const q = params ? `?${new URLSearchParams(params).toString()}` : ''
-  const r = await gmoFetch(`${BASE()}${path}${q}`, {
+  const r = await gmoFetchThrottled(`${BASE()}${path}${q}`, {
     headers: { 'x-access-token': token, Accept: 'application/json' },
   })
   const json = (await r.json().catch(() => ({}))) as unknown
