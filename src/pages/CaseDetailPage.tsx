@@ -1842,197 +1842,7 @@ function CaseDetailBody({
       <main className="min-h-0 flex-1 overflow-y-auto">
         <div className="flex min-w-0 w-full flex-col">
           <div className="min-w-0 space-y-1.5 px-2 pb-2 pt-1.5">
-            {/* 入金スケジュール・和解状況 */}
-            <div className="min-w-0">
-              <SectionCard title="入金スケジュール・和解状況" color="green">
-                <Tabs
-                  variant="split"
-                  tabBodyScroll="host"
-                  tabBodyMaxHeightClassName={
-                    paymentScheduleSectionTab === "settlement" &&
-                    displayCreditorScopeTabId !== "all"
-                      ? "h-fit max-h-[min(55vh,26rem)]"
-                      : "h-[min(55vh,26rem)]"
-                  }
-                  hostBodyNaturalHeight={
-                    paymentScheduleSectionTab === "settlement" &&
-                    displayCreditorScopeTabId !== "all"
-                  }
-                  activeTabId={paymentScheduleSectionTab}
-                  onActiveTabChange={(id) =>
-                    setPaymentScheduleSectionTab(
-                      id === "settlement" ? "settlement" : "payments",
-                    )
-                  }
-                  tabs={[
-                    {
-                      id: "payments",
-                      label: "入金スケジュール",
-                      content: (
-                        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-1.5">
-                          {/* 債権者タブ切替でも常に見えるサマリ */}
-                          <div className="min-w-0 overflow-x-auto">
-                            <div className="flex w-max min-w-0 flex-nowrap items-center whitespace-nowrap text-xs leading-none text-slate-800">
-                              <div className="flex min-h-[1.75rem] items-center gap-x-6 rounded-md border border-slate-100/80 bg-slate-50/60 px-2 py-0.5">
-                                {/* 催促通知除外 */}
-                                <span className="inline-flex shrink-0 items-center gap-1">
-                                  <span className="text-xs text-slate-500">催促通知除外：</span>
-                                  <select
-                                    value={caseData.paymentInfo.notificationExcluded ?? ''}
-                                    onChange={(e) =>
-                                      updateCase({
-                                        paymentInfo: {
-                                          ...caseData.paymentInfo,
-                                          notificationExcluded: e.target.value === '除外' ? '除外' : null,
-                                        },
-                                      })
-                                    }
-                                    className={`rounded border border-slate-200 px-1.5 py-0.5 text-xs ${
-                                      caseData.paymentInfo.notificationExcluded === '除外'
-                                        ? 'font-bold text-red-600'
-                                        : 'text-slate-700'
-                                    }`}
-                                  >
-                                    <option value="">-</option>
-                                    <option value="除外" className="font-bold text-red-600">除外</option>
-                                  </select>
-                                </span>
-                                <span
-                                  className="mx-0.5 h-3 w-px shrink-0 self-center bg-slate-300"
-                                  aria-hidden
-                                />
-                                <VAccountFields
-                                  branch={caseData.paymentInfo.vAccountBranch}
-                                  number={caseData.paymentInfo.vAccountNumber}
-                                  disabled={!editing}
-                                  onSave={(b, n) =>
-                                    updateCase({
-                                      paymentInfo: {
-                                        ...caseData.paymentInfo,
-                                        vAccountBranch: b,
-                                        vAccountNumber: n,
-                                      },
-                                    })
-                                  }
-                                />
-                                <span
-                                  className="mx-0.5 h-3 w-px shrink-0 self-center bg-slate-300"
-                                  aria-hidden
-                                />
-                                <span className="inline-flex shrink-0 items-center gap-0.5">
-                                  <span className="text-slate-400">
-                                    最終入金予定日：
-                                  </span>
-                                  <span className="font-bold tabular-nums text-blue-600">
-                                    {finalPlannedDate &&
-                                    finalPlannedDate.length > 0
-                                      ? finalPlannedDate
-                                      : "-"}
-                                  </span>
-                                </span>
-                                <span className="inline-flex shrink-0 items-center gap-0.5">
-                                  <span className="text-slate-400">
-                                    累計）弁代報酬充当額：
-                                  </span>
-                                  <span className={`font-bold tabular-nums ${sumActualAgentFee < 0 ? "text-red-600" : "text-blue-600"}`}>
-                                    {sumActualAgentFee.toLocaleString()}円
-                                  </span>
-                                </span>
-                                <span className="inline-flex shrink-0 items-center gap-0.5">
-                                  <span className="text-slate-400">
-                                    累計）プール充当：
-                                  </span>
-                                  <span className={`font-bold tabular-nums ${sumActualPool < 0 ? "text-red-600" : "text-blue-600"}`}>
-                                    {sumActualPool.toLocaleString()}円
-                                  </span>
-                                </span>
-                                <span className="inline-flex shrink-0 items-center gap-0.5 font-bold text-blue-600">
-                                  <span className="font-normal text-slate-400">
-                                    累計）弁済充当（実／予定）：
-                                  </span>
-                                  {formatYenPair(
-                                    sumActualRepayment,
-                                    sumPlannedRepayment,
-                                  )}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          <Tabs
-                            tabs={paymentTabs}
-                            defaultTab="all"
-                            activeTabId={displayCreditorScopeTabId}
-                            onActiveTabChange={setCreditorScopeTabId}
-                            density="dense"
-                            tabBodyScroll="guest"
-                          />
-                        </div>
-                      ),
-                    },
-                    {
-                      id: "settlement",
-                      label: "和解状況",
-                      content: (
-                        <Tabs
-                          tabs={settlementTabs}
-                          defaultTab="all"
-                          activeTabId={displayCreditorScopeTabId}
-                          onActiveTabChange={setCreditorScopeTabId}
-                          density="dense"
-                          tabBodyScroll="guest"
-                          guestExpandToParent={(id) => id === "all"}
-                          reorderable={locked == null}
-                          onReorder={handleReorderCreditors}
-                        />
-                      ),
-                    },
-                  ]}
-                  defaultTab="payments"
-                />
-              </SectionCard>
-            </div>
-            {/* 接触履歴（下部・コンパクト表示） */}
-            <div className="min-w-0">
-              <SectionCard title="接触履歴" color="slate">
-                <Tabs
-                  variant="split"
-                  defaultTab="creditor"
-                  tabs={[
-                    {
-                      id: "creditor",
-                      label: "債権者接触",
-                      content: (
-                        <ContactHistoryTable
-                          caseId={caseData.id}
-                          targetType="債権者"
-                          histories={contactHistories.filter(
-                            (h) => h.targetType === "債権者",
-                          )}
-                        />
-                      ),
-                    },
-                    {
-                      id: "client",
-                      label: "依頼者接触",
-                      content: (
-                        <ContactHistoryTable
-                          caseId={caseData.id}
-                          targetType="依頼者"
-                          histories={contactHistories.filter(
-                            (h) => h.targetType === "依頼者",
-                          )}
-                        />
-                      ),
-                    },
-                  ]}
-                />
-              </SectionCard>
-            </div>
-            {/* kintone で「★リマインド」という債権者の行にしていたもの */}
-            <SectionCard title="リマインド" color="slate" collapsible defaultOpen={false}>
-              <CaseReminders caseId={caseData.id} locked={locked != null} />
-            </SectionCard>
+            {/* 基本情報。事務所のご要望により一番上に置く（修正依頼・竹谷様） */}
             <SectionCard
               title="基本情報"
               color="slate"
@@ -2826,6 +2636,197 @@ function CaseDetailBody({
                   },
                 ]}
               />
+            </SectionCard>
+            {/* 入金スケジュール・和解状況 */}
+            <div className="min-w-0">
+              <SectionCard title="入金スケジュール・和解状況" color="green">
+                <Tabs
+                  variant="split"
+                  tabBodyScroll="host"
+                  tabBodyMaxHeightClassName={
+                    paymentScheduleSectionTab === "settlement" &&
+                    displayCreditorScopeTabId !== "all"
+                      ? "h-fit max-h-[min(55vh,26rem)]"
+                      : "h-[min(55vh,26rem)]"
+                  }
+                  hostBodyNaturalHeight={
+                    paymentScheduleSectionTab === "settlement" &&
+                    displayCreditorScopeTabId !== "all"
+                  }
+                  activeTabId={paymentScheduleSectionTab}
+                  onActiveTabChange={(id) =>
+                    setPaymentScheduleSectionTab(
+                      id === "settlement" ? "settlement" : "payments",
+                    )
+                  }
+                  tabs={[
+                    {
+                      id: "payments",
+                      label: "入金スケジュール",
+                      content: (
+                        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-1.5">
+                          {/* 債権者タブ切替でも常に見えるサマリ */}
+                          <div className="min-w-0 overflow-x-auto">
+                            <div className="flex w-max min-w-0 flex-nowrap items-center whitespace-nowrap text-xs leading-none text-slate-800">
+                              <div className="flex min-h-[1.75rem] items-center gap-x-6 rounded-md border border-slate-100/80 bg-slate-50/60 px-2 py-0.5">
+                                {/* 催促通知除外 */}
+                                <span className="inline-flex shrink-0 items-center gap-1">
+                                  <span className="text-xs text-slate-500">催促通知除外：</span>
+                                  <select
+                                    value={caseData.paymentInfo.notificationExcluded ?? ''}
+                                    onChange={(e) =>
+                                      updateCase({
+                                        paymentInfo: {
+                                          ...caseData.paymentInfo,
+                                          notificationExcluded: e.target.value === '除外' ? '除外' : null,
+                                        },
+                                      })
+                                    }
+                                    className={`rounded border border-slate-200 px-1.5 py-0.5 text-xs ${
+                                      caseData.paymentInfo.notificationExcluded === '除外'
+                                        ? 'font-bold text-red-600'
+                                        : 'text-slate-700'
+                                    }`}
+                                  >
+                                    <option value="">-</option>
+                                    <option value="除外" className="font-bold text-red-600">除外</option>
+                                  </select>
+                                </span>
+                                <span
+                                  className="mx-0.5 h-3 w-px shrink-0 self-center bg-slate-300"
+                                  aria-hidden
+                                />
+                                <VAccountFields
+                                  branch={caseData.paymentInfo.vAccountBranch}
+                                  number={caseData.paymentInfo.vAccountNumber}
+                                  disabled={!editing}
+                                  onSave={(b, n) =>
+                                    updateCase({
+                                      paymentInfo: {
+                                        ...caseData.paymentInfo,
+                                        vAccountBranch: b,
+                                        vAccountNumber: n,
+                                      },
+                                    })
+                                  }
+                                />
+                                <span
+                                  className="mx-0.5 h-3 w-px shrink-0 self-center bg-slate-300"
+                                  aria-hidden
+                                />
+                                <span className="inline-flex shrink-0 items-center gap-0.5">
+                                  <span className="text-slate-400">
+                                    最終入金予定日：
+                                  </span>
+                                  <span className="font-bold tabular-nums text-blue-600">
+                                    {finalPlannedDate &&
+                                    finalPlannedDate.length > 0
+                                      ? finalPlannedDate
+                                      : "-"}
+                                  </span>
+                                </span>
+                                <span className="inline-flex shrink-0 items-center gap-0.5">
+                                  <span className="text-slate-400">
+                                    累計）弁代報酬充当額：
+                                  </span>
+                                  <span className={`font-bold tabular-nums ${sumActualAgentFee < 0 ? "text-red-600" : "text-blue-600"}`}>
+                                    {sumActualAgentFee.toLocaleString()}円
+                                  </span>
+                                </span>
+                                <span className="inline-flex shrink-0 items-center gap-0.5">
+                                  <span className="text-slate-400">
+                                    累計）プール充当：
+                                  </span>
+                                  <span className={`font-bold tabular-nums ${sumActualPool < 0 ? "text-red-600" : "text-blue-600"}`}>
+                                    {sumActualPool.toLocaleString()}円
+                                  </span>
+                                </span>
+                                <span className="inline-flex shrink-0 items-center gap-0.5 font-bold text-blue-600">
+                                  <span className="font-normal text-slate-400">
+                                    累計）弁済充当（実／予定）：
+                                  </span>
+                                  {formatYenPair(
+                                    sumActualRepayment,
+                                    sumPlannedRepayment,
+                                  )}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <Tabs
+                            tabs={paymentTabs}
+                            defaultTab="all"
+                            activeTabId={displayCreditorScopeTabId}
+                            onActiveTabChange={setCreditorScopeTabId}
+                            density="dense"
+                            tabBodyScroll="guest"
+                          />
+                        </div>
+                      ),
+                    },
+                    {
+                      id: "settlement",
+                      label: "和解状況",
+                      content: (
+                        <Tabs
+                          tabs={settlementTabs}
+                          defaultTab="all"
+                          activeTabId={displayCreditorScopeTabId}
+                          onActiveTabChange={setCreditorScopeTabId}
+                          density="dense"
+                          tabBodyScroll="guest"
+                          guestExpandToParent={(id) => id === "all"}
+                          reorderable={locked == null}
+                          onReorder={handleReorderCreditors}
+                        />
+                      ),
+                    },
+                  ]}
+                  defaultTab="payments"
+                />
+              </SectionCard>
+            </div>
+            {/* 接触履歴（下部・コンパクト表示） */}
+            <div className="min-w-0">
+              <SectionCard title="接触履歴" color="slate">
+                <Tabs
+                  variant="split"
+                  defaultTab="creditor"
+                  tabs={[
+                    {
+                      id: "creditor",
+                      label: "債権者接触",
+                      content: (
+                        <ContactHistoryTable
+                          caseId={caseData.id}
+                          targetType="債権者"
+                          histories={contactHistories.filter(
+                            (h) => h.targetType === "債権者",
+                          )}
+                        />
+                      ),
+                    },
+                    {
+                      id: "client",
+                      label: "依頼者接触",
+                      content: (
+                        <ContactHistoryTable
+                          caseId={caseData.id}
+                          targetType="依頼者"
+                          histories={contactHistories.filter(
+                            (h) => h.targetType === "依頼者",
+                          )}
+                        />
+                      ),
+                    },
+                  ]}
+                />
+              </SectionCard>
+            </div>
+            {/* kintone で「★リマインド」という債権者の行にしていたもの */}
+            <SectionCard title="リマインド" color="slate" collapsible defaultOpen={false}>
+              <CaseReminders caseId={caseData.id} locked={locked != null} />
             </SectionCard>
           </div>
         </div>

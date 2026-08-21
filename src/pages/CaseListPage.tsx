@@ -33,7 +33,7 @@ const SEARCH_FIELD_LABEL: Record<string, string> = Object.fromEntries(
 
 /**
  * 列ごとの並び替え用の値。Case はネスト構造なので、列定義とは別に取り出し方を持つ。
- * ここに載っている列だけが（絞り込み中に限り）ヘッダークリックで並び替えできる。
+ * ここに載っている列だけがヘッダークリックで並び替えできる（修正依頼⑭）。
  * LINE連携済/未・LINE@URL は並び替えの意味がないため対象外。
  */
 const SORT_VALUE: Record<
@@ -145,7 +145,8 @@ export function CaseListPage() {
   const [saveRequestedAt, setSaveRequestedAt] = useState(0)
   const [results, setResults] = useState<Case[] | null>(null)
   const [searching, setSearching] = useState(false)
-  // 並び順。絞り込み中だけ有効（未絞り込みのときは常に No 昇順に固定する）
+  // 並び順。絞り込みの有無にかかわらず有効（修正依頼⑭）。
+  // null のときは既定の No（id）昇順。
   const [sort, setSort] = useSessionState<CaseListSort | null>('caseList.sort', null)
   // 2段目の並び順。1段目が同じ値の行だけをさらに並べ替える
   // （kintone の「受任日の新しい順、同じ日ならID順」に合わせるため）
@@ -264,10 +265,8 @@ export function CaseListPage() {
   }
 
   // ── 保存した絞り込み条件（共有フィルタ）──────────────────────
-  // 絞り込み中かどうか。未絞り込みのときは並び替えを無効にし、常に No 昇順で表示する。
-  // 保存した絞り込みを適用しているときは、条件が「すべてのレコード」（条件ゼロ）でも
-  // その並び順を効かせる（kintone のビューは条件なし＋並び順だけ、という形もあるため）。
-  const filtering = !!searchValue.trim() || results != null || activeFilterId != null
+  // （以前はここに filtering という判定があり、絞り込み中だけ並び替えを許していたが、
+  //   修正依頼⑭で絞り込みの有無にかかわらず並び替えられるようにしたため不要になった）
 
   /** いま画面に出ている絞り込み状態（「この条件を保存」で保存される内容） */
   const currentPayload: CaseListFilterPayload = useMemo(
@@ -275,11 +274,11 @@ export function CaseListPage() {
       version: 2,
       quick: { field: searchField, value: searchValue },
       filter: compactFilterQuery(filter),
-      sort: filtering ? sort : null,
-      sort2: filtering ? sort2 : null,
+      sort,
+      sort2,
       columns: columnKeys,
     }),
-    [searchField, searchValue, filter, sort, sort2, filtering, columnKeys]
+    [searchField, searchValue, filter, sort, sort2, columnKeys]
   )
 
   /** 保存条件を画面に適用する */
@@ -295,13 +294,6 @@ export function CaseListPage() {
     if (payload.filter.conditions.length > 0) void runFilter(payload.filter)
     else setResults(null)
   }
-
-  // 絞り込みが外れたら並び順も既定（No 昇順）に戻す
-  useEffect(() => {
-    if (!filtering && sort !== null) setSort(null)
-    if (!filtering && sort2 !== null) setSort2(null)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filtering])
 
   // FileMaker風「検索モード」（詳細レコードでCtrl+F）から渡された条件で自動検索。
   // 検索モードは旧形式（{field,value}）なので「含む」条件に読み替える。
@@ -1053,11 +1045,11 @@ export function CaseListPage() {
     setColumnKeys(next)
   }
 
-  // 絞り込み中だけヘッダークリックで並び替えできるようにする。
-  // 未絞り込みのときは従来どおり No（id）昇順で固定（順序を変えさせない）。
+  // 並び替えできる列（修正依頼⑭：絞り込みをしていなくてもヘッダークリックで並べ替える）。
+  // 並び順を指定していないあいだは No（id）昇順のまま。
   const sortableColumns: Column<Case>[] = columns.map((col) => {
     const sortValue = SORT_VALUE[String(col.key)]
-    return sortValue ? { ...col, sortable: filtering, sortValue } : col
+    return sortValue ? { ...col, sortable: true, sortValue } : col
   })
 
   return (
@@ -1194,8 +1186,27 @@ export function CaseListPage() {
               )}
             </div>
 
+            {/* 並び順を既定（No 昇順）に戻す。ヘッダークリックは昇順・降順の往復しか
+                しないため、戻す手段をここに置く（修正依頼⑭） */}
+            {sort && (
+              <>
+                <span className="mx-1 h-4 w-px bg-slate-300" />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSort(null)
+                    setSort2(null)
+                  }}
+                  title="並び順を既定（No 昇順）に戻します。絞り込み条件はそのままです"
+                  className="rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-600 hover:bg-slate-100"
+                >
+                  並び順を戻す
+                </button>
+              </>
+            )}
+
             {/* 2段目の並び順。1段目（ヘッダークリック）が同じ値の行だけを並べ替える */}
-            {filtering && sort && (
+            {sort && (
               <>
                 <span className="mx-1 h-4 w-px bg-slate-300" />
                 <label className="flex items-center gap-1 text-xs text-slate-500">
@@ -1286,10 +1297,10 @@ export function CaseListPage() {
             data={displayed}
             columns={sortableColumns}
             keyField="id"
-            sortKey={filtering ? (sort?.key ?? null) : null}
+            sortKey={sort?.key ?? null}
             sortOrder={sort?.order ?? 'asc'}
             onSortChange={(key, order) => setSort(key ? { key, order } : null)}
-            sortKey2={filtering ? (sort2?.key ?? null) : null}
+            sortKey2={sort2?.key ?? null}
             sortOrder2={sort2?.order ?? 'asc'}
             sortOnlyColumns={hiddenSortColumns}
             isRowExpanded={(item) => expanded?.caseId === item.id}

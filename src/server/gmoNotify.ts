@@ -25,7 +25,7 @@
  *     ・配信エラーが1時間続くと自動的に配信停止状態へ移行する
  *     ・配信停止のまま14日経過したメッセージは削除される（復旧不能）
  */
-import { gmoFetch } from './gmoProxy.js'
+import { gmoFetchThrottled } from './gmoProxy.js'
 import { planDepositRows, applyDepositPlan } from './depositImport.js'
 import { pickDeposits, EVENT_TYPE_VA_DEPOSIT } from './gmoWebhook.js'
 import { writeAudit, type Actor } from './audit.js'
@@ -74,7 +74,7 @@ export async function subscribe(
     subscribeStatus: start ? '1' : '0',
     eventTypes: [{ eventType }],
   }
-  const r = await gmoFetch(`${WEBHOOKS_BASE()}/subscribe`, {
+  const r = await gmoFetchThrottled(`${WEBHOOKS_BASE()}/subscribe`, {
     method: 'POST',
     headers: {
       Authorization: basicHeader(),
@@ -131,7 +131,7 @@ export async function fetchUnsentAndApply(
       message: 'GMO_CLIENT_ID / GMO_CLIENT_SECRET が未設定です',
     }
   }
-  const r = await gmoFetch(`${WEBHOOKS_BASE()}/unsentlist/${eventType}`, {
+  const r = await gmoFetchThrottled(`${WEBHOOKS_BASE()}/unsentlist/${eventType}`, {
     method: 'GET',
     headers: { Authorization: basicHeader() },
   })

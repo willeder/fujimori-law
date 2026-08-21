@@ -45,6 +45,7 @@ import * as creditorFiles from '../src/server/creditorFiles.js'
 import * as caseFiles from '../src/server/caseFiles.js'
 import * as caseReminders from '../src/server/caseReminders.js'
 import * as postalCode from '../src/server/postalCode.js'
+import * as bankCode from '../src/server/bankCode.js'
 import * as mail from '../src/server/mail.js'
 import { getSessionToken, getSessionUser } from '../src/server/auth.js'
 import * as savedFilters from '../src/server/savedFilters.js'
@@ -397,6 +398,19 @@ export default async function handler(
     }
     if (path === '/api/postal/address' && method === 'GET') {
       json({ ok: true, hits: postalCode.lookupByAddress(query.get('address') ?? '') })
+      return
+    }
+
+    // ── 金融機関コードの入力補助（辞書はサーバ側のみ。外部への問い合わせはしない）──
+    if (path === '/api/bank/search' && method === 'GET') {
+      json({ ok: true, hits: bankCode.searchBanks(query.get('q') ?? '') })
+      return
+    }
+    if (path === '/api/bank/branches' && method === 'GET') {
+      json({
+        ok: true,
+        hits: bankCode.searchBranches(query.get('code') ?? '', query.get('q') ?? ''),
+      })
       return
     }
 

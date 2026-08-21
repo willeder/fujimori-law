@@ -769,3 +769,13 @@ model SavedFilter {
   @@index([ownerId])
   @@map("saved_filters")
 }
+
+/// GMO オープンAPI の流量制御用。1行だけ（id=1）を使う。
+/// Vercel は同時に複数インスタンスが動くため、プロセス内キューでは
+/// 「全体の流量」を 1TPS 以下に保てない。この行を共有ゲートにして直列化する。
+model GmoRateLimit {
+  id           Int      @id
+  lastCalledAt DateTime
+
+  @@map("gmo_rate_limit")
+}
