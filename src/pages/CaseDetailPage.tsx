@@ -38,7 +38,6 @@ import { joinAddress, stripPrefecture } from "../utils/address";
 import { getClientId } from "../utils/clientId";
 import { settlementTotals } from "../lib/settlementTotals";
 import { isEmptyRow } from "../lib/paymentRows";
-import { CaseReminders } from "../components/case/CaseReminders";
 import { CaseReminderBanner } from "../components/case/CaseReminderBanner";
 import {
   CASE_STATUS_OPTIONS,
@@ -2838,10 +2837,6 @@ function CaseDetailBody({
                 />
               </SectionCard>
             </div>
-            {/* kintone で「★リマインド」という債権者の行にしていたもの */}
-            <SectionCard title="リマインド" color="slate" collapsible defaultOpen={false}>
-              <CaseReminders caseId={caseData.id} locked={locked != null} />
-            </SectionCard>
           </div>
         </div>
       </main>
