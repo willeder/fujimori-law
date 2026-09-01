@@ -19,6 +19,57 @@ function fmtNum(n: number | null | undefined) {
 }
 
 /**
+ * 振込1件あたりの手数料（円）。サーバ側（src/server/paymentSummary.ts の
+ * HANDLING_FEE_UNIT）と同じ値。kintone の計算式「手数料＝弁済社数×129円」に対応する。
+ */
+const HANDLING_FEE_UNIT = 129
+
+/**
+ * 予定側の充当額を kintone の計算式どおりに埋める（堀本様 2026-08-10 のご要望）。
+ *
+ *   手数料         = 弁済社数 × 129円
+ *   ﾌﾟｰﾙ充当予定額 = 入金予定額 − 報酬充当 − 弁代報酬充当 − 弁済充当 − 手数料
+ *
+ * kintone の実データ44,443行のうち44,442行でこの式が成立する（不成立の1行は手入力）。
+ * 取込時（src/server/intakeImport.ts）には適用していたが画面の編集時には効いておらず、
+ * 入金予定額や報酬額を直しても手数料・ﾌﾟｰﾙが手入力のままだった。
+ *
+ * 手で直した値は尊重する。この編集で手数料やﾌﾟｰﾙを触っていれば再計算しない。
+ * 入金予定額が0の行（プール金からの充当など）はこの恒等式が成り立たないため触らない。
+ */
+function applyPlannedAllocations(
+  payment: PaymentRecord,
+  finalData: Partial<PaymentRecord>
+): void {
+  const n = (v: number | null | undefined) => v ?? 0
+  const pick = <K extends keyof PaymentRecord>(k: K) =>
+    (finalData[k] ?? payment[k]) as PaymentRecord[K]
+
+  const plannedAmount = n(pick('plannedAmount') as number | null)
+  if (plannedAmount <= 0) return
+
+  const feeEdited = finalData.handlingFee !== payment.handlingFee
+  const poolEdited = finalData.plannedPoolAllocation !== payment.plannedPoolAllocation
+
+  const count = pick('repaymentCount') as number | null
+  if (!feeEdited && count != null) {
+    finalData.handlingFee = count * HANDLING_FEE_UNIT
+  }
+  // 弁済社数も手数料も分からない行は、残余のうちどこまでが手数料か決められない。
+  // ここでﾌﾟｰﾙに全部寄せると手数料ぶんがﾌﾟｰﾙに紛れるので触らない
+  // （既存データで30行だけこの形。いずれも残余がちょうど1社ぶんの手数料）。
+  const feeKnown = (finalData.handlingFee ?? payment.handlingFee) != null
+  if (!poolEdited && feeKnown) {
+    const rest =
+      plannedAmount -
+      n(pick('plannedFeeAllocation') as number | null) -
+      n(pick('plannedAgentFeeAllocation') as number | null) -
+      n(pick('plannedRepaymentAllocation') as number | null)
+    finalData.plannedPoolAllocation = rest - n(finalData.handlingFee ?? payment.handlingFee)
+  }
+}
+
+/**
  * 実入金額に基づいて各充当額を自動計算する。
  * サーバ側の入金取込（src/server/depositImport.ts の allocateActual）と同じ規則。
  *
@@ -148,6 +199,9 @@ export function PaymentTable({
 
   const handleSave = (payment: PaymentRecord) => {
     const finalData = { ...editData }
+
+    // 予定側は kintone の計算式で手数料・ﾌﾟｰﾙ充当予定額を埋める
+    applyPlannedAllocations(payment, finalData)
 
     // 実入金日が入力されている場合、充当額を自動計算
     if (finalData.actualDate) {

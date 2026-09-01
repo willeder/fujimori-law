@@ -1248,11 +1248,24 @@ async function updateRowField(
     userAgent: meta.userAgent,
   })
   // 日付の入力に連動してステータスを進める（事務所のご要望）
+  let latest = updated
+  let caseChanged = false
   if (model === 'Creditor') {
-    await applyCreditorStatusAutomation(actor, updated as Record<string, unknown>, after, meta)
+    const auto = await applyCreditorStatusAutomation(
+      actor,
+      updated as Record<string, unknown>,
+      after,
+      meta
+    )
+    caseChanged = auto.caseChanged
+    // 自動でステータスが変わった場合は、その結果を読み直して返す。
+    // updated は自動更新の前の値なので、そのまま返すと画面が古いままになる。
+    if (auto.creditorChanged) {
+      latest = (await delegate.findUnique({ where: { id } })) ?? updated
+    }
   }
 
-  return { status: 200, body: { changed: true, row: rowToJson(model, updated) } }
+  return { status: 200, body: { changed: true, row: rowToJson(model, latest), caseChanged } }
 }
 
 /**
@@ -1275,9 +1288,14 @@ async function applyCreditorStatusAutomation(
   updated: Record<string, unknown>,
   changed: Record<string, unknown>,
   meta: EditMeta
-) {
+): Promise<{ creditorChanged: boolean; caseChanged: boolean }> {
   const creditorId = Number(updated.id)
   const caseId = Number(updated.caseId)
+  // 画面はこの戻り値を見て、自動で変わった分を取り直す。
+  // 返さないと、保存したのに古いステータスが出たままになる
+  // （事務所から「データをいじってもその場で更新されない」とのご指摘）。
+  let creditorChanged = false
+  let caseChanged = false
 
   // ── ① 債権調査到着日 → 和解提案書作成待ち ──
   if ('debtInquiryArrivalDate' in changed && updated.debtInquiryArrivalDate != null) {
@@ -1287,6 +1305,7 @@ async function applyCreditorStatusAutomation(
         where: { id: creditorId },
         data: { status: '和解提案書作成待ち' },
       })
+      creditorChanged = true
       await writeChange({
         actor,
         entity: 'Creditor',
@@ -1327,6 +1346,7 @@ async function applyCreditorStatusAutomation(
           sent === targets.length ? '全社受任通知発送済' : sent > 0 ? '一部受任通知発送済' : null
         if (next && next !== cur) {
           await prisma.case.update({ where: { id: caseId }, data: { settlementStatus: next } })
+          caseChanged = true
           await writeChange({
             actor,
             entity: 'Case',
@@ -1349,6 +1369,8 @@ async function applyCreditorStatusAutomation(
       }
     }
   }
+
+  return { creditorChanged, caseChanged }
 }
 
 /** 子テーブル行の追加（変更履歴 CREATE ＋監査） */

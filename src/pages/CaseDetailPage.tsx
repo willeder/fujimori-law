@@ -29,7 +29,7 @@ import { CaseMailControl } from "../components/case/CaseMailControl";
 import { CaseChangeHistory } from "../components/case/CaseChangeHistory";
 import { FindModeLauncher } from "../components/case/FindModeLauncher";
 import { LAST_LIST_PATH_KEY } from "../components/AppHeader";
-import type { Case, Creditor } from "../types";
+import type { Case, ContactHistory, Creditor, PaymentRecord } from "../types";
 import {
   creditorTabAccentSummary,
   creditorTabAccentForName,
@@ -829,19 +829,45 @@ function CaseDetailBody({
     );
   }
 
-  /** 案件・債権者の最新値をサーバから取り直して画面へ反映（下書き破棄時に使う） */
+  /**
+   * 案件・債権者・入金・接触履歴の最新値をサーバから取り直して画面へ反映する。
+   * 下書きの破棄と、変更履歴からの「元に戻す」の後に使う。
+   *
+   * 以前は案件だけを取り直していたため、債権者・入金・接触履歴の取消が画面に
+   * 出ず、再読み込みするまで戻ったように見えなかった（サーバ側の revert は
+   * これらも戻している）。
+   */
   const reloadCaseFromServer = async () => {
     const caseId = caseData.id;
     try {
-      const [full, rows] = await Promise.all([
+      const [full, creditorRows, paymentRows, contactRows] = await Promise.all([
         fetch(`/api/cases/${caseId}`).then((r) => (r.ok ? r.json() : null)),
         fetch(`/api/creditors?caseId=${caseId}`).then((r) =>
           r.ok ? (r.json() as Promise<Creditor[]>) : null,
         ),
+        fetch(`/api/payments?caseId=${caseId}`).then((r) =>
+          r.ok ? (r.json() as Promise<PaymentRecord[]>) : null,
+        ),
+        fetch(`/api/contact-histories?caseId=${caseId}`).then((r) =>
+          r.ok ? (r.json() as Promise<ContactHistory[]>) : null,
+        ),
       ]);
       if (full) dispatch({ type: "MERGE_FULL_CASE", payload: full });
-      if (rows)
-        dispatch({ type: "MERGE_CREDITORS", payload: { caseId, rows } });
+      if (creditorRows)
+        dispatch({
+          type: "MERGE_CREDITORS",
+          payload: { caseId, rows: creditorRows },
+        });
+      if (paymentRows)
+        dispatch({
+          type: "MERGE_PAYMENTS",
+          payload: { caseId, rows: paymentRows },
+        });
+      if (contactRows)
+        dispatch({
+          type: "MERGE_CONTACT_HISTORIES",
+          payload: { caseId, rows: contactRows },
+        });
     } catch {
       /* 取り直しに失敗しても画面は壊さない */
     }
@@ -1528,13 +1554,9 @@ function CaseDetailBody({
                     refreshKey={historyRefreshKey}
                     onReverted={() => {
                       setHistoryRefreshKey((k) => k + 1);
-                      fetch(`/api/cases/${caseData.id}`)
-                        .then((r) => (r.ok ? r.json() : null))
-                        .then((full) => {
-                          if (full)
-                            dispatch({ type: "MERGE_FULL_CASE", payload: full });
-                        })
-                        .catch(() => {});
+                      // 案件だけでなく債権者・入金・接触履歴も取り直す。
+                      // サーバの取消はこれらも戻すため（堀本様のご指摘）。
+                      void reloadCaseFromServer();
                     }}
                   />
                 </div>

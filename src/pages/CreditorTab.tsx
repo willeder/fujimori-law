@@ -128,11 +128,33 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
     })
     // サーバへ永続化（差分判定・変更履歴/監査はサーバ側）
     if (creditor.id != null) {
-      void fetch(`/api/creditors/${creditor.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates),
-      }).catch((e) => console.error('債権者更新の保存に失敗:', e))
+      void (async () => {
+        try {
+          const r = await fetch(`/api/creditors/${creditor.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updates),
+          })
+          if (!r.ok) return
+          // サーバ側で日付に連動してステータスが進むことがある。
+          // 返ってきた最新行で上書きしないと、保存したのに古い表示が残る
+          // （事務所から「データをいじってもその場で更新されない」とのご指摘）。
+          const d = (await r.json()) as {
+            row?: Creditor
+            caseChanged?: boolean
+          }
+          if (d.row) dispatch({ type: 'UPDATE_CREDITOR', payload: d.row })
+          // 案件の受任後ステータスまで変わった場合は案件側も取り直す
+          if (d.caseChanged) {
+            const full = await fetch(`/api/cases/${creditor.caseId}`)
+              .then((res) => (res.ok ? res.json() : null))
+              .catch(() => null)
+            if (full) dispatch({ type: 'MERGE_FULL_CASE', payload: full })
+          }
+        } catch (e) {
+          console.error('債権者更新の保存に失敗:', e)
+        }
+      })()
     }
   }
 
