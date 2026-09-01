@@ -1986,10 +1986,6 @@ function CaseDetailBody({
                             prefecture={caseData.clientBasicInfo.prefecture ?? ""}
                             address={caseData.clientBasicInfo.address ?? ""}
                             disabled={locked != null}
-                            onApplyAddress={(pref, rest) => {
-                              updateClientBasicInfo("prefecture", pref);
-                              updateClientBasicInfo("address", rest);
-                            }}
                             onApplyZip={(zip) =>
                               updateClientBasicInfo("postalCode", zip)
                             }

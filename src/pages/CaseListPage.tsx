@@ -810,10 +810,30 @@ export function CaseListPage() {
     {
       key: 'id',
       header: 'ID',
-      width: '76px',
+      width: '92px',
       align: 'center',
       sortable: false,
-      render: (item) => item.metadata.externalId ?? '-',
+      // kintone と同じように、左端にアイコンを置いてそこから案件詳細へ飛ぶ
+      // （藤川様 2026-08-21。行を開くのは左端の列だけ、という既存の動きは
+      //   そのままで、どこを押せば開くのかが見て分かるようにする）。
+      render: (item) => (
+        <span className="inline-flex items-center gap-1">
+          <svg
+            viewBox="0 0 16 16"
+            aria-hidden="true"
+            className="h-3.5 w-3.5 shrink-0 text-blue-500"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect x="2.5" y="2" width="11" height="12" rx="1.5" />
+            <path d="M5.5 6h5M5.5 9h3" />
+          </svg>
+          <span className="tabular-nums">{item.metadata.externalId ?? '-'}</span>
+        </span>
+      ),
       filterValue: (item) => item.metadata.externalId ?? '',
     },
     {
