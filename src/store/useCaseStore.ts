@@ -27,7 +27,17 @@ export function useCase(id: number) {
 
 export function useCreditorsByCaseId(caseId: number) {
   const { creditors } = useCaseState()
-  return creditors.filter((c) => c.caseId === caseId)
+  return useMemo(() => {
+    // 「受任対象外」の債権者はタブ・一覧の一番右（末尾）にまとめる。
+    // ステータスを「破産申立待ち → 受任対象外」に変えた時点で末尾へ移ってほしい、
+    // という事務所のご要望への対応。安定ソートなので、それ以外の並び
+    // （サーバが返す displayOrder の昇順）はそのまま保たれる。
+    const rows = creditors.filter((c) => c.caseId === caseId)
+    return rows.sort(
+      (a, b) =>
+        Number(a.status === '受任対象外') - Number(b.status === '受任対象外')
+    )
+  }, [creditors, caseId])
 }
 
 /**

@@ -285,6 +285,53 @@ function dbApiPlugin(): Plugin {
             return
           }
 
+          // ── 金融機関コード・郵便番号の辞書検索 ──
+          // 本番は vercel.json の rewrite で /api/data に流れる。開発サーバには
+          // この分岐が無く 404 になっていたため、同じ結果を返せるようにする
+          // （事務所から「金融機関コードを調べられませんでした」「郵便番号を
+          //   調べられませんでした」とのご指摘。藤川様 2026-08-22）。
+          if (url.startsWith('/api/bank/') || url.startsWith('/api/postal/')) {
+            const q = new URL(req.url ?? '', 'http://localhost').searchParams
+            const sendJson = (body: unknown) => {
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify(body))
+            }
+            if (url === '/api/bank/search' && req.method === 'GET') {
+              const bank = (await server.ssrLoadModule(
+                '/src/server/bankCode.ts'
+              )) as typeof import('./src/server/bankCode')
+              sendJson({ ok: true, hits: bank.searchBanks(q.get('q') ?? '') })
+              return
+            }
+            if (url === '/api/bank/branches' && req.method === 'GET') {
+              const bank = (await server.ssrLoadModule(
+                '/src/server/bankCode.ts'
+              )) as typeof import('./src/server/bankCode')
+              sendJson({
+                ok: true,
+                hits: bank.searchBranches(q.get('code') ?? '', q.get('q') ?? ''),
+              })
+              return
+            }
+            if (url === '/api/postal/zip' && req.method === 'GET') {
+              const postal = (await server.ssrLoadModule(
+                '/src/server/postalCode.ts'
+              )) as typeof import('./src/server/postalCode')
+              sendJson({ ok: true, hits: postal.lookupByZip(q.get('code') ?? '') })
+              return
+            }
+            if (url === '/api/postal/address' && req.method === 'GET') {
+              const postal = (await server.ssrLoadModule(
+                '/src/server/postalCode.ts'
+              )) as typeof import('./src/server/postalCode')
+              sendJson({
+                ok: true,
+                hits: postal.lookupByAddress(q.get('address') ?? ''),
+              })
+              return
+            }
+          }
+
           // ── 保存した絞り込み条件（共有フィルタ） ──
           if (url.startsWith('/api/saved-filters')) {
             const sf = (await server.ssrLoadModule(

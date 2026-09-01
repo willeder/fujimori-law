@@ -356,14 +356,18 @@ export function CaseListPage() {
     })
   }, [cases, searchField, searchValue])
 
-  // 一覧は No（id）昇順で固定。ヘッダークリック等で順序を変更させない。
-  const sortedCases = useMemo(() => {
-    return [...filteredCases].sort((a, b) => (a.id ?? 0) - (b.id ?? 0))
-  }, [filteredCases])
+  // 並び順はサーバ側（src/server/handlers.ts の CASE_LIST_ORDER）が、kintone のビュー
+  // 「全件一覧」と同じ 受任日の新しい順 → レコード番号の新しい順 → No の新しい順で返す。
+  // 以前はここで No（id）昇順に並べ直しており、そのサーバの並びを打ち消していたため、
+  // 取り込んだ新規案件が最終ページの末尾に回って一覧の先頭に出てこなかった
+  // （事務所から「取り込んだ新規案件が一覧に出てこない」と再度ご指摘）。
+  // 列見出しクリックによる並び替えは DataTable 側が担うので、ここでは並べ替えない。
+  const sortedCases = filteredCases
 
   // 詳細検索の結果があればそれを優先表示、無ければクイック検索の結果
+  // （詳細検索の結果もサーバ側で CASE_LIST_ORDER と同じ順に返る）
   const displayed = useMemo(() => {
-    if (results != null) return [...results].sort((a, b) => (a.id ?? 0) - (b.id ?? 0))
+    if (results != null) return results
     return sortedCases
   }, [results, sortedCases])
 

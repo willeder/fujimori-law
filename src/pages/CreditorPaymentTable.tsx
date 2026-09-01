@@ -389,7 +389,6 @@ export function CreditorPaymentTable({
         type="button"
         onClick={() => {
           const newId = Math.max(0, ...allCasePayments.map((p) => p.id)) + 1
-          const lastPayment = sortedPayments[sortedPayments.length - 1]
           const prevInstallmentMax = payments.reduce(
             (m, p) => Math.max(m, p.creditorInstallmentIndex ?? 0),
             0
@@ -403,7 +402,8 @@ export function CreditorPaymentTable({
               creditorInstallmentIndex: prevInstallmentMax + 1,
               // 日付を空のまま作ると「中身の無い行」と判定されて画面に出ない
               plannedDate: nextPlannedDate(payments),
-              plannedAmount: lastPayment?.plannedAmount ?? null,
+              // 金額は空で作る（直前行のコピーは過弁済につながるため。藤川様 2026-08-21）
+              plannedAmount: null,
               plannedFeeAllocation: null,
               plannedAgentFeeAllocation: null,
               plannedPoolAllocation: null,

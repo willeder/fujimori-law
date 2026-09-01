@@ -15,6 +15,26 @@ type ChangeEntry = {
   createdAt: string
 }
 
+/**
+ * 変更履歴の日時表示。
+ * サーバは createdAt を UTC の ISO 文字列で返すため、以前のように文字列を
+ * そのまま切り出すと日本時間より9時間ずれた時刻が出ていた
+ * （事務所から「更新時間と全く違う時間が表示される」とのご指摘。宮川様 2026-08-24）。
+ */
+function formatJst(iso: string): string {
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return iso
+  return d.toLocaleString('ja-JP', {
+    timeZone: 'Asia/Tokyo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  })
+}
+
 const ENTITY_LABEL: Record<string, { label: string; cls: string }> = {
   Case: { label: '案件', cls: 'bg-slate-100 text-slate-600' },
   Creditor: { label: '債権者', cls: 'bg-indigo-100 text-indigo-700' },
@@ -250,7 +270,7 @@ export function CaseChangeHistory({
                 </span>
                 {c.action === 'CREATE' && <span className="text-emerald-600">追加</span>}
                 {c.action === 'DELETE' && <span className="text-red-600">削除</span>}
-                {c.createdAt.slice(0, 16).replace('T', ' ')} ・ {c.actor}
+                {formatJst(c.createdAt)} ・ {c.actor}
                 {c.reverted && <span className="ml-1 text-amber-600">（取消済）</span>}
               </div>
               <div className="mt-0.5 space-y-0.5">

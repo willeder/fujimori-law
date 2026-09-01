@@ -997,7 +997,6 @@ export function PaymentTable({
         title={locked ? '他の人が編集中のため、いまは変更できません' : undefined}
         onClick={() => {
           const newId = Math.max(0, ...allCasePayments.map((p) => p.id)) + 1
-          const lastPayment = sortedPayments[sortedPayments.length - 1]
           const scopeCreditorId =
             scheduleCreditorId === undefined ? null : scheduleCreditorId
           const prevInstallmentMax = payments.reduce(
@@ -1014,11 +1013,14 @@ export function PaymentTable({
             // 日付を空のまま作ると「中身の無い行」と判定されて画面に出ない。
             // 直近の予定日の翌月（予定が無ければ当日）を初期値として入れる。
             plannedDate: nextPlannedDate(payments),
-            plannedAmount: lastPayment?.plannedAmount ?? null,
-            plannedFeeAllocation: lastPayment?.plannedFeeAllocation ?? null,
-            plannedAgentFeeAllocation: lastPayment?.plannedAgentFeeAllocation ?? null,
-            plannedPoolAllocation: lastPayment?.plannedPoolAllocation ?? null,
-            plannedRepaymentAllocation: lastPayment?.plannedRepaymentAllocation ?? null,
+            // 金額はすべて空で作る。以前は直前の行の予定額をそのままコピーしていたが、
+            // 追加しただけで弁済予定が入ってしまい過弁済につながる、という事務所からの
+            // ご指摘（藤川様 2026-08-21）を受けて、金額は必ず手入力にする。
+            plannedAmount: null,
+            plannedFeeAllocation: null,
+            plannedAgentFeeAllocation: null,
+            plannedPoolAllocation: null,
+            plannedRepaymentAllocation: null,
             actualDate: null,
             actualAmount: null,
             actualFeeAllocation: null,
