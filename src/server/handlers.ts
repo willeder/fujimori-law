@@ -1418,6 +1418,10 @@ async function deleteRow(
     const v = caseDisplay(fieldType[col], existing[col])
     if (v != null && v !== '') before[col] = v
   }
+  // 案件IDを必ず残す。行が消えたあとは id で辿れないため、案件の変更履歴は
+  // ここに入っている caseId で削除ぶんを拾う（getCaseChanges 参照）。
+  // これが無いと「枠ごと削除すると変更履歴も消える」状態に戻る。
+  if (existing.caseId != null) before.caseId = existing.caseId
   await rowDelegate(model).delete({ where: { id } })
   await writeChange({ actor, entity: model, entityId: String(id), action: 'DELETE', before, after: null })
   await writeAudit({
@@ -1486,20 +1490,36 @@ export async function deleteCase(
   return { status: 200, body: { ok: true } }
 }
 
-/** 案件の変更履歴（本体＋その案件の債権者・入金の変更も含む。新しい順） */
+/**
+ * 案件の変更履歴（本体＋その案件の債権者・入金・接触履歴・リマインドの変更。新しい順）。
+ *
+ * 現存する行の id で絞ると、**削除された行の履歴が丸ごと一覧から消える**。
+ * 接触履歴の枠ごと削除したときに変更履歴も消えてしまい復元できない、という
+ * ご指摘（堀本様 2026-08-22）がこれ。削除の記録自体は before 付きで残って
+ * いるので、削除ぶんは before の caseId で拾って必ず出すようにする。
+ */
 export async function getCaseChanges(id: number) {
-  const [creditors, payments, contacts] = await Promise.all([
+  const [creditors, payments, contacts, reminders] = await Promise.all([
     prisma.creditor.findMany({ where: { caseId: id }, select: { id: true } }),
     prisma.payment.findMany({ where: { caseId: id }, select: { id: true } }),
     prisma.contactHistory.findMany({ where: { caseId: id }, select: { id: true } }),
+    prisma.caseReminder.findMany({ where: { caseId: id }, select: { id: true } }),
   ])
   const credIds = creditors.map((c) => String(c.id))
   const payIds = payments.map((p) => String(p.id))
   const contactIds = contacts.map((c) => String(c.id))
+  const reminderIds = reminders.map((r) => String(r.id))
   const or: Prisma.ChangeLogWhereInput[] = [{ entity: 'Case', entityId: String(id) }]
   if (credIds.length) or.push({ entity: 'Creditor', entityId: { in: credIds } })
   if (payIds.length) or.push({ entity: 'Payment', entityId: { in: payIds } })
   if (contactIds.length) or.push({ entity: 'ContactHistory', entityId: { in: contactIds } })
+  if (reminderIds.length) or.push({ entity: 'CaseReminder', entityId: { in: reminderIds } })
+  // 削除された行（もう id では引けない）。消える前の値に案件IDが入っている。
+  or.push({
+    entity: { in: ['Creditor', 'Payment', 'ContactHistory', 'CaseReminder'] },
+    action: 'DELETE',
+    before: { path: ['caseId'], equals: id },
+  })
   const rows = await prisma.changeLog.findMany({
     where: { OR: or },
     orderBy: { id: 'desc' },
@@ -1600,6 +1620,17 @@ export async function revertChange(
   })
   return { status: 200, body: { ok: true } }
 }
+/**
+ * 記号や伏字だけの値かどうか。
+ * 移行データに債権者名「？？？」の行が実在し、接触履歴の債権者欄を押すたびに
+ * 候補として出ていた（藤原様 2026-08-22）。名前として意味を持たない値は
+ * 候補から外す。データ自体は履歴として残す。
+ */
+function isPlaceholderName(v: string): boolean {
+  // 全角・半角の ? ！ ・ ー - _ * 空白 などしか含まない
+  return /^[\s?？!！・.．,，\-ー_*＊×〇○]+$/.test(v)
+}
+
 /** 重複を除いた債権者名の一覧（検索ドロップダウン用・軽量） */
 export async function getCreditorNames() {
   const [rows, partners] = await Promise.all([
@@ -1616,11 +1647,11 @@ export async function getCreditorNames() {
       orderBy: { negotiationPartner: 'asc' },
     }),
   ])
+  const usable = (n: string | null): n is string =>
+    !!n && n.trim() !== '' && !isPlaceholderName(n)
   return {
-    names: rows.map((r) => r.creditorName).filter((n): n is string => !!n),
-    partners: partners
-      .map((r) => r.negotiationPartner)
-      .filter((n): n is string => !!n && n.trim() !== ''),
+    names: rows.map((r) => r.creditorName).filter(usable),
+    partners: partners.map((r) => r.negotiationPartner).filter(usable),
   }
 }
 

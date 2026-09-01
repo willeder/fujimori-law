@@ -72,7 +72,9 @@ export interface AppointmentInfo {
   interviewStaff: string | null // 面談担当
   judicialScrivener: string | null // 担当司法書士
   debtAdjustmentType: '任意整理' | '自己破産' | '個人再生' | null // 債務整理区分
-  acceptanceRank: 'A' | 'B' | 'C' | null // 受任ランク
+  // 受任ランク。kintone の実データには「C通常」が280件あり、選択肢・取込・
+  // 絞り込みには入っているのに型だけ取り残されていた（藤原様 2026-08-10）。
+  acceptanceRank: 'A' | 'B' | 'C' | 'C通常' | null
   acceptanceDate: string | null // 受任日
   elapsedDays: number | null // 経過日数
   /** C受任昇格日 */

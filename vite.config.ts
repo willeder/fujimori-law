@@ -575,25 +575,11 @@ function dbApiPlugin(): Plugin {
           }
 
           // ── 相談票CSV取込（新規依頼者の一括登録） ──
-          if (
-            url === '/api/intake/preview' ||
-            url === '/api/intake/commit' ||
-            url === '/api/intake/template'
-          ) {
+          // テンプレートDL（/api/intake/template）は画面・サーバとも撤去済み
+          if (url === '/api/intake/preview' || url === '/api/intake/commit') {
             const intake = (await server.ssrLoadModule(
               '/src/server/intakeImport.ts'
             )) as typeof import('./src/server/intakeImport')
-            if (url === '/api/intake/template') {
-              const csv = intake.INTAKE_HEADERS.join(',') + '\r\n'
-              const bom = Buffer.from([0xef, 0xbb, 0xbf])
-              res.setHeader('Content-Type', 'text/csv; charset=utf-8')
-              res.setHeader(
-                'Content-Disposition',
-                'attachment; filename="intake_template.csv"'
-              )
-              res.end(Buffer.concat([bom, Buffer.from(csv, 'utf8')]))
-              return
-            }
             const buf = await readRawBuffer(req)
             if (url === '/api/intake/preview') {
               const out = await intake.previewIntake(buf)

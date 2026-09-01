@@ -19,6 +19,11 @@ export function CaseReminders({ caseId, locked = false }: { caseId: number; lock
   const [body, setBody] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  // 追加したあとに期日や内容を直せるようにする（藤川様・堀本様 2026-08-21/22）。
+  // 「期限を延期したいが編集ボタンが見当たらない」というご指摘への対応。
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [editDue, setEditDue] = useState('')
+  const [editBody, setEditBody] = useState('')
 
   const add = async () => {
     const text = body.trim()
@@ -46,6 +51,38 @@ export function CaseReminders({ caseId, locked = false }: { caseId: number; lock
     await removeReminder(id)
   }
 
+  const startEdit = (r: { id: number; dueDate: string | null; body: string }) => {
+    setError(null)
+    setEditingId(r.id)
+    setEditDue(r.dueDate ?? '')
+    setEditBody(r.body)
+  }
+
+  const cancelEdit = () => {
+    setEditingId(null)
+    setEditDue('')
+    setEditBody('')
+  }
+
+  const saveEdit = async (id: number) => {
+    const text = editBody.trim()
+    if (!text) {
+      setError('内容を入れてください')
+      return
+    }
+    if (editDue && !isValidYmd(editDue)) {
+      setError('期日が正しくありません（YYYY-MM-DD）')
+      return
+    }
+    setBusy(true)
+    setError(null)
+    // patch は画面に先に反映し、失敗したらサーバから取り直す作りなので
+    // ここでは戻り値を見ない（useCaseReminders 参照）。
+    await patch(id, { dueDate: editDue || null, body: text })
+    cancelEdit()
+    setBusy(false)
+  }
+
   const today = todayYmd()
 
   return (
@@ -62,6 +99,43 @@ export function CaseReminders({ caseId, locked = false }: { caseId: number; lock
         <ul className="divide-y divide-slate-100 rounded border border-slate-200">
           {rows.map((r) => {
             const overdue = !r.done && r.dueDate != null && r.dueDate < today
+            if (editingId === r.id) {
+              return (
+                <li key={r.id} className="flex items-center gap-1 bg-amber-50 px-2 py-1">
+                  <input
+                    value={editDue}
+                    onChange={(e) => setEditDue(formatYmdInput(e.target.value))}
+                    placeholder="20260822"
+                    className="w-28 shrink-0 rounded border border-slate-300 px-1.5 py-1 text-xs"
+                    title="期日（数字8桁で入れると自動で区切ります。空にすると期日なし）"
+                  />
+                  <input
+                    value={editBody}
+                    onChange={(e) => setEditBody(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') void saveEdit(r.id)
+                      if (e.key === 'Escape') cancelEdit()
+                    }}
+                    className="min-w-0 flex-1 rounded border border-slate-300 px-1.5 py-1 text-xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => void saveEdit(r.id)}
+                    disabled={busy}
+                    className="shrink-0 rounded bg-blue-500 px-2 py-1 text-[10px] text-white hover:bg-blue-600 disabled:bg-slate-300"
+                  >
+                    保存
+                  </button>
+                  <button
+                    type="button"
+                    onClick={cancelEdit}
+                    className="shrink-0 px-1 text-[10px] text-slate-500 hover:text-slate-800"
+                  >
+                    取消
+                  </button>
+                </li>
+              )
+            }
             return (
               <li key={r.id} className="flex items-start gap-2 px-2 py-1">
                 <input
@@ -87,6 +161,15 @@ export function CaseReminders({ caseId, locked = false }: { caseId: number; lock
                 >
                   {r.body}
                 </span>
+                <button
+                  type="button"
+                  onClick={() => startEdit(r)}
+                  disabled={locked}
+                  className="shrink-0 text-[10px] text-slate-400 hover:text-blue-600 disabled:text-slate-200"
+                  title="期日や内容を直します（期日の延期もここから）"
+                >
+                  編集
+                </button>
                 <button
                   type="button"
                   onClick={() => void remove(r.id)}

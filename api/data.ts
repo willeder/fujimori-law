@@ -159,13 +159,8 @@ export default async function handler(
 
   try {
     // ── 相談票CSV取込 ──
-    if (path === '/api/intake/template') {
-      const csv = intake.INTAKE_HEADERS.join(',') + '\r\n'
-      res.setHeader('Content-Type', 'text/csv; charset=utf-8')
-      res.setHeader('Content-Disposition', 'attachment; filename="intake_template.csv"')
-      res.end(Buffer.concat([Buffer.from([0xef, 0xbb, 0xbf]), Buffer.from(csv, 'utf8')]))
-      return
-    }
+    // テンプレートDL（/api/intake/template）は画面から削除済み。URL 直打ちでも
+    // 落とせないよう、サーバ側のルートも撤去した（堀本様 2026-08-11）。
     if (path === '/api/intake/preview' && method === 'POST') {
       json(await intake.previewIntake(await getRawBody(req)))
       return

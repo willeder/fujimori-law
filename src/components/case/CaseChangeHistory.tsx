@@ -39,9 +39,14 @@ const ENTITY_LABEL: Record<string, { label: string; cls: string }> = {
   Case: { label: '案件', cls: 'bg-slate-100 text-slate-600' },
   Creditor: { label: '債権者', cls: 'bg-indigo-100 text-indigo-700' },
   Payment: { label: '入金', cls: 'bg-emerald-100 text-emerald-700' },
+  ContactHistory: { label: '接触履歴', cls: 'bg-sky-100 text-sky-700' },
+  CaseReminder: { label: 'リマインド', cls: 'bg-amber-100 text-amber-700' },
 }
 
 const FIELD_LABEL: Record<string, string> = {
+  dueDate: '期日',
+  body: '内容',
+  done: '対応済み',
   name: '氏名',
   furigana: 'フリガナ',
   phone: '電話番号',
