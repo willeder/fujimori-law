@@ -451,7 +451,20 @@ export function EditableField({
             {...triggerProps}
             className={`${valueContainerClass} focus:outline-none focus:ring-2 focus:ring-blue-400`}
           >
-            <span className={`${valueSpanClass} ${negativeTextClass}`}>
+            <span
+              className={`${valueSpanClass} ${negativeTextClass}`}
+              /* 省略されている項目は、マウスを乗せたときに全文をツールチップで出す。
+                 押せば編集状態になり、そこで全文を選択してコピーできる。 */
+              onMouseEnter={(e) => {
+                const el = e.currentTarget;
+                if (el.dataset.fullHint === "1") return;
+                if (el.scrollWidth <= el.clientWidth + 1) return;
+                const t = (el.textContent ?? "").trim();
+                if (!t) return;
+                el.dataset.fullHint = "1";
+                el.title = t;
+              }}
+            >
               {displayText}
               {suffix && <span className="text-slate-400 ml-0">{suffix}</span>}
             </span>

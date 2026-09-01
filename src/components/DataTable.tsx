@@ -8,6 +8,7 @@ import {
   extractIsoDate,
 } from '../utils/findCriterion'
 import { SuggestInput } from './SuggestInput'
+import { copyTextToClipboard, findTruncatedInside, showCopiedToast } from '../lib/copyText'
 
 // 1画面に複数のテーブルがある場合（案件詳細など）に Shift+F が全テーブルを
 // 同時にトグルしないよう、「いま操作対象のテーブル」を1つだけ保持する簡易レジストリ。
@@ -728,6 +729,44 @@ export function DataTable<T>({
   const handleRowMouseDown = (e: ReactMouseEvent<HTMLTableRowElement>) => {
     rowPressRef.current = { x: e.clientX, y: e.clientY }
   }
+
+  /**
+   * 省略されているセルを押したら全文をコピーする。
+   *
+   * 事務所からのご要望:
+   *   「文字が見切れてるところとかもワンクリックでコピーできたらよい。
+   *     ドラッグアンドドロップじゃ見切れてるので全文取得ができない」
+   *
+   * 幅に収まらず … で省略されているセルだけが対象。収まっているセルは
+   * 今までどおり何もしない（ドラッグでの選択を邪魔しないため）。
+   * 文字を選択した状態のクリックも、選択を優先して何もしない。
+   */
+  const handleCellCopyClick = (e: ReactMouseEvent<HTMLTableCellElement>) => {
+    if ((window.getSelection()?.toString() ?? '').length > 0) return
+    const target = e.target as HTMLElement
+    // ボタン・リンク・入力欄の中を押したときは、その部品の動作を優先する
+    if (target.closest('button, a, input, select, textarea, [role="button"]')) return
+    const cell = e.currentTarget
+    const el = findTruncatedInside(cell)
+    if (!el) return
+    const text = el.textContent ?? ''
+    if (!text.trim()) return
+    void copyTextToClipboard(text).then((ok) => {
+      if (ok) showCopiedToast()
+    })
+  }
+
+  /** マウスを乗せたときに、省略されていれば全文をツールチップに出す */
+  const handleCellHover = (e: ReactMouseEvent<HTMLTableCellElement>) => {
+    const cell = e.currentTarget
+    if (cell.dataset.copyHint === '1') return
+    const el = findTruncatedInside(cell)
+    if (!el) return
+    const text = (el.textContent ?? '').trim()
+    if (!text) return
+    cell.dataset.copyHint = '1'
+    cell.title = `${text}\n\n（クリックで全文をコピーします）`
+  }
   const handleRowClick = (e: ReactMouseEvent<HTMLTableRowElement>, item: T) => {
     const start = rowPressRef.current
     rowPressRef.current = null
@@ -1157,6 +1196,14 @@ export function DataTable<T>({
                       onRowClick && colIndex === 0
                         ? 'クリックで開きます（他の列はコピー用に選択できます）'
                         : undefined
+                    }
+                    // 左端の列は行を開くので対象外。それ以外の列で、省略されて
+                    // いるセルだけクリックで全文コピーできるようにする。
+                    onMouseEnter={
+                      onRowClick && colIndex === 0 ? undefined : handleCellHover
+                    }
+                    onClick={
+                      onRowClick && colIndex === 0 ? undefined : handleCellCopyClick
                     }
                   >
                     {cellNoWrap ? (
