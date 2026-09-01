@@ -883,8 +883,13 @@ export function PaymentTable({
 
   return (
     <div className="min-h-0 space-y-3">
+      {/*
+        合計とボタンは上に貼り付ける。表と一緒に流れてしまい、スクロールすると
+        合計が見えなくなる／どこを操作しているのか分かりにくい、というご指摘への対応。
+      */}
+      <div className="sticky top-0 z-30 -mx-1 space-y-2 bg-white px-1 pb-1">
       {/* 合計（表示中の行の合計。予定と実績を並べて出す） */}
-      <div className="overflow-x-auto rounded-md border border-slate-200 bg-slate-50/70 px-2 py-1">
+      <div className="overflow-x-auto rounded-md border border-slate-200 bg-slate-50 px-2 py-1">
         <div className="flex w-max items-center gap-x-5 whitespace-nowrap text-[0.6875rem] leading-none text-slate-700">
           <span className="font-semibold text-slate-500">合計（{sortedPayments.length}行）</span>
           <span>
@@ -946,6 +951,7 @@ export function PaymentTable({
           {tall ? '表示を戻す' : '表を広げる'}
         </button>
       </div>
+      </div>
 
       <div ref={wrapRef}>
       <DataTable
@@ -958,7 +964,10 @@ export function PaymentTable({
         cellSingleLine
         suspendTruncate={editingId !== null}
         enableFind
-        bodyMaxHeightClassName={tall ? 'max-h-[82vh]' : 'max-h-[min(72vh,44rem)]'}
+        // 既定は親のタブ枠（55vh / 26rem）に収まる高さにして、スクロールを
+        // 表の中だけに閉じ込める。二重にスクロールすると合計やボタンごと流れて
+        // 操作しづらいため。「表を広げる」を押したときだけ大きく取る。
+        bodyMaxHeightClassName={tall ? 'max-h-[76vh]' : 'max-h-[min(38vh,17rem)]'}
         getRowClassName={(item) => {
           // 一括表示から飛んできた行を一時的に光らせる
           if (highlightId === item.id) return 'bg-amber-100'

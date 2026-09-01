@@ -814,6 +814,14 @@ export function DataTable<T>({
     : ''
 
   /**
+   * 検索モードの条件入力行。ヘッダーのすぐ下に貼り付ける。
+   * 貼り付けないと、スクロールしたときに条件の入力欄がヘッダーの下へ潜って
+   * 見えなくなる（事務所から「検索モードなどのところもスクロールできてしまうので
+   * 操作がややこしい」とのご指摘）。top はヘッダー1行ぶんの高さ。
+   */
+  const stickyFindTh = useStickyHeader ? 'sticky top-[1.75rem] z-10 bg-blue-50' : ''
+
+  /**
    * 折り返し+table-auto 時は表がやや広がることがあるため横スクロールも許可
    * stickyHeader を親スクロールコンテナで使う場合は overflow を設定せず
    * スクロールを親に委譲（sticky が親コンテナ基準で動作）
@@ -1039,7 +1047,7 @@ export function DataTable<T>({
               {columns.map((col, ci) => (
                 <th
                   key={String(col.key)}
-                  className={`${headPad} ${col.headerClassName ?? ''}`}
+                  className={`${headPad} ${stickyFindTh} ${col.headerClassName ?? ''}`}
                   style={{ width: col.width }}
                 >
                   {searchableFlags[ci] ? (
