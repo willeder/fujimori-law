@@ -8,7 +8,8 @@
  *   済   = kintone の check
  */
 import { useState } from 'react'
-import { formatYmdInput, isValidYmd } from '../../lib/dateInput'
+import { isValidYmd } from '../../lib/dateInput'
+import { DateTextInput } from '../DateTextInput'
 // 状態は上部のバナーと共有する。別々に持つと、片方で「済」にしても
 // もう片方に残ってしまうため（useCaseReminders 参照）。
 import { useCaseReminders, todayYmd } from '../../hooks/useCaseReminders'
@@ -102,12 +103,12 @@ export function CaseReminders({ caseId, locked = false }: { caseId: number; lock
             if (editingId === r.id) {
               return (
                 <li key={r.id} className="flex items-center gap-1 bg-amber-50 px-2 py-1">
-                  <input
+                  <DateTextInput
                     value={editDue}
-                    onChange={(e) => setEditDue(formatYmdInput(e.target.value))}
+                    onChange={setEditDue}
+                    onPick={setEditDue}
                     placeholder="20260822"
                     className="w-28 shrink-0 rounded border border-slate-300 px-1.5 py-1 text-xs"
-                    title="期日（数字8桁で入れると自動で区切ります。空にすると期日なし）"
                   />
                   <input
                     value={editBody}
@@ -185,13 +186,12 @@ export function CaseReminders({ caseId, locked = false }: { caseId: number; lock
       )}
 
       <div className="flex items-center gap-1">
-        <input
+        <DateTextInput
           value={due}
-          onChange={(e) => setDue(formatYmdInput(e.target.value))}
+          onChange={setDue}
+          onPick={setDue}
           placeholder="20260822"
-          disabled={locked}
           className="w-28 rounded border border-slate-300 px-1.5 py-1 text-xs"
-          title="期日（数字8桁で入れると自動で区切ります）"
         />
         <input
           value={body}
