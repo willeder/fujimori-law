@@ -5,6 +5,7 @@ import { useFoundSet } from '../store/FoundSet'
 import { useCaseEdit } from '../context/CaseEditContext'
 import { settlementTotals } from '../lib/settlementTotals'
 import { EditableField, StatusBadge, DataTable, type Column } from '../components'
+import { SuggestInput } from '../components/SuggestInput'
 import { CreditorFiles } from '../components/case/CreditorFiles'
 import { BankCodeHelper } from '../components/case/BankCodeHelper'
 import type { Creditor } from '../types'
@@ -53,9 +54,44 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
   const navigate = useNavigate()
   const { setFoundSet } = useFoundSet()
   // 編集モード中は下書きに貯めるだけ（「編集完了」でまとめて保存される）
-  const { stageCreditor } = useCaseEdit()
+  const { stageCreditor, locked } = useCaseEdit()
   // 弁済の進捗（合算）用。債権者別の弁済予定は表示時に生成される（creditorSchedule.ts）
   const casePayments = usePaymentsByCaseId(caseId)
+
+  // 追加介入で債権者を1社足すためのフォーム（竹谷様 2026-08-21）
+  const [addingCreditor, setAddingCreditor] = useState(false)
+  const [newCreditorName, setNewCreditorName] = useState('')
+  const [addError, setAddError] = useState<string | null>(null)
+  const [addBusy, setAddBusy] = useState(false)
+
+  const submitNewCreditor = async () => {
+    const name = newCreditorName.trim()
+    if (!name) {
+      setAddError('債権者名を入れてください')
+      return
+    }
+    setAddBusy(true)
+    setAddError(null)
+    try {
+      const r = await fetch('/api/creditors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ caseId, creditorName: name }),
+      })
+      const d = (await r.json().catch(() => ({}))) as { row?: Creditor; error?: string }
+      if (!r.ok || !d.row) {
+        setAddError(d.error ?? '追加に失敗しました')
+        return
+      }
+      dispatch({ type: 'ADD_CREDITOR', payload: d.row })
+      setNewCreditorName('')
+      setAddingCreditor(false)
+    } catch {
+      setAddError('追加に失敗しました')
+    } finally {
+      setAddBusy(false)
+    }
+  }
 
   const [creditorNameSuggestions, setCreditorNameSuggestions] = useState<string[]>(
     () => __creditorNameSuggestions ?? []
@@ -465,6 +501,61 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           enableFind
           onFindNavigate={runCreditorFind}
         />
+
+        {/*
+          追加介入で債権者が1社増えたときの追加口。これまでは相談票の取込
+          （案件ごと新規作成）でしか増やせなかった（竹谷様 2026-08-21）。
+          追加すると各社タブも1つ増える。
+        */}
+        <div className="mt-2">
+          {addingCreditor ? (
+            <div className="flex flex-wrap items-center gap-1">
+              <SuggestInput
+                value={newCreditorName}
+                onValueChange={setNewCreditorName}
+                onSelect={(v) => setNewCreditorName(v)}
+                suggestions={creditorNameSuggestions}
+                placeholder="債権者名（例: アコム）"
+                autoFocus
+                className="min-w-0 flex-1 rounded border border-blue-300 px-1.5 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                type="button"
+                onClick={() => void submitNewCreditor()}
+                disabled={addBusy}
+                className="shrink-0 rounded bg-blue-500 px-2 py-1 text-xs text-white hover:bg-blue-600 disabled:bg-slate-300"
+              >
+                追加
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setAddingCreditor(false)
+                  setNewCreditorName('')
+                  setAddError(null)
+                }}
+                className="shrink-0 rounded bg-slate-200 px-2 py-1 text-xs text-slate-700 hover:bg-slate-300"
+              >
+                取消
+              </button>
+              {addError && <span className="text-xs text-red-600">{addError}</span>}
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setAddingCreditor(true)}
+              disabled={locked}
+              title={
+                locked
+                  ? '他の人が編集中のため、いまは変更できません'
+                  : '追加介入などで債権者が増えたときに1社足します'
+              }
+              className="w-full rounded border border-dashed border-blue-300 py-1 text-xs text-blue-600 transition-colors hover:bg-blue-50 disabled:border-slate-200 disabled:text-slate-300 disabled:hover:bg-transparent"
+            >
+              ＋ 債権者を追加
+            </button>
+          )}
+        </div>
       </div>
     )
   }

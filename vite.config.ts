@@ -71,6 +71,11 @@ function dbApiPlugin(): Plugin {
               raw: string,
               meta: { ip?: string | null; userAgent?: string | null }
             ) => Promise<{ status: number; body: unknown }>
+            createCreditor: (
+              actor: { id: string; email: string },
+              raw: string,
+              meta: { ip?: string | null; userAgent?: string | null }
+            ) => Promise<{ status: number; body: unknown }>
             createPayment: (
               actor: { id: string; email: string },
               raw: string,
@@ -542,6 +547,13 @@ function dbApiPlugin(): Plugin {
             }
             if (paymentEdit && req.method === 'DELETE') {
               const r = await mod.deletePayment(editActor, Number(paymentEdit[1]), meta)
+              res.statusCode = r.status
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify(r.body))
+              return
+            }
+            if (url === '/api/creditors' && req.method === 'POST') {
+              const r = await mod.createCreditor(editActor, await readRawBody(req), meta)
               res.statusCode = r.status
               res.setHeader('Content-Type', 'application/json; charset=utf-8')
               res.end(JSON.stringify(r.body))

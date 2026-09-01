@@ -17,6 +17,7 @@ import {
   searchCreditors,
   getCreditorReminders,
   getFundIncreaseCandidates,
+  createCreditor,
   getSettlementCreditors,
   updateCaseField,
   updateCreditorField,
@@ -359,6 +360,11 @@ export default async function handler(
     }
 
     // ── 債権者リマインド一覧（次回処理日ありのみ・軽量） ──
+    if (path === '/api/creditors' && method === 'POST') {
+      const r = await createCreditor(editActor, (await getRawBody(req)).toString('utf8'), meta)
+      json(r.body, r.status)
+      return
+    }
     if (path === '/api/cases/fund-increase' && method === 'GET') {
       json(await getFundIncreaseCandidates())
       return

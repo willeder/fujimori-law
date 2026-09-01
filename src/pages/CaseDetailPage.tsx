@@ -1217,8 +1217,15 @@ function CaseDetailBody({
     0,
   );
 
-  // 累計入金額：全入金スケジュール（合計行を除く）の実入金額の合計
-  const paymentsWithoutSummary = payments.filter((p) => !isEmptyRow(p));
+  // 累計入金額：案件全体の入金（合計行を除く）の実入金額の合計。
+  //
+  // ★payments には案件全体の行に加えて、債権者タブを埋めるために実行時に
+  //   算出した「債権者別の弁済スケジュール」が合成されている
+  //   （src/store/useCaseStore.ts の usePaymentsByCaseId）。これは案件全体の
+  //   入金をFIFOで按分した推定値なので、合計すると同じ入金を二重に数えてしまう。
+  //   以前はここで payments をそのまま使っており、累計入金額・累計入金予定額・
+  //   残入金予定がおおむね倍の値になっていた。案件全体の行だけを見る。
+  const paymentsWithoutSummary = caseLevelPayments;
   const cumulativePaid = paymentsWithoutSummary.reduce(
     (s, p) => s + (p.actualAmount ?? 0),
     0,

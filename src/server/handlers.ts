@@ -1469,6 +1469,44 @@ export const updateContactHistoryField = (actor: EditActor, id: number, raw: str
   updateRowField('ContactHistory', CONTACT_FIELD_TYPE, actor, id, raw, meta)
 export const createContactHistory = (actor: EditActor, raw: string, meta: EditMeta) =>
   createRow('ContactHistory', CONTACT_FIELD_TYPE, actor, raw, meta)
+
+/**
+ * 既存案件に債権者を1社追加する。
+ *
+ * 事務所からのご指摘（竹谷様 2026-08-21）:
+ *   「追加介入があった場合、どのようにして追加の債権者を増やしていけば良いか
+ *     触り方が分かりません。タブを追加することが発生するので手動での調整が必要」
+ * これまで債権者が増える経路は相談票の取込（案件ごと新規作成）だけで、途中で
+ * 1社だけ足すことができなかった。
+ *
+ * 表示順は末尾に付ける（並べ替えは画面のドラッグで直せる）。ステータスの既定は
+ * 相談票の取込と揃えて「受任通知発送待ち」。
+ */
+export async function createCreditor(actor: EditActor, raw: string, meta: EditMeta) {
+  let body: Record<string, unknown>
+  try {
+    body = JSON.parse(raw || '{}') as Record<string, unknown>
+  } catch {
+    return { status: 400, body: { error: 'bad request' } }
+  }
+  const caseId = Number(body.caseId)
+  if (!Number.isFinite(caseId)) return { status: 400, body: { error: 'caseId が必要です' } }
+  const name = typeof body.creditorName === 'string' ? body.creditorName.trim() : ''
+  if (!name) return { status: 400, body: { error: '債権者名を入れてください' } }
+
+  const max = await prisma.creditor.aggregate({
+    where: { caseId },
+    _max: { displayOrder: true },
+  })
+  const payload = {
+    ...body,
+    creditorName: name,
+    displayOrder: (max._max.displayOrder ?? 0) + 1,
+    status:
+      typeof body.status === 'string' && body.status.length > 0 ? body.status : '受任通知発送待ち',
+  }
+  return createRow('Creditor', CREDITOR_FIELD_TYPE, actor, JSON.stringify(payload), meta)
+}
 export const deleteContactHistory = (actor: EditActor, id: number, meta: EditMeta) =>
   deleteRow('ContactHistory', CONTACT_FIELD_TYPE, actor, id, meta)
 /**
