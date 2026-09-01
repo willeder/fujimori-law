@@ -983,12 +983,14 @@ export function PaymentTable({
   const diffTotal = totals.actualAmount - paidPlannedTotal
 
   return (
-    <div className="min-h-0 space-y-3">
-      {/*
-        合計とボタンは上に貼り付ける。表と一緒に流れてしまい、スクロールすると
-        合計が見えなくなる／どこを操作しているのか分かりにくい、というご指摘への対応。
-      */}
-      <div className="sticky top-0 z-30 -mx-1 space-y-2 bg-white px-1 pb-1">
+    /*
+      枠の高さいっぱいに縦に積み、スクロールするのは表の中身だけにする。
+      合計とボタンは動かない場所に置くので、貼り付け（sticky）は使わない。
+      以前は合計を貼り付けていたが、表の見出し行と同じ位置に重なって
+      見出しを覆い隠してしまっていた（項目名が読めない状態）。
+    */
+    <div className="flex h-full min-h-0 flex-col gap-2">
+      <div className="shrink-0 space-y-2">
       {/* 合計（表示中の行の合計。予定と実績を並べて出す） */}
       <div className="overflow-x-auto rounded-md border border-slate-200 bg-slate-50 px-2 py-1">
         <div className="flex w-max items-center gap-x-5 whitespace-nowrap text-[0.6875rem] leading-none text-slate-700">
@@ -1054,7 +1056,7 @@ export function PaymentTable({
       </div>
       </div>
 
-      <div ref={wrapRef}>
+      <div ref={wrapRef} className="min-h-0 flex-1 overflow-hidden">
       <DataTable
         data={sortedPayments}
         columns={columns}
@@ -1065,10 +1067,15 @@ export function PaymentTable({
         cellSingleLine
         suspendTruncate={editingId !== null}
         enableFind
-        // 既定は親のタブ枠（55vh / 26rem）に収まる高さにして、スクロールを
-        // 表の中だけに閉じ込める。二重にスクロールすると合計やボタンごと流れて
-        // 操作しづらいため。「表を広げる」を押したときだけ大きく取る。
-        bodyMaxHeightClassName={tall ? 'max-h-[76vh]' : 'max-h-[min(38vh,17rem)]'}
+        /*
+          表の高さ＝親のタブ枠の高さ − 合計とボタンのぶん（約7rem）。
+          親は CaseDetailPage の h-[min(72vh,42rem)]。片方だけ変えると
+          はみ出したり余ったりするので、変えるときは両方を合わせること。
+          これで枠の外側はスクロールせず、動くのは表の中身だけになる。
+        */
+        bodyMaxHeightClassName={
+          tall ? 'max-h-[80vh]' : 'max-h-[calc(min(72vh,42rem)-7rem)]'
+        }
         getRowClassName={(item) => {
           // 一括表示から飛んできた行を一時的に光らせる
           if (highlightId === item.id) return 'bg-amber-100'
@@ -1178,7 +1185,7 @@ export function PaymentTable({
           setPendingIds((prev) => new Set(prev).add(id))
           handleEdit(row)
         }}
-        className="w-full rounded border border-dashed border-blue-300 py-1 text-[0.6875rem] text-blue-600 transition-colors hover:bg-blue-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-300 disabled:hover:bg-transparent"
+        className="w-full shrink-0 rounded border border-dashed border-blue-300 py-1 text-[0.6875rem] text-blue-600 transition-colors hover:bg-blue-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-300 disabled:hover:bg-transparent"
       >
         + 入金予定を追加
       </button>
