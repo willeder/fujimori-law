@@ -2656,11 +2656,17 @@ function CaseDetailBody({
                 <Tabs
                   variant="split"
                   tabBodyScroll="host"
+                  /*
+                    画面の高さの7割強まで使う。以前は55vh（画面の約半分）で、
+                    入金スケジュールが7行ほどしか見えず操作しづらかった。
+                    PaymentTable の表の高さはこの値から合計・ボタンぶんを引いて
+                    計算しているので、変えるときは両方を合わせること。
+                  */
                   tabBodyMaxHeightClassName={
                     paymentScheduleSectionTab === "settlement" &&
                     displayCreditorScopeTabId !== "all"
-                      ? "h-fit max-h-[min(55vh,26rem)]"
-                      : "h-[min(55vh,26rem)]"
+                      ? "h-fit max-h-[min(72vh,42rem)]"
+                      : "h-[min(72vh,42rem)]"
                   }
                   hostBodyNaturalHeight={
                     paymentScheduleSectionTab === "settlement" &&
