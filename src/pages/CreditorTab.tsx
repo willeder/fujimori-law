@@ -829,9 +829,16 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           fillWidth
         />
       </div>
-      <div className="min-w-0 col-span-2" />
+      {/*
+        4行目の余りを埋める1枠。以前は2枠ぶん置いていたが、この行に残っている
+        のは1枠なので折り返してしまい、行末に1枠・次の行頭に2枠、合わせて3枠の
+        空白ができていた（事務所から「回答状況と和解日の間に何もないスペースが
+        3枠空いている」とのご指摘）。1枠にして和解の3項目を次の行の左端から
+        始める。
+      */}
+      <div className="min-w-0 col-span-1" />
 
-      {/* 5行目: 和解日(1), 和解(1), 和解時債務金額(1), コメント(2) */}
+      {/* 5行目: 和解日(1), 和解金額(1), 和解時債務金額(1), コメント(2) */}
       <div className="min-w-0 col-span-1">
         <EditableField
           label="和解日"
