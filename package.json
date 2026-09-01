@@ -23,7 +23,6 @@
   "dependencies": {
     "@prisma/client": "^6.19.0",
     "dotenv": "^16.4.7",
-    "jp-zipcode-lookup": "^0.3.5",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.13.2",

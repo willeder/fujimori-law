@@ -44,7 +44,6 @@ import { writeAudit } from '../src/server/audit.js'
 import * as creditorFiles from '../src/server/creditorFiles.js'
 import * as caseFiles from '../src/server/caseFiles.js'
 import * as caseReminders from '../src/server/caseReminders.js'
-import * as postalCode from '../src/server/postalCode.js'
 import * as bankCode from '../src/server/bankCode.js'
 import * as mail from '../src/server/mail.js'
 import { getSessionToken, getSessionUser } from '../src/server/auth.js'
@@ -388,16 +387,6 @@ export default async function handler(
     }
     if (path === '/api/mail/status' && method === 'GET') {
       json(mail.mailConfigured())
-      return
-    }
-
-    // ── 郵便番号の入力補助（辞書はサーバ側のみ。外部への問い合わせはしない）──
-    if (path === '/api/postal/zip' && method === 'GET') {
-      json({ ok: true, hits: postalCode.lookupByZip(query.get('code') ?? '') })
-      return
-    }
-    if (path === '/api/postal/address' && method === 'GET') {
-      json({ ok: true, hits: postalCode.lookupByAddress(query.get('address') ?? '') })
       return
     }
 
