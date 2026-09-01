@@ -10,7 +10,7 @@
  * 「期日到来リマインド」も同じモジュールから返す。
  */
 import { prisma } from './db.js'
-import { writeAudit, type Actor } from './audit.js'
+import { writeAudit, writeChange, type Actor } from './audit.js'
 
 export type ReminderJson = {
   id: number
@@ -102,6 +102,16 @@ export async function createCaseReminder(
     summary: `リマインド追加: ${target.name} / ${ymd(created.dueDate) ?? '期日なし'} ${body.slice(0, 40)}`,
     metadata: { caseId },
   })
+  // 変更履歴にも残す。案件詳細の「変更履歴」から追えるようにするため
+  // （堀本様 2026-08-22「誤って削除する可能性もあるので復元可能に」）。
+  await writeChange({
+    actor,
+    entity: 'CaseReminder',
+    entityId: String(created.id),
+    action: 'CREATE',
+    before: null,
+    after: { caseId, dueDate: ymd(created.dueDate), body: created.body, done: created.done },
+  })
   return { status: 200, body: { ok: true, reminder: toJson(created) } }
 }
 
@@ -145,6 +155,24 @@ export async function updateCaseReminder(
         : `リマインド更新: ${updated.body.slice(0, 40)}`,
     metadata: { caseId: updated.caseId },
   })
+  await writeChange({
+    actor,
+    entity: 'CaseReminder',
+    entityId: String(id),
+    action: 'UPDATE',
+    before: {
+      caseId: before.caseId,
+      dueDate: ymd(before.dueDate),
+      body: before.body,
+      done: before.done,
+    },
+    after: {
+      caseId: updated.caseId,
+      dueDate: ymd(updated.dueDate),
+      body: updated.body,
+      done: updated.done,
+    },
+  })
   return { status: 200, body: { ok: true, reminder: toJson(updated) } }
 }
 
@@ -162,6 +190,16 @@ export async function deleteCaseReminder(
     entityId: String(id),
     summary: `リマインド削除: ${row.body.slice(0, 40)}`,
     metadata: { caseId: row.caseId },
+  })
+  // 削除も変更履歴に残す。before に案件IDを入れておくと、行が消えたあとでも
+  // 案件の変更履歴から拾える（getCaseChanges 参照）。
+  await writeChange({
+    actor,
+    entity: 'CaseReminder',
+    entityId: String(id),
+    action: 'DELETE',
+    before: { caseId: row.caseId, dueDate: ymd(row.dueDate), body: row.body, done: row.done },
+    after: null,
   })
   return { status: 200, body: { ok: true } }
 }

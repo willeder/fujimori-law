@@ -17,13 +17,13 @@ export function AccountMenu() {
       <span className="text-xs font-medium text-slate-700">
         {user.name ?? user.email}
       </span>
-      <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600">
+      <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[0.625rem] text-slate-600">
         {ROLE_LABEL[user.role]}
       </span>
       {user.role === 'ADMIN' && (
         <a
           href="/members"
-          className="rounded border border-slate-300 px-2 py-0.5 text-[11px] font-medium text-slate-600 hover:bg-slate-50"
+          className="rounded border border-slate-300 px-2 py-0.5 text-[0.6875rem] font-medium text-slate-600 hover:bg-slate-50"
         >
           メンバー管理
         </a>
@@ -31,7 +31,7 @@ export function AccountMenu() {
       <button
         type="button"
         onClick={() => void logout()}
-        className="rounded border border-slate-300 px-2 py-0.5 text-[11px] font-medium text-slate-600 hover:bg-slate-50"
+        className="rounded border border-slate-300 px-2 py-0.5 text-[0.6875rem] font-medium text-slate-600 hover:bg-slate-50"
       >
         ログアウト
       </button>

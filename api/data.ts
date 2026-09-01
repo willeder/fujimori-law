@@ -16,6 +16,8 @@ import {
   searchCases,
   searchCreditors,
   getCreditorReminders,
+  getFundIncreaseCandidates,
+  createCreditor,
   getSettlementCreditors,
   updateCaseField,
   updateCreditorField,
@@ -44,7 +46,6 @@ import { writeAudit } from '../src/server/audit.js'
 import * as creditorFiles from '../src/server/creditorFiles.js'
 import * as caseFiles from '../src/server/caseFiles.js'
 import * as caseReminders from '../src/server/caseReminders.js'
-import * as postalCode from '../src/server/postalCode.js'
 import * as bankCode from '../src/server/bankCode.js'
 import * as mail from '../src/server/mail.js'
 import { getSessionToken, getSessionUser } from '../src/server/auth.js'
@@ -160,13 +161,8 @@ export default async function handler(
 
   try {
     // ── 相談票CSV取込 ──
-    if (path === '/api/intake/template') {
-      const csv = intake.INTAKE_HEADERS.join(',') + '\r\n'
-      res.setHeader('Content-Type', 'text/csv; charset=utf-8')
-      res.setHeader('Content-Disposition', 'attachment; filename="intake_template.csv"')
-      res.end(Buffer.concat([Buffer.from([0xef, 0xbb, 0xbf]), Buffer.from(csv, 'utf8')]))
-      return
-    }
+    // テンプレートDL（/api/intake/template）は画面から削除済み。URL 直打ちでも
+    // 落とせないよう、サーバ側のルートも撤去した（堀本様 2026-08-11）。
     if (path === '/api/intake/preview' && method === 'POST') {
       json(await intake.previewIntake(await getRawBody(req)))
       return
@@ -364,6 +360,15 @@ export default async function handler(
     }
 
     // ── 債権者リマインド一覧（次回処理日ありのみ・軽量） ──
+    if (path === '/api/creditors' && method === 'POST') {
+      const r = await createCreditor(editActor, (await getRawBody(req)).toString('utf8'), meta)
+      json(r.body, r.status)
+      return
+    }
+    if (path === '/api/cases/fund-increase' && method === 'GET') {
+      json(await getFundIncreaseCandidates())
+      return
+    }
     if (path === '/api/creditors/reminders' && method === 'GET') {
       json(await getCreditorReminders())
       return
@@ -388,16 +393,6 @@ export default async function handler(
     }
     if (path === '/api/mail/status' && method === 'GET') {
       json(mail.mailConfigured())
-      return
-    }
-
-    // ── 郵便番号の入力補助（辞書はサーバ側のみ。外部への問い合わせはしない）──
-    if (path === '/api/postal/zip' && method === 'GET') {
-      json({ ok: true, hits: postalCode.lookupByZip(query.get('code') ?? '') })
-      return
-    }
-    if (path === '/api/postal/address' && method === 'GET') {
-      json({ ok: true, hits: postalCode.lookupByAddress(query.get('address') ?? '') })
       return
     }
 

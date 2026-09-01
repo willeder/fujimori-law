@@ -28,7 +28,7 @@ const TH = 'whitespace-nowrap px-2 py-1 text-left font-medium text-slate-500'
 const TD = 'whitespace-nowrap px-2 py-1 text-slate-700'
 
 function Loading() {
-  return <div className="px-3 py-2 text-[11px] text-slate-400">読み込み中…</div>
+  return <div className="px-3 py-2 text-[0.6875rem] text-slate-400">読み込み中…</div>
 }
 
 export function CaseRowDetail({
@@ -108,7 +108,7 @@ export function CaseRowDetail({
     <div className="space-y-2 border-l-4 border-blue-300 bg-slate-50 px-3 py-2">
       {showPayments && (
         <section>
-          <div className="mb-1 text-[11px] font-semibold text-slate-600">
+          <div className="mb-1 text-[0.6875rem] font-semibold text-slate-600">
             入金情報
             {payments != null && (
               <span className="ml-1 font-normal text-slate-400">{caseRows.length}件</span>
@@ -117,10 +117,10 @@ export function CaseRowDetail({
           {payments == null ? (
             <Loading />
           ) : caseRows.length === 0 ? (
-            <div className="px-1 py-1 text-[11px] text-slate-400">入金予定がありません</div>
+            <div className="px-1 py-1 text-[0.6875rem] text-slate-400">入金予定がありません</div>
           ) : (
             <div className="overflow-x-auto rounded border border-slate-200 bg-white">
-              <table className="w-full text-[11px]">
+              <table className="w-full text-[0.6875rem]">
                 <thead className="bg-slate-100">
                   <tr>
                     <th className={TH}>入金予定日</th>
@@ -175,7 +175,7 @@ export function CaseRowDetail({
 
       {showContacts && (
         <section>
-          <div className="mb-1 text-[11px] font-semibold text-slate-600">
+          <div className="mb-1 text-[0.6875rem] font-semibold text-slate-600">
             依頼者 接触履歴
             {contacts != null && (
               <span className="ml-1 font-normal text-slate-400">{clientContacts.length}件</span>
@@ -184,10 +184,10 @@ export function CaseRowDetail({
           {contacts == null ? (
             <Loading />
           ) : clientContacts.length === 0 ? (
-            <div className="px-1 py-1 text-[11px] text-slate-400">接触履歴がありません</div>
+            <div className="px-1 py-1 text-[0.6875rem] text-slate-400">接触履歴がありません</div>
           ) : (
             <div className="overflow-x-auto rounded border border-slate-200 bg-white">
-              <table className="w-full text-[11px]">
+              <table className="w-full text-[0.6875rem]">
                 <thead className="bg-slate-100">
                   <tr>
                     <th className={TH}>接触日</th>
@@ -216,7 +216,7 @@ export function CaseRowDetail({
 
       {showCreditors && (
         <section>
-          <div className="mb-1 text-[11px] font-semibold text-slate-600">
+          <div className="mb-1 text-[0.6875rem] font-semibold text-slate-600">
             和解対象債権一覧
             {creditors != null && (
               <span className="ml-1 font-normal text-slate-400">{creditors.length}社</span>
@@ -225,10 +225,10 @@ export function CaseRowDetail({
           {creditors == null ? (
             <Loading />
           ) : creditors.length === 0 ? (
-            <div className="px-1 py-1 text-[11px] text-slate-400">債権者がいません</div>
+            <div className="px-1 py-1 text-[0.6875rem] text-slate-400">債権者がいません</div>
           ) : (
             <div className="overflow-x-auto rounded border border-slate-200 bg-white">
-              <table className="w-full text-[11px]">
+              <table className="w-full text-[0.6875rem]">
                 <thead className="bg-slate-100">
                   <tr>
                     <th className={TH}>債権者</th>
@@ -271,7 +271,7 @@ export function CaseRowDetail({
                         <td className={TD}>{c.status}</td>
                         <td className={TD}>
                           {c.check ? (
-                            <span className="rounded bg-amber-100 px-1 text-[10px] font-semibold text-amber-800">
+                            <span className="rounded bg-amber-100 px-1 text-[0.625rem] font-semibold text-amber-800">
                               CHECK
                             </span>
                           ) : (
@@ -314,7 +314,7 @@ export function CaseRowDetail({
 
       {showSettlement && (
         <section>
-          <div className="mb-1 text-[11px] font-semibold text-slate-600">
+          <div className="mb-1 text-[0.6875rem] font-semibold text-slate-600">
             和解内容詳細
             {creditors != null && (
               <span className="ml-1 font-normal text-slate-400">
@@ -325,10 +325,10 @@ export function CaseRowDetail({
           {creditors == null ? (
             <Loading />
           ) : settled.length === 0 ? (
-            <div className="px-1 py-1 text-[11px] text-slate-400">和解内容がありません</div>
+            <div className="px-1 py-1 text-[0.6875rem] text-slate-400">和解内容がありません</div>
           ) : (
             <div className="overflow-x-auto rounded border border-slate-200 bg-white">
-              <table className="w-full text-[11px]">
+              <table className="w-full text-[0.6875rem]">
                 <thead className="bg-slate-100">
                   <tr>
                     <th className={TH}>債権者</th>
@@ -373,7 +373,7 @@ export function CaseRowDetail({
                       <td className={TD}>{c.accountHolder ?? ''}</td>
                       <td className={TD}>
                         {c.repaymentTarget ? (
-                          <span className="rounded bg-red-100 px-1 text-[10px] font-semibold text-red-700">
+                          <span className="rounded bg-red-100 px-1 text-[0.625rem] font-semibold text-red-700">
                             {c.repaymentTarget}
                           </span>
                         ) : (

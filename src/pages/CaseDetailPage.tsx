@@ -29,7 +29,7 @@ import { CaseMailControl } from "../components/case/CaseMailControl";
 import { CaseChangeHistory } from "../components/case/CaseChangeHistory";
 import { FindModeLauncher } from "../components/case/FindModeLauncher";
 import { LAST_LIST_PATH_KEY } from "../components/AppHeader";
-import type { Case, Creditor } from "../types";
+import type { Case, ContactHistory, Creditor, PaymentRecord } from "../types";
 import {
   creditorTabAccentSummary,
   creditorTabAccentForName,
@@ -40,7 +40,6 @@ import { settlementTotals } from "../lib/settlementTotals";
 import { isEmptyRow } from "../lib/paymentRows";
 import { CaseReminders } from "../components/case/CaseReminders";
 import { CaseReminderBanner } from "../components/case/CaseReminderBanner";
-import { PostalCodeHelper } from "../components/case/PostalCodeHelper";
 import {
   CASE_STATUS_OPTIONS,
   DEBT_ADJUSTMENT_TYPE_OPTIONS,
@@ -830,19 +829,45 @@ function CaseDetailBody({
     );
   }
 
-  /** 案件・債権者の最新値をサーバから取り直して画面へ反映（下書き破棄時に使う） */
+  /**
+   * 案件・債権者・入金・接触履歴の最新値をサーバから取り直して画面へ反映する。
+   * 下書きの破棄と、変更履歴からの「元に戻す」の後に使う。
+   *
+   * 以前は案件だけを取り直していたため、債権者・入金・接触履歴の取消が画面に
+   * 出ず、再読み込みするまで戻ったように見えなかった（サーバ側の revert は
+   * これらも戻している）。
+   */
   const reloadCaseFromServer = async () => {
     const caseId = caseData.id;
     try {
-      const [full, rows] = await Promise.all([
+      const [full, creditorRows, paymentRows, contactRows] = await Promise.all([
         fetch(`/api/cases/${caseId}`).then((r) => (r.ok ? r.json() : null)),
         fetch(`/api/creditors?caseId=${caseId}`).then((r) =>
           r.ok ? (r.json() as Promise<Creditor[]>) : null,
         ),
+        fetch(`/api/payments?caseId=${caseId}`).then((r) =>
+          r.ok ? (r.json() as Promise<PaymentRecord[]>) : null,
+        ),
+        fetch(`/api/contact-histories?caseId=${caseId}`).then((r) =>
+          r.ok ? (r.json() as Promise<ContactHistory[]>) : null,
+        ),
       ]);
       if (full) dispatch({ type: "MERGE_FULL_CASE", payload: full });
-      if (rows)
-        dispatch({ type: "MERGE_CREDITORS", payload: { caseId, rows } });
+      if (creditorRows)
+        dispatch({
+          type: "MERGE_CREDITORS",
+          payload: { caseId, rows: creditorRows },
+        });
+      if (paymentRows)
+        dispatch({
+          type: "MERGE_PAYMENTS",
+          payload: { caseId, rows: paymentRows },
+        });
+      if (contactRows)
+        dispatch({
+          type: "MERGE_CONTACT_HISTORIES",
+          payload: { caseId, rows: contactRows },
+        });
     } catch {
       /* 取り直しに失敗しても画面は壊さない */
     }
@@ -1192,8 +1217,15 @@ function CaseDetailBody({
     0,
   );
 
-  // 累計入金額：全入金スケジュール（合計行を除く）の実入金額の合計
-  const paymentsWithoutSummary = payments.filter((p) => !isEmptyRow(p));
+  // 累計入金額：案件全体の入金（合計行を除く）の実入金額の合計。
+  //
+  // ★payments には案件全体の行に加えて、債権者タブを埋めるために実行時に
+  //   算出した「債権者別の弁済スケジュール」が合成されている
+  //   （src/store/useCaseStore.ts の usePaymentsByCaseId）。これは案件全体の
+  //   入金をFIFOで按分した推定値なので、合計すると同じ入金を二重に数えてしまう。
+  //   以前はここで payments をそのまま使っており、累計入金額・累計入金予定額・
+  //   残入金予定がおおむね倍の値になっていた。案件全体の行だけを見る。
+  const paymentsWithoutSummary = caseLevelPayments;
   const cumulativePaid = paymentsWithoutSummary.reduce(
     (s, p) => s + (p.actualAmount ?? 0),
     0,
@@ -1529,13 +1561,9 @@ function CaseDetailBody({
                     refreshKey={historyRefreshKey}
                     onReverted={() => {
                       setHistoryRefreshKey((k) => k + 1);
-                      fetch(`/api/cases/${caseData.id}`)
-                        .then((r) => (r.ok ? r.json() : null))
-                        .then((full) => {
-                          if (full)
-                            dispatch({ type: "MERGE_FULL_CASE", payload: full });
-                        })
-                        .catch(() => {});
+                      // 案件だけでなく債権者・入金・接触履歴も取り直す。
+                      // サーバの取消はこれらも戻すため（堀本様のご指摘）。
+                      void reloadCaseFromServer();
                     }}
                   />
                 </div>
@@ -1769,13 +1797,13 @@ function CaseDetailBody({
         {/* 4行目：入金・報酬状況（8カラムグリッド） */}
         <div className="grid grid-cols-8 gap-0.5 px-2 py-0.5 [&>div]:min-w-0">
           <div className="flex min-w-0 items-center gap-1 py-0 min-h-[1.5rem] col-span-2">
-            <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[11px]">・累計入金額</span>
+            <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[0.6875rem]">・累計入金額</span>
             <span className="flex-1 min-w-0 text-xs font-bold tabular-nums text-blue-600 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate">
               {formatYenPair(cumulativePaid, cumulativePlanned)}
             </span>
           </div>
           <div className="flex min-w-0 items-center gap-1 py-0 min-h-[1.5rem]">
-            <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[11px]">・残入金予定</span>
+            <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[0.6875rem]">・残入金予定</span>
             <span className={`flex-1 min-w-0 text-xs font-bold tabular-nums rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate ${remainingPlanned != null && remainingPlanned < 0 ? "text-red-600" : "text-blue-600"}`}>
               {remainingPlanned != null
                 ? `${remainingPlanned.toLocaleString()}円`
@@ -1783,7 +1811,7 @@ function CaseDetailBody({
             </span>
           </div>
           <div className="flex min-w-0 items-center gap-1 py-0 min-h-[1.5rem]">
-            <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[11px]">・次回入金日</span>
+            <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[0.6875rem]">・次回入金日</span>
             <span className="flex-1 min-w-0 text-xs font-bold tabular-nums text-blue-600 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate">
               {nextPaymentDate ?? "-"}
             </span>
@@ -1801,7 +1829,7 @@ function CaseDetailBody({
             fillWidth
           />
           <div className="flex min-w-0 items-center gap-1 py-0 min-h-[1.5rem]">
-            <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[11px]">・報酬充当額</span>
+            <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[0.6875rem]">・報酬充当額</span>
             <span className={`flex-1 min-w-0 text-xs font-bold tabular-nums rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate ${caseData.paymentInfo.cumulativeFeeAllocation != null && caseData.paymentInfo.cumulativeFeeAllocation < 0 ? "text-red-600" : "text-blue-600"}`}>
               {caseData.paymentInfo.cumulativeFeeAllocation != null
                 ? `${caseData.paymentInfo.cumulativeFeeAllocation.toLocaleString()}円`
@@ -1809,7 +1837,7 @@ function CaseDetailBody({
             </span>
           </div>
           <div className="flex min-w-0 items-center gap-1 py-0 min-h-[1.5rem]">
-            <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[11px]">・報酬未回収</span>
+            <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[0.6875rem]">・報酬未回収</span>
             <span className={`flex-1 min-w-0 text-xs font-bold tabular-nums rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate ${caseData.feeInfo.uncollectedFee != null && caseData.feeInfo.uncollectedFee < 0 ? "text-red-600" : "text-blue-600"}`}>
               {caseData.feeInfo.uncollectedFee != null
                 ? `${caseData.feeInfo.uncollectedFee.toLocaleString()}円`
@@ -1979,20 +2007,6 @@ function CaseDetailBody({
                             bordered
                             truncateValue
                             fillWidth
-                          />
-                          {/* 郵便番号と住所の入力補助（辞書はサーバ側・外部通信なし） */}
-                          <PostalCodeHelper
-                            postalCode={caseData.clientBasicInfo.postalCode ?? ""}
-                            prefecture={caseData.clientBasicInfo.prefecture ?? ""}
-                            address={caseData.clientBasicInfo.address ?? ""}
-                            disabled={locked != null}
-                            onApplyAddress={(pref, rest) => {
-                              updateClientBasicInfo("prefecture", pref);
-                              updateClientBasicInfo("address", rest);
-                            }}
-                            onApplyZip={(zip) =>
-                              updateClientBasicInfo("postalCode", zip)
-                            }
                           />
                         </div>
                         <div className="min-w-0 col-span-4">

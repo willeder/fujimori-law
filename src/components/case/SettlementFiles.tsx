@@ -250,14 +250,14 @@ export function SettlementFiles({ caseId }: { caseId?: number }) {
             key={c}
             type="button"
             onClick={() => setFilter(c)}
-            className={`rounded border px-2 py-0.5 text-[11px] ${
+            className={`rounded border px-2 py-0.5 text-[0.6875rem] ${
               filter === c
                 ? 'border-blue-600 bg-blue-600 text-white'
                 : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-100'
             }`}
           >
             {c}
-            <span className="ml-1 text-[10px] opacity-70">
+            <span className="ml-1 text-[0.625rem] opacity-70">
               {c === 'すべて' ? files.length : files.filter((f) => groupOf(f) === c).length}
             </span>
           </button>
@@ -271,7 +271,7 @@ export function SettlementFiles({ caseId }: { caseId?: number }) {
           {shown.map((f) => (
             <li key={f.id} className="flex items-center gap-2 px-2 py-1">
               <span
-                className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] ${
+                className={`shrink-0 rounded px-1.5 py-0.5 text-[0.625rem] ${
                   CATEGORY_COLORS[groupOf(f)] ?? 'bg-gray-100 text-gray-600'
                 }`}
               >
@@ -285,24 +285,24 @@ export function SettlementFiles({ caseId }: { caseId?: number }) {
               >
                 {f.name}
               </button>
-              <span className="shrink-0 text-[10px] tabular-nums text-slate-400">
+              <span className="shrink-0 text-[0.625rem] tabular-nums text-slate-400">
                 {fmtSize(f.size)}
               </span>
-              <span className="hidden shrink-0 text-[10px] text-slate-400 sm:inline">
+              <span className="hidden shrink-0 text-[0.625rem] text-slate-400 sm:inline">
                 {fmtDate(f.createdAt)}
               </span>
               {f.field === UPLOAD_FIELD ? (
                 <button
                   type="button"
                   onClick={() => void remove(f)}
-                  className="shrink-0 text-[10px] text-slate-400 hover:text-red-600"
+                  className="shrink-0 text-[0.625rem] text-slate-400 hover:text-red-600"
                 >
                   削除
                 </button>
               ) : (
                 // kintone から移した分は移行元の記録なので消させない
                 <span
-                  className="shrink-0 text-[10px] text-slate-300"
+                  className="shrink-0 text-[0.625rem] text-slate-300"
                   title="kintoneから移行した資料です。この画面からは削除できません"
                 >
                   移行分
@@ -313,7 +313,7 @@ export function SettlementFiles({ caseId }: { caseId?: number }) {
         </ul>
       )}
 
-      <p className="text-[11px] leading-snug text-slate-400">
+      <p className="text-[0.6875rem] leading-snug text-slate-400">
         kintone から移した「相談票添付」「和解ファイル」もここに出しています（区分で絞り込めます）。
         移行分は記録として残すため、この画面からは削除できません。
       </p>

@@ -1248,11 +1248,24 @@ async function updateRowField(
     userAgent: meta.userAgent,
   })
   // 日付の入力に連動してステータスを進める（事務所のご要望）
+  let latest = updated
+  let caseChanged = false
   if (model === 'Creditor') {
-    await applyCreditorStatusAutomation(actor, updated as Record<string, unknown>, after, meta)
+    const auto = await applyCreditorStatusAutomation(
+      actor,
+      updated as Record<string, unknown>,
+      after,
+      meta
+    )
+    caseChanged = auto.caseChanged
+    // 自動でステータスが変わった場合は、その結果を読み直して返す。
+    // updated は自動更新の前の値なので、そのまま返すと画面が古いままになる。
+    if (auto.creditorChanged) {
+      latest = (await delegate.findUnique({ where: { id } })) ?? updated
+    }
   }
 
-  return { status: 200, body: { changed: true, row: rowToJson(model, updated) } }
+  return { status: 200, body: { changed: true, row: rowToJson(model, latest), caseChanged } }
 }
 
 /**
@@ -1275,9 +1288,14 @@ async function applyCreditorStatusAutomation(
   updated: Record<string, unknown>,
   changed: Record<string, unknown>,
   meta: EditMeta
-) {
+): Promise<{ creditorChanged: boolean; caseChanged: boolean }> {
   const creditorId = Number(updated.id)
   const caseId = Number(updated.caseId)
+  // 画面はこの戻り値を見て、自動で変わった分を取り直す。
+  // 返さないと、保存したのに古いステータスが出たままになる
+  // （事務所から「データをいじってもその場で更新されない」とのご指摘）。
+  let creditorChanged = false
+  let caseChanged = false
 
   // ── ① 債権調査到着日 → 和解提案書作成待ち ──
   if ('debtInquiryArrivalDate' in changed && updated.debtInquiryArrivalDate != null) {
@@ -1287,6 +1305,7 @@ async function applyCreditorStatusAutomation(
         where: { id: creditorId },
         data: { status: '和解提案書作成待ち' },
       })
+      creditorChanged = true
       await writeChange({
         actor,
         entity: 'Creditor',
@@ -1327,6 +1346,7 @@ async function applyCreditorStatusAutomation(
           sent === targets.length ? '全社受任通知発送済' : sent > 0 ? '一部受任通知発送済' : null
         if (next && next !== cur) {
           await prisma.case.update({ where: { id: caseId }, data: { settlementStatus: next } })
+          caseChanged = true
           await writeChange({
             actor,
             entity: 'Case',
@@ -1349,6 +1369,8 @@ async function applyCreditorStatusAutomation(
       }
     }
   }
+
+  return { creditorChanged, caseChanged }
 }
 
 /** 子テーブル行の追加（変更履歴 CREATE ＋監査） */
@@ -1418,6 +1440,10 @@ async function deleteRow(
     const v = caseDisplay(fieldType[col], existing[col])
     if (v != null && v !== '') before[col] = v
   }
+  // 案件IDを必ず残す。行が消えたあとは id で辿れないため、案件の変更履歴は
+  // ここに入っている caseId で削除ぶんを拾う（getCaseChanges 参照）。
+  // これが無いと「枠ごと削除すると変更履歴も消える」状態に戻る。
+  if (existing.caseId != null) before.caseId = existing.caseId
   await rowDelegate(model).delete({ where: { id } })
   await writeChange({ actor, entity: model, entityId: String(id), action: 'DELETE', before, after: null })
   await writeAudit({
@@ -1443,6 +1469,44 @@ export const updateContactHistoryField = (actor: EditActor, id: number, raw: str
   updateRowField('ContactHistory', CONTACT_FIELD_TYPE, actor, id, raw, meta)
 export const createContactHistory = (actor: EditActor, raw: string, meta: EditMeta) =>
   createRow('ContactHistory', CONTACT_FIELD_TYPE, actor, raw, meta)
+
+/**
+ * 既存案件に債権者を1社追加する。
+ *
+ * 事務所からのご指摘（竹谷様 2026-08-21）:
+ *   「追加介入があった場合、どのようにして追加の債権者を増やしていけば良いか
+ *     触り方が分かりません。タブを追加することが発生するので手動での調整が必要」
+ * これまで債権者が増える経路は相談票の取込（案件ごと新規作成）だけで、途中で
+ * 1社だけ足すことができなかった。
+ *
+ * 表示順は末尾に付ける（並べ替えは画面のドラッグで直せる）。ステータスの既定は
+ * 相談票の取込と揃えて「受任通知発送待ち」。
+ */
+export async function createCreditor(actor: EditActor, raw: string, meta: EditMeta) {
+  let body: Record<string, unknown>
+  try {
+    body = JSON.parse(raw || '{}') as Record<string, unknown>
+  } catch {
+    return { status: 400, body: { error: 'bad request' } }
+  }
+  const caseId = Number(body.caseId)
+  if (!Number.isFinite(caseId)) return { status: 400, body: { error: 'caseId が必要です' } }
+  const name = typeof body.creditorName === 'string' ? body.creditorName.trim() : ''
+  if (!name) return { status: 400, body: { error: '債権者名を入れてください' } }
+
+  const max = await prisma.creditor.aggregate({
+    where: { caseId },
+    _max: { displayOrder: true },
+  })
+  const payload = {
+    ...body,
+    creditorName: name,
+    displayOrder: (max._max.displayOrder ?? 0) + 1,
+    status:
+      typeof body.status === 'string' && body.status.length > 0 ? body.status : '受任通知発送待ち',
+  }
+  return createRow('Creditor', CREDITOR_FIELD_TYPE, actor, JSON.stringify(payload), meta)
+}
 export const deleteContactHistory = (actor: EditActor, id: number, meta: EditMeta) =>
   deleteRow('ContactHistory', CONTACT_FIELD_TYPE, actor, id, meta)
 /**
@@ -1486,20 +1550,36 @@ export async function deleteCase(
   return { status: 200, body: { ok: true } }
 }
 
-/** 案件の変更履歴（本体＋その案件の債権者・入金の変更も含む。新しい順） */
+/**
+ * 案件の変更履歴（本体＋その案件の債権者・入金・接触履歴・リマインドの変更。新しい順）。
+ *
+ * 現存する行の id で絞ると、**削除された行の履歴が丸ごと一覧から消える**。
+ * 接触履歴の枠ごと削除したときに変更履歴も消えてしまい復元できない、という
+ * ご指摘（堀本様 2026-08-22）がこれ。削除の記録自体は before 付きで残って
+ * いるので、削除ぶんは before の caseId で拾って必ず出すようにする。
+ */
 export async function getCaseChanges(id: number) {
-  const [creditors, payments, contacts] = await Promise.all([
+  const [creditors, payments, contacts, reminders] = await Promise.all([
     prisma.creditor.findMany({ where: { caseId: id }, select: { id: true } }),
     prisma.payment.findMany({ where: { caseId: id }, select: { id: true } }),
     prisma.contactHistory.findMany({ where: { caseId: id }, select: { id: true } }),
+    prisma.caseReminder.findMany({ where: { caseId: id }, select: { id: true } }),
   ])
   const credIds = creditors.map((c) => String(c.id))
   const payIds = payments.map((p) => String(p.id))
   const contactIds = contacts.map((c) => String(c.id))
+  const reminderIds = reminders.map((r) => String(r.id))
   const or: Prisma.ChangeLogWhereInput[] = [{ entity: 'Case', entityId: String(id) }]
   if (credIds.length) or.push({ entity: 'Creditor', entityId: { in: credIds } })
   if (payIds.length) or.push({ entity: 'Payment', entityId: { in: payIds } })
   if (contactIds.length) or.push({ entity: 'ContactHistory', entityId: { in: contactIds } })
+  if (reminderIds.length) or.push({ entity: 'CaseReminder', entityId: { in: reminderIds } })
+  // 削除された行（もう id では引けない）。消える前の値に案件IDが入っている。
+  or.push({
+    entity: { in: ['Creditor', 'Payment', 'ContactHistory', 'CaseReminder'] },
+    action: 'DELETE',
+    before: { path: ['caseId'], equals: id },
+  })
   const rows = await prisma.changeLog.findMany({
     where: { OR: or },
     orderBy: { id: 'desc' },
@@ -1600,6 +1680,17 @@ export async function revertChange(
   })
   return { status: 200, body: { ok: true } }
 }
+/**
+ * 記号や伏字だけの値かどうか。
+ * 移行データに債権者名「？？？」の行が実在し、接触履歴の債権者欄を押すたびに
+ * 候補として出ていた（藤原様 2026-08-22）。名前として意味を持たない値は
+ * 候補から外す。データ自体は履歴として残す。
+ */
+function isPlaceholderName(v: string): boolean {
+  // 全角・半角の ? ！ ・ ー - _ * 空白 などしか含まない
+  return /^[\s?？!！・.．,，\-ー_*＊×〇○]+$/.test(v)
+}
+
 /** 重複を除いた債権者名の一覧（検索ドロップダウン用・軽量） */
 export async function getCreditorNames() {
   const [rows, partners] = await Promise.all([
@@ -1616,12 +1707,104 @@ export async function getCreditorNames() {
       orderBy: { negotiationPartner: 'asc' },
     }),
   ])
+  const usable = (n: string | null): n is string =>
+    !!n && n.trim() !== '' && !isPlaceholderName(n)
   return {
-    names: rows.map((r) => r.creditorName).filter((n): n is string => !!n),
-    partners: partners
-      .map((r) => r.negotiationPartner)
-      .filter((n): n is string => !!n && n.trim() !== ''),
+    names: rows.map((r) => r.creditorName).filter(usable),
+    partners: partners.map((r) => r.negotiationPartner).filter(usable),
   }
+}
+
+/**
+ * 原資UP対応が必要な依頼者の一覧。
+ *
+ * 事務所の運用（竹谷様 2026-08-21）:
+ *   「申告額から20万円以上、もしくは申告額の10％以上、実債務額の方が大きい場合、
+ *     原資アップの対応を行う流れになっている」
+ * 相談時の申告額より実際の債権額が大きいと、当初の原資では返しきれないため、
+ * 早めに見つけて原資を上げる交渉をする、というもの。
+ *
+ * 判定は依頼者（案件）単位で、受任対象の債権者の合計で見る。
+ * 「受任対象外」の債権者は返済の対象ではないので合計に入れない。
+ */
+export const FUND_INCREASE_ABSOLUTE_THRESHOLD = 200_000
+export const FUND_INCREASE_RATIO_THRESHOLD = 0.1
+
+export async function getFundIncreaseCandidates() {
+  const rows = await prisma.creditor.findMany({
+    where: { status: { not: '受任対象外' } },
+    select: {
+      caseId: true,
+      declaredAmount: true,
+      debtAmount: true,
+      case: {
+        select: {
+          id: true,
+          externalId: true,
+          name: true,
+          furigana: true,
+          settlementStatus: true,
+          judicialScrivener: true,
+          basePaymentAmount: true,
+        },
+      },
+    },
+  })
+
+  type Acc = {
+    case: (typeof rows)[number]['case']
+    declared: number
+    debt: number
+    creditorCount: number
+    /** 債権額が未入力の債権者数。合計が過小になるので画面で注記する */
+    debtUnknownCount: number
+  }
+  const byCase = new Map<number, Acc>()
+  for (const r of rows) {
+    const acc = byCase.get(r.caseId) ?? {
+      case: r.case,
+      declared: 0,
+      debt: 0,
+      creditorCount: 0,
+      debtUnknownCount: 0,
+    }
+    acc.declared += r.declaredAmount ?? 0
+    acc.debt += r.debtAmount ?? 0
+    acc.creditorCount += 1
+    if (r.debtAmount == null) acc.debtUnknownCount += 1
+    byCase.set(r.caseId, acc)
+  }
+
+  const result = []
+  for (const acc of byCase.values()) {
+    // 差額は「実債務額 − 申告額」。プラスなら申告より実際の借金が多い。
+    const gap = acc.debt - acc.declared
+    if (gap <= 0) continue
+    const ratio = acc.declared > 0 ? gap / acc.declared : null
+    const byAmount = gap >= FUND_INCREASE_ABSOLUTE_THRESHOLD
+    const byRatio = ratio != null && ratio >= FUND_INCREASE_RATIO_THRESHOLD
+    if (!byAmount && !byRatio) continue
+    result.push({
+      caseId: acc.case.id,
+      externalId: acc.case.externalId,
+      name: acc.case.name,
+      furigana: acc.case.furigana,
+      caseStatus: acc.case.settlementStatus,
+      judicialScrivener: acc.case.judicialScrivener,
+      basePaymentAmount: acc.case.basePaymentAmount,
+      creditorCount: acc.creditorCount,
+      debtUnknownCount: acc.debtUnknownCount,
+      declaredAmount: acc.declared,
+      debtAmount: acc.debt,
+      gap,
+      ratio,
+      /** どちらの条件で拾ったか（両方のこともある） */
+      reason: byAmount && byRatio ? 'both' : byAmount ? 'amount' : 'ratio',
+    })
+  }
+  // 差額の大きい順。対応の優先度が高いものから見られるように。
+  result.sort((a, b) => b.gap - a.gap)
+  return result
 }
 
 /**

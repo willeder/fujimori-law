@@ -14,9 +14,6 @@ importers:
       dotenv:
         specifier: ^16.4.7
         version: 16.6.1
-      jp-zipcode-lookup:
-        specifier: ^0.3.5
-        version: 0.3.5
       react:
         specifier: ^19.2.4
         version: 19.2.7
@@ -1048,6 +1045,7 @@ packages:
   eslint@9.39.4:
     resolution: {integrity: sha512-XoMjdBOwe/esVgEvLmNsD3IRHkm7fbKIUGvrleloJXUZgDHig2IPWNniv+GwjyJXzuNqVjlr5+4yVUZjycJwfQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
     peerDependencies:
       jiti: '*'
@@ -1202,9 +1200,6 @@ packages:
   jiti@2.7.0:
     resolution: {integrity: sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ==}
     hasBin: true
-
-  jp-zipcode-lookup@0.3.5:
-    resolution: {integrity: sha512-NeNYUMv0eCFNBeGV6eBeJg8MRF+tgM/GMvXmCbvlOj4JSb+PZE5lXI3vOQWxct8+VhP5qCnIp+jgQ2zbZzy6ew==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -2698,8 +2693,6 @@ snapshots:
   isexe@2.0.0: {}
 
   jiti@2.7.0: {}
-
-  jp-zipcode-lookup@0.3.5: {}
 
   js-tokens@4.0.0: {}
 

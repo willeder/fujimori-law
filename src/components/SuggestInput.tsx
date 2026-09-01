@@ -125,7 +125,7 @@ export function SuggestInput({
             </button>
           ))}
           {total > filtered.length && (
-            <div className="border-t border-slate-100 px-2 py-1 text-[10px] text-slate-400">
+            <div className="border-t border-slate-100 px-2 py-1 text-[0.625rem] text-slate-400">
               {total}件中 先頭{filtered.length}件を表示（入力で絞り込めます）
             </div>
           )}

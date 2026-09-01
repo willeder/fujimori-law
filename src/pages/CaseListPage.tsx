@@ -210,7 +210,7 @@ export function CaseListPage() {
           e.stopPropagation()
           toggleExpand(item.id, kind)
         }}
-        className="whitespace-nowrap text-[11px] text-blue-600 hover:underline"
+        className="whitespace-nowrap text-[0.6875rem] text-blue-600 hover:underline"
       >
         {open ? '閉じる ▾' : '表示する ▶'}
       </button>
@@ -356,14 +356,18 @@ export function CaseListPage() {
     })
   }, [cases, searchField, searchValue])
 
-  // 一覧は No（id）昇順で固定。ヘッダークリック等で順序を変更させない。
-  const sortedCases = useMemo(() => {
-    return [...filteredCases].sort((a, b) => (a.id ?? 0) - (b.id ?? 0))
-  }, [filteredCases])
+  // 並び順はサーバ側（src/server/handlers.ts の CASE_LIST_ORDER）が、kintone のビュー
+  // 「全件一覧」と同じ 受任日の新しい順 → レコード番号の新しい順 → No の新しい順で返す。
+  // 以前はここで No（id）昇順に並べ直しており、そのサーバの並びを打ち消していたため、
+  // 取り込んだ新規案件が最終ページの末尾に回って一覧の先頭に出てこなかった
+  // （事務所から「取り込んだ新規案件が一覧に出てこない」と再度ご指摘）。
+  // 列見出しクリックによる並び替えは DataTable 側が担うので、ここでは並べ替えない。
+  const sortedCases = filteredCases
 
   // 詳細検索の結果があればそれを優先表示、無ければクイック検索の結果
+  // （詳細検索の結果もサーバ側で CASE_LIST_ORDER と同じ順に返る）
   const displayed = useMemo(() => {
-    if (results != null) return [...results].sort((a, b) => (a.id ?? 0) - (b.id ?? 0))
+    if (results != null) return results
     return sortedCases
   }, [results, sortedCases])
 
@@ -371,7 +375,7 @@ export function CaseListPage() {
     n != null ? (
       <span>
         {n.toLocaleString()}
-        <span className="text-slate-400 text-[10px] ml-0.5">円</span>
+        <span className="text-slate-400 text-[0.625rem] ml-0.5">円</span>
       </span>
     ) : (
       '-'
@@ -806,10 +810,30 @@ export function CaseListPage() {
     {
       key: 'id',
       header: 'ID',
-      width: '76px',
+      width: '92px',
       align: 'center',
       sortable: false,
-      render: (item) => item.metadata.externalId ?? '-',
+      // kintone と同じように、左端にアイコンを置いてそこから案件詳細へ飛ぶ
+      // （藤川様 2026-08-21。行を開くのは左端の列だけ、という既存の動きは
+      //   そのままで、どこを押せば開くのかが見て分かるようにする）。
+      render: (item) => (
+        <span className="inline-flex items-center gap-1">
+          <svg
+            viewBox="0 0 16 16"
+            aria-hidden="true"
+            className="h-3.5 w-3.5 shrink-0 text-blue-500"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect x="2.5" y="2" width="11" height="12" rx="1.5" />
+            <path d="M5.5 6h5M5.5 9h3" />
+          </svg>
+          <span className="tabular-nums">{item.metadata.externalId ?? '-'}</span>
+        </span>
+      ),
       filterValue: (item) => item.metadata.externalId ?? '',
     },
     {
@@ -820,9 +844,9 @@ export function CaseListPage() {
       sortable: false,
       render: (item) =>
         item.metadata.lineLinked ? (
-          <span className="rounded bg-emerald-100 px-1 text-[10px] text-emerald-700">済</span>
+          <span className="rounded bg-emerald-100 px-1 text-[0.625rem] text-emerald-700">済</span>
         ) : (
-          <span className="rounded bg-slate-100 px-1 text-[10px] text-slate-400">未</span>
+          <span className="rounded bg-slate-100 px-1 text-[0.625rem] text-slate-400">未</span>
         ),
     },
     {
@@ -946,7 +970,7 @@ export function CaseListPage() {
       render: (item) => (
         <span>
           {item.debtInfo.creditorCount ?? '-'}
-          <span className="text-slate-400 text-[10px] ml-0.5">社</span>
+          <span className="text-slate-400 text-[0.625rem] ml-0.5">社</span>
         </span>
       ),
       filterValue: (item) => (item.debtInfo.creditorCount != null ? String(item.debtInfo.creditorCount) : ''),
@@ -1153,14 +1177,14 @@ export function CaseListPage() {
                       <button
                         type="button"
                         onClick={() => setColumnKeys(null)}
-                        className="text-[10px] text-blue-600 hover:underline"
+                        className="text-[0.625rem] text-blue-600 hover:underline"
                       >
                         既定に戻す
                       </button>
                     </div>
                     {columnGroups.map((g) => (
                       <div key={g.label} className="mb-1">
-                        <div className="px-1 py-0.5 text-[10px] font-medium text-slate-400">
+                        <div className="px-1 py-0.5 text-[0.625rem] font-medium text-slate-400">
                           {g.label}
                         </div>
                         {g.cols.map((c) => {
@@ -1269,7 +1293,7 @@ export function CaseListPage() {
           {/* 最近の絞り込み（直近10件・クリックで再実行）No.147 */}
           {filterHistory.length > 0 && (
             <div className="flex flex-wrap items-center gap-1">
-              <span className="text-[10px] text-slate-400">最近の絞り込み：</span>
+              <span className="text-[0.625rem] text-slate-400">最近の絞り込み：</span>
               {filterHistory.slice(0, 10).map((h, i) => (
                 <button
                   key={i}
@@ -1280,7 +1304,7 @@ export function CaseListPage() {
                     void runFilter(h)
                   }}
                   title={filterHistoryLabel(h)}
-                  className="max-w-[220px] truncate rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] text-slate-600 hover:border-blue-300 hover:bg-blue-50"
+                  className="max-w-[220px] truncate rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[0.625rem] text-slate-600 hover:border-blue-300 hover:bg-blue-50"
                 >
                   {filterHistoryLabel(h)}
                 </button>

@@ -23,6 +23,7 @@ import { PaymentDelayDashboard } from './pages/PaymentDelayDashboard'
 import { ReminderTaskPage } from './pages/ReminderTaskPage'
 import { ClientReminderPage } from './pages/ClientReminderPage'
 import { CreditorReminderPage } from './pages/CreditorReminderPage'
+import { FundIncreasePage } from './pages/FundIncreasePage'
 
 const router = createBrowserRouter([
   {
@@ -64,6 +65,10 @@ const router = createBrowserRouter([
   {
     path: '/reminder-creditor',
     element: <CreditorReminderPage />,
+  },
+  {
+    path: '/fund-increase',
+    element: <FundIncreasePage />,
   },
   {
     path: '/members',

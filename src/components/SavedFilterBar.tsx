@@ -163,14 +163,14 @@ export function SavedFilterBar({
         管理
       </button>
       {active && (
-        <span className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] text-blue-700">
+        <span className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[0.625rem] text-blue-700">
           適用中：{active.name}
         </span>
       )}
       {error && (
         <span
           title={error}
-          className="max-w-[280px] truncate text-[10px] text-rose-600"
+          className="max-w-[280px] truncate text-[0.625rem] text-rose-600"
         >
           {error}
         </span>
@@ -243,8 +243,8 @@ function SaveDialog({
     <Modal title="この条件を保存" onClose={onClose}>
       <div className="space-y-3">
         <label className="block">
-          <span className="mb-1 block text-[11px] text-slate-500">
-            条件名 <span className="rounded bg-rose-400 px-1 text-[9px] text-white">必須</span>
+          <span className="mb-1 block text-[0.6875rem] text-slate-500">
+            条件名 <span className="rounded bg-rose-400 px-1 text-[0.5625rem] text-white">必須</span>
           </span>
           <input
             autoFocus
@@ -259,7 +259,7 @@ function SaveDialog({
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-[11px] text-slate-500">公開範囲</span>
+          <span className="mb-1 block text-[0.6875rem] text-slate-500">公開範囲</span>
           <select
             value={scope}
             onChange={(e) => setScope(e.target.value as SavedFilterScope)}
@@ -271,7 +271,7 @@ function SaveDialog({
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-[11px] text-slate-500">説明（任意）</span>
+          <span className="mb-1 block text-[0.6875rem] text-slate-500">説明（任意）</span>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -281,7 +281,7 @@ function SaveDialog({
           />
         </label>
 
-        <div className="rounded border border-slate-200 bg-slate-50 p-2 text-[11px] text-slate-600">
+        <div className="rounded border border-slate-200 bg-slate-50 p-2 text-[0.6875rem] text-slate-600">
           <div className="mb-1 font-medium text-slate-500">保存される内容</div>
           <div>クイック検索：{hasQuick ? current.quick.value : '（なし）'}</div>
           <div>詳細検索の条件：{conditionCount} 件</div>
@@ -294,11 +294,11 @@ function SaveDialog({
         </div>
 
         {empty && (
-          <p className="text-[11px] text-amber-600">
+          <p className="text-[0.6875rem] text-amber-600">
             条件が空のままです。この状態で保存すると「絞り込みなし」の条件になります。
           </p>
         )}
-        {error && <p className="text-[11px] text-rose-600">{error}</p>}
+        {error && <p className="text-[0.6875rem] text-rose-600">{error}</p>}
 
         <div className="flex justify-end gap-2 pt-1">
           <button type="button" onClick={onClose} className={btn}>
@@ -375,10 +375,10 @@ function ManageList({
 
   return (
     <div className="space-y-2">
-      {error && <p className="text-[11px] text-rose-600">{error}</p>}
+      {error && <p className="text-[0.6875rem] text-rose-600">{error}</p>}
       <table className="w-full text-xs">
         <thead>
-          <tr className="border-b border-slate-200 text-left text-[11px] text-slate-500">
+          <tr className="border-b border-slate-200 text-left text-[0.6875rem] text-slate-500">
             <th className="py-1.5 pr-2">条件名</th>
             <th className="py-1.5 pr-2 whitespace-nowrap">公開範囲</th>
             <th className="py-1.5 pr-2">内容</th>
@@ -403,7 +403,7 @@ function ManageList({
                     <>
                       <div className="font-medium text-slate-800">{f.name}</div>
                       {f.description && (
-                        <div className="text-[10px] text-slate-500">{f.description}</div>
+                        <div className="text-[0.625rem] text-slate-500">{f.description}</div>
                       )}
                     </>
                   )}
@@ -419,19 +419,19 @@ function ManageList({
                       <option value="PRIVATE">個人用</option>
                     </select>
                   ) : f.scope === 'SHARED' ? (
-                    <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] text-emerald-700">
+                    <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[0.625rem] text-emerald-700">
                       全体共有
                     </span>
                   ) : (
-                    <span className="rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-[10px] text-slate-600">
+                    <span className="rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-[0.625rem] text-slate-600">
                       個人用
                     </span>
                   )}
                 </td>
-                <td className="max-w-[260px] py-2 pr-2 text-[10px] text-slate-500">
+                <td className="max-w-[260px] py-2 pr-2 text-[0.625rem] text-slate-500">
                   {describe(normalizeCaseListPayload(f.payload), fieldLabel)}
                 </td>
-                <td className="py-2 pr-2 whitespace-nowrap text-[10px] text-slate-500">
+                <td className="py-2 pr-2 whitespace-nowrap text-[0.625rem] text-slate-500">
                   {f.ownerLabel}
                 </td>
                 <td className="py-2 whitespace-nowrap text-right">
@@ -512,7 +512,7 @@ function ManageList({
           })}
         </tbody>
       </table>
-      <p className="text-[10px] text-slate-400">
+      <p className="text-[0.625rem] text-slate-400">
         ※ 編集・削除できるのは、自分が作成した条件と管理者のみです。
       </p>
     </div>

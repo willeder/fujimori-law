@@ -243,7 +243,7 @@ export function SettlementResultsPage() {
           className="flex flex-wrap items-end gap-2"
         >
           {/* 検索条件の並び（左から）: 受任後ステータス → 債権者 → 受任日 → 受任通知送付日 → 和解日 */}
-          <label className="flex flex-col gap-0.5 text-[10px] text-slate-500">
+          <label className="flex flex-col gap-0.5 text-[0.625rem] text-slate-500">
             受任後ステータス
             <select
               value={fStatus}
@@ -258,7 +258,7 @@ export function SettlementResultsPage() {
               ))}
             </select>
           </label>
-          <label className="flex flex-col gap-0.5 text-[10px] text-slate-500">
+          <label className="flex flex-col gap-0.5 text-[0.625rem] text-slate-500">
             債権者（部分一致）
             <SuggestInput
               value={fCreditor}
@@ -268,7 +268,7 @@ export function SettlementResultsPage() {
               className={`${inputCls} w-44`}
             />
           </label>
-          <div className="flex flex-col gap-0.5 text-[10px] text-slate-500">
+          <div className="flex flex-col gap-0.5 text-[0.625rem] text-slate-500">
             受任日（期間）
             <div className="flex items-center gap-1">
               <input
@@ -286,7 +286,7 @@ export function SettlementResultsPage() {
               />
             </div>
           </div>
-          <div className="flex flex-col gap-0.5 text-[10px] text-slate-500">
+          <div className="flex flex-col gap-0.5 text-[0.625rem] text-slate-500">
             受任通知送付日（期間）
             <div className="flex items-center gap-1">
               <input
@@ -304,7 +304,7 @@ export function SettlementResultsPage() {
               />
             </div>
           </div>
-          <div className="flex flex-col gap-0.5 text-[10px] text-slate-500">
+          <div className="flex flex-col gap-0.5 text-[0.625rem] text-slate-500">
             和解日（期間）
             <div className="flex items-center gap-1">
               <input

@@ -69,7 +69,7 @@ export function FindModeModal({
         </div>
         <div className="grid max-h-[60vh] grid-cols-2 gap-2 overflow-auto p-4 sm:grid-cols-3">
           {SEARCH_FIELDS.map((f) => (
-            <label key={f.field} className="flex flex-col gap-0.5 text-[10px] text-slate-500">
+            <label key={f.field} className="flex flex-col gap-0.5 text-[0.625rem] text-slate-500">
               {f.label}
               <input
                 value={vals[f.field] ?? ''}
@@ -83,7 +83,7 @@ export function FindModeModal({
           ))}
         </div>
         <div className="border-t border-slate-100 px-4 py-2">
-          <div className="mb-1 text-[10px] font-medium text-slate-400">
+          <div className="mb-1 text-[0.625rem] font-medium text-slate-400">
             最近の検索（直近10件・クリックで条件を復元）
           </div>
           {history.length > 0 ? (
@@ -94,14 +94,14 @@ export function FindModeModal({
                   type="button"
                   onClick={() => applyHistory(h)}
                   title={findHistoryLabel(h)}
-                  className="max-w-full truncate rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] text-slate-600 hover:border-blue-300 hover:bg-blue-50"
+                  className="max-w-full truncate rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[0.625rem] text-slate-600 hover:border-blue-300 hover:bg-blue-50"
                 >
                   {findHistoryLabel(h)}
                 </button>
               ))}
             </div>
           ) : (
-            <div className="text-[10px] text-slate-400">
+            <div className="text-[0.625rem] text-slate-400">
               検索を実行すると、ここに履歴が表示されます
             </div>
           )}
@@ -121,7 +121,7 @@ export function FindModeModal({
           >
             クリア
           </button>
-          <span className="text-[10px] text-slate-400">
+          <span className="text-[0.625rem] text-slate-400">
             入力した全フィールドに一致（AND）。Enterで検索 / Escで閉じる。
             数値・日付は比較式が使えます（例: &gt;=100000、&lt;2026-07-01、100000..200000、2026-04-01〜2026-06-30、2026/08=その月のみ）
           </span>

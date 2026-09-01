@@ -45,6 +45,7 @@ function dbApiPlugin(): Plugin {
             searchCases: (raw: string) => Promise<unknown>
             searchCreditors: (raw: string) => Promise<unknown>
             getCreditorReminders: () => Promise<unknown>
+            getFundIncreaseCandidates: () => Promise<unknown>
             getSettlementCreditors: () => Promise<unknown>
             updateCaseField: (
               actor: { id: string; email: string },
@@ -67,6 +68,11 @@ function dbApiPlugin(): Plugin {
             updatePaymentField: (
               actor: { id: string; email: string },
               id: number,
+              raw: string,
+              meta: { ip?: string | null; userAgent?: string | null }
+            ) => Promise<{ status: number; body: unknown }>
+            createCreditor: (
+              actor: { id: string; email: string },
               raw: string,
               meta: { ip?: string | null; userAgent?: string | null }
             ) => Promise<{ status: number; body: unknown }>
@@ -130,6 +136,8 @@ function dbApiPlugin(): Plugin {
               result = await authMod.handleLogout(meta)
             } else if (url === '/api/auth/me' && req.method === 'GET') {
               result = await authMod.handleMe(meta)
+            } else if (url === '/api/auth/preferences' && req.method === 'PATCH') {
+              result = await authMod.handleUpdatePreferences(await readRawBody(req), meta)
             } else {
               res.statusCode = 404
               res.end(JSON.stringify({ error: 'not found' }))
@@ -266,6 +274,12 @@ function dbApiPlugin(): Plugin {
             res.end(JSON.stringify(out))
             return
           }
+          if (url === '/api/cases/fund-increase' && req.method === 'GET') {
+            const out = await mod.getFundIncreaseCandidates()
+            res.setHeader('Content-Type', 'application/json; charset=utf-8')
+            res.end(JSON.stringify(out))
+            return
+          }
           if (url === '/api/creditors/reminders' && req.method === 'GET') {
             const out = await mod.getCreditorReminders()
             res.setHeader('Content-Type', 'application/json; charset=utf-8')
@@ -283,6 +297,36 @@ function dbApiPlugin(): Plugin {
             res.setHeader('Content-Type', 'application/json; charset=utf-8')
             res.end(JSON.stringify(out))
             return
+          }
+
+          // ── 金融機関コードの辞書検索 ──
+          // 本番は vercel.json の rewrite で /api/data に流れる。開発サーバには
+          // この分岐が無く 404 になっていたため、同じ結果を返せるようにする
+          // （事務所から「金融機関コードを調べられませんでした」とのご指摘。
+          //   藤川様 2026-08-22）。
+          if (url.startsWith('/api/bank/')) {
+            const q = new URL(req.url ?? '', 'http://localhost').searchParams
+            const sendJson = (body: unknown) => {
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify(body))
+            }
+            if (url === '/api/bank/search' && req.method === 'GET') {
+              const bank = (await server.ssrLoadModule(
+                '/src/server/bankCode.ts'
+              )) as typeof import('./src/server/bankCode')
+              sendJson({ ok: true, hits: bank.searchBanks(q.get('q') ?? '') })
+              return
+            }
+            if (url === '/api/bank/branches' && req.method === 'GET') {
+              const bank = (await server.ssrLoadModule(
+                '/src/server/bankCode.ts'
+              )) as typeof import('./src/server/bankCode')
+              sendJson({
+                ok: true,
+                hits: bank.searchBranches(q.get('code') ?? '', q.get('q') ?? ''),
+              })
+              return
+            }
           }
 
           // ── 保存した絞り込み条件（共有フィルタ） ──
@@ -508,6 +552,13 @@ function dbApiPlugin(): Plugin {
               res.end(JSON.stringify(r.body))
               return
             }
+            if (url === '/api/creditors' && req.method === 'POST') {
+              const r = await mod.createCreditor(editActor, await readRawBody(req), meta)
+              res.statusCode = r.status
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify(r.body))
+              return
+            }
             if (url === '/api/payments' && req.method === 'POST') {
               const r = await mod.createPayment(editActor, await readRawBody(req), meta)
               res.statusCode = r.status
@@ -545,25 +596,11 @@ function dbApiPlugin(): Plugin {
           }
 
           // ── 相談票CSV取込（新規依頼者の一括登録） ──
-          if (
-            url === '/api/intake/preview' ||
-            url === '/api/intake/commit' ||
-            url === '/api/intake/template'
-          ) {
+          // テンプレートDL（/api/intake/template）は画面・サーバとも撤去済み
+          if (url === '/api/intake/preview' || url === '/api/intake/commit') {
             const intake = (await server.ssrLoadModule(
               '/src/server/intakeImport.ts'
             )) as typeof import('./src/server/intakeImport')
-            if (url === '/api/intake/template') {
-              const csv = intake.INTAKE_HEADERS.join(',') + '\r\n'
-              const bom = Buffer.from([0xef, 0xbb, 0xbf])
-              res.setHeader('Content-Type', 'text/csv; charset=utf-8')
-              res.setHeader(
-                'Content-Disposition',
-                'attachment; filename="intake_template.csv"'
-              )
-              res.end(Buffer.concat([bom, Buffer.from(csv, 'utf8')]))
-              return
-            }
             const buf = await readRawBuffer(req)
             if (url === '/api/intake/preview') {
               const out = await intake.previewIntake(buf)

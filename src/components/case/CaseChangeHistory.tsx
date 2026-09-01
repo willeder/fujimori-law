@@ -15,13 +15,38 @@ type ChangeEntry = {
   createdAt: string
 }
 
+/**
+ * 変更履歴の日時表示。
+ * サーバは createdAt を UTC の ISO 文字列で返すため、以前のように文字列を
+ * そのまま切り出すと日本時間より9時間ずれた時刻が出ていた
+ * （事務所から「更新時間と全く違う時間が表示される」とのご指摘。宮川様 2026-08-24）。
+ */
+function formatJst(iso: string): string {
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return iso
+  return d.toLocaleString('ja-JP', {
+    timeZone: 'Asia/Tokyo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  })
+}
+
 const ENTITY_LABEL: Record<string, { label: string; cls: string }> = {
   Case: { label: '案件', cls: 'bg-slate-100 text-slate-600' },
   Creditor: { label: '債権者', cls: 'bg-indigo-100 text-indigo-700' },
   Payment: { label: '入金', cls: 'bg-emerald-100 text-emerald-700' },
+  ContactHistory: { label: '接触履歴', cls: 'bg-sky-100 text-sky-700' },
+  CaseReminder: { label: 'リマインド', cls: 'bg-amber-100 text-amber-700' },
 }
 
 const FIELD_LABEL: Record<string, string> = {
+  dueDate: '期日',
+  body: '内容',
+  done: '対応済み',
   name: '氏名',
   furigana: 'フリガナ',
   phone: '電話番号',
@@ -240,7 +265,7 @@ export function CaseChangeHistory({
         return (
           <li key={c.id} className="flex items-start justify-between gap-2 px-3 py-2 text-xs">
             <div className="min-w-0">
-              <div className="flex items-center gap-1 text-[10px] text-slate-400">
+              <div className="flex items-center gap-1 text-[0.625rem] text-slate-400">
                 <span
                   className={`rounded px-1 py-0.5 font-medium ${
                     ENTITY_LABEL[c.entity ?? 'Case']?.cls ?? 'bg-slate-100 text-slate-600'
@@ -250,7 +275,7 @@ export function CaseChangeHistory({
                 </span>
                 {c.action === 'CREATE' && <span className="text-emerald-600">追加</span>}
                 {c.action === 'DELETE' && <span className="text-red-600">削除</span>}
-                {c.createdAt.slice(0, 16).replace('T', ' ')} ・ {c.actor}
+                {formatJst(c.createdAt)} ・ {c.actor}
                 {c.reverted && <span className="ml-1 text-amber-600">（取消済）</span>}
               </div>
               <div className="mt-0.5 space-y-0.5">
@@ -269,7 +294,7 @@ export function CaseChangeHistory({
                 type="button"
                 disabled={busy === c.id}
                 onClick={() => revert(c.id)}
-                className="shrink-0 rounded border border-slate-300 px-2 py-1 text-[11px] text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+                className="shrink-0 rounded border border-slate-300 px-2 py-1 text-[0.6875rem] text-slate-600 hover:bg-slate-50 disabled:opacity-40"
               >
                 元に戻す
               </button>

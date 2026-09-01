@@ -126,6 +126,8 @@ export type SafeUser = {
   role: User['role']
   status: User['status']
   lastLoginAt: string | null
+  /** 画面の文字サイズ。未設定なら null（画面側の既定を使う） */
+  uiFontScale: string | null
 }
 
 export function toSafeUser(u: User): SafeUser {
@@ -136,5 +138,6 @@ export function toSafeUser(u: User): SafeUser {
     role: u.role,
     status: u.status,
     lastLoginAt: u.lastLoginAt ? u.lastLoginAt.toISOString() : null,
+    uiFontScale: u.uiFontScale ?? null,
   }
 }

@@ -208,7 +208,7 @@ export function FilterModal({
         </div>
 
         {/* 使い方 */}
-        <div className="border-b border-slate-200 bg-slate-50 px-5 py-2 text-[11px] text-slate-500">
+        <div className="border-b border-slate-200 bg-slate-50 px-5 py-2 text-[0.6875rem] text-slate-500">
           フィールドと条件を選んで「適用」を押すと一覧が絞り込まれます。「保存」すると、
           この条件に名前を付けて全員で共有できます。
         </div>
@@ -228,7 +228,7 @@ export function FilterModal({
               <option value="or">いずれかの条件を満たす（OR）</option>
             </select>
             {draft.conditions.length > 0 && (
-              <button type="button" onClick={clearAll} className="text-[11px] text-slate-400 hover:text-slate-700">
+              <button type="button" onClick={clearAll} className="text-[0.6875rem] text-slate-400 hover:text-slate-700">
                 すべての条件を消す
               </button>
             )}
@@ -320,7 +320,7 @@ export function FilterModal({
             キャンセル
           </button>
           <div className="flex items-center gap-2">
-            <span className="mr-2 text-[11px] text-slate-500">
+            <span className="mr-2 text-[0.6875rem] text-slate-500">
               有効な条件 {effective.conditions.length} 件
             </span>
             {onSave && (
@@ -359,7 +359,7 @@ function ValueInput({
   const type = def?.type ?? 'text'
 
   if (NO_VALUE_OPERATORS.includes(cond.operator)) {
-    return <span className="text-[11px] text-slate-400">値の入力は不要です</span>
+    return <span className="text-[0.6875rem] text-slate-400">値の入力は不要です</span>
   }
 
   // 選択肢（複数選択）
@@ -537,7 +537,7 @@ function DateValue({ value, onChange }: { value: string; onChange: (v: string) =
               </option>
             ))}
           </select>
-          <span className="text-[11px] text-slate-400">後（過去はマイナス）</span>
+          <span className="text-[0.6875rem] text-slate-400">後（過去はマイナス）</span>
         </>
       )}
     </div>

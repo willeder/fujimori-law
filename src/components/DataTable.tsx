@@ -594,7 +594,7 @@ export function DataTable<T>({
       type="button"
       onClick={openCsvModal}
       title="表示中の一覧をCSVファイルで出力（フィールドの追加・削除・並び替え可）"
-      className="rounded border border-emerald-600 bg-white px-2 py-0.5 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-50"
+      className="rounded border border-emerald-600 bg-white px-2 py-0.5 text-[0.6875rem] font-semibold text-emerald-700 hover:bg-emerald-50"
     >
       CSV出力
     </button>
@@ -619,7 +619,7 @@ export function DataTable<T>({
               ✕
             </button>
           </div>
-          <div className="px-4 py-2 text-[11px] text-slate-500">
+          <div className="px-4 py-2 text-[0.6875rem] text-slate-500">
             出力するフィールドにチェックし、↑↓で並び順を変更できます（設定は保存されます）。
             出力対象: 現在の絞り込み・ソートを適用した {sortedData.length} 件
           </div>
@@ -651,7 +651,7 @@ export function DataTable<T>({
                       type="button"
                       disabled={i === 0}
                       onClick={() => moveCsvField(i, -1)}
-                      className="rounded border border-slate-300 px-1.5 py-0.5 text-[11px] text-slate-600 hover:bg-slate-50 disabled:opacity-30"
+                      className="rounded border border-slate-300 px-1.5 py-0.5 text-[0.6875rem] text-slate-600 hover:bg-slate-50 disabled:opacity-30"
                     >
                       ↑
                     </button>
@@ -659,7 +659,7 @@ export function DataTable<T>({
                       type="button"
                       disabled={i === csvFields.length - 1}
                       onClick={() => moveCsvField(i, 1)}
-                      className="rounded border border-slate-300 px-1.5 py-0.5 text-[11px] text-slate-600 hover:bg-slate-50 disabled:opacity-30"
+                      className="rounded border border-slate-300 px-1.5 py-0.5 text-[0.6875rem] text-slate-600 hover:bg-slate-50 disabled:opacity-30"
                     >
                       ↓
                     </button>
@@ -673,21 +673,21 @@ export function DataTable<T>({
               <button
                 type="button"
                 onClick={() => saveCsvFields(csvFields.map((f) => ({ ...f, on: true })))}
-                className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[11px] text-slate-600 hover:bg-slate-100"
+                className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[0.6875rem] text-slate-600 hover:bg-slate-100"
               >
                 全選択
               </button>
               <button
                 type="button"
                 onClick={() => saveCsvFields(csvFields.map((f) => ({ ...f, on: false })))}
-                className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[11px] text-slate-600 hover:bg-slate-100"
+                className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[0.6875rem] text-slate-600 hover:bg-slate-100"
               >
                 全解除
               </button>
               <button
                 type="button"
                 onClick={() => saveCsvFields(defaultCsvFields())}
-                className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[11px] text-slate-600 hover:bg-slate-100"
+                className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[0.6875rem] text-slate-600 hover:bg-slate-100"
               >
                 初期に戻す
               </button>
@@ -794,14 +794,14 @@ export function DataTable<T>({
           ? 'px-2 py-0.5'
           : 'px-2 py-1'
   // 一覧（compact）の文字を約1pt拡大（本文 11→12px / ヘッダ 10→11px）
-  const tableText = isDense ? 'text-[10px] leading-tight' : isCompact ? 'text-[12px] leading-tight' : 'text-xs'
+  const tableText = isDense ? 'text-[0.625rem] leading-tight' : isCompact ? 'text-[0.75rem] leading-tight' : 'text-xs'
   const headText = isDense
-    ? 'text-[9px] font-semibold leading-tight'
+    ? 'text-[0.5625rem] font-semibold leading-tight'
     : isCompact
-      ? 'text-[11px] font-semibold leading-tight'
+      ? 'text-[0.6875rem] font-semibold leading-tight'
       : slimHeader
-        ? 'text-[11px] font-semibold leading-tight'
-        : 'text-[11px] font-semibold'
+        ? 'text-[0.6875rem] font-semibold leading-tight'
+        : 'text-[0.6875rem] font-semibold'
   const emptyPad = isCompact ? 'px-2 py-4' : 'px-2 py-6'
 
   const scrollBody =
@@ -812,6 +812,14 @@ export function DataTable<T>({
   const stickyTh = useStickyHeader
     ? 'sticky top-0 z-20 bg-white shadow-[inset_0_-1px_0_0_theme(colors.slate.200)]'
     : ''
+
+  /**
+   * 検索モードの条件入力行。ヘッダーのすぐ下に貼り付ける。
+   * 貼り付けないと、スクロールしたときに条件の入力欄がヘッダーの下へ潜って
+   * 見えなくなる（事務所から「検索モードなどのところもスクロールできてしまうので
+   * 操作がややこしい」とのご指摘）。top はヘッダー1行ぶんの高さ。
+   */
+  const stickyFindTh = useStickyHeader ? 'sticky top-[1.75rem] z-10 bg-blue-50' : ''
 
   /**
    * 折り返し+table-auto 時は表がやや広がることがあるため横スクロールも許可
@@ -909,21 +917,21 @@ export function DataTable<T>({
     findOn ? (
       // 検索モード中（FileMaker の Find Mode 相当）
       <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-blue-300 bg-blue-50 px-3 py-1.5 text-xs">
-        <span className="rounded bg-blue-600 px-2 py-0.5 text-[11px] font-semibold text-white">
+        <span className="rounded bg-blue-600 px-2 py-0.5 text-[0.6875rem] font-semibold text-white">
           🔍 検索モード
         </span>
         <span className="text-blue-900">各列に条件を入力 → Enter で検索</span>
         <button
           type="button"
           onClick={performFind}
-          className="rounded bg-blue-600 px-3 py-0.5 text-[11px] font-semibold text-white hover:bg-blue-700"
+          className="rounded bg-blue-600 px-3 py-0.5 text-[0.6875rem] font-semibold text-white hover:bg-blue-700"
         >
           検索実行
         </button>
         <button
           type="button"
           onClick={cancelFind}
-          className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[11px] text-slate-600 hover:bg-slate-100"
+          className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[0.6875rem] text-slate-600 hover:bg-slate-100"
         >
           取消（Esc）
         </button>
@@ -944,20 +952,20 @@ export function DataTable<T>({
             <span className="ml-1 font-normal text-amber-700">／ 全 {data.length} 件</span>
           )}
         </span>
-        <span className="text-[10px] text-amber-700">
+        <span className="text-[0.625rem] text-amber-700">
           条件: {activeApplied.map(([k, v]) => `${columns.find((c) => String(c.key) === k)?.header ?? k}=${v}`).join(' / ')}
         </span>
         <button
           type="button"
           onClick={enterFind}
-          className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[11px] text-slate-600 hover:bg-slate-100"
+          className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[0.6875rem] text-slate-600 hover:bg-slate-100"
         >
           条件を編集
         </button>
         <button
           type="button"
           onClick={clearFind}
-          className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[11px] text-slate-600 hover:bg-slate-100"
+          className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[0.6875rem] text-slate-600 hover:bg-slate-100"
         >
           解除（全件表示）
         </button>
@@ -969,7 +977,7 @@ export function DataTable<T>({
           type="button"
           onClick={enterFind}
           title="検索モード（Shift+F）"
-          className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[11px] font-semibold text-slate-600 hover:bg-slate-100"
+          className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[0.6875rem] font-semibold text-slate-600 hover:bg-slate-100"
         >
           🔍 検索モード（Shift+F）
         </button>
@@ -1039,7 +1047,7 @@ export function DataTable<T>({
               {columns.map((col, ci) => (
                 <th
                   key={String(col.key)}
-                  className={`${headPad} ${col.headerClassName ?? ''}`}
+                  className={`${headPad} ${stickyFindTh} ${col.headerClassName ?? ''}`}
                   style={{ width: col.width }}
                 >
                   {searchableFlags[ci] ? (
@@ -1063,7 +1071,7 @@ export function DataTable<T>({
                             }
                           }}
                           placeholder="条件"
-                          className="w-full min-w-0 rounded border border-blue-300 bg-white px-1 py-0.5 text-[11px] font-normal text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          className="w-full min-w-0 rounded border border-blue-300 bg-white px-1 py-0.5 text-[0.6875rem] font-normal text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500"
                         />
                       </div>
                     ) : (
@@ -1085,7 +1093,7 @@ export function DataTable<T>({
                         }
                       }}
                       placeholder="条件"
-                      className="w-full min-w-0 rounded border border-blue-300 bg-white px-1 py-0.5 text-[11px] font-normal text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="w-full min-w-0 rounded border border-blue-300 bg-white px-1 py-0.5 text-[0.6875rem] font-normal text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                     )
                   ) : null}

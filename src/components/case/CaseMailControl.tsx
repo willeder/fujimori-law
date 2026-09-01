@@ -113,12 +113,12 @@ export function CaseMailControl({
               {/* 送信フォーム */}
               <div className="flex flex-col gap-2 overflow-y-auto p-3">
                 {configured === false && (
-                  <div className="rounded border border-amber-300 bg-amber-50 px-2 py-1.5 text-[11px] text-amber-800">
+                  <div className="rounded border border-amber-300 bg-amber-50 px-2 py-1.5 text-[0.6875rem] text-amber-800">
                     メール送信の設定（RESEND_API_KEY / SENDGRID_API_KEY・MAIL_FROM）が
                     未設定のため送信できません。履歴の閲覧は可能です。
                   </div>
                 )}
-                <label className="flex flex-col gap-0.5 text-[11px] text-slate-500">
+                <label className="flex flex-col gap-0.5 text-[0.6875rem] text-slate-500">
                   宛先
                   <input
                     value={to}
@@ -127,7 +127,7 @@ export function CaseMailControl({
                     className="rounded border border-slate-300 px-2 py-1 text-xs"
                   />
                 </label>
-                <label className="flex flex-col gap-0.5 text-[11px] text-slate-500">
+                <label className="flex flex-col gap-0.5 text-[0.6875rem] text-slate-500">
                   件名
                   <input
                     value={subject}
@@ -135,7 +135,7 @@ export function CaseMailControl({
                     className="rounded border border-slate-300 px-2 py-1 text-xs"
                   />
                 </label>
-                <label className="flex min-h-0 flex-1 flex-col gap-0.5 text-[11px] text-slate-500">
+                <label className="flex min-h-0 flex-1 flex-col gap-0.5 text-[0.6875rem] text-slate-500">
                   本文
                   <textarea
                     value={text}
@@ -146,7 +146,7 @@ export function CaseMailControl({
                 </label>
                 {notice && (
                   <div
-                    className={`rounded px-2 py-1 text-[11px] ${
+                    className={`rounded px-2 py-1 text-[0.6875rem] ${
                       notice.ok ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
                     }`}
                   >
@@ -164,24 +164,24 @@ export function CaseMailControl({
               </div>
               {/* 履歴 */}
               <div className="overflow-y-auto p-3">
-                <div className="mb-1 text-[11px] font-semibold text-slate-500">
+                <div className="mb-1 text-[0.6875rem] font-semibold text-slate-500">
                   この案件の送信履歴（{history.length}件）
                 </div>
                 {history.length === 0 ? (
-                  <div className="py-4 text-center text-[11px] text-slate-400">
+                  <div className="py-4 text-center text-[0.6875rem] text-slate-400">
                     送信履歴はありません
                   </div>
                 ) : (
                   <ul className="divide-y divide-slate-100">
                     {history.map((h) => (
-                      <li key={h.id} className="py-1.5 text-[11px]">
+                      <li key={h.id} className="py-1.5 text-[0.6875rem]">
                         <button
                           type="button"
                           className="flex w-full items-center gap-2 text-left"
                           onClick={() => setExpanded(expanded === h.id ? null : h.id)}
                         >
                           <span
-                            className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold ${
+                            className={`shrink-0 rounded px-1.5 py-0.5 text-[0.625rem] font-semibold ${
                               h.status === 'SENT'
                                 ? 'bg-emerald-100 text-emerald-700'
                                 : 'bg-red-100 text-red-700'
@@ -192,19 +192,19 @@ export function CaseMailControl({
                           <span className="min-w-0 flex-1 truncate font-medium text-slate-700">
                             {h.subject}
                           </span>
-                          <span className="shrink-0 text-[10px] text-slate-400">
+                          <span className="shrink-0 text-[0.625rem] text-slate-400">
                             {h.createdAt.slice(0, 16).replace('T', ' ')}
                           </span>
                         </button>
                         {expanded === h.id && (
                           <div className="mt-1 rounded bg-slate-50 p-2">
-                            <div className="text-[10px] text-slate-500">
+                            <div className="text-[0.625rem] text-slate-500">
                               宛先: {h.toAddress} ／ 送信者: {h.sentBy}
                             </div>
                             {h.error && (
-                              <div className="text-[10px] text-red-600">エラー: {h.error}</div>
+                              <div className="text-[0.625rem] text-red-600">エラー: {h.error}</div>
                             )}
-                            <pre className="mt-1 whitespace-pre-wrap break-words font-sans text-[11px] text-slate-700">
+                            <pre className="mt-1 whitespace-pre-wrap break-words font-sans text-[0.6875rem] text-slate-700">
                               {h.body}
                             </pre>
                           </div>

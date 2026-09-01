@@ -5,6 +5,7 @@ import { useFoundSet } from '../store/FoundSet'
 import { useCaseEdit } from '../context/CaseEditContext'
 import { settlementTotals } from '../lib/settlementTotals'
 import { EditableField, StatusBadge, DataTable, type Column } from '../components'
+import { SuggestInput } from '../components/SuggestInput'
 import { CreditorFiles } from '../components/case/CreditorFiles'
 import { BankCodeHelper } from '../components/case/BankCodeHelper'
 import type { Creditor } from '../types'
@@ -43,7 +44,7 @@ function renderYen(v: number | null | undefined) {
   return (
     <span className="tabular-nums">
       {v.toLocaleString()}
-      <span className="ml-0.5 text-[8px] text-slate-400">円</span>
+      <span className="ml-0.5 text-[0.5rem] text-slate-400">円</span>
     </span>
   )
 }
@@ -53,9 +54,44 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
   const navigate = useNavigate()
   const { setFoundSet } = useFoundSet()
   // 編集モード中は下書きに貯めるだけ（「編集完了」でまとめて保存される）
-  const { stageCreditor } = useCaseEdit()
+  const { stageCreditor, locked } = useCaseEdit()
   // 弁済の進捗（合算）用。債権者別の弁済予定は表示時に生成される（creditorSchedule.ts）
   const casePayments = usePaymentsByCaseId(caseId)
+
+  // 追加介入で債権者を1社足すためのフォーム（竹谷様 2026-08-21）
+  const [addingCreditor, setAddingCreditor] = useState(false)
+  const [newCreditorName, setNewCreditorName] = useState('')
+  const [addError, setAddError] = useState<string | null>(null)
+  const [addBusy, setAddBusy] = useState(false)
+
+  const submitNewCreditor = async () => {
+    const name = newCreditorName.trim()
+    if (!name) {
+      setAddError('債権者名を入れてください')
+      return
+    }
+    setAddBusy(true)
+    setAddError(null)
+    try {
+      const r = await fetch('/api/creditors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ caseId, creditorName: name }),
+      })
+      const d = (await r.json().catch(() => ({}))) as { row?: Creditor; error?: string }
+      if (!r.ok || !d.row) {
+        setAddError(d.error ?? '追加に失敗しました')
+        return
+      }
+      dispatch({ type: 'ADD_CREDITOR', payload: d.row })
+      setNewCreditorName('')
+      setAddingCreditor(false)
+    } catch {
+      setAddError('追加に失敗しました')
+    } finally {
+      setAddBusy(false)
+    }
+  }
 
   const [creditorNameSuggestions, setCreditorNameSuggestions] = useState<string[]>(
     () => __creditorNameSuggestions ?? []
@@ -128,11 +164,33 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
     })
     // サーバへ永続化（差分判定・変更履歴/監査はサーバ側）
     if (creditor.id != null) {
-      void fetch(`/api/creditors/${creditor.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates),
-      }).catch((e) => console.error('債権者更新の保存に失敗:', e))
+      void (async () => {
+        try {
+          const r = await fetch(`/api/creditors/${creditor.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updates),
+          })
+          if (!r.ok) return
+          // サーバ側で日付に連動してステータスが進むことがある。
+          // 返ってきた最新行で上書きしないと、保存したのに古い表示が残る
+          // （事務所から「データをいじってもその場で更新されない」とのご指摘）。
+          const d = (await r.json()) as {
+            row?: Creditor
+            caseChanged?: boolean
+          }
+          if (d.row) dispatch({ type: 'UPDATE_CREDITOR', payload: d.row })
+          // 案件の受任後ステータスまで変わった場合は案件側も取り直す
+          if (d.caseChanged) {
+            const full = await fetch(`/api/cases/${creditor.caseId}`)
+              .then((res) => (res.ok ? res.json() : null))
+              .catch(() => null)
+            if (full) dispatch({ type: 'MERGE_FULL_CASE', payload: full })
+          }
+        } catch (e) {
+          console.error('債権者更新の保存に失敗:', e)
+        }
+      })()
     }
   }
 
@@ -286,7 +344,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           return (
             <span className={`tabular-nums ${isNegative ? 'text-red-600' : ''}`}>
               {diff !== 0 ? diff.toLocaleString() : '-'}
-              {diff !== 0 && <span className="ml-0.5 text-[8px] text-slate-400">円</span>}
+              {diff !== 0 && <span className="ml-0.5 text-[0.5rem] text-slate-400">円</span>}
             </span>
           )
         },
@@ -307,7 +365,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           item.settlementAmount ? (
             <span className="font-medium text-green-700 tabular-nums">
               {item.settlementAmount.toLocaleString()}
-              <span className="ml-0.5 text-[8px] text-slate-400">円</span>
+              <span className="ml-0.5 text-[0.5rem] text-slate-400">円</span>
             </span>
           ) : (
             <span className="text-slate-300">-</span>
@@ -425,7 +483,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
             </div>
           </div>
           {totals.missingPaymentCount > 0 && (
-            <div className="col-span-full text-[11px] text-amber-700">
+            <div className="col-span-full text-[0.6875rem] text-amber-700">
               ※ 弁済対象 {totals.missingPaymentCount} 社は支払回数が未入力のため、
               回数の合計は実態より少なく出ています（債権者名の読み替えが済むと解消します）
             </div>
@@ -443,6 +501,61 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           enableFind
           onFindNavigate={runCreditorFind}
         />
+
+        {/*
+          追加介入で債権者が1社増えたときの追加口。これまでは相談票の取込
+          （案件ごと新規作成）でしか増やせなかった（竹谷様 2026-08-21）。
+          追加すると各社タブも1つ増える。
+        */}
+        <div className="mt-2">
+          {addingCreditor ? (
+            <div className="flex flex-wrap items-center gap-1">
+              <SuggestInput
+                value={newCreditorName}
+                onValueChange={setNewCreditorName}
+                onSelect={(v) => setNewCreditorName(v)}
+                suggestions={creditorNameSuggestions}
+                placeholder="債権者名（例: アコム）"
+                autoFocus
+                className="min-w-0 flex-1 rounded border border-blue-300 px-1.5 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                type="button"
+                onClick={() => void submitNewCreditor()}
+                disabled={addBusy}
+                className="shrink-0 rounded bg-blue-500 px-2 py-1 text-xs text-white hover:bg-blue-600 disabled:bg-slate-300"
+              >
+                追加
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setAddingCreditor(false)
+                  setNewCreditorName('')
+                  setAddError(null)
+                }}
+                className="shrink-0 rounded bg-slate-200 px-2 py-1 text-xs text-slate-700 hover:bg-slate-300"
+              >
+                取消
+              </button>
+              {addError && <span className="text-xs text-red-600">{addError}</span>}
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setAddingCreditor(true)}
+              disabled={locked}
+              title={
+                locked
+                  ? '他の人が編集中のため、いまは変更できません'
+                  : '追加介入などで債権者が増えたときに1社足します'
+              }
+              className="w-full rounded border border-dashed border-blue-300 py-1 text-xs text-blue-600 transition-colors hover:bg-blue-50 disabled:border-slate-200 disabled:text-slate-300 disabled:hover:bg-transparent"
+            >
+              ＋ 債権者を追加
+            </button>
+          )}
+        </div>
       </div>
     )
   }
@@ -716,9 +829,16 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           fillWidth
         />
       </div>
-      <div className="min-w-0 col-span-2" />
+      {/*
+        4行目の余りを埋める1枠。以前は2枠ぶん置いていたが、この行に残っている
+        のは1枠なので折り返してしまい、行末に1枠・次の行頭に2枠、合わせて3枠の
+        空白ができていた（事務所から「回答状況と和解日の間に何もないスペースが
+        3枠空いている」とのご指摘）。1枠にして和解の3項目を次の行の左端から
+        始める。
+      */}
+      <div className="min-w-0 col-span-1" />
 
-      {/* 5行目: 和解日(1), 和解(1), 和解時債務金額(1), コメント(2) */}
+      {/* 5行目: 和解日(1), 和解金額(1), 和解時債務金額(1), コメント(2) */}
       <div className="min-w-0 col-span-1">
         <EditableField
           label="和解日"
@@ -783,7 +903,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       </div>
 
       {/* 支払条件 */}
-      <div className="col-span-5 mt-1 border-t border-slate-100 pt-1 text-[10px] font-semibold text-slate-400">
+      <div className="col-span-5 mt-1 border-t border-slate-100 pt-1 text-[0.625rem] font-semibold text-slate-400">
         支払条件
       </div>
       <div className="min-w-0 col-span-1">
@@ -907,7 +1027,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       <div className="min-w-0 col-span-3" />
 
       {/* 振込先情報 */}
-      <div className="col-span-5 mt-1 border-t border-slate-100 pt-1 text-[10px] font-semibold text-slate-400">
+      <div className="col-span-5 mt-1 border-t border-slate-100 pt-1 text-[0.625rem] font-semibold text-slate-400">
         振込先情報
       </div>
       <div className="min-w-0 col-span-1">

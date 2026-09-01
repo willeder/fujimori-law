@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { SuggestInput } from "./SuggestInput";
 import { useCaseEdit } from "../context/CaseEditContext";
-import { formatYmdInput, isValidYmd } from "../lib/dateInput";
+import { isValidYmd } from "../lib/dateInput";
+import { DateTextInput } from "./DateTextInput";
 
 interface EditableFieldProps {
   label: string;
@@ -218,30 +219,30 @@ export function EditableField({
     ? "text-xs"
     : isLg
       ? "text-xs"
-      : "text-[11px]";
+      : "text-[0.6875rem]";
   /** 入力値：header=16px, lg=14px, md=12px */
   const compactValueClass = isHdr ? "text-base" : isLg ? "text-sm" : "text-xs";
   const compactMinHRow = isLg ? "min-h-[2rem]" : "min-h-[1.5rem]";
   const compactEditHintClass = isLg
     ? "text-xs"
     : isHdr
-      ? "text-[9px]"
-      : "text-[10px]";
+      ? "text-[0.5625rem]"
+      : "text-[0.625rem]";
   const compactSuffixClass = isLg
     ? "text-xs"
     : isHdr
-      ? "text-[10px]"
-      : "text-[11px]";
+      ? "text-[0.625rem]"
+      : "text-[0.6875rem]";
   const compactToggleClass = isLg
     ? "text-xs"
     : isHdr
-      ? "text-[10px]"
-      : "text-[11px]";
+      ? "text-[0.625rem]"
+      : "text-[0.6875rem]";
   const stackedEditingLabelClass = isLg
     ? "text-xs"
     : isHdr
-      ? "text-[10px]"
-      : "text-[9px]";
+      ? "text-[0.625rem]"
+      : "text-[0.5625rem]";
 
   const compactInputBase = isLg
     ? "flex-1 min-w-0 text-sm border border-blue-300 rounded px-1.5 py-0.5 h-8 leading-tight focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -382,7 +383,7 @@ export function EditableField({
     }
     return (
       <div className="flex min-w-0 items-baseline gap-1">
-        <span className="shrink-0 text-[11px] font-medium text-slate-500">
+        <span className="shrink-0 text-[0.6875rem] font-medium text-slate-500">
           {labelWithColon}
         </span>
         <div className={`min-w-0 flex-1 text-xs text-slate-700 ${negativeTextClass}`}>
@@ -470,7 +471,7 @@ export function EditableField({
           {...triggerProps}
           className="flex min-w-0 cursor-pointer items-baseline gap-1 rounded py-0.5 transition-colors group hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
-          <span className="shrink-0 text-[11px] font-medium text-slate-500">
+          <span className="shrink-0 text-[0.6875rem] font-medium text-slate-500">
             {labelWithColon}
           </span>
           <span className={`min-w-0 flex-1 whitespace-normal break-words text-xs text-slate-700 ${negativeTextClass}`}>
@@ -478,7 +479,7 @@ export function EditableField({
             {suffix && <span className="text-slate-400 ml-0.5">{suffix}</span>}
           </span>
           {toggleButton}
-          <span className="shrink-0 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100 text-[11px]">
+          <span className="shrink-0 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100 text-[0.6875rem]">
             編集
           </span>
         </div>
@@ -534,17 +535,24 @@ export function EditableField({
                 onKeyDown={handleKeyDown}
                 className={inputBase}
               />
+            ) : type === "date" ? (
+              <DateTextInput
+                inputRef={inputRef as React.RefObject<HTMLInputElement>}
+                value={editValue}
+                onChange={setEditValue}
+                onPick={(v) => commit(v)}
+                onBlur={handleSave}
+                onKeyDown={handleKeyDown}
+                placeholder={placeholder}
+                className={inputBase}
+              />
             ) : (
               <input
                 ref={inputRef as React.RefObject<HTMLInputElement>}
-                type={type === "date" ? "text" : type}
-                inputMode={type === "date" || type === "number" ? "numeric" : undefined}
+                type={type}
+                inputMode={type === "number" ? "numeric" : undefined}
                 value={editValue}
-                onChange={(e) =>
-                  setEditValue(
-                    type === "date" ? formatYmdInput(e.target.value) : e.target.value,
-                  )
-                }
+                onChange={(e) => setEditValue(e.target.value)}
                 onBlur={handleSave}
                 onKeyDown={handleKeyDown}
                 placeholder={placeholder}
@@ -563,14 +571,14 @@ export function EditableField({
                 <button
                   type="button"
                   onClick={handleSave}
-                  className="px-1.5 py-0.5 text-[10px] bg-blue-500 text-white rounded hover:bg-blue-600"
+                  className="px-1.5 py-0.5 text-[0.625rem] bg-blue-500 text-white rounded hover:bg-blue-600"
                 >
                   保存
                 </button>
                 <button
                   type="button"
                   onClick={handleCancel}
-                  className="px-1.5 py-0.5 text-[10px] bg-slate-200 text-slate-600 rounded hover:bg-slate-300"
+                  className="px-1.5 py-0.5 text-[0.625rem] bg-slate-200 text-slate-600 rounded hover:bg-slate-300"
                 >
                   取消
                 </button>
@@ -632,17 +640,24 @@ export function EditableField({
                 onKeyDown={handleKeyDown}
                 className={inputBase}
               />
+            ) : type === "date" ? (
+              <DateTextInput
+                inputRef={inputRef as React.RefObject<HTMLInputElement>}
+                value={editValue}
+                onChange={setEditValue}
+                onPick={(v) => commit(v)}
+                onBlur={handleSave}
+                onKeyDown={handleKeyDown}
+                placeholder={placeholder}
+                className={inputBase}
+              />
             ) : (
               <input
                 ref={inputRef as React.RefObject<HTMLInputElement>}
-                type={type === "date" ? "text" : type}
-                inputMode={type === "date" || type === "number" ? "numeric" : undefined}
+                type={type}
+                inputMode={type === "number" ? "numeric" : undefined}
                 value={editValue}
-                onChange={(e) =>
-                  setEditValue(
-                    type === "date" ? formatYmdInput(e.target.value) : e.target.value,
-                  )
-                }
+                onChange={(e) => setEditValue(e.target.value)}
                 onBlur={handleSave}
                 onKeyDown={handleKeyDown}
                 placeholder={placeholder}
@@ -662,14 +677,14 @@ export function EditableField({
               <button
                 type="button"
                 onClick={handleSave}
-                className="px-1.5 py-0.5 text-[10px] bg-blue-500 text-white rounded hover:bg-blue-600"
+                className="px-1.5 py-0.5 text-[0.625rem] bg-blue-500 text-white rounded hover:bg-blue-600"
               >
                 保存
               </button>
               <button
                 type="button"
                 onClick={handleCancel}
-                className="px-1.5 py-0.5 text-[10px] bg-slate-200 text-slate-600 rounded hover:bg-slate-300"
+                className="px-1.5 py-0.5 text-[0.625rem] bg-slate-200 text-slate-600 rounded hover:bg-slate-300"
               >
                 取消
               </button>
@@ -683,7 +698,7 @@ export function EditableField({
   return (
     <div className="flex min-w-0 flex-col gap-0.5">
       <div className="flex min-w-0 items-start gap-1">
-        <span className="shrink-0 pt-0.5 text-[11px] font-medium text-slate-500">
+        <span className="shrink-0 pt-0.5 text-[0.6875rem] font-medium text-slate-500">
           {labelWithColon}
         </span>
         <div
@@ -727,17 +742,24 @@ export function EditableField({
               onKeyDown={handleKeyDown}
               className="flex-1 text-xs border border-blue-300 rounded px-1.5 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+          ) : type === "date" ? (
+            <DateTextInput
+              inputRef={inputRef as React.RefObject<HTMLInputElement>}
+              value={editValue}
+              onChange={setEditValue}
+              onPick={(v) => commit(v)}
+              onBlur={handleSave}
+              onKeyDown={handleKeyDown}
+              placeholder={placeholder}
+              className="flex-1 text-xs border border-blue-300 rounded px-1.5 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           ) : (
             <input
               ref={inputRef as React.RefObject<HTMLInputElement>}
-              type={type === "date" ? "text" : type}
-              inputMode={type === "date" || type === "number" ? "numeric" : undefined}
+              type={type}
+              inputMode={type === "number" ? "numeric" : undefined}
               value={editValue}
-              onChange={(e) =>
-                setEditValue(
-                  type === "date" ? formatYmdInput(e.target.value) : e.target.value,
-                )
-              }
+              onChange={(e) => setEditValue(e.target.value)}
               onBlur={handleSave}
               onKeyDown={handleKeyDown}
               placeholder={placeholder}
@@ -749,13 +771,13 @@ export function EditableField({
             <div className="flex gap-1">
               <button
                 onClick={handleSave}
-                className="px-1.5 py-0.5 text-[10px] bg-blue-500 text-white rounded hover:bg-blue-600"
+                className="px-1.5 py-0.5 text-[0.625rem] bg-blue-500 text-white rounded hover:bg-blue-600"
               >
                 保存
               </button>
               <button
                 onClick={handleCancel}
-                className="px-1.5 py-0.5 text-[10px] bg-slate-200 text-slate-600 rounded hover:bg-slate-300"
+                className="px-1.5 py-0.5 text-[0.625rem] bg-slate-200 text-slate-600 rounded hover:bg-slate-300"
               >
                 取消
               </button>

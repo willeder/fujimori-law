@@ -19,6 +19,57 @@ function fmtNum(n: number | null | undefined) {
 }
 
 /**
+ * 振込1件あたりの手数料（円）。サーバ側（src/server/paymentSummary.ts の
+ * HANDLING_FEE_UNIT）と同じ値。kintone の計算式「手数料＝弁済社数×129円」に対応する。
+ */
+const HANDLING_FEE_UNIT = 129
+
+/**
+ * 予定側の充当額を kintone の計算式どおりに埋める（堀本様 2026-08-10 のご要望）。
+ *
+ *   手数料         = 弁済社数 × 129円
+ *   ﾌﾟｰﾙ充当予定額 = 入金予定額 − 報酬充当 − 弁代報酬充当 − 弁済充当 − 手数料
+ *
+ * kintone の実データ44,443行のうち44,442行でこの式が成立する（不成立の1行は手入力）。
+ * 取込時（src/server/intakeImport.ts）には適用していたが画面の編集時には効いておらず、
+ * 入金予定額や報酬額を直しても手数料・ﾌﾟｰﾙが手入力のままだった。
+ *
+ * 手で直した値は尊重する。この編集で手数料やﾌﾟｰﾙを触っていれば再計算しない。
+ * 入金予定額が0の行（プール金からの充当など）はこの恒等式が成り立たないため触らない。
+ */
+function applyPlannedAllocations(
+  payment: PaymentRecord,
+  finalData: Partial<PaymentRecord>
+): void {
+  const n = (v: number | null | undefined) => v ?? 0
+  const pick = <K extends keyof PaymentRecord>(k: K) =>
+    (finalData[k] ?? payment[k]) as PaymentRecord[K]
+
+  const plannedAmount = n(pick('plannedAmount') as number | null)
+  if (plannedAmount <= 0) return
+
+  const feeEdited = finalData.handlingFee !== payment.handlingFee
+  const poolEdited = finalData.plannedPoolAllocation !== payment.plannedPoolAllocation
+
+  const count = pick('repaymentCount') as number | null
+  if (!feeEdited && count != null) {
+    finalData.handlingFee = count * HANDLING_FEE_UNIT
+  }
+  // 弁済社数も手数料も分からない行は、残余のうちどこまでが手数料か決められない。
+  // ここでﾌﾟｰﾙに全部寄せると手数料ぶんがﾌﾟｰﾙに紛れるので触らない
+  // （既存データで30行だけこの形。いずれも残余がちょうど1社ぶんの手数料）。
+  const feeKnown = (finalData.handlingFee ?? payment.handlingFee) != null
+  if (!poolEdited && feeKnown) {
+    const rest =
+      plannedAmount -
+      n(pick('plannedFeeAllocation') as number | null) -
+      n(pick('plannedAgentFeeAllocation') as number | null) -
+      n(pick('plannedRepaymentAllocation') as number | null)
+    finalData.plannedPoolAllocation = rest - n(finalData.handlingFee ?? payment.handlingFee)
+  }
+}
+
+/**
  * 実入金額に基づいて各充当額を自動計算する。
  * サーバ側の入金取込（src/server/depositImport.ts の allocateActual）と同じ規則。
  *
@@ -88,6 +139,22 @@ export function PaymentTable({
   const dispatch = useCaseDispatch()
   const allCasePayments = usePaymentsByCaseId(caseId)
   const [editingId, setEditingId] = useState<number | null>(null)
+  /**
+   * 追加したけれどまだ保存していない行の id。
+   * 以前は「入金予定を追加」を押した時点でサーバへ作られており、間違えて押しても
+   * 消しに行くまで残った（事務所から「保存しないと反映されないようになってない。
+   * 現状追加まちがってできてしまうので運用が難しい」とのご指摘。藤川様 2026-08-21）。
+   * ここに入っている行は画面上だけの下書きで、「保存」を押して初めて作成する。
+   */
+  const [pendingIds, setPendingIds] = useState<Set<number>>(() => new Set())
+
+  const unmarkPending = (id: number) =>
+    setPendingIds((prev) => {
+      if (!prev.has(id)) return prev
+      const next = new Set(prev)
+      next.delete(id)
+      return next
+    })
   const [editData, setEditData] = useState<Partial<PaymentRecord>>({})
 
   // 一括表示（修正依頼㉗・45）。
@@ -121,6 +188,60 @@ export function PaymentTable({
     return dateA.localeCompare(dateB)
   })
 
+  /** 金額が空の入金行のひな形。追加はすべてここを通す */
+  const blankRow = (
+    id: number,
+    plannedDate: string,
+    creditorId: number | null,
+    creditorInstallmentIndex: number | null
+  ): PaymentRecord => ({
+    id,
+    caseId,
+    creditorId,
+    creditorInstallmentIndex,
+    // 日付を空のまま作ると「中身の無い行」と判定されて画面に出ない。
+    plannedDate,
+    // 金額はすべて空で作る。直前の行からコピーすると、追加しただけで弁済予定が
+    // 入ってしまい過弁済につながる（藤川様 2026-08-21）。
+    plannedAmount: null,
+    plannedFeeAllocation: null,
+    plannedAgentFeeAllocation: null,
+    plannedPoolAllocation: null,
+    plannedRepaymentAllocation: null,
+    actualDate: null,
+    actualAmount: null,
+    actualFeeAllocation: null,
+    actualAgentFeeAllocation: null,
+    actualPoolAllocation: null,
+    actualRepaymentAllocation: null,
+    handlingFee: null,
+    repaymentCount: null,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
+    cumulativePool: null,
+  })
+
+  const nextTempId = () => Math.max(0, ...allCasePayments.map((p) => p.id)) + 1
+
+  /**
+   * その行の次に1行足す（kintone と同じく行ごとのアイコンから）。
+   * 画面に足すだけで、サーバへは「保存」を押すまで送らない。
+   */
+  const insertRowAfter = (item: PaymentRecord) => {
+    if (locked) return
+    const id = nextTempId()
+    const row = blankRow(
+      id,
+      nextPlannedDate([item]),
+      item.creditorId ?? (scheduleCreditorId === undefined ? null : scheduleCreditorId),
+      item.creditorInstallmentIndex != null ? item.creditorInstallmentIndex + 1 : null
+    )
+    dispatch({ type: 'ADD_PAYMENT', payload: row })
+    setPendingIds((prev) => new Set(prev).add(id))
+    handleEdit(row)
+  }
+
   const handleEdit = (payment: PaymentRecord) => {
     setEditingId(payment.id)
     setEditData({
@@ -148,6 +269,9 @@ export function PaymentTable({
 
   const handleSave = (payment: PaymentRecord) => {
     const finalData = { ...editData }
+
+    // 予定側は kintone の計算式で手数料・ﾌﾟｰﾙ充当予定額を埋める
+    applyPlannedAllocations(payment, finalData)
 
     // 実入金日が入力されている場合、充当額を自動計算
     if (finalData.actualDate) {
@@ -210,34 +334,46 @@ export function PaymentTable({
       }
     }
 
-    dispatch({
-      type: 'UPDATE_PAYMENT',
-      payload: {
-        ...payment,
-        ...finalData,
-      },
-    })
-    // 既存入金レコードはサーバへ永続化（変更履歴/監査はサーバ側）。
-    // 自動補充で追加されたローカル行（DB未登録）は対象外（404は握りつぶす）。
-    if (payment.id != null) {
-      void fetch(`/api/payments/${payment.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(finalData),
-      }).catch((e) => console.error('入金更新の保存に失敗:', e))
+    const merged = { ...payment, ...finalData } as PaymentRecord
+    if (pendingIds.has(payment.id)) {
+      // 追加したばかりの下書き行。ここで初めてサーバに作る。
+      dispatch({ type: 'UPDATE_PAYMENT', payload: merged })
+      createPaymentRow(merged, { alreadyOnScreen: true })
+      unmarkPending(payment.id)
+    } else {
+      dispatch({ type: 'UPDATE_PAYMENT', payload: merged })
+      // 既存入金レコードはサーバへ永続化（変更履歴/監査はサーバ側）。
+      // 自動補充で追加されたローカル行（DB未登録）は対象外（404は握りつぶす）。
+      if (payment.id != null) {
+        void fetch(`/api/payments/${payment.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(finalData),
+        }).catch((e) => console.error('入金更新の保存に失敗:', e))
+      }
     }
     setEditingId(null)
     setEditData({})
   }
 
   const handleCancel = () => {
+    // まだ保存していない行は、取消で画面からも消す。
+    // 間違えて押したときにそのまま無かったことにできる。
+    if (editingId != null && pendingIds.has(editingId)) {
+      dispatch({ type: 'DELETE_PAYMENT', payload: editingId })
+      unmarkPending(editingId)
+    }
     setEditingId(null)
     setEditData({})
   }
 
-  // 新規入金行を楽観的に追加しつつサーバへ作成。成功したら合成IDを実IDへ差し替える。
-  const createPaymentRow = (record: PaymentRecord) => {
-    dispatch({ type: 'ADD_PAYMENT', payload: record })
+  // 新規入金行をサーバへ作成。成功したら合成IDを実IDへ差し替える。
+  // alreadyOnScreen: 下書きとして既に画面に出ている行（二重に足さない）。
+  const createPaymentRow = (
+    record: PaymentRecord,
+    opts?: { alreadyOnScreen?: boolean }
+  ) => {
+    if (!opts?.alreadyOnScreen) dispatch({ type: 'ADD_PAYMENT', payload: record })
     void fetch('/api/payments', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -265,6 +401,11 @@ export function PaymentTable({
       : `${record.plannedDate ?? ''} の入金予定（${(record.plannedAmount ?? 0).toLocaleString()}円）を削除します。よろしいですか？`
     if (!window.confirm(msg)) return
     dispatch({ type: 'DELETE_PAYMENT', payload: record.id })
+    // まだ保存していない行はサーバに無いので消しに行かない
+    if (pendingIds.has(record.id)) {
+      unmarkPending(record.id)
+      return
+    }
     if (record.id != null) {
       void fetch(`/api/payments/${record.id}`, { method: 'DELETE' }).catch((e) =>
         console.error('入金行の削除に失敗:', e)
@@ -802,6 +943,20 @@ export function PaymentTable({
           <div className="flex shrink-0 flex-nowrap items-center gap-0.5">
             <button
               type="button"
+              onClick={() => insertRowAfter(item)}
+              disabled={locked}
+              title={
+                locked
+                  ? '他の人が編集中のため、いまは変更できません'
+                  : 'この行の次に入金予定を1行足します（保存するまで反映されません）'
+              }
+              className="rounded px-1 py-0.5 text-sm leading-none text-emerald-600 hover:bg-emerald-50 disabled:text-slate-300 disabled:hover:bg-transparent"
+              aria-label="この行の次に入金予定を追加"
+            >
+              ＋
+            </button>
+            <button
+              type="button"
               onClick={() => handleEdit(item)}
               disabled={locked}
               title={locked ? '他の人が編集中のため、いまは変更できません' : undefined}
@@ -829,9 +984,14 @@ export function PaymentTable({
 
   return (
     <div className="min-h-0 space-y-3">
+      {/*
+        合計とボタンは上に貼り付ける。表と一緒に流れてしまい、スクロールすると
+        合計が見えなくなる／どこを操作しているのか分かりにくい、というご指摘への対応。
+      */}
+      <div className="sticky top-0 z-30 -mx-1 space-y-2 bg-white px-1 pb-1">
       {/* 合計（表示中の行の合計。予定と実績を並べて出す） */}
-      <div className="overflow-x-auto rounded-md border border-slate-200 bg-slate-50/70 px-2 py-1">
-        <div className="flex w-max items-center gap-x-5 whitespace-nowrap text-[11px] leading-none text-slate-700">
+      <div className="overflow-x-auto rounded-md border border-slate-200 bg-slate-50 px-2 py-1">
+        <div className="flex w-max items-center gap-x-5 whitespace-nowrap text-[0.6875rem] leading-none text-slate-700">
           <span className="font-semibold text-slate-500">合計（{sortedPayments.length}行）</span>
           <span>
             入金予定額 <b className="tabular-nums">{yen(totals.plannedAmount)}</b>
@@ -892,6 +1052,7 @@ export function PaymentTable({
           {tall ? '表示を戻す' : '表を広げる'}
         </button>
       </div>
+      </div>
 
       <div ref={wrapRef}>
       <DataTable
@@ -904,7 +1065,10 @@ export function PaymentTable({
         cellSingleLine
         suspendTruncate={editingId !== null}
         enableFind
-        bodyMaxHeightClassName={tall ? 'max-h-[82vh]' : 'max-h-[min(72vh,44rem)]'}
+        // 既定は親のタブ枠（55vh / 26rem）に収まる高さにして、スクロールを
+        // 表の中だけに閉じ込める。二重にスクロールすると合計やボタンごと流れて
+        // 操作しづらいため。「表を広げる」を押したときだけ大きく取る。
+        bodyMaxHeightClassName={tall ? 'max-h-[76vh]' : 'max-h-[min(38vh,17rem)]'}
         getRowClassName={(item) => {
           // 一括表示から飛んできた行を一時的に光らせる
           if (highlightId === item.id) return 'bg-amber-100'
@@ -996,44 +1160,25 @@ export function PaymentTable({
         disabled={locked}
         title={locked ? '他の人が編集中のため、いまは変更できません' : undefined}
         onClick={() => {
-          const newId = Math.max(0, ...allCasePayments.map((p) => p.id)) + 1
-          const lastPayment = sortedPayments[sortedPayments.length - 1]
           const scopeCreditorId =
             scheduleCreditorId === undefined ? null : scheduleCreditorId
           const prevInstallmentMax = payments.reduce(
             (m, p) => Math.max(m, p.creditorInstallmentIndex ?? 0),
             0
           )
-          const creditorInstallmentIndex =
+          const id = nextTempId()
+          const row = blankRow(
+            id,
+            nextPlannedDate(payments),
+            scopeCreditorId,
             scopeCreditorId != null ? prevInstallmentMax + 1 : null
-          createPaymentRow({
-            id: newId,
-            caseId,
-            creditorId: scopeCreditorId,
-            creditorInstallmentIndex,
-            // 日付を空のまま作ると「中身の無い行」と判定されて画面に出ない。
-            // 直近の予定日の翌月（予定が無ければ当日）を初期値として入れる。
-            plannedDate: nextPlannedDate(payments),
-            plannedAmount: lastPayment?.plannedAmount ?? null,
-            plannedFeeAllocation: lastPayment?.plannedFeeAllocation ?? null,
-            plannedAgentFeeAllocation: lastPayment?.plannedAgentFeeAllocation ?? null,
-            plannedPoolAllocation: lastPayment?.plannedPoolAllocation ?? null,
-            plannedRepaymentAllocation: lastPayment?.plannedRepaymentAllocation ?? null,
-            actualDate: null,
-            actualAmount: null,
-            actualFeeAllocation: null,
-            actualAgentFeeAllocation: null,
-            actualPoolAllocation: null,
-            actualRepaymentAllocation: null,
-            handlingFee: null,
-            repaymentCount: null,
-            repaymentDate: null,
-            actualRepaymentCount: null,
-            actualHandlingFee: null,
-            cumulativePool: null,
-          })
+          )
+          // 画面に足すだけ。サーバへは「保存」を押してから送る
+          dispatch({ type: 'ADD_PAYMENT', payload: row })
+          setPendingIds((prev) => new Set(prev).add(id))
+          handleEdit(row)
         }}
-        className="w-full rounded border border-dashed border-blue-300 py-1 text-[11px] text-blue-600 transition-colors hover:bg-blue-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-300 disabled:hover:bg-transparent"
+        className="w-full rounded border border-dashed border-blue-300 py-1 text-[0.6875rem] text-blue-600 transition-colors hover:bg-blue-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-300 disabled:hover:bg-transparent"
       >
         + 入金予定を追加
       </button>

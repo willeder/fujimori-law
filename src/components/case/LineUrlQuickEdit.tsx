@@ -82,7 +82,7 @@ export function LineUrlQuickEdit({
             spellCheck={false}
             autoComplete="off"
             placeholder="https://chat.line.biz/…"
-            className="mt-1.5 w-full resize-y rounded border border-slate-200 px-2 py-1.5 font-mono text-[11px] leading-snug text-slate-800 placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
+            className="mt-1.5 w-full resize-y rounded border border-slate-200 px-2 py-1.5 font-mono text-[0.6875rem] leading-snug text-slate-800 placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
           />
           <div className="mt-2 flex justify-end gap-1.5">
             <button

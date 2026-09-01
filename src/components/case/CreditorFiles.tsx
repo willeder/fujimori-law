@@ -102,7 +102,7 @@ export function CreditorFiles({ creditorId }: { creditorId: number }) {
   return (
     <div className="col-span-5 mt-1 border-t border-slate-100 pt-1">
       <div className="mb-1 flex items-center gap-2">
-        <span className="text-[10px] font-semibold text-slate-400">債権者資料</span>
+        <span className="text-[0.625rem] font-semibold text-slate-400">債権者資料</span>
         <input
           ref={inputRef}
           type="file"
@@ -117,13 +117,13 @@ export function CreditorFiles({ creditorId }: { creditorId: number }) {
           type="button"
           disabled={busy}
           onClick={() => inputRef.current?.click()}
-          className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+          className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[0.625rem] font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
         >
           {busy ? 'アップロード中…' : '＋ ファイル追加'}
         </button>
-        <span className="text-[9px] text-slate-400">（1ファイル4MBまで・ドラッグ&ドロップ可）</span>
+        <span className="text-[0.5625rem] text-slate-400">（1ファイル4MBまで・ドラッグ&ドロップ可）</span>
       </div>
-      {error && <div className="mb-1 text-[10px] text-red-600">{error}</div>}
+      {error && <div className="mb-1 text-[0.625rem] text-red-600">{error}</div>}
       <div
         onDragOver={(e) => {
           e.preventDefault()
@@ -136,13 +136,13 @@ export function CreditorFiles({ creditorId }: { creditorId: number }) {
         }`}
       >
         {files.length === 0 ? (
-          <div className="py-1 text-center text-[10px] text-slate-400">
+          <div className="py-1 text-center text-[0.625rem] text-slate-400">
             資料はまだありません（ここにファイルをドロップしても追加できます）
           </div>
         ) : (
           <ul className="divide-y divide-slate-100">
             {files.map((f) => (
-              <li key={f.id} className="flex items-center gap-2 py-0.5 text-[11px]">
+              <li key={f.id} className="flex items-center gap-2 py-0.5 text-[0.6875rem]">
                 <a
                   href={`/api/creditors/files/${f.id}`}
                   className="min-w-0 flex-1 truncate text-blue-600 hover:underline"
@@ -150,12 +150,12 @@ export function CreditorFiles({ creditorId }: { creditorId: number }) {
                 >
                   {f.name}
                 </a>
-                <span className="shrink-0 text-[10px] text-slate-400">{fmtSize(f.size)}</span>
-                <span className="shrink-0 text-[10px] text-slate-400">{fmtDate(f.createdAt)}</span>
+                <span className="shrink-0 text-[0.625rem] text-slate-400">{fmtSize(f.size)}</span>
+                <span className="shrink-0 text-[0.625rem] text-slate-400">{fmtDate(f.createdAt)}</span>
                 <button
                   type="button"
                   onClick={() => void remove(f)}
-                  className="shrink-0 rounded px-1 text-[10px] text-slate-400 hover:bg-red-50 hover:text-red-600"
+                  className="shrink-0 rounded px-1 text-[0.625rem] text-slate-400 hover:bg-red-50 hover:text-red-600"
                   title="削除"
                 >
                   ✕

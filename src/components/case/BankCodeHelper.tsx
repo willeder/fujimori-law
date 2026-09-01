@@ -84,25 +84,25 @@ export function BankCodeHelper({
           type="button"
           onClick={() => void find()}
           disabled={disabled || busy}
-          className="rounded border border-blue-300 bg-blue-50 px-1.5 py-0.5 text-[10px] text-blue-700 hover:bg-blue-100 disabled:opacity-40"
+          className="rounded border border-blue-300 bg-blue-50 px-1.5 py-0.5 text-[0.625rem] text-blue-700 hover:bg-blue-100 disabled:opacity-40"
           title={`${name} から${label}の候補を探します`}
         >
           {label}を引く
         </button>
-        {busy && <span className="text-[10px] text-slate-400">調べています…</span>}
-        {message && <span className="text-[10px] text-amber-700">{message}</span>}
+        {busy && <span className="text-[0.625rem] text-slate-400">調べています…</span>}
+        {message && <span className="text-[0.625rem] text-amber-700">{message}</span>}
       </div>
 
       {candidates && (
         <div className="rounded border border-blue-200 bg-blue-50 p-1">
           <div className="mb-0.5 flex items-center justify-between gap-1">
-            <span className="text-[10px] text-blue-800">
+            <span className="text-[0.625rem] text-blue-800">
               候補{candidates.length}件。正しいものを選んでください
             </span>
             <button
               type="button"
               onClick={() => setCandidates(null)}
-              className="text-[10px] text-slate-500 hover:text-slate-700"
+              className="text-[0.625rem] text-slate-500 hover:text-slate-700"
             >
               閉じる
             </button>
@@ -116,7 +116,7 @@ export function BankCodeHelper({
                     onApply(h)
                     setCandidates(null)
                   }}
-                  className="w-full rounded px-1 py-0.5 text-left text-[10px] text-slate-700 hover:bg-white"
+                  className="w-full rounded px-1 py-0.5 text-left text-[0.625rem] text-slate-700 hover:bg-white"
                 >
                   <span className="font-bold tabular-nums">{h.code}</span>
                   <span className="ml-1">{h.name}</span>

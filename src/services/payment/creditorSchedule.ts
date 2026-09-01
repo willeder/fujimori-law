@@ -8,7 +8,17 @@
  *      期日の古い順（FIFO）で各債権者の予定に充当して「入金済み」を推定
  * という方針で各債権者タブを埋める。
  *
- * 注意: 債権者別の実績は合算からの推定値。actualDate は予定日で近似している。
+ * 注意: 債権者別の実績（いくら充当されたか）は合算からの推定値。
+ *
+ * ただし**実際の弁済日は推定しない**。GMO振込ファイルを出力した時点で、実際の
+ * 振込日が案件全体の行の「弁済日（repaymentDate）」に書き戻されているので、
+ * その月の値をそのまま使う。以前は予定日（約定日）で近似していたため、
+ * 土日祝の前倒しなどが反映されず「実際の弁済日が全て約定日になっている」という
+ * ご指摘（堀本様 2026-08-09）につながっていた。
+ * 実データでは、実入金のある案件全体行 44,438件のうち 43,636件（98.2%）に
+ * 弁済日が入っており、うち約7割は約定日と異なる日付が記録されている。
+ * 弁済日がまだ入っていない月（振込ファイル未出力など）は空のままにする。
+ * 推測した日付を出すより、空にして担当者が入れられるほうが誤解が無いため。
  */
 import type { Creditor, PaymentRecord } from '../../types/case.js'
 
@@ -106,6 +116,20 @@ export function buildCreditorScheduleForCase(
     return a.installmentNo - b.installmentNo
   })
 
+  /**
+   * 月（YYYY-MM）→ その月に実際に振り込んだ日。
+   * 案件全体の行に記録されている弁済日を引き当てる。同じ月に複数行あるときは
+   * 遅い方（＝実際に振り込んだ回）を採る。
+   */
+  const repaymentDateByMonth = new Map<string, string>()
+  for (const p of caseLevelPayments) {
+    if (!p.repaymentDate) continue
+    const d = p.repaymentDate.slice(0, 10)
+    const month = d.slice(0, 7)
+    const cur = repaymentDateByMonth.get(month)
+    if (cur == null || d > cur) repaymentDateByMonth.set(month, d)
+  }
+
   const paidById = new Map<number, number>()
   for (const inst of order) {
     if (pool <= 0) break
@@ -130,7 +154,9 @@ export function buildCreditorScheduleForCase(
       plannedAgentFeeAllocation: null,
       plannedPoolAllocation: null,
       plannedRepaymentAllocation: inst.plannedAmount,
-      actualDate: paid != null ? inst.plannedDate : null,
+      // 実際に振り込んだ日。予定日の月に記録があればそれを使い、無ければ空。
+      actualDate:
+        paid != null ? (repaymentDateByMonth.get(inst.plannedDate.slice(0, 7)) ?? null) : null,
       actualAmount: paid,
       actualFeeAllocation: null,
       actualAgentFeeAllocation: null,
@@ -138,7 +164,7 @@ export function buildCreditorScheduleForCase(
       actualRepaymentAllocation: paid,
       handlingFee: null,
       repaymentCount: null,
-      repaymentDate: null,
+      repaymentDate: repaymentDateByMonth.get(inst.plannedDate.slice(0, 7)) ?? null,
       actualRepaymentCount: null,
       actualHandlingFee: null,
       cumulativePool: null,

@@ -269,17 +269,17 @@ export function IntakeImportPage() {
                       <td className="px-2 py-1.5">{rec.payments.length}件</td>
                       <td className="px-2 py-1.5">
                         {rec.errors.map((e, i) => (
-                          <span key={i} className="mr-1 inline-block rounded bg-red-100 px-1 text-[10px] text-red-700">
+                          <span key={i} className="mr-1 inline-block rounded bg-red-100 px-1 text-[0.625rem] text-red-700">
                             {e}
                           </span>
                         ))}
                         {rec.warnings.map((w, i) => (
-                          <span key={i} className="mr-1 inline-block rounded bg-amber-100 px-1 text-[10px] text-amber-800">
+                          <span key={i} className="mr-1 inline-block rounded bg-amber-100 px-1 text-[0.625rem] text-amber-800">
                             {w}
                           </span>
                         ))}
                         {!rec.errors.length && !rec.warnings.length && (
-                          <span className="text-[10px] text-emerald-600">OK</span>
+                          <span className="text-[0.625rem] text-emerald-600">OK</span>
                         )}
                       </td>
                     </tr>

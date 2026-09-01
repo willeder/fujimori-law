@@ -110,7 +110,7 @@ export function LineLinkControl({ caseId, clientName }: Props) {
         className="inline-flex items-center gap-1 rounded border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
       >
         LINE連携
-        <span className={`rounded px-1.5 py-0.5 text-[10px] ${meta.cls}`}>
+        <span className={`rounded px-1.5 py-0.5 text-[0.625rem] ${meta.cls}`}>
           {meta.label}
         </span>
       </button>
@@ -121,7 +121,7 @@ export function LineLinkControl({ caseId, clientName }: Props) {
             <span className="text-xs font-semibold text-slate-700">
               LINE連携 {clientName ? `（${clientName} 様）` : ''}
             </span>
-            <span className={`rounded px-1.5 py-0.5 text-[10px] ${meta.cls}`}>
+            <span className={`rounded px-1.5 py-0.5 text-[0.625rem] ${meta.cls}`}>
               {meta.label}
             </span>
           </div>
@@ -137,7 +137,7 @@ export function LineLinkControl({ caseId, clientName }: Props) {
             <>
               {code && (
                 <div className="mb-2 rounded border border-slate-200 bg-slate-50 px-2 py-1.5">
-                  <div className="text-[10px] text-slate-500">登録コード</div>
+                  <div className="text-[0.625rem] text-slate-500">登録コード</div>
                   <div className="font-mono text-base font-bold tracking-widest text-slate-800">
                     {code}
                   </div>
@@ -174,13 +174,13 @@ export function LineLinkControl({ caseId, clientName }: Props) {
                     type="button"
                     onClick={reissue}
                     disabled={busy}
-                    className="mt-1.5 w-full text-[11px] text-slate-500 underline hover:text-slate-700 disabled:opacity-50"
+                    className="mt-1.5 w-full text-[0.6875rem] text-slate-500 underline hover:text-slate-700 disabled:opacity-50"
                   >
                     {busy ? '処理中…' : 'コードを再発行（現在のコードは無効になります）'}
                   </button>
                 </>
               )}
-              <p className="mt-2 text-[10px] leading-snug text-slate-400">
+              <p className="mt-2 text-[0.625rem] leading-snug text-slate-400">
                 「案内文をコピー」の1通を送ってください。依頼者が
                 <b>その全文をそのまま返信すると自動で連携</b>されます。
                 文面を書き換えると一致しなくなるのでご注意ください。
