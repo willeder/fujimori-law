@@ -40,7 +40,6 @@ import { settlementTotals } from "../lib/settlementTotals";
 import { isEmptyRow } from "../lib/paymentRows";
 import { CaseReminders } from "../components/case/CaseReminders";
 import { CaseReminderBanner } from "../components/case/CaseReminderBanner";
-import { PostalCodeHelper } from "../components/case/PostalCodeHelper";
 import {
   CASE_STATUS_OPTIONS,
   DEBT_ADJUSTMENT_TYPE_OPTIONS,
@@ -1979,16 +1978,6 @@ function CaseDetailBody({
                             bordered
                             truncateValue
                             fillWidth
-                          />
-                          {/* 郵便番号と住所の入力補助（辞書はサーバ側・外部通信なし） */}
-                          <PostalCodeHelper
-                            postalCode={caseData.clientBasicInfo.postalCode ?? ""}
-                            prefecture={caseData.clientBasicInfo.prefecture ?? ""}
-                            address={caseData.clientBasicInfo.address ?? ""}
-                            disabled={locked != null}
-                            onApplyZip={(zip) =>
-                              updateClientBasicInfo("postalCode", zip)
-                            }
                           />
                         </div>
                         <div className="min-w-0 col-span-4">
