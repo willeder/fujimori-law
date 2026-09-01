@@ -210,7 +210,7 @@ export function CaseListPage() {
           e.stopPropagation()
           toggleExpand(item.id, kind)
         }}
-        className="whitespace-nowrap text-[11px] text-blue-600 hover:underline"
+        className="whitespace-nowrap text-[0.6875rem] text-blue-600 hover:underline"
       >
         {open ? '閉じる ▾' : '表示する ▶'}
       </button>
@@ -375,7 +375,7 @@ export function CaseListPage() {
     n != null ? (
       <span>
         {n.toLocaleString()}
-        <span className="text-slate-400 text-[10px] ml-0.5">円</span>
+        <span className="text-slate-400 text-[0.625rem] ml-0.5">円</span>
       </span>
     ) : (
       '-'
@@ -844,9 +844,9 @@ export function CaseListPage() {
       sortable: false,
       render: (item) =>
         item.metadata.lineLinked ? (
-          <span className="rounded bg-emerald-100 px-1 text-[10px] text-emerald-700">済</span>
+          <span className="rounded bg-emerald-100 px-1 text-[0.625rem] text-emerald-700">済</span>
         ) : (
-          <span className="rounded bg-slate-100 px-1 text-[10px] text-slate-400">未</span>
+          <span className="rounded bg-slate-100 px-1 text-[0.625rem] text-slate-400">未</span>
         ),
     },
     {
@@ -970,7 +970,7 @@ export function CaseListPage() {
       render: (item) => (
         <span>
           {item.debtInfo.creditorCount ?? '-'}
-          <span className="text-slate-400 text-[10px] ml-0.5">社</span>
+          <span className="text-slate-400 text-[0.625rem] ml-0.5">社</span>
         </span>
       ),
       filterValue: (item) => (item.debtInfo.creditorCount != null ? String(item.debtInfo.creditorCount) : ''),
@@ -1177,14 +1177,14 @@ export function CaseListPage() {
                       <button
                         type="button"
                         onClick={() => setColumnKeys(null)}
-                        className="text-[10px] text-blue-600 hover:underline"
+                        className="text-[0.625rem] text-blue-600 hover:underline"
                       >
                         既定に戻す
                       </button>
                     </div>
                     {columnGroups.map((g) => (
                       <div key={g.label} className="mb-1">
-                        <div className="px-1 py-0.5 text-[10px] font-medium text-slate-400">
+                        <div className="px-1 py-0.5 text-[0.625rem] font-medium text-slate-400">
                           {g.label}
                         </div>
                         {g.cols.map((c) => {
@@ -1293,7 +1293,7 @@ export function CaseListPage() {
           {/* 最近の絞り込み（直近10件・クリックで再実行）No.147 */}
           {filterHistory.length > 0 && (
             <div className="flex flex-wrap items-center gap-1">
-              <span className="text-[10px] text-slate-400">最近の絞り込み：</span>
+              <span className="text-[0.625rem] text-slate-400">最近の絞り込み：</span>
               {filterHistory.slice(0, 10).map((h, i) => (
                 <button
                   key={i}
@@ -1304,7 +1304,7 @@ export function CaseListPage() {
                     void runFilter(h)
                   }}
                   title={filterHistoryLabel(h)}
-                  className="max-w-[220px] truncate rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] text-slate-600 hover:border-blue-300 hover:bg-blue-50"
+                  className="max-w-[220px] truncate rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[0.625rem] text-slate-600 hover:border-blue-300 hover:bg-blue-50"
                 >
                   {filterHistoryLabel(h)}
                 </button>

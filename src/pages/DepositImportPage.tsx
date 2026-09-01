@@ -151,7 +151,7 @@ function RuleGuide({ open }: { open: boolean }) {
             明細の「摘要」に振込依頼人名・支店名・バーチャル口座番号が続けて入っているので、
             これを3つに分解して使います。
           </p>
-          <pre className="mt-1 overflow-x-auto rounded bg-slate-50 px-3 py-2 text-[11px] leading-relaxed text-slate-700">
+          <pre className="mt-1 overflow-x-auto rounded bg-slate-50 px-3 py-2 text-[0.6875rem] leading-relaxed text-slate-700">
 {`振込  タカシマ　サオリ エキデン支店 6946670
       └ 振込依頼人名 ┘ └ 支店名 ┘ └ 口座番号 ┘`}
           </pre>
@@ -165,7 +165,7 @@ function RuleGuide({ open }: { open: boolean }) {
               誤って振り込まれた入金を見つけるためです
             </li>
           </ul>
-          <table className="mt-2 w-full border-collapse text-[12px]">
+          <table className="mt-2 w-full border-collapse text-[0.75rem]">
             <thead>
               <tr className="bg-slate-50 text-left text-slate-500">
                 <th className="border border-slate-200 px-2 py-1">名義の照合結果</th>
@@ -205,7 +205,7 @@ function RuleGuide({ open }: { open: boolean }) {
             イレギュラーな入金を少しでも自動で想定どおりに反映するため、下記のルールを設定しています。
             「既存データ」とは、すでにアプリに登録されている同じ日の実入金のことです。
           </p>
-          <table className="w-full border-collapse text-[12px]">
+          <table className="w-full border-collapse text-[0.75rem]">
             <thead>
               <tr className="bg-slate-50 text-left text-slate-500">
                 <th className="w-8 border border-slate-200 px-2 py-1">#</th>
@@ -242,7 +242,7 @@ function RuleGuide({ open }: { open: boolean }) {
             それまでの原資はプール金に残ります。
             そのため、どのパターンでも「実入金額 ＝ 報酬 ＋ 弁代報酬 ＋ プール」になります。
           </p>
-          <table className="w-full border-collapse text-[12px]">
+          <table className="w-full border-collapse text-[0.75rem]">
             <thead>
               <tr className="bg-slate-50 text-left text-slate-500">
                 <th className="w-8 border border-slate-200 px-2 py-1">#</th>
@@ -267,7 +267,7 @@ function RuleGuide({ open }: { open: boolean }) {
         {/* 5. 判定バッジ */}
         <section>
           <h3 className="mb-1 font-semibold text-slate-800">5. プレビューの「判定」の見かた</h3>
-          <table className="w-full border-collapse text-[12px]">
+          <table className="w-full border-collapse text-[0.75rem]">
             <thead>
               <tr className="bg-slate-50 text-left text-slate-500">
                 <th className="w-24 border border-slate-200 px-2 py-1">判定</th>
@@ -277,7 +277,7 @@ function RuleGuide({ open }: { open: boolean }) {
             <tbody>
               <tr>
                 <td className="border border-slate-200 px-2 py-1">
-                  <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-800">
+                  <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[0.6875rem] font-semibold text-emerald-800">
                     反映
                   </span>
                 </td>
@@ -287,7 +287,7 @@ function RuleGuide({ open }: { open: boolean }) {
               </tr>
               <tr>
                 <td className="border border-slate-200 px-2 py-1">
-                  <span className="rounded bg-slate-200 px-1.5 py-0.5 text-[11px] font-semibold text-slate-600">
+                  <span className="rounded bg-slate-200 px-1.5 py-0.5 text-[0.6875rem] font-semibold text-slate-600">
                     スキップ
                   </span>
                 </td>
@@ -297,7 +297,7 @@ function RuleGuide({ open }: { open: boolean }) {
               </tr>
               <tr>
                 <td className="border border-slate-200 px-2 py-1">
-                  <span className="rounded bg-red-100 px-1.5 py-0.5 text-[11px] font-semibold text-red-700">
+                  <span className="rounded bg-red-100 px-1.5 py-0.5 text-[0.6875rem] font-semibold text-red-700">
                     エラー
                   </span>
                 </td>
@@ -308,7 +308,7 @@ function RuleGuide({ open }: { open: boolean }) {
               </tr>
               <tr>
                 <td className="border border-slate-200 px-2 py-1">
-                  <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-semibold text-amber-800">
+                  <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[0.6875rem] font-semibold text-amber-800">
                     未突合
                   </span>
                 </td>
@@ -540,7 +540,7 @@ export function DepositImportPage() {
                     return (
                       <tr key={i} className="border-b border-slate-100 align-top">
                         <td className="px-2 py-1.5">
-                          <span className={`rounded px-1.5 py-0.5 text-[11px] font-semibold ${a.cls}`}>
+                          <span className={`rounded px-1.5 py-0.5 text-[0.6875rem] font-semibold ${a.cls}`}>
                             {a.label}
                           </span>
                         </td>
@@ -550,12 +550,12 @@ export function DepositImportPage() {
                         <td className="px-2 py-1.5">
                           {g.payerName ?? '-'}
                           {g.nameCheck === 'given-only' && (
-                            <span className="ml-1 rounded bg-amber-100 px-1 py-px text-[10px] text-amber-800">
+                            <span className="ml-1 rounded bg-amber-100 px-1 py-px text-[0.625rem] text-amber-800">
                               姓違い
                             </span>
                           )}
                           {g.nameCheck === 'mismatch' && (
-                            <span className="ml-1 rounded bg-red-100 px-1 py-px text-[10px] text-red-700">
+                            <span className="ml-1 rounded bg-red-100 px-1 py-px text-[0.625rem] text-red-700">
                               名義不一致
                             </span>
                           )}
@@ -563,7 +563,7 @@ export function DepositImportPage() {
                         <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums">
                           {g.depositSum.toLocaleString()}
                           {g.deposits.length > 1 && (
-                            <span className="ml-1 text-[10px] text-slate-500">
+                            <span className="ml-1 text-[0.625rem] text-slate-500">
                               ({g.deposits.map((d) => d.amount.toLocaleString()).join('+')})
                             </span>
                           )}
@@ -580,7 +580,7 @@ export function DepositImportPage() {
                         <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums">
                           {g.reflectAmount != null ? g.reflectAmount.toLocaleString() : '-'}
                           {g.pattern && (
-                            <span className="ml-1 text-[10px] text-slate-500">({g.pattern})</span>
+                            <span className="ml-1 text-[0.625rem] text-slate-500">({g.pattern})</span>
                           )}
                         </td>
                         <td className="whitespace-nowrap px-2 py-1.5">

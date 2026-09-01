@@ -885,7 +885,7 @@ export function PaymentTable({
     <div className="min-h-0 space-y-3">
       {/* 合計（表示中の行の合計。予定と実績を並べて出す） */}
       <div className="overflow-x-auto rounded-md border border-slate-200 bg-slate-50/70 px-2 py-1">
-        <div className="flex w-max items-center gap-x-5 whitespace-nowrap text-[11px] leading-none text-slate-700">
+        <div className="flex w-max items-center gap-x-5 whitespace-nowrap text-[0.6875rem] leading-none text-slate-700">
           <span className="font-semibold text-slate-500">合計（{sortedPayments.length}行）</span>
           <span>
             入金予定額 <b className="tabular-nums">{yen(totals.plannedAmount)}</b>
@@ -1089,7 +1089,7 @@ export function PaymentTable({
             cumulativePool: null,
           })
         }}
-        className="w-full rounded border border-dashed border-blue-300 py-1 text-[11px] text-blue-600 transition-colors hover:bg-blue-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-300 disabled:hover:bg-transparent"
+        className="w-full rounded border border-dashed border-blue-300 py-1 text-[0.6875rem] text-blue-600 transition-colors hover:bg-blue-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-300 disabled:hover:bg-transparent"
       >
         + 入金予定を追加
       </button>

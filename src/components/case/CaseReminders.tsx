@@ -122,14 +122,14 @@ export function CaseReminders({ caseId, locked = false }: { caseId: number; lock
                     type="button"
                     onClick={() => void saveEdit(r.id)}
                     disabled={busy}
-                    className="shrink-0 rounded bg-blue-500 px-2 py-1 text-[10px] text-white hover:bg-blue-600 disabled:bg-slate-300"
+                    className="shrink-0 rounded bg-blue-500 px-2 py-1 text-[0.625rem] text-white hover:bg-blue-600 disabled:bg-slate-300"
                   >
                     保存
                   </button>
                   <button
                     type="button"
                     onClick={cancelEdit}
-                    className="shrink-0 px-1 text-[10px] text-slate-500 hover:text-slate-800"
+                    className="shrink-0 px-1 text-[0.625rem] text-slate-500 hover:text-slate-800"
                   >
                     取消
                   </button>
@@ -165,7 +165,7 @@ export function CaseReminders({ caseId, locked = false }: { caseId: number; lock
                   type="button"
                   onClick={() => startEdit(r)}
                   disabled={locked}
-                  className="shrink-0 text-[10px] text-slate-400 hover:text-blue-600 disabled:text-slate-200"
+                  className="shrink-0 text-[0.625rem] text-slate-400 hover:text-blue-600 disabled:text-slate-200"
                   title="期日や内容を直します（期日の延期もここから）"
                 >
                   編集
@@ -174,7 +174,7 @@ export function CaseReminders({ caseId, locked = false }: { caseId: number; lock
                   type="button"
                   onClick={() => void remove(r.id)}
                   disabled={locked}
-                  className="shrink-0 text-[10px] text-slate-400 hover:text-red-600 disabled:text-slate-200"
+                  className="shrink-0 text-[0.625rem] text-slate-400 hover:text-red-600 disabled:text-slate-200"
                 >
                   削除
                 </button>

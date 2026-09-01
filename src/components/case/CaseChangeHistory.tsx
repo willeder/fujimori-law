@@ -265,7 +265,7 @@ export function CaseChangeHistory({
         return (
           <li key={c.id} className="flex items-start justify-between gap-2 px-3 py-2 text-xs">
             <div className="min-w-0">
-              <div className="flex items-center gap-1 text-[10px] text-slate-400">
+              <div className="flex items-center gap-1 text-[0.625rem] text-slate-400">
                 <span
                   className={`rounded px-1 py-0.5 font-medium ${
                     ENTITY_LABEL[c.entity ?? 'Case']?.cls ?? 'bg-slate-100 text-slate-600'
@@ -294,7 +294,7 @@ export function CaseChangeHistory({
                 type="button"
                 disabled={busy === c.id}
                 onClick={() => revert(c.id)}
-                className="shrink-0 rounded border border-slate-300 px-2 py-1 text-[11px] text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+                className="shrink-0 rounded border border-slate-300 px-2 py-1 text-[0.6875rem] text-slate-600 hover:bg-slate-50 disabled:opacity-40"
               >
                 元に戻す
               </button>

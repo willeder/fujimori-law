@@ -130,6 +130,8 @@ function dbApiPlugin(): Plugin {
               result = await authMod.handleLogout(meta)
             } else if (url === '/api/auth/me' && req.method === 'GET') {
               result = await authMod.handleMe(meta)
+            } else if (url === '/api/auth/preferences' && req.method === 'PATCH') {
+              result = await authMod.handleUpdatePreferences(await readRawBody(req), meta)
             } else {
               res.statusCode = 404
               res.end(JSON.stringify({ error: 'not found' }))

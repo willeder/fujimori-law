@@ -230,13 +230,13 @@ export function GmoTransferPage() {
       render: (r) => (
         <span className="flex flex-wrap gap-1">
           {r.scheduleMissing && (
-            <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] text-amber-800">支払条件</span>
+            <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[0.625rem] text-amber-800">支払条件</span>
           )}
           {r.accountMissing && (
-            <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] text-red-700">振込先口座</span>
+            <span className="rounded bg-red-100 px-1.5 py-0.5 text-[0.625rem] text-red-700">振込先口座</span>
           )}
           {r.monthUnknown && (
-            <span className="rounded bg-rose-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+            <span className="rounded bg-rose-600 px-1.5 py-0.5 text-[0.625rem] font-semibold text-white">
               支払開始日なし
             </span>
           )}
@@ -369,9 +369,9 @@ export function GmoTransferPage() {
       align: 'center',
       render: (r) =>
         r.incomplete ? (
-          <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] text-red-700">口座情報不足</span>
+          <span className="rounded bg-red-100 px-1.5 py-0.5 text-[0.625rem] text-red-700">口座情報不足</span>
         ) : (
-          <span className="rounded bg-green-100 px-1.5 py-0.5 text-[10px] text-green-700">OK</span>
+          <span className="rounded bg-green-100 px-1.5 py-0.5 text-[0.625rem] text-green-700">OK</span>
         ),
     },
   ]
@@ -383,11 +383,11 @@ export function GmoTransferPage() {
     <div className="min-h-screen bg-slate-100">
       <AppHeader title="GMO一括振込ファイル出力">
         <div className="flex flex-wrap items-end gap-2">
-          <label className="flex flex-col gap-0.5 text-[10px] text-slate-500">
+          <label className="flex flex-col gap-0.5 text-[0.625rem] text-slate-500">
             対象期間（開始）
             <input type="date" value={start} onChange={(e) => setStart(e.target.value)} className="rounded border border-slate-300 bg-white px-2 py-1 text-xs" />
           </label>
-          <label className="flex flex-col gap-0.5 text-[10px] text-slate-500">
+          <label className="flex flex-col gap-0.5 text-[0.625rem] text-slate-500">
             〜（終了）
             <input type="date" value={end} onChange={(e) => setEnd(e.target.value)} className="rounded border border-slate-300 bg-white px-2 py-1 text-xs" />
           </label>
@@ -438,7 +438,7 @@ export function GmoTransferPage() {
                 API設定待ち（契約完了後に GMO_CLIENT_ID 等を設定すると連携できます）
               </span>
             )}
-            <span className="text-[10px] text-slate-400">接続先: {apiStatus.base}</span>
+            <span className="text-[0.625rem] text-slate-400">接続先: {apiStatus.base}</span>
           </div>
         )}
 
@@ -472,7 +472,7 @@ export function GmoTransferPage() {
               </span>
             </button>
             {/* 配信制御。GMO側の設定だけでは通知は始まらないので、ここから開始を要求する */}
-            <div className="flex flex-wrap items-center gap-2 border-t border-slate-200 bg-slate-50 px-3 py-2 text-[11px]">
+            <div className="flex flex-wrap items-center gap-2 border-t border-slate-200 bg-slate-50 px-3 py-2 text-[0.6875rem]">
               <span className="font-semibold text-slate-600">配信制御</span>
               <button
                 type="button"
@@ -498,7 +498,7 @@ export function GmoTransferPage() {
               >
                 {notifyBusy === 'unsent' ? '回収中…' : '未送信明細を回収して反映'}
               </button>
-              <span className="text-[10px] text-slate-500">
+              <span className="text-[0.625rem] text-slate-500">
                 配信エラーが1時間続くと銀行側で自動停止します。停止中の明細は「回収」で取り込めますが、
                 <b className="text-red-600">14日を過ぎると銀行側から削除され復旧できません</b>。
               </span>
@@ -507,7 +507,7 @@ export function GmoTransferPage() {
             {showEvents && (
               <div className="border-t border-slate-200 p-2">
                 {events.rows.length === 0 ? (
-                  <p className="px-1 py-2 text-[11px] text-slate-500">
+                  <p className="px-1 py-2 text-[0.6875rem] text-slate-500">
                     まだ通知を受信していません。GMOのイベント通知設定に{' '}
                     <code className="rounded bg-slate-100 px-1">
                       {location.origin}/api/gmo/webhook
@@ -516,7 +516,7 @@ export function GmoTransferPage() {
                   </p>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="w-full text-[11px]">
+                    <table className="w-full text-[0.6875rem]">
                       <thead className="bg-slate-50 text-slate-500">
                         <tr>
                           <th className="px-2 py-1 text-left">受信日時</th>
@@ -535,7 +535,7 @@ export function GmoTransferPage() {
                             </td>
                             <td className="px-2 py-1">
                               <span
-                                className={`rounded px-1.5 py-0.5 text-[10px] ${
+                                className={`rounded px-1.5 py-0.5 text-[0.625rem] ${
                                   r.status === 'applied'
                                     ? 'bg-emerald-100 text-emerald-800'
                                     : r.status === 'failed' || r.status === 'rejected'
@@ -566,7 +566,7 @@ export function GmoTransferPage() {
                                 <button
                                   type="button"
                                   onClick={() => void reprocessEvent(r.id)}
-                                  className="rounded border border-slate-300 px-2 py-0.5 text-[10px] text-slate-600 hover:bg-slate-50"
+                                  className="rounded border border-slate-300 px-2 py-0.5 text-[0.625rem] text-slate-600 hover:bg-slate-50"
                                 >
                                   再処理
                                 </button>
@@ -608,7 +608,7 @@ export function GmoTransferPage() {
             </button>
             {showIncomplete && (
               <div className="border-t border-amber-200 p-2">
-                <p className="mb-2 px-1 text-[11px] text-amber-700">
+                <p className="mb-2 px-1 text-[0.6875rem] text-amber-700">
                   弁済対象なのに支払条件（支払開始日・支払回数・金額）か振込先口座が未入力のため、GMO振込の対象にならない債権者です。行をクリックすると案件詳細を開いて入力できます。
                   <br />
                   対象は次の2種類です。

@@ -29,7 +29,7 @@ export function FindModeLauncher() {
         type="button"
         onClick={() => setOpen(true)}
         title="検索モード（Ctrl+F / Ctrl+Shift+F）"
-        className="rounded border border-slate-300 px-2 py-0.5 text-[11px] font-medium text-slate-600 hover:bg-slate-50"
+        className="rounded border border-slate-300 px-2 py-0.5 text-[0.6875rem] font-medium text-slate-600 hover:bg-slate-50"
       >
         🔍 検索
       </button>

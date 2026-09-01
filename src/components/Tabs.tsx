@@ -146,10 +146,10 @@ export function Tabs({
           const base = isSplit
             ? // split（入金スケジュール/和解状況・債権者接触/依頼者接触の大タブ）:
               // 視認性・押しやすさのため約1.5倍の高さに（No.155。中の各社タブ等は対象外）
-              `w-full px-2 ${isDense ? 'py-2 text-[11px] leading-none' : 'py-1.5 text-[11px] leading-tight'} font-medium transition-colors text-center`
+              `w-full px-2 ${isDense ? 'py-2 text-[0.6875rem] leading-none' : 'py-1.5 text-[0.6875rem] leading-tight'} font-medium transition-colors text-center`
             : accent
-              ? `rounded-t-md border-l-2 ${isDense ? 'inline-flex h-7 shrink-0 items-center py-0 pl-1.5 pr-1.5 text-[10px] leading-none' : 'py-1 pl-2 pr-2 text-xs leading-tight'} font-normal whitespace-nowrap transition-colors`
-              : `rounded-t-md border-b-2 border-b-transparent ${isDense ? 'inline-flex h-7 shrink-0 items-center px-2 py-0 text-[10px] leading-none' : 'px-2 py-1 text-xs leading-tight'} font-normal whitespace-nowrap transition-colors`
+              ? `rounded-t-md border-l-2 ${isDense ? 'inline-flex h-7 shrink-0 items-center py-0 pl-1.5 pr-1.5 text-[0.625rem] leading-none' : 'py-1 pl-2 pr-2 text-xs leading-tight'} font-normal whitespace-nowrap transition-colors`
+              : `rounded-t-md border-b-2 border-b-transparent ${isDense ? 'inline-flex h-7 shrink-0 items-center px-2 py-0 text-[0.625rem] leading-none' : 'px-2 py-1 text-xs leading-tight'} font-normal whitespace-nowrap transition-colors`
 
           const muted = tab.muted
           const state = isSplit
@@ -221,7 +221,7 @@ export function Tabs({
               {tab.label}
               {tab.badge !== undefined && (
                 <span
-                  className={`ml-1 rounded-full ${isDense ? 'px-0.5 py-px text-[8px] leading-none' : 'px-1 py-0.5 text-[9px] leading-none'} ${
+                  className={`ml-1 rounded-full ${isDense ? 'px-0.5 py-px text-[0.5rem] leading-none' : 'px-1 py-0.5 text-[0.5625rem] leading-none'} ${
                     muted
                       ? 'bg-slate-200 text-slate-500'
                       : active

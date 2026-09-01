@@ -306,7 +306,7 @@ export function CreditorPaymentTable({
       {/* サマリ表示 */}
       <div className="grid grid-cols-4 gap-2 rounded bg-slate-50 p-2 sm:grid-cols-8">
         <div>
-          <div className="text-[10px] font-medium leading-tight text-slate-500">
+          <div className="text-[0.625rem] font-medium leading-tight text-slate-500">
             {isSettled ? '和解金額' : '和解予定額'}
           </div>
           <div className={`text-sm ${summaryValueClass}`}>
@@ -314,7 +314,7 @@ export function CreditorPaymentTable({
           </div>
         </div>
         <div>
-          <div className="text-[10px] font-medium leading-tight text-slate-500">
+          <div className="text-[0.625rem] font-medium leading-tight text-slate-500">
             {isSettled ? '和解回数' : '和解予定回数'}
           </div>
           <div className={`text-sm ${summaryValueClass}`}>
@@ -322,7 +322,7 @@ export function CreditorPaymentTable({
           </div>
         </div>
         <div>
-          <div className="text-[10px] font-medium leading-tight text-slate-500">
+          <div className="text-[0.625rem] font-medium leading-tight text-slate-500">
             {isSettled ? '将来利息' : '予定利息'}
           </div>
           <div className={`text-sm ${summaryValueClass}`}>
@@ -330,13 +330,13 @@ export function CreditorPaymentTable({
           </div>
         </div>
         <div>
-          <div className="text-[10px] font-medium leading-tight text-slate-500">累計弁済額</div>
+          <div className="text-[0.625rem] font-medium leading-tight text-slate-500">累計弁済額</div>
           <div className={`text-sm ${summaryValueClass}`}>
             {isSettled ? `${cumulativePaidAmount.toLocaleString()}円` : '-'}
           </div>
         </div>
         <div>
-          <div className="text-[10px] font-medium leading-tight text-slate-500">弁済残金額</div>
+          <div className="text-[0.625rem] font-medium leading-tight text-slate-500">弁済残金額</div>
           <div className={`text-sm ${summaryValueClass}`}>
             {settlementAmount != null
               ? `${remainingAmount.toLocaleString()}円`
@@ -344,19 +344,19 @@ export function CreditorPaymentTable({
           </div>
         </div>
         <div>
-          <div className="text-[10px] font-medium leading-tight text-slate-500">累計弁済回数</div>
+          <div className="text-[0.625rem] font-medium leading-tight text-slate-500">累計弁済回数</div>
           <div className={`text-sm ${summaryValueClass}`}>
             {isSettled ? `${cumulativePaidCount}回` : '-'}
           </div>
         </div>
         <div>
-          <div className="text-[10px] font-medium leading-tight text-slate-500">弁済残回数</div>
+          <div className="text-[0.625rem] font-medium leading-tight text-slate-500">弁済残回数</div>
           <div className={`text-sm ${summaryValueClass}`}>
             {paymentCount != null ? `${remainingCount}回` : '-'}
           </div>
         </div>
         <div>
-          <div className="text-[10px] font-medium leading-tight text-slate-500">最終弁済日</div>
+          <div className="text-[0.625rem] font-medium leading-tight text-slate-500">最終弁済日</div>
           <div className={`text-sm ${summaryValueClass}`}>
             {isSettled && lastPaidDate ? lastPaidDate : '-'}
           </div>
@@ -425,7 +425,7 @@ export function CreditorPaymentTable({
         }}
         disabled={locked}
         title={locked ? '他の人が編集中のため、いまは変更できません' : undefined}
-        className="w-full rounded border border-dashed border-blue-300 py-1 text-[11px] text-blue-600 transition-colors hover:bg-blue-50 disabled:border-slate-200 disabled:text-slate-300 disabled:hover:bg-transparent"
+        className="w-full rounded border border-dashed border-blue-300 py-1 text-[0.6875rem] text-blue-600 transition-colors hover:bg-blue-50 disabled:border-slate-200 disabled:text-slate-300 disabled:hover:bg-transparent"
       >
         + 弁済予定を追加
       </button>

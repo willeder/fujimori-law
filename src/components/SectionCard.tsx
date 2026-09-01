@@ -34,7 +34,7 @@ export function SectionCard({
         onClick={() => collapsible && setIsOpen(!isOpen)}
       >
         <h3
-          className="inline-block rounded px-1.5 py-0.5 text-[10px] font-medium tracking-wide text-white"
+          className="inline-block rounded px-1.5 py-0.5 text-[0.625rem] font-medium tracking-wide text-white"
           style={{ backgroundColor: '#689BC6' }}
         >
           {title}

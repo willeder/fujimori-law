@@ -17,6 +17,8 @@ export type AuthUser = {
   role: 'ADMIN' | 'STAFF'
   status: 'ACTIVE' | 'DISABLED'
   lastLoginAt: string | null
+  /** 画面の文字サイズ。アカウントごとに保持する（未設定なら null） */
+  uiFontScale: string | null
 }
 
 type AuthState = {

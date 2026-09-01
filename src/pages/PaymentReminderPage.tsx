@@ -324,7 +324,7 @@ export function PaymentReminderPage() {
                         </td>
                         <td className="px-2 py-1 text-center">
                           {c.alreadySent ? (
-                            <span className="rounded bg-slate-200 px-1.5 py-0.5 text-[10px] text-slate-600">
+                            <span className="rounded bg-slate-200 px-1.5 py-0.5 text-[0.625rem] text-slate-600">
                               送信済
                             </span>
                           ) : (
@@ -350,7 +350,7 @@ export function PaymentReminderPage() {
                   type="button"
                   onClick={copyPreview}
                   disabled={!previewCandidate}
-                  className="rounded border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 hover:bg-emerald-100 disabled:opacity-40"
+                  className="rounded border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-[0.6875rem] font-medium text-emerald-700 hover:bg-emerald-100 disabled:opacity-40"
                   title="プレビュー対象の本文（差し込み済み）をコピー"
                 >
                   {copied ? 'コピーしました' : '本文をコピー'}
@@ -358,7 +358,7 @@ export function PaymentReminderPage() {
                 <button
                   type="button"
                   onClick={() => setShowPreview((v) => !v)}
-                  className="rounded border border-slate-300 px-2 py-0.5 text-[11px] text-slate-600 hover:bg-slate-50"
+                  className="rounded border border-slate-300 px-2 py-0.5 text-[0.6875rem] text-slate-600 hover:bg-slate-50"
                 >
                   {showPreview ? '編集に戻す' : 'プレビュー'}
                 </button>
@@ -380,7 +380,7 @@ export function PaymentReminderPage() {
               />
             )}
 
-            <div className="mt-1.5 text-[10px] leading-relaxed text-slate-400">
+            <div className="mt-1.5 text-[0.625rem] leading-relaxed text-slate-400">
               差し込み変数（受信者ごとに自動置換）:<br />
               {'{名前}'} ・ {'{フリガナ}'} ・ {'{ID}'} ・ {'{期日}'} ・ {'{支店名}'} ・{' '}
               {'{口座番号}'} ・ {'{入金額}'}
@@ -402,7 +402,7 @@ export function PaymentReminderPage() {
                 : `LINE送信（選択 ${selectedSendable.length}件）`}
             </button>
             {selectedSendable.length === 0 && (
-              <p className="mt-1.5 text-center text-[11px] text-amber-600">
+              <p className="mt-1.5 text-center text-[0.6875rem] text-amber-600">
                 送信可能（連携済み・未送信）な対象を選択してください
               </p>
             )}

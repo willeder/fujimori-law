@@ -1790,13 +1790,13 @@ function CaseDetailBody({
         {/* 4行目：入金・報酬状況（8カラムグリッド） */}
         <div className="grid grid-cols-8 gap-0.5 px-2 py-0.5 [&>div]:min-w-0">
           <div className="flex min-w-0 items-center gap-1 py-0 min-h-[1.5rem] col-span-2">
-            <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[11px]">・累計入金額</span>
+            <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[0.6875rem]">・累計入金額</span>
             <span className="flex-1 min-w-0 text-xs font-bold tabular-nums text-blue-600 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate">
               {formatYenPair(cumulativePaid, cumulativePlanned)}
             </span>
           </div>
           <div className="flex min-w-0 items-center gap-1 py-0 min-h-[1.5rem]">
-            <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[11px]">・残入金予定</span>
+            <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[0.6875rem]">・残入金予定</span>
             <span className={`flex-1 min-w-0 text-xs font-bold tabular-nums rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate ${remainingPlanned != null && remainingPlanned < 0 ? "text-red-600" : "text-blue-600"}`}>
               {remainingPlanned != null
                 ? `${remainingPlanned.toLocaleString()}円`
@@ -1804,7 +1804,7 @@ function CaseDetailBody({
             </span>
           </div>
           <div className="flex min-w-0 items-center gap-1 py-0 min-h-[1.5rem]">
-            <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[11px]">・次回入金日</span>
+            <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[0.6875rem]">・次回入金日</span>
             <span className="flex-1 min-w-0 text-xs font-bold tabular-nums text-blue-600 rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate">
               {nextPaymentDate ?? "-"}
             </span>
@@ -1822,7 +1822,7 @@ function CaseDetailBody({
             fillWidth
           />
           <div className="flex min-w-0 items-center gap-1 py-0 min-h-[1.5rem]">
-            <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[11px]">・報酬充当額</span>
+            <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[0.6875rem]">・報酬充当額</span>
             <span className={`flex-1 min-w-0 text-xs font-bold tabular-nums rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate ${caseData.paymentInfo.cumulativeFeeAllocation != null && caseData.paymentInfo.cumulativeFeeAllocation < 0 ? "text-red-600" : "text-blue-600"}`}>
               {caseData.paymentInfo.cumulativeFeeAllocation != null
                 ? `${caseData.paymentInfo.cumulativeFeeAllocation.toLocaleString()}円`
@@ -1830,7 +1830,7 @@ function CaseDetailBody({
             </span>
           </div>
           <div className="flex min-w-0 items-center gap-1 py-0 min-h-[1.5rem]">
-            <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[11px]">・報酬未回収</span>
+            <span className="shrink-0 text-slate-500 leading-tight whitespace-nowrap text-[0.6875rem]">・報酬未回収</span>
             <span className={`flex-1 min-w-0 text-xs font-bold tabular-nums rounded border border-slate-200 bg-slate-50/50 px-1.5 py-0.5 truncate ${caseData.feeInfo.uncollectedFee != null && caseData.feeInfo.uncollectedFee < 0 ? "text-red-600" : "text-blue-600"}`}>
               {caseData.feeInfo.uncollectedFee != null
                 ? `${caseData.feeInfo.uncollectedFee.toLocaleString()}円`

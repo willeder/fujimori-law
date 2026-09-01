@@ -164,7 +164,7 @@ export function PaymentDelayDashboard() {
         r.overdueCount > 0 ? (
           <span className="text-red-600">
             {r.overdueCount}件
-            <span className="ml-1 text-[10px] text-slate-500">（最長{r.maxOverdueDays}日）</span>
+            <span className="ml-1 text-[0.625rem] text-slate-500">（最長{r.maxOverdueDays}日）</span>
           </span>
         ) : (
           <span className="text-slate-300">-</span>
@@ -286,7 +286,7 @@ function RiskBadge({ level }: { level: RiskLevel }) {
   }
   const m = meta[level]
   return (
-    <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${m.cls}`}>
+    <span className={`inline-flex rounded-full px-2 py-0.5 text-[0.625rem] font-semibold ${m.cls}`}>
       {m.label}
     </span>
   )

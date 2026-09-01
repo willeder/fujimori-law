@@ -126,7 +126,7 @@ export function MembersPage() {
       render: (m) => (
         <span className="whitespace-nowrap font-medium text-slate-800">
           {m.name ?? '—'}
-          {m.id === user?.id && <span className="ml-1 text-[10px] text-slate-400">(自分)</span>}
+          {m.id === user?.id && <span className="ml-1 text-[0.625rem] text-slate-400">(自分)</span>}
         </span>
       ),
     },
@@ -161,7 +161,7 @@ export function MembersPage() {
       sortable: false,
       render: (m) => (
         <span
-          className={`rounded px-1.5 py-0.5 text-[10px] ${m.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-700'}`}
+          className={`rounded px-1.5 py-0.5 text-[0.625rem] ${m.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-700'}`}
         >
           {m.status === 'ACTIVE' ? '有効' : '無効'}
         </span>
@@ -184,7 +184,7 @@ export function MembersPage() {
             type="button"
             disabled={busyId === m.id}
             onClick={() => patch(m, { status: m.status === 'ACTIVE' ? 'DISABLED' : 'ACTIVE' })}
-            className="rounded border border-slate-300 px-2 py-1 text-[11px] text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+            className="rounded border border-slate-300 px-2 py-1 text-[0.6875rem] text-slate-600 hover:bg-slate-50 disabled:opacity-40"
           >
             {m.status === 'ACTIVE' ? '無効化' : '有効化'}
           </button>
@@ -192,7 +192,7 @@ export function MembersPage() {
             type="button"
             disabled={busyId === m.id}
             onClick={() => resetPw(m)}
-            className="rounded border border-slate-300 px-2 py-1 text-[11px] text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+            className="rounded border border-slate-300 px-2 py-1 text-[0.6875rem] text-slate-600 hover:bg-slate-50 disabled:opacity-40"
           >
             パスワード再発行
           </button>

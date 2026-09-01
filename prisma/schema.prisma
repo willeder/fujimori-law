@@ -406,6 +406,9 @@ model User {
   role          UserRole   @default(STAFF)
   status        UserStatus @default(ACTIVE)
   lastLoginAt   DateTime?
+  /// 画面の文字サイズ（large / standard / compact / dense）。
+  /// アカウントごとに持ちたいというご要望への対応。NULL は未設定＝既定を使う。
+  uiFontScale   String?
   accounts      Account[]
   sessions      Session[]
   createdAt     DateTime   @default(now())

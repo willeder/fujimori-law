@@ -7,22 +7,27 @@
 /**
  * 画面全体の文字スケール（Tailwind の rem ベースのサイズが追従）。
  * `UiFontScaleProvider` が html に data-ui-font-scale を付与。
+ *
+ * 段階を一つずつ大きい方へずらしている（堀本様 2026-08-23 のご要望）。
+ *   「今の『大』を標準にしてほしい。表現は一個ずつずらして、大はもっと大きく」
+ * 以前の値は 大112.5% / 標準100% / やや小93.75% / 小85% だった。
+ * 既に「標準」を選んでいる方は、何もしなくても以前の「大」の大きさになる。
  */
-html {
-  font-size: 100%;
-}
-
-/* 「大」。全体的に文字が小さく読みづらいというご要望（堀本様 2026-08-11） */
-html[data-ui-font-scale='large'] {
+html,
+html[data-ui-font-scale='standard'] {
   font-size: 112.5%;
 }
 
+html[data-ui-font-scale='large'] {
+  font-size: 126.5%;
+}
+
 html[data-ui-font-scale='compact'] {
-  font-size: 93.75%;
+  font-size: 100%;
 }
 
 html[data-ui-font-scale='dense'] {
-  font-size: 85%;
+  font-size: 93.75%;
 }
 
 html,

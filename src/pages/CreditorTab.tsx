@@ -43,7 +43,7 @@ function renderYen(v: number | null | undefined) {
   return (
     <span className="tabular-nums">
       {v.toLocaleString()}
-      <span className="ml-0.5 text-[8px] text-slate-400">円</span>
+      <span className="ml-0.5 text-[0.5rem] text-slate-400">円</span>
     </span>
   )
 }
@@ -308,7 +308,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           return (
             <span className={`tabular-nums ${isNegative ? 'text-red-600' : ''}`}>
               {diff !== 0 ? diff.toLocaleString() : '-'}
-              {diff !== 0 && <span className="ml-0.5 text-[8px] text-slate-400">円</span>}
+              {diff !== 0 && <span className="ml-0.5 text-[0.5rem] text-slate-400">円</span>}
             </span>
           )
         },
@@ -329,7 +329,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           item.settlementAmount ? (
             <span className="font-medium text-green-700 tabular-nums">
               {item.settlementAmount.toLocaleString()}
-              <span className="ml-0.5 text-[8px] text-slate-400">円</span>
+              <span className="ml-0.5 text-[0.5rem] text-slate-400">円</span>
             </span>
           ) : (
             <span className="text-slate-300">-</span>
@@ -447,7 +447,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
             </div>
           </div>
           {totals.missingPaymentCount > 0 && (
-            <div className="col-span-full text-[11px] text-amber-700">
+            <div className="col-span-full text-[0.6875rem] text-amber-700">
               ※ 弁済対象 {totals.missingPaymentCount} 社は支払回数が未入力のため、
               回数の合計は実態より少なく出ています（債権者名の読み替えが済むと解消します）
             </div>
@@ -805,7 +805,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       </div>
 
       {/* 支払条件 */}
-      <div className="col-span-5 mt-1 border-t border-slate-100 pt-1 text-[10px] font-semibold text-slate-400">
+      <div className="col-span-5 mt-1 border-t border-slate-100 pt-1 text-[0.625rem] font-semibold text-slate-400">
         支払条件
       </div>
       <div className="min-w-0 col-span-1">
@@ -929,7 +929,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       <div className="min-w-0 col-span-3" />
 
       {/* 振込先情報 */}
-      <div className="col-span-5 mt-1 border-t border-slate-100 pt-1 text-[10px] font-semibold text-slate-400">
+      <div className="col-span-5 mt-1 border-t border-slate-100 pt-1 text-[0.625rem] font-semibold text-slate-400">
         振込先情報
       </div>
       <div className="min-w-0 col-span-1">

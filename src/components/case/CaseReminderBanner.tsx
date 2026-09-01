@@ -47,12 +47,12 @@ export function CaseReminderBanner({
           リマインド {open.length}件
         </span>
         {overdue > 0 && (
-          <span className="rounded bg-red-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
+          <span className="rounded bg-red-600 px-1.5 py-0.5 text-[0.625rem] font-bold text-white">
             期日超過 {overdue}件
           </span>
         )}
         {dueToday > 0 && (
-          <span className="rounded bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+          <span className="rounded bg-amber-500 px-1.5 py-0.5 text-[0.625rem] font-bold text-white">
             本日 {dueToday}件
           </span>
         )}
