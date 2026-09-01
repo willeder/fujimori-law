@@ -139,6 +139,22 @@ export function PaymentTable({
   const dispatch = useCaseDispatch()
   const allCasePayments = usePaymentsByCaseId(caseId)
   const [editingId, setEditingId] = useState<number | null>(null)
+  /**
+   * 追加したけれどまだ保存していない行の id。
+   * 以前は「入金予定を追加」を押した時点でサーバへ作られており、間違えて押しても
+   * 消しに行くまで残った（事務所から「保存しないと反映されないようになってない。
+   * 現状追加まちがってできてしまうので運用が難しい」とのご指摘。藤川様 2026-08-21）。
+   * ここに入っている行は画面上だけの下書きで、「保存」を押して初めて作成する。
+   */
+  const [pendingIds, setPendingIds] = useState<Set<number>>(() => new Set())
+
+  const unmarkPending = (id: number) =>
+    setPendingIds((prev) => {
+      if (!prev.has(id)) return prev
+      const next = new Set(prev)
+      next.delete(id)
+      return next
+    })
   const [editData, setEditData] = useState<Partial<PaymentRecord>>({})
 
   // 一括表示（修正依頼㉗・45）。
@@ -171,6 +187,60 @@ export function PaymentTable({
     if (!dateB) return -1
     return dateA.localeCompare(dateB)
   })
+
+  /** 金額が空の入金行のひな形。追加はすべてここを通す */
+  const blankRow = (
+    id: number,
+    plannedDate: string,
+    creditorId: number | null,
+    creditorInstallmentIndex: number | null
+  ): PaymentRecord => ({
+    id,
+    caseId,
+    creditorId,
+    creditorInstallmentIndex,
+    // 日付を空のまま作ると「中身の無い行」と判定されて画面に出ない。
+    plannedDate,
+    // 金額はすべて空で作る。直前の行からコピーすると、追加しただけで弁済予定が
+    // 入ってしまい過弁済につながる（藤川様 2026-08-21）。
+    plannedAmount: null,
+    plannedFeeAllocation: null,
+    plannedAgentFeeAllocation: null,
+    plannedPoolAllocation: null,
+    plannedRepaymentAllocation: null,
+    actualDate: null,
+    actualAmount: null,
+    actualFeeAllocation: null,
+    actualAgentFeeAllocation: null,
+    actualPoolAllocation: null,
+    actualRepaymentAllocation: null,
+    handlingFee: null,
+    repaymentCount: null,
+    repaymentDate: null,
+    actualRepaymentCount: null,
+    actualHandlingFee: null,
+    cumulativePool: null,
+  })
+
+  const nextTempId = () => Math.max(0, ...allCasePayments.map((p) => p.id)) + 1
+
+  /**
+   * その行の次に1行足す（kintone と同じく行ごとのアイコンから）。
+   * 画面に足すだけで、サーバへは「保存」を押すまで送らない。
+   */
+  const insertRowAfter = (item: PaymentRecord) => {
+    if (locked) return
+    const id = nextTempId()
+    const row = blankRow(
+      id,
+      nextPlannedDate([item]),
+      item.creditorId ?? (scheduleCreditorId === undefined ? null : scheduleCreditorId),
+      item.creditorInstallmentIndex != null ? item.creditorInstallmentIndex + 1 : null
+    )
+    dispatch({ type: 'ADD_PAYMENT', payload: row })
+    setPendingIds((prev) => new Set(prev).add(id))
+    handleEdit(row)
+  }
 
   const handleEdit = (payment: PaymentRecord) => {
     setEditingId(payment.id)
@@ -264,34 +334,46 @@ export function PaymentTable({
       }
     }
 
-    dispatch({
-      type: 'UPDATE_PAYMENT',
-      payload: {
-        ...payment,
-        ...finalData,
-      },
-    })
-    // 既存入金レコードはサーバへ永続化（変更履歴/監査はサーバ側）。
-    // 自動補充で追加されたローカル行（DB未登録）は対象外（404は握りつぶす）。
-    if (payment.id != null) {
-      void fetch(`/api/payments/${payment.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(finalData),
-      }).catch((e) => console.error('入金更新の保存に失敗:', e))
+    const merged = { ...payment, ...finalData } as PaymentRecord
+    if (pendingIds.has(payment.id)) {
+      // 追加したばかりの下書き行。ここで初めてサーバに作る。
+      dispatch({ type: 'UPDATE_PAYMENT', payload: merged })
+      createPaymentRow(merged, { alreadyOnScreen: true })
+      unmarkPending(payment.id)
+    } else {
+      dispatch({ type: 'UPDATE_PAYMENT', payload: merged })
+      // 既存入金レコードはサーバへ永続化（変更履歴/監査はサーバ側）。
+      // 自動補充で追加されたローカル行（DB未登録）は対象外（404は握りつぶす）。
+      if (payment.id != null) {
+        void fetch(`/api/payments/${payment.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(finalData),
+        }).catch((e) => console.error('入金更新の保存に失敗:', e))
+      }
     }
     setEditingId(null)
     setEditData({})
   }
 
   const handleCancel = () => {
+    // まだ保存していない行は、取消で画面からも消す。
+    // 間違えて押したときにそのまま無かったことにできる。
+    if (editingId != null && pendingIds.has(editingId)) {
+      dispatch({ type: 'DELETE_PAYMENT', payload: editingId })
+      unmarkPending(editingId)
+    }
     setEditingId(null)
     setEditData({})
   }
 
-  // 新規入金行を楽観的に追加しつつサーバへ作成。成功したら合成IDを実IDへ差し替える。
-  const createPaymentRow = (record: PaymentRecord) => {
-    dispatch({ type: 'ADD_PAYMENT', payload: record })
+  // 新規入金行をサーバへ作成。成功したら合成IDを実IDへ差し替える。
+  // alreadyOnScreen: 下書きとして既に画面に出ている行（二重に足さない）。
+  const createPaymentRow = (
+    record: PaymentRecord,
+    opts?: { alreadyOnScreen?: boolean }
+  ) => {
+    if (!opts?.alreadyOnScreen) dispatch({ type: 'ADD_PAYMENT', payload: record })
     void fetch('/api/payments', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -319,6 +401,11 @@ export function PaymentTable({
       : `${record.plannedDate ?? ''} の入金予定（${(record.plannedAmount ?? 0).toLocaleString()}円）を削除します。よろしいですか？`
     if (!window.confirm(msg)) return
     dispatch({ type: 'DELETE_PAYMENT', payload: record.id })
+    // まだ保存していない行はサーバに無いので消しに行かない
+    if (pendingIds.has(record.id)) {
+      unmarkPending(record.id)
+      return
+    }
     if (record.id != null) {
       void fetch(`/api/payments/${record.id}`, { method: 'DELETE' }).catch((e) =>
         console.error('入金行の削除に失敗:', e)
@@ -856,6 +943,20 @@ export function PaymentTable({
           <div className="flex shrink-0 flex-nowrap items-center gap-0.5">
             <button
               type="button"
+              onClick={() => insertRowAfter(item)}
+              disabled={locked}
+              title={
+                locked
+                  ? '他の人が編集中のため、いまは変更できません'
+                  : 'この行の次に入金予定を1行足します（保存するまで反映されません）'
+              }
+              className="rounded px-1 py-0.5 text-sm leading-none text-emerald-600 hover:bg-emerald-50 disabled:text-slate-300 disabled:hover:bg-transparent"
+              aria-label="この行の次に入金予定を追加"
+            >
+              ＋
+            </button>
+            <button
+              type="button"
               onClick={() => handleEdit(item)}
               disabled={locked}
               title={locked ? '他の人が編集中のため、いまは変更できません' : undefined}
@@ -1059,44 +1160,23 @@ export function PaymentTable({
         disabled={locked}
         title={locked ? '他の人が編集中のため、いまは変更できません' : undefined}
         onClick={() => {
-          const newId = Math.max(0, ...allCasePayments.map((p) => p.id)) + 1
           const scopeCreditorId =
             scheduleCreditorId === undefined ? null : scheduleCreditorId
           const prevInstallmentMax = payments.reduce(
             (m, p) => Math.max(m, p.creditorInstallmentIndex ?? 0),
             0
           )
-          const creditorInstallmentIndex =
+          const id = nextTempId()
+          const row = blankRow(
+            id,
+            nextPlannedDate(payments),
+            scopeCreditorId,
             scopeCreditorId != null ? prevInstallmentMax + 1 : null
-          createPaymentRow({
-            id: newId,
-            caseId,
-            creditorId: scopeCreditorId,
-            creditorInstallmentIndex,
-            // 日付を空のまま作ると「中身の無い行」と判定されて画面に出ない。
-            // 直近の予定日の翌月（予定が無ければ当日）を初期値として入れる。
-            plannedDate: nextPlannedDate(payments),
-            // 金額はすべて空で作る。以前は直前の行の予定額をそのままコピーしていたが、
-            // 追加しただけで弁済予定が入ってしまい過弁済につながる、という事務所からの
-            // ご指摘（藤川様 2026-08-21）を受けて、金額は必ず手入力にする。
-            plannedAmount: null,
-            plannedFeeAllocation: null,
-            plannedAgentFeeAllocation: null,
-            plannedPoolAllocation: null,
-            plannedRepaymentAllocation: null,
-            actualDate: null,
-            actualAmount: null,
-            actualFeeAllocation: null,
-            actualAgentFeeAllocation: null,
-            actualPoolAllocation: null,
-            actualRepaymentAllocation: null,
-            handlingFee: null,
-            repaymentCount: null,
-            repaymentDate: null,
-            actualRepaymentCount: null,
-            actualHandlingFee: null,
-            cumulativePool: null,
-          })
+          )
+          // 画面に足すだけ。サーバへは「保存」を押してから送る
+          dispatch({ type: 'ADD_PAYMENT', payload: row })
+          setPendingIds((prev) => new Set(prev).add(id))
+          handleEdit(row)
         }}
         className="w-full rounded border border-dashed border-blue-300 py-1 text-[0.6875rem] text-blue-600 transition-colors hover:bg-blue-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-300 disabled:hover:bg-transparent"
       >
