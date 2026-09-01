@@ -731,41 +731,42 @@ export function DataTable<T>({
   }
 
   /**
-   * 省略されているセルを押したら全文をコピーする。
+   * セルを押したら中身をコピーする。
    *
    * 事務所からのご要望:
    *   「文字が見切れてるところとかもワンクリックでコピーできたらよい。
    *     ドラッグアンドドロップじゃ見切れてるので全文取得ができない」
+   *   「見切れていなくてもコピーできるようにして欲しい」
    *
-   * 幅に収まらず … で省略されているセルだけが対象。収まっているセルは
-   * 今までどおり何もしない（ドラッグでの選択を邪魔しないため）。
-   * 文字を選択した状態のクリックも、選択を優先して何もしない。
+   * 見切れているかどうかに関わらず、押せばそのセルの中身をコピーする。
+   * ドラッグでの選択は邪魔しない（文字を選択した状態のクリックは無視する）。
+   * 中身が空・「-」だけのセルはコピーしても意味がないので何もしない。
    */
   const handleCellCopyClick = (e: ReactMouseEvent<HTMLTableCellElement>) => {
     if ((window.getSelection()?.toString() ?? '').length > 0) return
     const target = e.target as HTMLElement
     // ボタン・リンク・入力欄の中を押したときは、その部品の動作を優先する
     if (target.closest('button, a, input, select, textarea, [role="button"]')) return
-    const cell = e.currentTarget
-    const el = findTruncatedInside(cell)
-    if (!el) return
-    const text = el.textContent ?? ''
-    if (!text.trim()) return
+    const text = (e.currentTarget.textContent ?? '').trim()
+    if (!text || text === '-' || text === '—') return
     void copyTextToClipboard(text).then((ok) => {
       if (ok) showCopiedToast()
     })
   }
 
-  /** マウスを乗せたときに、省略されていれば全文をツールチップに出す */
+  /**
+   * マウスを乗せたときのツールチップ。
+   * 省略されているセルは全文を出す（見えていない部分を読めるように）。
+   * 収まっているセルは操作の案内だけにする（全セルに長い吹き出しが出ると邪魔なため）。
+   */
   const handleCellHover = (e: ReactMouseEvent<HTMLTableCellElement>) => {
     const cell = e.currentTarget
     if (cell.dataset.copyHint === '1') return
-    const el = findTruncatedInside(cell)
-    if (!el) return
-    const text = (el.textContent ?? '').trim()
-    if (!text) return
+    const text = (cell.textContent ?? '').trim()
+    if (!text || text === '-' || text === '—') return
     cell.dataset.copyHint = '1'
-    cell.title = `${text}\n\n（クリックで全文をコピーします）`
+    const el = findTruncatedInside(cell)
+    cell.title = el ? `${text}\n\n（クリックでコピーします）` : 'クリックでコピーします'
   }
   const handleRowClick = (e: ReactMouseEvent<HTMLTableRowElement>, item: T) => {
     const start = rowPressRef.current
