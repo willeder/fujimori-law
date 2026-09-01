@@ -475,17 +475,24 @@ def emit_creditors(id_to_case):
     #       149201E 今村様 … イオンクレジット×2 → 11行が10タブに
     # 実データで23行・21案件が消えていた。同名でも別の債権として扱う。
     listrows = {}
+    # (ID, 突合コードA) -> 一覧行。事務所が振った突合コードで、債権者名が
+    # 一致しない行（回数分割・求償分・債権回収会社など）を紐付けるための索引。
+    bycode = {}
     for r in read_csv("和解対象債権一覧.csv", "和解対象債権者一覧.csv"):
         eid = r["ID"].strip()
         name = s(r.get("債権者"))
         if not name:
             continue
+        r["__used"] = False
         listrows.setdefault((eid, name), []).append(r)
+        code = s(r.get("突合コードA"))
+        if code:
+            bycode.setdefault((eid, code), r)
 
     out = []
     cid_seq = 1
-    # (ID,債権者名) ごとに、一覧の何行目まで和解詳細へ割り当てたか
-    used = {}
+    # 突合の内訳（①名前一致 / ②突合コード一致 / ③新規タブ）。標準出力に出す。
+    match_stats = {"name": 0, "code": 0, "new": 0, "new_rows": []}
 
     # 「★リマインド」等の行は債権者ではなく事務員向けのメモ（いつ・何をする）。
     # 債権者として数えると債権社数・申告額の集計が狂うのでここでは捨てる。
@@ -497,13 +504,25 @@ def emit_creditors(id_to_case):
         case_id = id_to_case.get(eid)
         if case_id is None or not name or name.startswith("★") or name == "債権者":
             continue
-        # 同名が複数あるときは、和解詳細の行に対して一覧の行を先頭から1つずつ割り当てる
-        key = (eid, name)
-        rows = listrows.get(key, [])
-        i = used.get(key, 0)
-        r = rows[i] if i < len(rows) else None
+        # ① 債権者名が完全一致 → 同じタブへ。
+        #    同名が複数あるときは、和解詳細の行に対して一覧の行を先頭から1つずつ割り当てる
+        r = next((x for x in listrows.get((eid, name), []) if not x["__used"]), None)
         if r is not None:
-            used[key] = i + 1
+            match_stats["name"] += 1
+        else:
+            # ② 名前が一致しない場合は、事務所が振った突合コードで紐付ける
+            #    （和解内容詳細の「突合コードB」＝和解対象債権一覧の「突合コードA」）
+            code = s(d.get("突合コードB"))
+            cand = bycode.get((eid, code)) if code else None
+            if cand is not None and not cand["__used"]:
+                r = cand
+                match_stats["code"] += 1
+        if r is not None:
+            r["__used"] = True
+        else:
+            # ③ ①②のいずれでも紐付かない → 和解内容詳細の債権者名で新規タブ
+            match_stats["new"] += 1
+            match_stats["new_rows"].append((eid, name))
         out.append(_build_creditor(cid_seq, case_id, name, r or {}, d))
         cid_seq += 1
 
@@ -513,9 +532,20 @@ def emit_creditors(id_to_case):
         case_id = id_to_case.get(eid)
         if case_id is None or name.startswith("★") or name == "債権者":
             continue
-        for r in rows[used.get((eid, name), 0):]:
+        for r in rows:
+            if r["__used"]:
+                continue
             out.append(_build_creditor(cid_seq, case_id, name, r, {}))
             cid_seq += 1
+
+    print(
+        f"  突合: ①名前一致 {match_stats['name']}件 / "
+        f"②突合コード一致 {match_stats['code']}件 / ③新規タブ {match_stats['new']}件"
+    )
+    if os.environ.get("MATCH_REPORT"):
+        with open(os.environ["MATCH_REPORT"], "w", encoding="utf-8") as f:
+            for eid, name in match_stats["new_rows"]:
+                f.write(f"{eid}\t{name}\n")
 
     return out
 
