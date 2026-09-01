@@ -1678,6 +1678,98 @@ export async function getCreditorNames() {
 }
 
 /**
+ * 原資UP対応が必要な依頼者の一覧。
+ *
+ * 事務所の運用（竹谷様 2026-08-21）:
+ *   「申告額から20万円以上、もしくは申告額の10％以上、実債務額の方が大きい場合、
+ *     原資アップの対応を行う流れになっている」
+ * 相談時の申告額より実際の債権額が大きいと、当初の原資では返しきれないため、
+ * 早めに見つけて原資を上げる交渉をする、というもの。
+ *
+ * 判定は依頼者（案件）単位で、受任対象の債権者の合計で見る。
+ * 「受任対象外」の債権者は返済の対象ではないので合計に入れない。
+ */
+export const FUND_INCREASE_ABSOLUTE_THRESHOLD = 200_000
+export const FUND_INCREASE_RATIO_THRESHOLD = 0.1
+
+export async function getFundIncreaseCandidates() {
+  const rows = await prisma.creditor.findMany({
+    where: { status: { not: '受任対象外' } },
+    select: {
+      caseId: true,
+      declaredAmount: true,
+      debtAmount: true,
+      case: {
+        select: {
+          id: true,
+          externalId: true,
+          name: true,
+          furigana: true,
+          settlementStatus: true,
+          judicialScrivener: true,
+          basePaymentAmount: true,
+        },
+      },
+    },
+  })
+
+  type Acc = {
+    case: (typeof rows)[number]['case']
+    declared: number
+    debt: number
+    creditorCount: number
+    /** 債権額が未入力の債権者数。合計が過小になるので画面で注記する */
+    debtUnknownCount: number
+  }
+  const byCase = new Map<number, Acc>()
+  for (const r of rows) {
+    const acc = byCase.get(r.caseId) ?? {
+      case: r.case,
+      declared: 0,
+      debt: 0,
+      creditorCount: 0,
+      debtUnknownCount: 0,
+    }
+    acc.declared += r.declaredAmount ?? 0
+    acc.debt += r.debtAmount ?? 0
+    acc.creditorCount += 1
+    if (r.debtAmount == null) acc.debtUnknownCount += 1
+    byCase.set(r.caseId, acc)
+  }
+
+  const result = []
+  for (const acc of byCase.values()) {
+    // 差額は「実債務額 − 申告額」。プラスなら申告より実際の借金が多い。
+    const gap = acc.debt - acc.declared
+    if (gap <= 0) continue
+    const ratio = acc.declared > 0 ? gap / acc.declared : null
+    const byAmount = gap >= FUND_INCREASE_ABSOLUTE_THRESHOLD
+    const byRatio = ratio != null && ratio >= FUND_INCREASE_RATIO_THRESHOLD
+    if (!byAmount && !byRatio) continue
+    result.push({
+      caseId: acc.case.id,
+      externalId: acc.case.externalId,
+      name: acc.case.name,
+      furigana: acc.case.furigana,
+      caseStatus: acc.case.settlementStatus,
+      judicialScrivener: acc.case.judicialScrivener,
+      basePaymentAmount: acc.case.basePaymentAmount,
+      creditorCount: acc.creditorCount,
+      debtUnknownCount: acc.debtUnknownCount,
+      declaredAmount: acc.declared,
+      debtAmount: acc.debt,
+      gap,
+      ratio,
+      /** どちらの条件で拾ったか（両方のこともある） */
+      reason: byAmount && byRatio ? 'both' : byAmount ? 'amount' : 'ratio',
+    })
+  }
+  // 差額の大きい順。対応の優先度が高いものから見られるように。
+  result.sort((a, b) => b.gap - a.gap)
+  return result
+}
+
+/**
  * 債権者リマインド一覧用：次回処理日ありの債権者のみ、必要列だけを軽量に返す。
  * 全債権者(1.6万件)を転送しないことでパフォーマンスを確保する。
  */

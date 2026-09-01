@@ -10,6 +10,7 @@ const LINKS: { path: string; label: string }[] = [
   { path: '/payment-delay', label: '入金遅延モニタリング' },
   { path: '/payment-reminder', label: '入金催促' },
   { path: '/settlement-results', label: '和解実績一覧' },
+  { path: '/fund-increase', label: '原資UP対応' },
   { path: '/payment-discrepancy', label: '入金額相違一覧' },
   { path: '/reminder-task', label: '処理予定リマインド' },
   { path: '/reminder-client', label: '依頼者リマインド' },
