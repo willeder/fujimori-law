@@ -1053,6 +1053,42 @@ export function PaymentTable({
         >
           {tall ? '表示を戻す' : '表を広げる'}
         </button>
+        {/*
+          追加は各行の「＋」で行うのが基本だが、1行も無いときは押す場所が無い。
+          ここに置いておけば、行が無くても最初の1行を足せる。表の外の動かない
+          場所なので、以前のように表の下に付いてスクロールを伸ばすことも無い。
+        */}
+        <button
+          type="button"
+          disabled={locked}
+          title={
+            locked
+              ? '他の人が編集中のため、いまは変更できません'
+              : '末尾に入金予定を1行足します（保存するまで反映されません）'
+          }
+          onClick={() => {
+            const scopeCreditorId =
+              scheduleCreditorId === undefined ? null : scheduleCreditorId
+            const prevInstallmentMax = payments.reduce(
+              (m, p) => Math.max(m, p.creditorInstallmentIndex ?? 0),
+              0
+            )
+            const id = nextTempId()
+            const row = blankRow(
+              id,
+              nextPlannedDate(payments),
+              scopeCreditorId,
+              scopeCreditorId != null ? prevInstallmentMax + 1 : null
+            )
+            // 画面に足すだけ。サーバへは「保存」を押してから送る
+            dispatch({ type: 'ADD_PAYMENT', payload: row })
+            setPendingIds((prev) => new Set(prev).add(id))
+            handleEdit(row)
+          }}
+          className="rounded border border-dashed border-blue-300 bg-white px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 disabled:border-slate-200 disabled:text-slate-300 disabled:hover:bg-transparent"
+        >
+          ＋ 入金予定を追加
+        </button>
       </div>
       </div>
 
@@ -1162,33 +1198,6 @@ export function PaymentTable({
         </div>
       )}
 
-      <button
-        type="button"
-        disabled={locked}
-        title={locked ? '他の人が編集中のため、いまは変更できません' : undefined}
-        onClick={() => {
-          const scopeCreditorId =
-            scheduleCreditorId === undefined ? null : scheduleCreditorId
-          const prevInstallmentMax = payments.reduce(
-            (m, p) => Math.max(m, p.creditorInstallmentIndex ?? 0),
-            0
-          )
-          const id = nextTempId()
-          const row = blankRow(
-            id,
-            nextPlannedDate(payments),
-            scopeCreditorId,
-            scopeCreditorId != null ? prevInstallmentMax + 1 : null
-          )
-          // 画面に足すだけ。サーバへは「保存」を押してから送る
-          dispatch({ type: 'ADD_PAYMENT', payload: row })
-          setPendingIds((prev) => new Set(prev).add(id))
-          handleEdit(row)
-        }}
-        className="w-full shrink-0 rounded border border-dashed border-blue-300 py-1 text-[0.6875rem] text-blue-600 transition-colors hover:bg-blue-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-300 disabled:hover:bg-transparent"
-      >
-        + 入金予定を追加
-      </button>
     </div>
   )
 }
