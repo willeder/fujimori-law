@@ -106,7 +106,7 @@ export function PaymentDelayDashboard() {
   }, [filteredCases])
 
   const columns: Column<DelayRow>[] = [
-    { key: 'caseId', header: 'ID', width: '76px', align: 'center', sortable: false, render: (r) => r.externalId ?? '-' },
+    { key: 'caseId', header: 'ID', width: '96px', align: 'center', sortable: false, render: (r) => r.externalId ?? '-' },
     { key: 'name', header: '依頼者名', width: '120px', render: (r) => <span className="whitespace-nowrap">{r.name ?? '-'}</span> },
     {
       key: 'delayedPayments',

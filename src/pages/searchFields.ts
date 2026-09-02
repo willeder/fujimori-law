@@ -14,6 +14,7 @@ import {
   OTHER_OFFICE_CONSULTATION_OPTIONS,
   WITHIN_TEN_DAYS_OPTIONS,
   REPAYMENT_TARGET_OPTIONS,
+  FUND_INCREASE_ACTION_OPTIONS,
 } from '../constants/fieldOptions'
 import type { FilterFieldType } from '../types/filter'
 
@@ -105,6 +106,8 @@ export const SEARCH_FIELDS: SearchFieldDef[] = [
   { field: 'firstPaymentWithinTenDays', label: '10日以内', type: 'choice', options: WITHIN_TEN_DAYS_OPTIONS },
   { field: 'creditorResponseStatus', label: '回答状況（債権者）', type: 'choice', options: RESPONSE_STATUS_OPTIONS },
   { field: 'creditorRepaymentTarget', label: '弁済対象（債権者）', type: 'choice', options: REPAYMENT_TARGET_OPTIONS },
+  // 原資UP対応（債権者ごと）。1社でも該当すればその案件がヒットする。
+  { field: 'creditorFundIncreaseAction', label: '原資UP対応（債権者）', type: 'choice', options: FUND_INCREASE_ACTION_OPTIONS },
 
   // ── 債権者側の日付（修正依頼㉑「今月完済の人を絞りたい」）──
   // 完済は「最後の1社が終わったとき」なので、案件全体の最終と、

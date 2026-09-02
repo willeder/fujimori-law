@@ -76,7 +76,7 @@ export function CreditorReminderPage() {
     {
       key: 'nextProcessDate',
       header: '次回処理日',
-      width: '108px',
+      width: '128px',
       sortable: false,
       render: (r) => (
         <span className="font-semibold tabular-nums text-slate-800">

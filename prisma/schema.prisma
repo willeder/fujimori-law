@@ -218,6 +218,8 @@ model Creditor {
   accountHolder            String?
   designatedCode           String?
   repaymentTarget          String?
+  // 原資UP対応（'要' | '完了' | NULL=空欄）。債権者の進捗ステータスとは別の軸。
+  fundIncreaseAction       String?
 
   payments Payment[]
   files    CreditorFile[]

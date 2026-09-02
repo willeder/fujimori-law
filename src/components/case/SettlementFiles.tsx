@@ -49,7 +49,13 @@ const UPLOAD_FIELD = '受任資料'
 /** kintone から移した分。区分としてそのまま並べる（削除はさせない） */
 const KINTONE_FIELDS = ['相談票添付', '和解ファイル'] as const
 const MAX_BYTES = 100 * 1024 * 1024
-const ALLOWED_EXT = ['jpg', 'jpeg', 'png', 'heic', 'webp', 'pdf', 'docx', 'doc', 'xlsx', 'xls']
+/*
+  拡張子での制限はしない（事務所のご要望「ファイルの形式をなんでも許容させて欲しい」）。
+  以前は画像・PDF・Word・Excel だけを通しており、それ以外をドラッグしても
+  「対応していない形式です」で弾かれ、ドラッグ＆ドロップ自体が効かないように
+  見えていた。サーバ側は元々サイズしか見ていないので、ここを外すだけでよい。
+  大きさの上限（100MB）はそのまま残す。
+*/
 
 type CaseFile = {
   id: number
@@ -94,8 +100,6 @@ export function SettlementFiles({ caseId }: { caseId?: number }) {
 
   const uploadOne = async (file: File) => {
     if (!caseId) return
-    const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
-    if (!ALLOWED_EXT.includes(ext)) throw new Error(`${file.name}: 対応していない形式です`)
     if (file.size > MAX_BYTES)
       throw new Error(`${file.name}: 大きすぎます（上限 ${MAX_BYTES / 1024 / 1024}MB）`)
 
@@ -182,14 +186,34 @@ export function SettlementFiles({ caseId }: { caseId?: number }) {
   ]
   const shown = filter === 'すべて' ? files : files.filter((f) => groupOf(f) === filter)
 
+  /*
+    ドロップ先はこのカード全体。以前は下の点線の枠だけが受け口で、少しでも
+    外すとブラウザがファイルを開いてしまい「ドラッグしても入らない」状態だった。
+    枠の中の要素を通過するたびに枠線が点滅しないよう、出た先がカードの外の
+    ときだけ強調を消す。
+  */
   const onDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault()
     setDragging(false)
-    void addFiles(Array.from(e.dataTransfer.files))
+    const dropped = Array.from(e.dataTransfer?.files ?? [])
+    if (dropped.length === 0) return
+    void addFiles(dropped)
   }
 
   return (
-    <div className="space-y-3 p-2">
+    <div
+      className={`space-y-3 rounded p-2 ${dragging ? 'bg-blue-50 ring-2 ring-blue-300' : ''}`}
+      onDragOver={(e) => {
+        e.preventDefault()
+        if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy'
+        setDragging(true)
+      }}
+      onDragLeave={(e) => {
+        const next = e.relatedTarget as Node | null
+        if (!next || !e.currentTarget.contains(next)) setDragging(false)
+      }}
+      onDrop={onDrop}
+    >
       {error && (
         <div className="rounded border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-700">
           {error}
@@ -231,17 +255,13 @@ export function SettlementFiles({ caseId }: { caseId?: number }) {
       </div>
 
       <div
-        onDragOver={(e) => {
-          e.preventDefault()
-          setDragging(true)
-        }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={onDrop}
         className={`rounded border-2 border-dashed px-3 py-4 text-center text-xs ${
           dragging ? 'border-blue-400 bg-blue-50 text-blue-700' : 'border-slate-200 text-slate-400'
         }`}
       >
-        ここにドラッグしても入れられます（画像・PDF・Word・Excel、1ファイル100MBまで）
+        {dragging
+          ? 'ここで離すと添付します'
+          : 'この枠のあたりにドラッグしても入れられます（形式は問いません。1ファイル100MBまで）'}
       </div>
 
       <div className="flex flex-wrap items-center gap-1">

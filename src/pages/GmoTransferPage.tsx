@@ -218,7 +218,7 @@ export function GmoTransferPage() {
   }, [month])
 
   const incompleteColumns: Column<IncompleteRow>[] = [
-    { key: 'externalId', header: 'ID', width: '72px', render: (r) => r.externalId ?? '-' },
+    { key: 'externalId', header: 'ID', width: '92px', render: (r) => r.externalId ?? '-' },
     { key: 'clientName', header: '依頼者', width: '110px', render: (r) => r.clientName ?? '-' },
     { key: 'creditorName', header: '債権者', width: '150px' },
     { key: 'status', header: 'ステータス', width: '96px' },
@@ -350,7 +350,7 @@ export function GmoTransferPage() {
 
   const yen = (n: number | null) => (n != null ? `${n.toLocaleString()}円` : '-')
   const columns: Column<Row>[] = [
-    { key: 'externalId', header: 'ID', width: '72px', render: (r) => r.externalId ?? '-' },
+    { key: 'externalId', header: 'ID', width: '92px', render: (r) => r.externalId ?? '-' },
     { key: 'clientName', header: '依頼者', width: '100px', render: (r) => r.clientName ?? '-' },
     { key: 'creditorName', header: '債権者', width: '150px' },
     { key: 'round', header: '回', width: '72px', align: 'center' },

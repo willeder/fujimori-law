@@ -4,6 +4,7 @@ import { useCaseDispatch, usePaymentsByCaseId } from '../store/useCaseStore'
 import { useFoundSet } from '../store/FoundSet'
 import { useCaseEdit } from '../context/CaseEditContext'
 import { settlementTotals } from '../lib/settlementTotals'
+import { fundIncreaseState } from '../lib/fundIncrease'
 import { EditableField, StatusBadge, DataTable, type Column } from '../components'
 import { CreditorFiles } from '../components/case/CreditorFiles'
 import { useBanks, useBranches } from '../hooks/useBankDictionary'
@@ -11,6 +12,7 @@ import type { Creditor } from '../types'
 import {
   ACCOUNT_TYPE_OPTIONS,
   CREDITOR_STATUS_OPTIONS,
+  FUND_INCREASE_ACTION_OPTIONS,
   REPAYMENT_TARGET_OPTIONS,
   RESPONSE_STATUS_OPTIONS,
   SETTLED_CREDITOR_STATUSES,
@@ -192,6 +194,8 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
     // 和解状況の4項目（旧・手入力）。債権者データから機械的に出せるので画面で計算する。
     // 定義は src/lib/settlementTotals.ts を参照。
     const totals = settlementTotals(creditors)
+    // 原資UP対応の案件としての状態（要 / 済 / なし）
+    const fundIncrease = fundIncreaseState(creditors)
 
     // 弁済の進捗（合算）。個別の債権者タブ（弁済予定履歴）と同じ定義で合計する。
     //   ・和解済（和解日あり）は和解内容の金額・回数、未和解は見込み値を使う
@@ -326,6 +330,23 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         },
       },
       {
+        // 原資UP対応（各社タブで入れた値をそのまま出す）。
+        key: 'fundIncreaseAction',
+        header: '原資UP対応',
+        width: '92px',
+        align: 'center',
+        render: (item) =>
+          item.fundIncreaseAction === '要' ? (
+            <span className="rounded bg-red-100 px-1 text-[0.625rem] font-bold text-red-700">要</span>
+          ) : item.fundIncreaseAction === '完了' ? (
+            <span className="rounded bg-slate-100 px-1 text-[0.625rem] text-slate-600">完了</span>
+          ) : (
+            <span className="text-slate-300">-</span>
+          ),
+        filterValue: (item) => item.fundIncreaseAction ?? '',
+        filterSuggestions: [...FUND_INCREASE_ACTION_OPTIONS],
+      },
+      {
         key: 'settlementDebtAmount',
         header: '和解時債務金額',
         width: '120px',
@@ -458,6 +479,26 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
               {(totalDeclared - totalDebt).toLocaleString()}円
             </div>
           </div>
+          {/*
+            原資UP対応（案件としての状態）。各社タブで入れた値からまとめる。
+            1社でも「要」があれば赤太字で「原資UP対応要」、
+            「要」が無く「完了」があれば黒字で「原資UP対応済」。
+            どちらも無い（全社空欄）ときは出さない。まとめ方は lib/fundIncrease.ts。
+          */}
+          {fundIncrease !== 'none' && (
+            <div>
+              <div className="text-xs font-medium leading-tight text-slate-500">原資UP対応</div>
+              <div
+                className={
+                  fundIncrease === 'required'
+                    ? 'text-sm font-bold text-red-600'
+                    : 'text-sm font-bold text-slate-800'
+                }
+              >
+                {fundIncrease === 'required' ? '原資UP対応要' : '原資UP対応済'}
+              </div>
+            </div>
+          )}
           {totals.missingPaymentCount > 0 && (
             <div className="col-span-full text-[0.6875rem] text-amber-700">
               ※ 弁済対象 {totals.missingPaymentCount} 社は支払回数が未入力のため、
@@ -626,7 +667,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         />
       </div>
 
-      {/* 3行目: 債権調査到着日(1), 調査票_契約日(1), 顧客コード(1), 債務額(1), 差額(1) */}
+      {/* 3行目: 債権調査到着日(1), 調査票_契約日(1), 債務額(1), 差額(1), 原資UP対応(1) */}
       <div className="min-w-0 col-span-1">
         <EditableField
           label="債権調査到着日"
@@ -650,20 +691,6 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
             updateCreditor(creditor, { contractDate: v || null })
           }
           type="date"
-          compact
-          compactLayout="inline"
-          bordered
-          truncateValue
-          fillWidth
-        />
-      </div>
-      <div className="min-w-0 col-span-1">
-        <EditableField
-          label="顧客コード"
-          value={creditor.customerCode}
-          onChange={(v) =>
-            updateCreditor(creditor, { customerCode: v || null })
-          }
           compact
           compactLayout="inline"
           bordered
@@ -702,8 +729,31 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           disabled
         />
       </div>
+      {/*
+        原資UP対応。差額のすぐ隣に置く（事務所のご要望 2026-09-02）。
+        空欄が既定で、「要」「完了」を選ぶ。各社の値は「すべて合算」タブの
+        一覧とサマリにそのまま出る。
+        ※この枠を差額の隣に入れるため、顧客コードは次の行へ移した
+          （その行に空き枠が1つあり、全体の行数は変わらない）。
+      */}
+      <div className="min-w-0 col-span-1">
+        <EditableField
+          label="原資UP対応"
+          type="select"
+          options={toSelectOptions(FUND_INCREASE_ACTION_OPTIONS)}
+          value={creditor.fundIncreaseAction}
+          onChange={(v) =>
+            updateCreditor(creditor, { fundIncreaseAction: v || null })
+          }
+          compact
+          compactLayout="inline"
+          bordered
+          truncateValue
+          fillWidth
+        />
+      </div>
 
-      {/* 4行目(左寄せ): 和解提案日(1), 和解提案(1), 回答状況(1), 空(2) */}
+      {/* 4行目(左寄せ): 和解提案日(1), 和解提案(1), 回答状況(1), 顧客コード(1), 空(1) */}
       <div className="min-w-0 col-span-1">
         <EditableField
           label="和解提案日"
@@ -752,12 +802,24 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         />
       </div>
       {/*
-        4行目の余りを埋める1枠。以前は2枠ぶん置いていたが、この行に残っている
-        のは1枠なので折り返してしまい、行末に1枠・次の行頭に2枠、合わせて3枠の
-        空白ができていた（事務所から「回答状況と和解日の間に何もないスペースが
-        3枠空いている」とのご指摘）。1枠にして和解の3項目を次の行の左端から
-        始める。
+        顧客コード。もとは3行目にあったが、差額の隣に原資UP対応を置くため
+        この行の空き枠へ移した。空白の枠数は以前と同じ1枠のまま
+        （回答状況と和解日の間が3枠空いていた件の修正は維持している）。
       */}
+      <div className="min-w-0 col-span-1">
+        <EditableField
+          label="顧客コード"
+          value={creditor.customerCode}
+          onChange={(v) =>
+            updateCreditor(creditor, { customerCode: v || null })
+          }
+          compact
+          compactLayout="inline"
+          bordered
+          truncateValue
+          fillWidth
+        />
+      </div>
       <div className="min-w-0 col-span-1" />
 
       {/* 5行目: 和解日(1), 和解金額(1), 和解時債務金額(1), コメント(2) */}

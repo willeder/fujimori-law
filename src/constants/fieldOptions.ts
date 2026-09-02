@@ -55,6 +55,17 @@ export const GMO_TRANSFER_TARGET_STATUSES = [
  *   和解提案書作成済 / 援用通知作成待ち / 援用通知発送待ち / 援用通知発送済
  *   → kintone 側に追加されしだい、ここにも追加する。
  */
+/**
+ * 原資UP対応（債権者ごと）。
+ *
+ * 事務所の運用（2026-09-02）:
+ *   申告額より実債務額が大きい社が出たとき、依頼者と話して弁済原資を上げる。
+ *   その要否と完了を債権者ごとに残し、案件単位のまとめは各社の値から出す。
+ *
+ * 空欄（NULL）が既定。kintone からの移行分は全件空欄。
+ */
+export const FUND_INCREASE_ACTION_OPTIONS = ['要', '完了'] as const
+
 export const CREDITOR_STATUS_OPTIONS = [
   '受任通知発送待ち',
   '債権調査票待ち',

@@ -104,7 +104,7 @@ export function PaymentDiscrepancyPage() {
     {
       key: 'caseId',
       header: 'ID',
-      width: '76px',
+      width: '96px',
       align: 'center',
       render: (r) => r.externalId ?? '-',
     },

@@ -736,8 +736,17 @@ export function buildConditionWhere(
   // 案件の「受任後ステータス」とは別で、債権者1社ごとの進捗。
   // 「受任通知発送待ちの債権者を1社でも持つ案件」のような絞り込みに使う。
   // 債権者の「回答状況」「弁済対象」で案件を絞る（1社でも該当すればヒット）
-  if (field === 'creditorResponseStatus' || field === 'creditorRepaymentTarget') {
-    const col = field === 'creditorResponseStatus' ? 'responseStatus' : 'repaymentTarget'
+  if (
+    field === 'creditorResponseStatus' ||
+    field === 'creditorRepaymentTarget' ||
+    field === 'creditorFundIncreaseAction'
+  ) {
+    const col =
+      field === 'creditorResponseStatus'
+        ? 'responseStatus'
+        : field === 'creditorRepaymentTarget'
+          ? 'repaymentTarget'
+          : 'fundIncreaseAction'
     const anyVal = `EXISTS (SELECT 1 FROM creditors cr WHERE cr."caseId" = c.id AND COALESCE(cr."${col}", '') <> '')`
     if (op === 'empty') return `NOT ${anyVal}`
     if (op === 'notEmpty') return anyVal
@@ -1737,6 +1746,8 @@ export async function getFundIncreaseCandidates() {
       caseId: true,
       declaredAmount: true,
       debtAmount: true,
+      // 原資UP対応（各社タブで入れた '要' / '完了'）。案件の状態はここからまとめる。
+      fundIncreaseAction: true,
       case: {
         select: {
           id: true,
@@ -1758,6 +1769,10 @@ export async function getFundIncreaseCandidates() {
     creditorCount: number
     /** 債権額が未入力の債権者数。合計が過小になるので画面で注記する */
     debtUnknownCount: number
+    /** 原資UP対応が「要」の社数 */
+    fundIncreaseRequired: number
+    /** 原資UP対応が「完了」の社数 */
+    fundIncreaseDone: number
   }
   const byCase = new Map<number, Acc>()
   for (const r of rows) {
@@ -1767,11 +1782,15 @@ export async function getFundIncreaseCandidates() {
       debt: 0,
       creditorCount: 0,
       debtUnknownCount: 0,
+      fundIncreaseRequired: 0,
+      fundIncreaseDone: 0,
     }
     acc.declared += r.declaredAmount ?? 0
     acc.debt += r.debtAmount ?? 0
     acc.creditorCount += 1
     if (r.debtAmount == null) acc.debtUnknownCount += 1
+    if (r.fundIncreaseAction === '要') acc.fundIncreaseRequired += 1
+    else if (r.fundIncreaseAction === '完了') acc.fundIncreaseDone += 1
     byCase.set(r.caseId, acc)
   }
 
@@ -1794,6 +1813,14 @@ export async function getFundIncreaseCandidates() {
       basePaymentAmount: acc.case.basePaymentAmount,
       creditorCount: acc.creditorCount,
       debtUnknownCount: acc.debtUnknownCount,
+      fundIncreaseRequired: acc.fundIncreaseRequired,
+      fundIncreaseDone: acc.fundIncreaseDone,
+      /*
+        案件としての原資UP対応。各社タブの値からまとめる（lib/fundIncrease.ts と同じ規則）:
+          1社でも「要」→ required / 「要」が無く「完了」あり → done / どちらも無い → none
+      */
+      fundIncreaseState:
+        acc.fundIncreaseRequired > 0 ? 'required' : acc.fundIncreaseDone > 0 ? 'done' : 'none',
       declaredAmount: acc.declared,
       debtAmount: acc.debt,
       gap,

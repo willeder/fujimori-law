@@ -179,6 +179,30 @@ interface DataTableProps<T> {
   sortOnlyColumns?: Column<T>[]
 }
 
+/*
+  行を開けることを示す左端のアイコン。
+  もともと案件一覧だけに置いていたが、他の一覧でも「どこを押せば開くのか
+  分からない」というご指摘をいただいたため、DataTable 側に移して
+  行クリックで開けるすべての一覧に自動で出るようにした（2026-09-02）。
+*/
+function OpenRowIcon() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      aria-hidden="true"
+      className="h-3.5 w-3.5 shrink-0 text-blue-500"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="2.5" y="2" width="11" height="12" rx="1.5" />
+      <path d="M5.5 6h5M5.5 9h3" />
+    </svg>
+  )
+}
+
 export function DataTable<T>({
   data,
   columns,
@@ -1223,17 +1247,35 @@ export function DataTable<T>({
                       onRowClick && colIndex === 0 ? undefined : handleCellCopyClick
                     }
                   >
-                    {cellNoWrap ? (
-                      col.render
-                        ? col.render(item, index)
-                        : formatValue(getValue(item, String(col.key)))
-                    ) : (
-                      <div className={innerClass}>
-                        {col.render
+                    {(() => {
+                      const body = cellNoWrap ? (
+                        col.render
                           ? col.render(item, index)
-                          : formatValue(getValue(item, String(col.key)))}
-                      </div>
-                    )}
+                          : formatValue(getValue(item, String(col.key)))
+                      ) : (
+                        <div className={`${innerClass} min-w-0`}>
+                          {col.render
+                            ? col.render(item, index)
+                            : formatValue(getValue(item, String(col.key)))}
+                        </div>
+                      )
+                      // 開ける行の左端だけ、押せる場所が見て分かるようにアイコンを添える
+                      if (!onRowClick || colIndex !== 0) return body
+                      return (
+                        <span
+                          className={`flex min-w-0 items-center gap-1 ${
+                            col.align === 'center'
+                              ? 'justify-center'
+                              : col.align === 'right'
+                                ? 'justify-end'
+                                : ''
+                          }`}
+                        >
+                          <OpenRowIcon />
+                          {body}
+                        </span>
+                      )
+                    })()}
                   </td>
                   )
                 })}
