@@ -165,7 +165,6 @@ const FIELD_LABEL: Record<string, string> = {
   settlementContentComment: '和解内容',
   nextProcessDate: '次回処理日時',
   fundIncreaseAction: '原資UP対応',
-  memo: 'メモ',
   paymentStartMonth: '支払開始日',
   paymentDay: '支払日',
   firstPaymentAmount: '初回支払額',
