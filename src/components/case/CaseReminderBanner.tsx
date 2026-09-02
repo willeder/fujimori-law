@@ -63,6 +63,10 @@ export function CaseReminderBanner({
   const [body, setBody] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  // 追加したあとに期日や内容を直せるようにする（藤川様・堀本様 2026-08-21/22）
+  const [editingKey, setEditingKey] = useState<string | null>(null)
+  const [editDue, setEditDue] = useState('')
+  const [editBody, setEditBody] = useState('')
 
   const items: Item[] = []
 
@@ -186,10 +190,23 @@ export function CaseReminderBanner({
     }
   }
 
-  /** 済にする。案件は完了フラグ、依頼者・債権者は日付を空にする */
-  const complete = async (it: Item) => {
+  /**
+   * リマインドを消す。押したら必ず確認してから消す
+   * （「チェックマークではなく削除ボタンにして、押したらアラートを出して
+   *   消すかどうかを判断したい」という事務所のご要望）。
+   * 消し方は種類で違う。案件はリマインドそのものを削除、依頼者・債権者は
+   * 日付を空にする（項目自体は他でも使うので消さない）。
+   */
+  const removeItem = async (it: Item) => {
+    const what =
+      it.kind === 'case'
+        ? `このリマインドを削除します。\n\n${it.dueDate ?? '期日なし'}　${it.body}`
+        : it.kind === 'client'
+          ? `依頼者のリマインド日（${it.dueDate}）を消します。`
+          : `この債権者の次回処理日（${it.dueDate}）を消します。\n\n${it.body}`
+    if (!window.confirm(`${what}\n\nよろしいですか？`)) return
     if (it.reminderId != null) {
-      await patch(it.reminderId, { done: true })
+      await remove(it.reminderId)
       return
     }
     if (it.kind === 'client') {
@@ -199,10 +216,53 @@ export function CaseReminderBanner({
     if (it.creditorId != null) await setCreditorReminder(it.creditorId, null)
   }
 
-  const removeItem = async (it: Item) => {
-    if (it.reminderId == null) return
-    if (!window.confirm('このリマインドを削除しますか？')) return
-    await remove(it.reminderId)
+  const startEdit = (it: Item) => {
+    setError(null)
+    setEditingKey(it.key)
+    setEditDue(it.dueDate ?? '')
+    // 依頼者はメモを持つ項目が無いので空。債権者は「債権者名：メモ」からメモだけ取り出す
+    setEditBody(
+      it.kind === 'case'
+        ? it.body
+        : it.kind === 'creditor'
+          ? it.body.replace(/^[^：]*：/, '').replace(/^次回処理日$/, '')
+          : ''
+    )
+  }
+
+  const cancelEdit = () => {
+    setEditingKey(null)
+    setEditDue('')
+    setEditBody('')
+  }
+
+  const saveEdit = async (it: Item) => {
+    if (editDue && !isValidYmd(editDue)) {
+      setError('期日が正しくありません（YYYY-MM-DD）')
+      return
+    }
+    if (it.kind !== 'case' && !editDue) {
+      setError('期日を入れてください')
+      return
+    }
+    if (it.kind === 'case' && !editBody.trim()) {
+      setError('やることを入れてください')
+      return
+    }
+    setBusy(true)
+    setError(null)
+    try {
+      if (it.reminderId != null) {
+        await patch(it.reminderId, { dueDate: editDue || null, body: editBody.trim() })
+      } else if (it.kind === 'client') {
+        await setClientReminder(editDue)
+      } else if (it.creditorId != null) {
+        await setCreditorReminder(it.creditorId, editDue, editBody.trim())
+      }
+      cancelEdit()
+    } finally {
+      setBusy(false)
+    }
   }
 
   // 出すものが1件も無く、追加フォームも閉じているときは帯ごと隠す
@@ -295,8 +355,9 @@ export function CaseReminderBanner({
               value={due}
               onChange={setDue}
               onPick={setDue}
+              grow={false}
               placeholder="20260930"
-              className="w-28 shrink-0 rounded border border-slate-300 px-1.5 py-1 text-xs"
+              className="w-24 rounded border border-slate-300 px-1.5 py-1 text-xs"
             />
             <input
               value={body}
@@ -322,7 +383,7 @@ export function CaseReminderBanner({
             </button>
           </div>
           <div className="mt-1 text-[0.625rem] text-slate-500">
-            {kind === 'case' && '案件ごとのリマインドとして追加します。済のチェックが付きます。'}
+            {kind === 'case' && '案件ごとのリマインドとして追加します。対応が済んだら「削除」で消します。'}
             {kind === 'client' && '案件の「リマインド日」に入ります。メモを持つ項目が無いため日付だけです。'}
             {kind === 'creditor' && '選んだ債権者の「次回処理日時」と「リマインド」に入ります。'}
           </div>
@@ -334,25 +395,59 @@ export function CaseReminderBanner({
         {items.map((it) => {
           const isOverdue = it.dueDate != null && it.dueDate < today
           const isToday = it.dueDate === today
+          const kindBadge = (
+            <span
+              className={`shrink-0 rounded px-1 py-px text-[0.625rem] font-bold ${KIND_LABEL[it.kind].cls}`}
+            >
+              {KIND_LABEL[it.kind].label}
+            </span>
+          )
+          if (editingKey === it.key) {
+            return (
+              <li key={it.key} className="flex items-center gap-1 rounded bg-white/70 px-1 py-0.5 text-xs">
+                {kindBadge}
+                <DateTextInput
+                  value={editDue}
+                  onChange={setEditDue}
+                  onPick={setEditDue}
+                  grow={false}
+                  placeholder="20260930"
+                  className="w-24 rounded border border-slate-300 px-1.5 py-0.5 text-xs"
+                />
+                <input
+                  value={editBody}
+                  onChange={(e) => setEditBody(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') void saveEdit(it)
+                    if (e.key === 'Escape') cancelEdit()
+                  }}
+                  disabled={it.kind === 'client'}
+                  placeholder={
+                    it.kind === 'client' ? '依頼者のリマインドは日付だけです' : 'やること'
+                  }
+                  className="min-w-0 flex-1 rounded border border-slate-300 px-1.5 py-0.5 text-xs disabled:bg-slate-100 disabled:text-slate-400"
+                />
+                <button
+                  type="button"
+                  onClick={() => void saveEdit(it)}
+                  disabled={busy}
+                  className="shrink-0 rounded bg-blue-500 px-2 py-0.5 text-[0.625rem] text-white hover:bg-blue-600 disabled:bg-slate-300"
+                >
+                  保存
+                </button>
+                <button
+                  type="button"
+                  onClick={cancelEdit}
+                  className="shrink-0 px-1 text-[0.625rem] text-slate-500 hover:text-slate-800"
+                >
+                  取消
+                </button>
+              </li>
+            )
+          }
           return (
             <li key={it.key} className="flex items-start gap-2 text-xs">
-              <input
-                type="checkbox"
-                checked={false}
-                disabled={locked}
-                onChange={() => void complete(it)}
-                className="mt-0.5 shrink-0"
-                title={
-                  it.kind === 'case'
-                    ? '対応が済んだらチェック'
-                    : '対応が済んだらチェック（日付を空にします）'
-                }
-              />
-              <span
-                className={`shrink-0 rounded px-1 py-px text-[0.625rem] font-bold ${KIND_LABEL[it.kind].cls}`}
-              >
-                {KIND_LABEL[it.kind].label}
-              </span>
+              {kindBadge}
               <span
                 className={`w-24 shrink-0 tabular-nums ${
                   isOverdue
@@ -380,16 +475,24 @@ export function CaseReminderBanner({
                   {it.body}
                 </span>
               )}
-              {it.reminderId != null && (
-                <button
-                  type="button"
-                  onClick={() => void removeItem(it)}
-                  disabled={locked}
-                  className="shrink-0 text-[0.625rem] text-slate-400 hover:text-red-600 disabled:text-slate-200"
-                >
-                  削除
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => startEdit(it)}
+                disabled={locked}
+                className="shrink-0 text-[0.625rem] text-slate-400 hover:text-blue-600 disabled:text-slate-200"
+                title="期日や内容を直します"
+              >
+                編集
+              </button>
+              <button
+                type="button"
+                onClick={() => void removeItem(it)}
+                disabled={locked}
+                className="shrink-0 text-[0.625rem] text-slate-400 hover:text-red-600 disabled:text-slate-200"
+                title="確認のうえで消します"
+              >
+                削除
+              </button>
             </li>
           )
         })}

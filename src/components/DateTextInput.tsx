@@ -23,6 +23,12 @@ type Props = {
   className?: string
   autoFocus?: boolean
   inputRef?: React.RefObject<HTMLInputElement>
+  /**
+   * 横幅を親いっぱいに伸ばすか。既定は伸ばす（項目の欄で使うため）。
+   * 幅を className で決めている場所では false にする。true のままだと
+   * 余白ができて、隣の入力欄との間が空きすぎる。
+   */
+  grow?: boolean
 }
 
 export function DateTextInput({
@@ -35,9 +41,10 @@ export function DateTextInput({
   className,
   autoFocus,
   inputRef,
+  grow = true,
 }: Props) {
   return (
-    <span className="flex min-w-0 flex-1 items-center gap-0.5">
+    <span className={`flex min-w-0 items-center gap-0.5 ${grow ? 'flex-1' : ''}`}>
       <input
         ref={inputRef}
         type="text"
