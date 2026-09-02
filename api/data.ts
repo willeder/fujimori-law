@@ -397,6 +397,14 @@ export default async function handler(
     }
 
     // ── 金融機関コードの入力補助（辞書はサーバ側のみ。外部への問い合わせはしない）──
+    if (path === '/api/bank/banks' && method === 'GET') {
+      json({ ok: true, hits: bankCode.allBanks() })
+      return
+    }
+    if (path === '/api/bank/branch-list' && method === 'GET') {
+      json({ ok: true, hits: bankCode.allBranches(query.get('code') ?? '') })
+      return
+    }
     if (path === '/api/bank/search' && method === 'GET') {
       json({ ok: true, hits: bankCode.searchBanks(query.get('q') ?? '') })
       return
