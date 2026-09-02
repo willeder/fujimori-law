@@ -311,6 +311,11 @@ export function CaseReminderBanner({
             </span>
           ) : null
         )}
+        <span className="text-slate-500">
+          {locked
+            ? '他の人が編集中のため、いまは変更できません'
+            : '期日や内容は「編集」、消すときは「削除」から'}
+        </span>
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
@@ -475,11 +480,16 @@ export function CaseReminderBanner({
                   {it.body}
                 </span>
               )}
+              {/*
+                以前は10pxのグレー文字で置いていたが、色の付いた帯の上では
+                ほとんど見えず「編集できない」と受け取られてしまった。
+                枠と白背景を付けて、押せる場所だと分かるようにする。
+              */}
               <button
                 type="button"
                 onClick={() => startEdit(it)}
                 disabled={locked}
-                className="shrink-0 text-[0.625rem] text-slate-400 hover:text-blue-600 disabled:text-slate-200"
+                className="shrink-0 rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[0.6875rem] text-slate-700 hover:border-blue-400 hover:text-blue-700 disabled:border-slate-200 disabled:text-slate-300"
                 title="期日や内容を直します"
               >
                 編集
@@ -488,7 +498,7 @@ export function CaseReminderBanner({
                 type="button"
                 onClick={() => void removeItem(it)}
                 disabled={locked}
-                className="shrink-0 text-[0.625rem] text-slate-400 hover:text-red-600 disabled:text-slate-200"
+                className="shrink-0 rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[0.6875rem] text-slate-700 hover:border-red-400 hover:text-red-700 disabled:border-slate-200 disabled:text-slate-300"
                 title="確認のうえで消します"
               >
                 削除
