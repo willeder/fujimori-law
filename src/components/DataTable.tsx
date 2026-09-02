@@ -105,6 +105,12 @@ interface DataTableProps<T> {
   cellSingleLine?: boolean
   /** cellSingleLine 時、true なら一時的に省略をやめる（行内編集中の入力が切れないようにする） */
   suspendTruncate?: boolean
+  /**
+   * 親の高さいっぱいに広がり、表の中身だけをスクロールさせる。
+   * 高さを vh などで決め打ちしないので、親の枠とずれない。
+   * 親は高さの決まった flex コンテナであること（例: min-h-0 flex-1）。
+   */
+  fillHeight?: boolean
   /** 余白をさらに詰める（入金スケジュールなど超高密度表示向け） */
   tight?: boolean
   /** true のとき thead の縦余白のみ一段詰める（見出し行の高さを抑える） */
@@ -186,6 +192,7 @@ export function DataTable<T>({
   cellNoWrap = false,
   cellSingleLine = false,
   suspendTruncate = false,
+  fillHeight = false,
   tight = false,
   slimHeader = false,
   paginated = false,
@@ -845,7 +852,7 @@ export function DataTable<T>({
   const emptyPad = isCompact ? 'px-2 py-4' : 'px-2 py-6'
 
   const scrollBody =
-    bodyMaxHeightClassName != null && bodyMaxHeightClassName.length > 0
+    fillHeight || (bodyMaxHeightClassName != null && bodyMaxHeightClassName.length > 0)
 
   const useStickyHeader = scrollBody || stickyHeader || paginated
 
@@ -949,9 +956,12 @@ export function DataTable<T>({
       </div>
     ) : null
 
-  const bodyScrollClass = paginated
-    ? `min-w-0 overflow-auto isolate ${bodyMaxHeightClassName ?? 'max-h-[calc(100vh-13rem)]'}`
-    : scrollWrapClass
+  const bodyScrollClass = fillHeight
+    ? // 高さは親から受け取る。max-height を使わないので枠とずれない
+      'min-h-0 min-w-0 flex-1 overflow-auto isolate'
+    : paginated
+      ? `min-w-0 overflow-auto isolate ${bodyMaxHeightClassName ?? 'max-h-[calc(100vh-13rem)]'}`
+      : scrollWrapClass
 
   const findBar = enableFind ? (
     findOn ? (
@@ -1027,7 +1037,13 @@ export function DataTable<T>({
 
   return (
     <div
-      className={paginated ? 'flex min-h-0 flex-col' : ''}
+      className={
+        fillHeight
+          ? 'flex h-full min-h-0 flex-col'
+          : paginated
+            ? 'flex min-h-0 flex-col'
+            : ''
+      }
       onMouseEnter={claimActive}
       onFocusCapture={claimActive}
     >

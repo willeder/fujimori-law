@@ -2672,6 +2672,16 @@ function CaseDetailBody({
                     paymentScheduleSectionTab === "settlement" &&
                     displayCreditorScopeTabId !== "all"
                   }
+                  /*
+                    入金スケジュールは表が自分でスクロールするので、外側では
+                    スクロールさせない。両方スクロールすると、どちらが動いて
+                    いるのか分からず操作しづらい（事務所からのご指摘）。
+                    和解状況は縦に長い入力欄が並ぶので、従来どおり外側で
+                    スクロールする。
+                  */
+                  activePanelOverflow={
+                    paymentScheduleSectionTab === "payments" ? "hidden" : "auto"
+                  }
                   activeTabId={paymentScheduleSectionTab}
                   onActiveTabChange={(id) =>
                     setPaymentScheduleSectionTab(

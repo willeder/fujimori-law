@@ -46,6 +46,14 @@ interface TabsProps {
    */
   beforeActivePanelContent?: ReactNode
   /**
+   * beforeActivePanelContent があるときの本文の扱い。
+   *   'auto'   … 本文が長ければここでスクロールする（既定。和解状況の各社タブなど）
+   *   'hidden' … ここではスクロールさせない。中身が自分でスクロールする場合に使う
+   *              （入金スケジュールの表など）。指定しないと、表の中と外の二重
+   *              スクロールになって操作しづらくなる。
+   */
+  activePanelOverflow?: 'auto' | 'hidden'
+  /**
    * guest のとき、ルート・パネルを親の余白まで flex 伸長するか。
    * false のときは内容の高さに寄せ、長い内容はルートでスクロール（和解状況の個別債権者タブ向け）。
    */
@@ -71,6 +79,7 @@ export function Tabs({
   /** max-h だけだと flex 内で子の flex-1 が効かずスクロールできないことがあるため h-[min(...)] で高さを確定 */
   tabBodyMaxHeightClassName = 'h-[min(72vh,34rem)]',
   beforeActivePanelContent,
+  activePanelOverflow = 'auto',
   guestExpandToParent = true,
   hostBodyNaturalHeight = false,
   reorderable = false,
@@ -263,7 +272,11 @@ export function Tabs({
                 <div className="min-h-[1.75rem] min-w-0 shrink-0 overflow-x-auto border-b border-slate-100 bg-slate-50/40 px-1 py-0.5">
                   {beforeActivePanelContent}
                 </div>
-                <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-auto">
+                <div
+                  className={`flex min-h-0 min-w-0 flex-1 flex-col ${
+                    activePanelOverflow === 'hidden' ? 'overflow-hidden' : 'overflow-auto'
+                  }`}
+                >
                   {activeContent}
                 </div>
               </>
