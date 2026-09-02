@@ -176,6 +176,65 @@ export function searchBanks(q: string, limit = 20): BankHit[] {
   return rank(bankList(), raw, normBank, wantsBank).slice(0, limit)
 }
 
+/** 略記 → 正式名称（TYPE_ALIAS の逆向き。候補の表示に使う） */
+const TYPE_UNALIAS: Array<[RegExp, string]> = [
+  [/信金$/, '信用金庫'],
+  [/信組$/, '信用組合'],
+  [/農協$/, '農業協同組合'],
+  [/漁協$/, '漁業協同組合'],
+  [/労金$/, '労働金庫'],
+  [/中金$/, '中央金庫'],
+]
+
+/** 全角の英数字を半角へ（「三菱ＵＦＪ」→「三菱UFJ」）。事務所の入力は半角のため */
+function toHalfWidth(s: string): string {
+  return s.replace(/[Ａ-Ｚａ-ｚ０-９]/g, (c) =>
+    String.fromCharCode(c.charCodeAt(0) - 0xfee0)
+  )
+}
+
+/**
+ * 辞書の名前を、事務所が実際に入力している表記に合わせる。
+ *
+ * 辞書（zengin-code）は「三井住友」「尼崎信金」「三菱ＵＦＪ」のように、
+ * 業態語が略され英数字が全角の表記で、登録済みの実データ（「三井住友銀行」
+ * 「尼崎信用金庫」「三菱UFJ銀行」）とは一致しない。そのまま候補に出すと打っても
+ * 引っかからず、選ぶと登録済みの名前が別表記に変わってしまう。
+ *   ・業態語が付いていない＝銀行なので「銀行」を補う
+ *   ・信金・信組などの略記は正式名称に戻す
+ *   ・全角の英数字は半角にする
+ * 登録済みの銀行名72種類で照合して決めた変換。
+ */
+function displayBankName(name: string): string {
+  const half = toHalfWidth(name)
+  for (const [re, full] of TYPE_UNALIAS) {
+    if (re.test(half)) return half.replace(re, full)
+  }
+  return TYPE_SUFFIX.test(half) ? half : `${half}銀行`
+}
+
+/**
+ * 全金融機関（1,146件）を返す。
+ * 銀行名の欄で「打ちながら候補を出す」ために、画面側で一度だけ読み込んで持つ。
+ * 打鍵のたびにサーバへ問い合わせない作りにするため。
+ */
+export function allBanks(): BankHit[] {
+  if (!load()) return []
+  return bankList()
+    .map((b) => ({ ...b, name: displayBankName(b.name) }))
+    .sort((a, b) => a.name.localeCompare(b.name, 'ja'))
+}
+
+/** ある金融機関の全支店を返す（支店名の候補用。銀行が決まってから読み込む） */
+export function allBranches(bankCode: string): BranchHit[] {
+  if (!load()) return []
+  const b = BANKS?.[fixBankCode(bankCode)]
+  if (!b) return []
+  return Object.values(b.branches ?? {})
+    .map((x) => ({ code: x.code, name: x.name, kana: x.kana ?? '' }))
+    .sort((a, b2) => a.name.localeCompare(b2.name, 'ja'))
+}
+
 /** 金融機関コードから1件だけ引く */
 export function bankByCode(code: string): BankHit | null {
   if (!load()) return null

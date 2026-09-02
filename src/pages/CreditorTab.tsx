@@ -7,7 +7,7 @@ import { settlementTotals } from '../lib/settlementTotals'
 import { EditableField, StatusBadge, DataTable, type Column } from '../components'
 import { SuggestInput } from '../components/SuggestInput'
 import { CreditorFiles } from '../components/case/CreditorFiles'
-import { BankCodeHelper } from '../components/case/BankCodeHelper'
+import { useBanks, useBranches } from '../hooks/useBankDictionary'
 import type { Creditor } from '../types'
 import {
   ACCOUNT_TYPE_OPTIONS,
@@ -57,6 +57,18 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
   const { stageCreditor, locked } = useCaseEdit()
   // 弁済の進捗（合算）用。債権者別の弁済予定は表示時に生成される（creditorSchedule.ts）
   const casePayments = usePaymentsByCaseId(caseId)
+
+  /*
+    振込先の銀行名・支店名を打ちながら候補を出すための辞書（全銀協の公開データ）。
+    フックは早期returnより前で呼ぶ必要があるのでここに置く。
+    金融機関は一度だけ読み込み、支店は金融機関コードが決まってからその銀行のぶんだけ読む。
+  */
+  const { banks, byName: bankByName } = useBanks()
+  const { branches, byName: branchByName } = useBranches(
+    creditors[0]?.financialInstitutionCode
+  )
+  const bankNameSuggestions = banks.map((b) => b.name)
+  const branchNameSuggestions = branches.map((b) => b.name)
 
   // 追加介入で債権者を1社足すためのフォーム（竹谷様 2026-08-21）
   const [addingCreditor, setAddingCreditor] = useState(false)
@@ -1034,22 +1046,27 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         <EditableField
           label="振込先銀行名"
           value={creditor.bankName}
-          onChange={(v) => updateCreditor(creditor, { bankName: v || null })}
+          /*
+            打ちながら候補が出る（藤川様 2026-08-22「ボタンではなく直接予測が
+            出る方針にしたい」）。候補から選ぶと金融機関コードも同時に入る。
+            辞書に無い名前もそのまま入れられる。実データには「三菱UFJニコス」
+            「三井住友カード」のように、銀行名の欄にカード会社名が入っている行が
+            あるため、候補から選ぶことは強制しない。
+          */
+          suggestions={bankNameSuggestions}
+          onChange={(v) => {
+            const hit = v ? bankByName.get(v) : undefined
+            updateCreditor(creditor, {
+              bankName: v || null,
+              // 候補から選んだときだけコードを入れる。手打ちの名前では触らない
+              ...(hit ? { financialInstitutionCode: hit.code } : {}),
+            })
+          }}
           compact
           compactLayout="inline"
           bordered
           truncateValue
           fillWidth
-        />
-        {/* 銀行名から金融機関コードを引く。銀行名そのものは書き換えない
-            （辞書は「三井住友」のような略記で、登録済みの「三井住友銀行」より情報が少ないため） */}
-        <BankCodeHelper
-          kind="bank"
-          name={creditor.bankName ?? ''}
-          code={creditor.financialInstitutionCode ?? ''}
-          onApply={(h) =>
-            updateCreditor(creditor, { financialInstitutionCode: h.code })
-          }
         />
       </div>
       <div className="min-w-0 col-span-1">
@@ -1070,20 +1087,24 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         <EditableField
           label="振込先支店名"
           value={creditor.branchName}
-          onChange={(v) => updateCreditor(creditor, { branchName: v || null })}
+          /*
+            支店の候補は金融機関コードが決まってから出す。同名の支店が他行に
+            大量にあるため、銀行が特定できていないと選び間違える。
+            選ぶと支店コードも同時に入る。
+          */
+          suggestions={branchNameSuggestions}
+          onChange={(v) => {
+            const hit = v ? branchByName.get(v) : undefined
+            updateCreditor(creditor, {
+              branchName: v || null,
+              ...(hit ? { branchCode: hit.code } : {}),
+            })
+          }}
           compact
           compactLayout="inline"
           bordered
           truncateValue
           fillWidth
-        />
-        {/* 支店は金融機関コードが決まっていないと絞れない（同名支店が他行に多数あるため） */}
-        <BankCodeHelper
-          kind="branch"
-          name={creditor.branchName ?? ''}
-          code={creditor.branchCode ?? ''}
-          bankCode={creditor.financialInstitutionCode ?? ''}
-          onApply={(h) => updateCreditor(creditor, { branchCode: h.code })}
         />
       </div>
       <div className="min-w-0 col-span-1">

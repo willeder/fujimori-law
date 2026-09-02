@@ -310,6 +310,20 @@ function dbApiPlugin(): Plugin {
               res.setHeader('Content-Type', 'application/json; charset=utf-8')
               res.end(JSON.stringify(body))
             }
+            if (url === '/api/bank/banks' && req.method === 'GET') {
+              const bank = (await server.ssrLoadModule(
+                '/src/server/bankCode.ts'
+              )) as typeof import('./src/server/bankCode')
+              sendJson({ ok: true, hits: bank.allBanks() })
+              return
+            }
+            if (url === '/api/bank/branch-list' && req.method === 'GET') {
+              const bank = (await server.ssrLoadModule(
+                '/src/server/bankCode.ts'
+              )) as typeof import('./src/server/bankCode')
+              sendJson({ ok: true, hits: bank.allBranches(q.get('code') ?? '') })
+              return
+            }
             if (url === '/api/bank/search' && req.method === 'GET') {
               const bank = (await server.ssrLoadModule(
                 '/src/server/bankCode.ts'
