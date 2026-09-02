@@ -29,7 +29,7 @@ export function ClientReminderPage() {
     {
       key: 'reminderDate',
       header: 'リマインド日',
-      width: '108px',
+      width: '128px',
       sortable: false,
       render: (c) => (
         <span className="font-semibold tabular-nums text-slate-800">

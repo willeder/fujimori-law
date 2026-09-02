@@ -108,7 +108,7 @@ export function PaymentManagementPage() {
   }, [cases, onlyUnpaid, unpaidIds, q])
 
   const columns: Column<Case>[] = [
-    { key: 'id', header: 'ID', width: '76px', align: 'center', render: (c) => c.metadata.externalId ?? '-' },
+    { key: 'id', header: 'ID', width: '96px', align: 'center', render: (c) => c.metadata.externalId ?? '-' },
     {
       key: 'name',
       header: '名前',

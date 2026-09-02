@@ -66,7 +66,7 @@ export function ReminderTaskPage() {
     {
       key: 'dueDate',
       header: '期日',
-      width: '96px',
+      width: '116px',
       sortable: false,
       render: (r) => (
         <span

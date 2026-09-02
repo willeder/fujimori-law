@@ -155,7 +155,7 @@ export function SettlementResultsPage() {
 
   const columns: Column<Row>[] = [
     // 名前・フリガナ・ID は絞り込み対象から除外（filterable: false で検索モードの入力欄も出さない）No.161
-    { key: 'caseId', header: 'ID', width: '76px', align: 'center', render: (r) => r.externalId ?? '-', filterable: false },
+    { key: 'caseId', header: 'ID', width: '96px', align: 'center', render: (r) => r.externalId ?? '-', filterable: false },
     { key: 'name', header: '名前', width: '120px', render: (r) => <span className="whitespace-nowrap">{r.name ?? '-'}</span>, filterable: false },
     { key: 'furigana', header: 'フリガナ', width: '140px', render: (r) => r.furigana ?? '-', filterable: false },
     {

@@ -72,7 +72,7 @@ export function FundIncreasePage() {
     {
       key: 'externalId',
       header: 'ID',
-      width: '80px',
+      width: '100px',
       align: 'center',
       render: (r) => r.externalId ?? '-',
       filterValue: (r) => r.externalId ?? '',
