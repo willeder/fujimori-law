@@ -16,10 +16,11 @@
  * 案件のリマインドは未対応のものを常に出す。依頼者・債権者は期日が来たもの
  * （今日以前）だけを出す。先の予定まで並べると常に何か出ていて意味がなくなるため。
  */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCaseReminders, todayYmd } from '../../hooks/useCaseReminders'
 import { useCase, useCaseDispatch, useCreditorsByCaseId } from '../../store/useCaseStore'
+import { useCaseEdit } from '../../context/CaseEditContext'
 import { isValidYmd } from '../../lib/dateInput'
 import { DateTextInput } from '../DateTextInput'
 
@@ -63,10 +64,25 @@ export function CaseReminderBanner({
   const [body, setBody] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
-  // 追加したあとに期日や内容を直せるようにする（藤川様・堀本様 2026-08-21/22）
+  /**
+   * 期日や内容の直し方は2通り。
+   *   ・行ごとの「編集」を押す … その行だけ入力欄になる
+   *   ・画面上部の「編集」を押す … 編集モードの間、全部の行が入力欄になる
+   * 事務所からのご要望「詳細ページの上部にある編集ボタンを押した時に、どの
+   * リマインドでも編集できるようにしたい」への対応。
+   * 複数行を同時に触れるので、下書きは行ごとに持つ。
+   */
+  const { editing } = useCaseEdit()
   const [editingKey, setEditingKey] = useState<string | null>(null)
-  const [editDue, setEditDue] = useState('')
-  const [editBody, setEditBody] = useState('')
+  const [drafts, setDrafts] = useState<Record<string, { due: string; body: string }>>({})
+
+  // 上部の編集モードを抜けたら、保存していない下書きは捨てる
+  useEffect(() => {
+    if (!editing) {
+      setEditingKey(null)
+      setDrafts({})
+    }
+  }, [editing])
 
   const items: Item[] = []
 
@@ -216,36 +232,46 @@ export function CaseReminderBanner({
     if (it.creditorId != null) await setCreditorReminder(it.creditorId, null)
   }
 
+  /** 編集欄に出す文字。依頼者はメモを持つ項目が無いので空。債権者は「債権者名：メモ」からメモだけ取り出す */
+  const bodyForEdit = (it: Item): string =>
+    it.kind === 'case'
+      ? it.body
+      : it.kind === 'creditor'
+        ? it.body.replace(/^[^：]*：/, '').replace(/^次回処理日$/, '')
+        : ''
+
+  /** その行の下書き。まだ触っていなければ今の値を出す */
+  const draftOf = (it: Item) =>
+    drafts[it.key] ?? { due: it.dueDate ?? '', body: bodyForEdit(it) }
+
+  const setDraft = (it: Item, patch: Partial<{ due: string; body: string }>) =>
+    setDrafts((prev) => ({ ...prev, [it.key]: { ...draftOf(it), ...patch } }))
+
   const startEdit = (it: Item) => {
     setError(null)
     setEditingKey(it.key)
-    setEditDue(it.dueDate ?? '')
-    // 依頼者はメモを持つ項目が無いので空。債権者は「債権者名：メモ」からメモだけ取り出す
-    setEditBody(
-      it.kind === 'case'
-        ? it.body
-        : it.kind === 'creditor'
-          ? it.body.replace(/^[^：]*：/, '').replace(/^次回処理日$/, '')
-          : ''
-    )
+    setDrafts((prev) => ({ ...prev, [it.key]: { due: it.dueDate ?? '', body: bodyForEdit(it) } }))
   }
 
-  const cancelEdit = () => {
+  const cancelEdit = (it?: Item) => {
     setEditingKey(null)
-    setEditDue('')
-    setEditBody('')
+    setError(null)
+    // 触った下書きは捨てて、サーバの値に戻す
+    if (it) setDrafts((prev) => ({ ...prev, [it.key]: { due: it.dueDate ?? '', body: bodyForEdit(it) } }))
+    else setDrafts({})
   }
 
   const saveEdit = async (it: Item) => {
-    if (editDue && !isValidYmd(editDue)) {
+    const d = draftOf(it)
+    if (d.due && !isValidYmd(d.due)) {
       setError('期日が正しくありません（YYYY-MM-DD）')
       return
     }
-    if (it.kind !== 'case' && !editDue) {
+    if (it.kind !== 'case' && !d.due) {
       setError('期日を入れてください')
       return
     }
-    if (it.kind === 'case' && !editBody.trim()) {
+    if (it.kind === 'case' && !d.body.trim()) {
       setError('やることを入れてください')
       return
     }
@@ -253,13 +279,14 @@ export function CaseReminderBanner({
     setError(null)
     try {
       if (it.reminderId != null) {
-        await patch(it.reminderId, { dueDate: editDue || null, body: editBody.trim() })
+        await patch(it.reminderId, { dueDate: d.due || null, body: d.body.trim() })
       } else if (it.kind === 'client') {
-        await setClientReminder(editDue)
+        await setClientReminder(d.due)
       } else if (it.creditorId != null) {
-        await setCreditorReminder(it.creditorId, editDue, editBody.trim())
+        await setCreditorReminder(it.creditorId, d.due, d.body.trim())
       }
-      cancelEdit()
+      // 行ごとの編集は閉じる。上部の編集モード中はそのまま入力欄を出しておく
+      setEditingKey(null)
     } finally {
       setBusy(false)
     }
@@ -314,7 +341,9 @@ export function CaseReminderBanner({
         <span className="text-slate-500">
           {locked
             ? '他の人が編集中のため、いまは変更できません'
-            : '期日や内容は「編集」、消すときは「削除」から'}
+            : editing
+              ? '編集モード中です。期日と内容を直して「保存」を押してください'
+              : '期日や内容は「編集」、消すときは「削除」から'}
         </span>
         <button
           type="button"
@@ -407,24 +436,26 @@ export function CaseReminderBanner({
               {KIND_LABEL[it.kind].label}
             </span>
           )
-          if (editingKey === it.key) {
+          // 上部の「編集」で編集モードのときは全行、そうでなければ押した行だけ入力欄にする
+          if (editing || editingKey === it.key) {
+            const d = draftOf(it)
             return (
               <li key={it.key} className="flex items-center gap-1 rounded bg-white/70 px-1 py-0.5 text-xs">
                 {kindBadge}
                 <DateTextInput
-                  value={editDue}
-                  onChange={setEditDue}
-                  onPick={setEditDue}
+                  value={d.due}
+                  onChange={(v) => setDraft(it, { due: v })}
+                  onPick={(v) => setDraft(it, { due: v })}
                   grow={false}
                   placeholder="20260930"
                   className="w-24 rounded border border-slate-300 px-1.5 py-0.5 text-xs"
                 />
                 <input
-                  value={editBody}
-                  onChange={(e) => setEditBody(e.target.value)}
+                  value={d.body}
+                  onChange={(e) => setDraft(it, { body: e.target.value })}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') void saveEdit(it)
-                    if (e.key === 'Escape') cancelEdit()
+                    if (e.key === 'Escape') cancelEdit(it)
                   }}
                   disabled={it.kind === 'client'}
                   placeholder={
@@ -436,16 +467,24 @@ export function CaseReminderBanner({
                   type="button"
                   onClick={() => void saveEdit(it)}
                   disabled={busy}
-                  className="shrink-0 rounded bg-blue-500 px-2 py-0.5 text-[0.625rem] text-white hover:bg-blue-600 disabled:bg-slate-300"
+                  className="shrink-0 rounded bg-blue-500 px-2 py-0.5 text-[0.6875rem] text-white hover:bg-blue-600 disabled:bg-slate-300"
                 >
                   保存
                 </button>
                 <button
                   type="button"
-                  onClick={cancelEdit}
-                  className="shrink-0 px-1 text-[0.625rem] text-slate-500 hover:text-slate-800"
+                  onClick={() => cancelEdit(it)}
+                  className="shrink-0 rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[0.6875rem] text-slate-600 hover:bg-slate-100"
                 >
                   取消
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void removeItem(it)}
+                  className="shrink-0 rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[0.6875rem] text-slate-700 hover:border-red-400 hover:text-red-700"
+                  title="確認のうえで消します"
+                >
+                  削除
                 </button>
               </li>
             )
