@@ -461,32 +461,6 @@ function dbApiPlugin(): Plugin {
               res.end(JSON.stringify(r.body))
               return
             }
-            // ── メール送信・履歴（No.92/93） ──
-            if (url === '/api/mail/send' || url.startsWith('/api/mail/history') || url === '/api/mail/status') {
-              const mail = (await server.ssrLoadModule(
-                '/src/server/mail.ts'
-              )) as typeof import('./src/server/mail')
-              if (url === '/api/mail/send' && req.method === 'POST') {
-                const r = await mail.sendMail(editActor, await readRawBody(req))
-                res.statusCode = r.status
-                res.setHeader('Content-Type', 'application/json; charset=utf-8')
-                res.end(JSON.stringify(r.body))
-                return
-              }
-              if (url.startsWith('/api/mail/history') && req.method === 'GET') {
-                const q = new URLSearchParams(req.url?.split('?')[1] ?? '')
-                const cid = q.get('caseId')
-                res.setHeader('Content-Type', 'application/json; charset=utf-8')
-                res.end(JSON.stringify(await mail.getMailHistory(cid ? Number(cid) : null)))
-                return
-              }
-              if (url === '/api/mail/status') {
-                res.setHeader('Content-Type', 'application/json; charset=utf-8')
-                res.end(JSON.stringify(mail.mailConfigured()))
-                return
-              }
-            }
-
             // ── 債権者資料（各社タブのファイル格納・No.8） ──
             const cfList = url.match(/^\/api\/creditors\/(\d+)\/files$/)
             const cfById = url.match(/^\/api\/creditors\/files\/(\d+)$/)

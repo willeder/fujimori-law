@@ -47,7 +47,6 @@ import * as creditorFiles from '../src/server/creditorFiles.js'
 import * as caseFiles from '../src/server/caseFiles.js'
 import * as caseReminders from '../src/server/caseReminders.js'
 import * as bankCode from '../src/server/bankCode.js'
-import * as mail from '../src/server/mail.js'
 import { getSessionToken, getSessionUser } from '../src/server/auth.js'
 import * as savedFilters from '../src/server/savedFilters.js'
 import { getReminderCandidates, sendReminders } from '../src/server/paymentReminder.js'
@@ -381,21 +380,6 @@ export default async function handler(
     }
 
     // ── メール送信・履歴（No.92/93） ──
-    if (path === '/api/mail/send' && method === 'POST') {
-      const r = await mail.sendMail(editActor, (await getRawBody(req)).toString('utf8'))
-      json(r.body, r.status)
-      return
-    }
-    if (path === '/api/mail/history' && method === 'GET') {
-      const cid = query.get('caseId')
-      json(await mail.getMailHistory(cid ? Number(cid) : null))
-      return
-    }
-    if (path === '/api/mail/status' && method === 'GET') {
-      json(mail.mailConfigured())
-      return
-    }
-
     // ── 金融機関コードの入力補助（辞書はサーバ側のみ。外部への問い合わせはしない）──
     if (path === '/api/bank/banks' && method === 'GET') {
       json({ ok: true, hits: bankCode.allBanks() })

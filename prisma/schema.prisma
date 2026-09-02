@@ -719,24 +719,6 @@ model CaseReminder {
   @@map("case_reminders")
 }
 
-// メール送信履歴（No.92/93）
-model EmailLog {
-  id         Int      @id @default(autoincrement())
-  caseId     Int?
-  toAddress  String
-  subject    String
-  body       String
-  status     String // SENT / FAILED
-  error      String?
-  provider   String   @default("")
-  providerId String?
-  sentBy     String   @default("")
-  createdAt  DateTime @default(now())
-
-  @@index([caseId])
-  @@index([createdAt])
-  @@map("email_logs")
-}
 
 // ============================================================
 // 保存した絞り込み条件（一覧の検索条件を名前を付けて保存・共有する）

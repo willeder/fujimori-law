@@ -25,7 +25,6 @@ import { CreditorPaymentTable } from "./CreditorPaymentTable";
 import { SettlementFiles } from "../components/case/SettlementFiles";
 import { LineUrlQuickEdit } from "../components/case/LineUrlQuickEdit";
 import { LineLinkControl } from "../components/case/LineLinkControl";
-import { CaseMailControl } from "../components/case/CaseMailControl";
 import { CaseChangeHistory } from "../components/case/CaseChangeHistory";
 import { FindModeLauncher } from "../components/case/FindModeLauncher";
 import { LAST_LIST_PATH_KEY } from "../components/AppHeader";
@@ -1151,18 +1150,6 @@ function CaseDetailBody({
     });
   };
 
-  const updateReminderInfo = (
-    field: keyof Case["reminderInfo"],
-    value: string,
-  ) => {
-    updateCase({
-      reminderInfo: {
-        ...caseData.reminderInfo,
-        [field]: value || null,
-      },
-    });
-  };
-
   const updateFeeInfo = (field: keyof Case["feeInfo"], value: string) => {
     const numericFields: (keyof Case["feeInfo"])[] = [
       "normalFee",
@@ -1568,10 +1555,6 @@ function CaseDetailBody({
                 </div>
               )}
             </div>
-            <CaseMailControl
-              caseId={caseData.id}
-              defaultTo={caseData.clientBasicInfo.email}
-            />
             <LineLinkControl
               caseId={caseData.id}
               clientName={caseData.clientBasicInfo.name}
@@ -1682,27 +1665,24 @@ function CaseDetailBody({
             truncateValue
             fillWidth
           />
-          <EditableField
-            label="メール"
-            value={caseData.clientBasicInfo.email}
-            onChange={(v) => updateClientBasicInfo("email", v)}
-            compact
-            compactLayout="inline"
-            bordered
-            truncateValue
-            fillWidth
-          />
-          <EditableField
-            label="リマインド日"
-            value={caseData.reminderInfo?.reminderDate ?? null}
-            onChange={(v) => updateReminderInfo("reminderDate", v)}
-            type="date"
-            compact
-            compactLayout="inline"
-            bordered
-            truncateValue
-            fillWidth
-          />
+          {/*
+            メールは2枠ぶん使う。長いアドレスが途中で切れて読めない、という
+            ご指摘への対応（堀本様 2026-08-23）。
+            ここにあった「リマインド日」は撤去した。リマインドは上部の帯に
+            一本化し、そこで追加・編集・削除まで完結する（事務所のご要望）。
+          */}
+          <div className="col-span-2 min-w-0">
+            <EditableField
+              label="メール"
+              value={caseData.clientBasicInfo.email}
+              onChange={(v) => updateClientBasicInfo("email", v)}
+              compact
+              compactLayout="inline"
+              bordered
+              truncateValue
+              fillWidth
+            />
+          </div>
         </div>
         {/* 3行目：リスト・受任情報（8カラムグリッド） */}
         <div className="grid grid-cols-8 gap-0.5 px-2 py-0.5 [&>div]:min-w-0">
