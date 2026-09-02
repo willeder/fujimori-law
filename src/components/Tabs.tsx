@@ -54,6 +54,11 @@ interface TabsProps {
    */
   activePanelOverflow?: 'auto' | 'hidden'
   /**
+   * タブの並びの右端に置くもの（「＋ 債権者を追加」など）。
+   * タブと同じ行に出したいボタン用。
+   */
+  tabRowTrailing?: ReactNode
+  /**
    * guest のとき、ルート・パネルを親の余白まで flex 伸長するか。
    * false のときは内容の高さに寄せ、長い内容はルートでスクロール（和解状況の個別債権者タブ向け）。
    */
@@ -80,6 +85,7 @@ export function Tabs({
   tabBodyMaxHeightClassName = 'h-[min(72vh,34rem)]',
   beforeActivePanelContent,
   activePanelOverflow = 'auto',
+  tabRowTrailing,
   guestExpandToParent = true,
   hostBodyNaturalHeight = false,
   reorderable = false,
@@ -249,6 +255,9 @@ export function Tabs({
             </button>
           )
         })}
+        {tabRowTrailing != null && (
+          <span className="ml-1 flex shrink-0 items-center self-center">{tabRowTrailing}</span>
+        )}
       </div>
       <div className={panelClass}>
         {tabBodyScroll === 'none' ? (
