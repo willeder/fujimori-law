@@ -6,7 +6,6 @@ import { useCaseEdit } from '../context/CaseEditContext'
 import { settlementTotals } from '../lib/settlementTotals'
 import { fundIncreaseState } from '../lib/fundIncrease'
 import { EditableField, StatusBadge, DataTable, type Column } from '../components'
-import { CreditorFiles } from '../components/case/CreditorFiles'
 import { useBanks, useBranches } from '../hooks/useBankDictionary'
 import type { Creditor } from '../types'
 import {
@@ -1145,8 +1144,14 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       </div>
       <div className="min-w-0 col-span-1" />
 
-      {/* 債権者資料（ファイル格納フィールド）。No.8 */}
-      {creditor.id != null && <CreditorFiles creditorId={creditor.id} />}
+      {/*
+        債権者資料（ファイル添付）は事務所のご判断で一旦出さない（2026-09-02）。
+          「債権者の資料は添付は一旦いらない」
+        画面から外すだけで、部品（components/case/CreditorFiles.tsx）・API・
+        保存先のテーブルはそのまま残してある。実データも0件で、消えたものは無い。
+        戻すときは下の1行を復活させ、上の import を戻すだけでよい。
+        {creditor.id != null && <CreditorFiles creditorId={creditor.id} />}
+      */}
     </div>
   )
 }
