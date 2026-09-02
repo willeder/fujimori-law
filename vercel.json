@@ -17,7 +17,6 @@
     { "source": "/api/gmo/:p*", "destination": "/api/data?__path=gmo/:p*" },
     { "source": "/api/intake/:p*", "destination": "/api/data?__path=intake/:p*" },
     { "source": "/api/deposits/:p*", "destination": "/api/data?__path=deposits/:p*" },
-    { "source": "/api/mail/:p*", "destination": "/api/data?__path=mail/:p*" },
     { "source": "/api/reminders/:p*", "destination": "/api/data?__path=reminders/:p*" },
     { "source": "/api/presence/:p*", "destination": "/api/data?__path=presence/:p*" },
     { "source": "/api/saved-filters", "destination": "/api/data?__path=saved-filters" },

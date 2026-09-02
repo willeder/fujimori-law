@@ -25,7 +25,6 @@ import { CreditorPaymentTable } from "./CreditorPaymentTable";
 import { SettlementFiles } from "../components/case/SettlementFiles";
 import { LineUrlQuickEdit } from "../components/case/LineUrlQuickEdit";
 import { LineLinkControl } from "../components/case/LineLinkControl";
-import { CaseMailControl } from "../components/case/CaseMailControl";
 import { CaseChangeHistory } from "../components/case/CaseChangeHistory";
 import { FindModeLauncher } from "../components/case/FindModeLauncher";
 import { LAST_LIST_PATH_KEY } from "../components/AppHeader";
@@ -1556,10 +1555,6 @@ function CaseDetailBody({
                 </div>
               )}
             </div>
-            <CaseMailControl
-              caseId={caseData.id}
-              defaultTo={caseData.clientBasicInfo.email}
-            />
             <LineLinkControl
               caseId={caseData.id}
               clientName={caseData.clientBasicInfo.name}
