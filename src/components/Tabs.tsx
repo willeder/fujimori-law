@@ -46,11 +46,11 @@ interface TabsProps {
    */
   beforeActivePanelContent?: ReactNode
   /**
-   * beforeActivePanelContent があるときの本文の扱い。
+   * 本文（パネル）でスクロールさせるかどうか。
    *   'auto'   … 本文が長ければここでスクロールする（既定。和解状況の各社タブなど）
    *   'hidden' … ここではスクロールさせない。中身が自分でスクロールする場合に使う
    *              （入金スケジュールの表など）。指定しないと、表の中と外の二重
-   *              スクロールになって操作しづらくなる。
+   *              スクロールになり、合計やボタンまで一緒に流れて操作しづらくなる。
    */
   activePanelOverflow?: 'auto' | 'hidden'
   /**
@@ -131,9 +131,12 @@ export function Tabs({
         ? hostBodyNaturalHeight
           ? 'mt-2 flex min-h-0 shrink-0 flex-col overflow-x-hidden'
           : 'mt-2 flex min-h-0 flex-1 flex-col overflow-hidden'
-        : tabBodyScroll === 'guest' && !guestExpand
-          ? 'mt-2 min-h-0 max-h-full shrink-0 overflow-auto overscroll-contain [-webkit-overflow-scrolling:touch]'
-          : 'mt-2 min-h-0 flex-1 overflow-auto overscroll-contain [-webkit-overflow-scrolling:touch]'
+        : activePanelOverflow === 'hidden'
+          ? // 中身（表など）が自分でスクロールするので、ここでは動かさない
+            'mt-2 flex min-h-0 flex-1 flex-col overflow-hidden'
+          : tabBodyScroll === 'guest' && !guestExpand
+            ? 'mt-2 min-h-0 max-h-full shrink-0 overflow-auto overscroll-contain [-webkit-overflow-scrolling:touch]'
+            : 'mt-2 min-h-0 flex-1 overflow-auto overscroll-contain [-webkit-overflow-scrolling:touch]'
 
   const rootClass =
     tabBodyScroll === 'none'
