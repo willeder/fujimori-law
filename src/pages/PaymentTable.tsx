@@ -225,15 +225,21 @@ export function PaymentTable({
   const nextTempId = () => Math.max(0, ...allCasePayments.map((p) => p.id)) + 1
 
   /**
-   * その行の次に1行足す（kintone と同じく行ごとのアイコンから）。
+   * その行のすぐ下に1行足す（kintone と同じく行ごとのアイコンから）。
    * 画面に足すだけで、サーバへは「保存」を押すまで送らない。
+   *
+   * 入金予定日は**押した行と同じ日**にする。表は予定日の順に並び、日付が同じ
+   * 行は追加した順に並ぶので、これで押した行のすぐ下に入る。
+   * 以前は翌月の日付を入れていたが、月次の予定表では翌月の行が既にあるため
+   * その後ろに回り、2行下に出てしまっていた（事務所からのご指摘）。
+   * 日付は追加後にそのまま編集できる。
    */
   const insertRowAfter = (item: PaymentRecord) => {
     if (locked) return
     const id = nextTempId()
     const row = blankRow(
       id,
-      nextPlannedDate([item]),
+      item.plannedDate ?? nextPlannedDate(payments),
       item.creditorId ?? (scheduleCreditorId === undefined ? null : scheduleCreditorId),
       item.creditorInstallmentIndex != null ? item.creditorInstallmentIndex + 1 : null
     )
@@ -948,10 +954,10 @@ export function PaymentTable({
               title={
                 locked
                   ? '他の人が編集中のため、いまは変更できません'
-                  : 'この行の次に入金予定を1行足します（保存するまで反映されません）'
+                  : 'この行のすぐ下に入金予定を1行足します（保存するまで反映されません）'
               }
               className="rounded px-1 py-0.5 text-sm leading-none text-emerald-600 hover:bg-emerald-50 disabled:text-slate-300 disabled:hover:bg-transparent"
-              aria-label="この行の次に入金予定を追加"
+              aria-label="この行のすぐ下に入金予定を追加"
             >
               ＋
             </button>
