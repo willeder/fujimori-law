@@ -2790,6 +2790,14 @@ function CaseDetailBody({
                             onActiveTabChange={setCreditorScopeTabId}
                             density="dense"
                             tabBodyScroll="guest"
+                            /*
+                              入金表は自分でスクロールするので、この債権者タブの
+                              パネルではスクロールさせない。ここが動くと、合計や
+                              ボタンまで一緒に流れて消えてしまう
+                              （事務所から「表以外もスクロールできてしまう」との
+                                ご指摘。スクロールするのは表の中だけにする）。
+                            */
+                            activePanelOverflow="hidden"
                           />
                         </div>
                       ),
