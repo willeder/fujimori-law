@@ -30,6 +30,8 @@ import {
   deleteCase,
   getCaseChanges,
   revertChange,
+  previewRestoreChange,
+  restoreChange,
   getLineLink,
   issueLineCode,
   presenceHeartbeat,
@@ -555,6 +557,19 @@ export default async function handler(
     const revertMatch = path.match(/^\/api\/changes\/(\d+)\/revert$/)
     if (revertMatch && method === 'POST') {
       const r = await revertChange(editActor, revertMatch[1], meta)
+      json(r.body, r.status)
+      return
+    }
+    // このバージョンに戻す（確認用の下見 → 実行）
+    const restorePreview = path.match(/^\/api\/changes\/(\d+)\/restore-preview$/)
+    if (restorePreview && method === 'GET') {
+      const r = await previewRestoreChange(restorePreview[1])
+      json(r.body, r.status)
+      return
+    }
+    const restoreMatch = path.match(/^\/api\/changes\/(\d+)\/restore$/)
+    if (restoreMatch && method === 'POST') {
+      const r = await restoreChange(editActor, restoreMatch[1], meta)
       json(r.body, r.status)
       return
     }

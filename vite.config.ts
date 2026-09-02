@@ -59,6 +59,14 @@ function dbApiPlugin(): Plugin {
               changeLogId: string,
               meta: { ip?: string | null; userAgent?: string | null }
             ) => Promise<{ status: number; body: unknown }>
+            previewRestoreChange: (
+              changeLogId: string
+            ) => Promise<{ status: number; body: unknown }>
+            restoreChange: (
+              actor: { id: string; email: string },
+              changeLogId: string,
+              meta: { ip?: string | null; userAgent?: string | null }
+            ) => Promise<{ status: number; body: unknown }>
             updateCreditorField: (
               actor: { id: string; email: string },
               id: number,
@@ -429,6 +437,8 @@ function dbApiPlugin(): Plugin {
             const changesMatch = url.match(/^\/api\/cases\/(\d+)\/changes$/)
             const editMatch = url.match(/^\/api\/cases\/(\d+)$/)
             const revertMatch = url.match(/^\/api\/changes\/(\d+)\/revert$/)
+            const restorePreview = url.match(/^\/api\/changes\/(\d+)\/restore-preview$/)
+            const restoreMatch = url.match(/^\/api\/changes\/(\d+)\/restore$/)
             if (changesMatch && req.method === 'GET') {
               const out = await mod.getCaseChanges(Number(changesMatch[1]))
               res.setHeader('Content-Type', 'application/json; charset=utf-8')
@@ -456,6 +466,21 @@ function dbApiPlugin(): Plugin {
             }
             if (revertMatch && req.method === 'POST') {
               const r = await mod.revertChange(editActor, revertMatch[1], meta)
+              res.statusCode = r.status
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify(r.body))
+              return
+            }
+            // このバージョンに戻す（確認用の下見 → 実行）
+            if (restorePreview && req.method === 'GET') {
+              const r = await mod.previewRestoreChange(restorePreview[1])
+              res.statusCode = r.status
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify(r.body))
+              return
+            }
+            if (restoreMatch && req.method === 'POST') {
+              const r = await mod.restoreChange(editActor, restoreMatch[1], meta)
               res.statusCode = r.status
               res.setHeader('Content-Type', 'application/json; charset=utf-8')
               res.end(JSON.stringify(r.body))

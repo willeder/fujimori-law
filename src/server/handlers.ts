@@ -1690,6 +1690,164 @@ export async function revertChange(
   return { status: 200, body: { ok: true } }
 }
 /**
+ * 「このバージョンに戻す」の共通処理。
+ *
+ * 事務所からのご要望（2026-09-02。kintone の変更履歴と同じ操作）:
+ *   「変更箇所を表示する」「このバージョンに戻す」
+ *
+ * 既存の revertChange は **その1件だけ** を打ち消すもの。こちらは kintone と
+ * 同じで、選んだ履歴の時点の状態へ丸ごと戻す（それ以降の変更もまとめて取り消す）。
+ *
+ * 戻し方:
+ *   同じ行（entity + entityId）に対する「選んだ履歴より新しい変更」を
+ *   新しい順にたどり、各項目に before を上書きしていく。最後に残るのは
+ *   その中で一番古い変更の before ＝「選んだ履歴の直後の状態」になる。
+ *   選んだ履歴自身は取り消さない（その版に戻すため、その変更は活かす）。
+ *
+ * 対象は1行ぶんだけ（案件なら案件、債権者ならその1社）。別の行までは触らない。
+ */
+async function buildRestorePlan(changeLogId: string) {
+  let clId: bigint
+  try {
+    clId = BigInt(changeLogId)
+  } catch {
+    return { error: { status: 400, body: { error: 'invalid id' } } as const }
+  }
+  const cl = await prisma.changeLog.findUnique({ where: { id: clId } })
+  if (!cl) return { error: { status: 404, body: { error: '変更が見つかりません' } } as const }
+  if (cl.action !== 'UPDATE') {
+    return { error: { status: 400, body: { error: '追加・削除の履歴には戻せません' } } as const }
+  }
+  const fieldType =
+    cl.entity === 'Case'
+      ? CASE_FIELD_TYPE
+      : cl.entity === 'Creditor'
+        ? CREDITOR_FIELD_TYPE
+        : cl.entity === 'Payment'
+          ? PAYMENT_FIELD_TYPE
+          : cl.entity === 'ContactHistory'
+            ? CONTACT_FIELD_TYPE
+            : null
+  if (!fieldType) {
+    return { error: { status: 400, body: { error: 'この種別は戻せません' } } as const }
+  }
+  const rowId = Number(cl.entityId)
+  const delegate = (
+    cl.entity === 'Case'
+      ? prisma.case
+      : cl.entity === 'Creditor'
+        ? prisma.creditor
+        : cl.entity === 'Payment'
+          ? prisma.payment
+          : prisma.contactHistory
+  ) as {
+    findUnique: (a: unknown) => Promise<Record<string, unknown> | null>
+    update: (a: unknown) => Promise<unknown>
+  }
+  const current = await delegate.findUnique({ where: { id: rowId } })
+  if (!current) return { error: { status: 404, body: { error: '対象の行が見つかりません' } } as const }
+
+  // 選んだ履歴より新しい、同じ行の変更（新しい順）
+  const later = await prisma.changeLog.findMany({
+    where: { entity: cl.entity, entityId: cl.entityId, action: 'UPDATE', id: { gt: clId } },
+    orderBy: { id: 'desc' },
+  })
+
+  // 新しい順に before を重ねる → 一番古い変更の before（＝選んだ履歴の直後）が残る
+  const target: Record<string, unknown> = {}
+  for (const e of later) {
+    const before = (e.before ?? {}) as Record<string, unknown>
+    for (const col of Object.keys(before)) {
+      if (!fieldType[col]) continue
+      target[col] = before[col]
+    }
+  }
+
+  // いまの値と違う項目だけを戻す対象にする
+  const items: { field: string; from: unknown; to: unknown }[] = []
+  const updateData: Record<string, unknown> = {}
+  for (const col of Object.keys(target)) {
+    const type = fieldType[col]
+    const nowDisp = caseDisplay(type, current[col])
+    const toDisp = target[col]
+    if (JSON.stringify(nowDisp) === JSON.stringify(toDisp)) continue
+    items.push({ field: col, from: nowDisp, to: toDisp })
+    updateData[col] = caseToDb(type, toDisp)
+  }
+
+  return { cl, clId, rowId, delegate, items, updateData, laterCount: later.length }
+}
+
+/** 「このバージョンに戻す」の確認用。実行はせず、戻る内容だけを返す */
+export async function previewRestoreChange(changeLogId: string) {
+  const plan = await buildRestorePlan(changeLogId)
+  if ('error' in plan && plan.error) return plan.error
+  const p = plan as Exclude<typeof plan, { error: unknown }>
+  return {
+    status: 200,
+    body: {
+      entity: p.cl.entity,
+      createdAt: p.cl.createdAt.toISOString(),
+      /** この履歴より後に行われた変更の件数（まとめて取り消される） */
+      laterCount: p.laterCount,
+      items: p.items,
+    },
+  }
+}
+
+/** 選んだ履歴の時点の状態へ丸ごと戻す（それ以降の変更もまとめて取り消す） */
+export async function restoreChange(actor: EditActor, changeLogId: string, meta: EditMeta) {
+  const plan = await buildRestorePlan(changeLogId)
+  if ('error' in plan && plan.error) return plan.error
+  const p = plan as Exclude<typeof plan, { error: unknown }>
+  if (p.items.length === 0) {
+    return { status: 400, body: { error: 'すでにこの版の状態です（戻す項目がありません）' } }
+  }
+  const updateData = { ...p.updateData }
+  if (p.cl.entity === 'Case') updateData.updatedBy = actor.email
+  await p.delegate.update({ where: { id: p.rowId }, data: updateData })
+
+  // この履歴より後の変更は、まとめて取り消されたので取消済みにする
+  await prisma.changeLog.updateMany({
+    where: {
+      entity: p.cl.entity,
+      entityId: p.cl.entityId,
+      action: 'UPDATE',
+      id: { gt: p.clId },
+      reverted: false,
+    },
+    data: { reverted: true, revertedAt: new Date(), revertedById: actor.id },
+  })
+
+  // 戻したこと自体も履歴に残す（誰がいつどの版に戻したかを追えるように）
+  const before: Record<string, unknown> = {}
+  const after: Record<string, unknown> = {}
+  for (const it of p.items) {
+    before[it.field] = it.from
+    after[it.field] = it.to
+  }
+  await writeChange({
+    actor,
+    entity: p.cl.entity,
+    entityId: p.cl.entityId,
+    action: 'UPDATE',
+    before,
+    after,
+  })
+  await writeAudit({
+    actor,
+    action: 'UPDATE',
+    entity: p.cl.entity,
+    entityId: p.cl.entityId,
+    summary: `このバージョンに戻す（${p.items.length}項目・以降${p.laterCount}件の変更を取消）`,
+    metadata: { restoredToChangeId: changeLogId, fields: p.items.map((i) => i.field) },
+    ip: meta.ip,
+    userAgent: meta.userAgent,
+  })
+  return { status: 200, body: { ok: true, restored: p.items.length } }
+}
+
+/**
  * 記号や伏字だけの値かどうか。
  * 移行データに債権者名「？？？」の行が実在し、接触履歴の債権者欄を押すたびに
  * 候補として出ていた（藤原様 2026-08-22）。名前として意味を持たない値は
