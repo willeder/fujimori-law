@@ -1092,7 +1092,7 @@ export function PaymentTable({
       </div>
       </div>
 
-      <div ref={wrapRef} className="min-h-0 flex-1 overflow-hidden">
+      <div ref={wrapRef} className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <DataTable
         data={sortedPayments}
         columns={columns}
@@ -1104,14 +1104,14 @@ export function PaymentTable({
         suspendTruncate={editingId !== null}
         enableFind
         /*
-          表の高さ＝親のタブ枠の高さ − 合計とボタンのぶん（約7rem）。
-          親は CaseDetailPage の h-[min(72vh,42rem)]。片方だけ変えると
-          はみ出したり余ったりするので、変えるときは両方を合わせること。
-          これで枠の外側はスクロールせず、動くのは表の中身だけになる。
+          既定は親の枠いっぱい（fillHeight）。高さを決め打ちしないので、
+          タブ枠の高さを変えてもずれない。外側のタブ枠は
+          activePanelOverflow="hidden" でスクロールしないため、動くのは
+          この表の中身だけになる。
+          「表を広げる」を押したときだけ、枠を越えて大きく取る。
         */
-        bodyMaxHeightClassName={
-          tall ? 'max-h-[80vh]' : 'max-h-[calc(min(72vh,42rem)-7rem)]'
-        }
+        fillHeight={!tall}
+        bodyMaxHeightClassName={tall ? 'max-h-[80vh]' : undefined}
         getRowClassName={(item) => {
           // 一括表示から飛んできた行を一時的に光らせる
           if (highlightId === item.id) return 'bg-amber-100'
