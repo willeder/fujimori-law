@@ -54,6 +54,11 @@ interface TabsProps {
    */
   activePanelOverflow?: 'auto' | 'hidden'
   /**
+   * タブの並びの右端に置くもの（「＋ 債権者を追加」など）。
+   * タブと同じ行に出したいボタン用。
+   */
+  tabRowTrailing?: ReactNode
+  /**
    * guest のとき、ルート・パネルを親の余白まで flex 伸長するか。
    * false のときは内容の高さに寄せ、長い内容はルートでスクロール（和解状況の個別債権者タブ向け）。
    */
@@ -80,6 +85,7 @@ export function Tabs({
   tabBodyMaxHeightClassName = 'h-[min(72vh,34rem)]',
   beforeActivePanelContent,
   activePanelOverflow = 'auto',
+  tabRowTrailing,
   guestExpandToParent = true,
   hostBodyNaturalHeight = false,
   reorderable = false,
@@ -169,9 +175,11 @@ export function Tabs({
               ? 'bg-white font-semibold text-slate-900 shadow-sm'
               : 'bg-slate-100 text-slate-500 hover:bg-slate-50 hover:text-slate-700'
             : muted
-              ? active
-                ? 'border-l-slate-500 border-b-slate-500 bg-slate-200 font-medium text-slate-600 shadow-sm'
-                : 'border-l-slate-300 border-b-transparent bg-slate-100 text-slate-400 hover:bg-slate-200/70 hover:text-slate-600'
+              ? // 「受任対象外」のタブ。灰色が薄くて他と見分けにくい、という
+                // ご指摘を受けて濃くした（bg-slate-100/200 → 300/400）。
+                active
+                ? 'border-l-slate-600 border-b-slate-600 bg-slate-400 font-semibold text-white shadow-sm'
+                : 'border-l-slate-400 border-b-transparent bg-slate-300 text-slate-700 hover:bg-slate-400 hover:text-white'
               : active
                 ? accent?.active ?? 'border-b-2 border-b-slate-700 font-medium text-slate-900'
                 : accent?.inactive ??
@@ -235,7 +243,7 @@ export function Tabs({
                 <span
                   className={`ml-1 rounded-full ${isDense ? 'px-0.5 py-px text-[0.5rem] leading-none' : 'px-1 py-0.5 text-[0.5625rem] leading-none'} ${
                     muted
-                      ? 'bg-slate-200 text-slate-500'
+                      ? 'bg-slate-500 text-white'
                       : active
                         ? accent?.badgeActive ?? 'bg-blue-100 text-blue-600'
                         : accent?.badgeInactive ?? 'bg-slate-100 text-slate-500'
@@ -247,6 +255,9 @@ export function Tabs({
             </button>
           )
         })}
+        {tabRowTrailing != null && (
+          <span className="ml-1 flex shrink-0 items-center self-center">{tabRowTrailing}</span>
+        )}
       </div>
       <div className={panelClass}>
         {tabBodyScroll === 'none' ? (

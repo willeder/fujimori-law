@@ -38,6 +38,7 @@ import { getClientId } from "../utils/clientId";
 import { settlementTotals } from "../lib/settlementTotals";
 import { isEmptyRow } from "../lib/paymentRows";
 import { CaseReminderBanner } from "../components/case/CaseReminderBanner";
+import { AddCreditorButton } from "../components/case/AddCreditorButton";
 import {
   CASE_STATUS_OPTIONS,
   DEBT_ADJUSTMENT_TYPE_OPTIONS,
@@ -2778,6 +2779,12 @@ function CaseDetailBody({
                                 ご指摘。スクロールするのは表の中だけにする）。
                             */
                             activePanelOverflow="hidden"
+                            tabRowTrailing={
+                              <AddCreditorButton
+                                caseId={caseData.id}
+                                disabled={locked != null}
+                              />
+                            }
                           />
                         </div>
                       ),
@@ -2796,6 +2803,13 @@ function CaseDetailBody({
                           guestExpandToParent={(id) => id === "all"}
                           reorderable={locked == null}
                           onReorder={handleReorderCreditors}
+                          /* 追加するとタブが1つ増えるので、タブの隣に置く */
+                          tabRowTrailing={
+                            <AddCreditorButton
+                              caseId={caseData.id}
+                              disabled={locked != null}
+                            />
+                          }
                         />
                       ),
                     },
