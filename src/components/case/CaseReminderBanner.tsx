@@ -65,11 +65,10 @@ export function CaseReminderBanner({
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   /**
-   * 期日や内容の直し方は2通り。
-   *   ・行ごとの「編集」を押す … その行だけ入力欄になる
-   *   ・画面上部の「編集」を押す … 編集モードの間、全部の行が入力欄になる
-   * 事務所からのご要望「詳細ページの上部にある編集ボタンを押した時に、どの
-   * リマインドでも編集できるようにしたい」への対応。
+   * 期日や内容は、画面上部の「編集」で編集モードに入っている間だけ直せる。
+   * 案件の項目と同じ操作で、全部の行がまとめて入力欄になる
+   * （事務所のご要望「一番上の編集ボタンで全てのリマインドを一括変更できるように」）。
+   * 入力欄から離れた時点でその行が保存されるので、行ごとの保存ボタンは置かない。
    * 複数行を同時に触れるので、下書きは行ごとに持つ。
    */
   const { editing } = useCaseEdit()
@@ -247,12 +246,6 @@ export function CaseReminderBanner({
   const setDraft = (it: Item, patch: Partial<{ due: string; body: string }>) =>
     setDrafts((prev) => ({ ...prev, [it.key]: { ...draftOf(it), ...patch } }))
 
-  const startEdit = (it: Item) => {
-    setError(null)
-    setEditingKey(it.key)
-    setDrafts((prev) => ({ ...prev, [it.key]: { due: it.dueDate ?? '', body: bodyForEdit(it) } }))
-  }
-
   const cancelEdit = (it?: Item) => {
     setEditingKey(null)
     setError(null)
@@ -342,8 +335,8 @@ export function CaseReminderBanner({
           {locked
             ? '他の人が編集中のため、いまは変更できません'
             : editing
-              ? '編集モード中です。期日と内容を直して「保存」を押してください'
-              : '期日や内容は「編集」、消すときは「削除」から'}
+              ? '編集モード中です。期日と内容を直すと、欄から離れた時点で保存されます'
+              : '期日や内容を直すときは画面上部の「編集」を押してください'}
         </span>
         <button
           type="button"
@@ -429,119 +422,85 @@ export function CaseReminderBanner({
         {items.map((it) => {
           const isOverdue = it.dueDate != null && it.dueDate < today
           const isToday = it.dueDate === today
-          const kindBadge = (
-            <span
-              className={`shrink-0 rounded px-1 py-px text-[0.625rem] font-bold ${KIND_LABEL[it.kind].cls}`}
-            >
-              {KIND_LABEL[it.kind].label}
-            </span>
-          )
-          // 上部の「編集」で編集モードのときは全行、そうでなければ押した行だけ入力欄にする
-          if (editing || editingKey === it.key) {
-            const d = draftOf(it)
-            return (
-              <li key={it.key} className="flex items-center gap-1 rounded bg-white/70 px-1 py-0.5 text-xs">
-                {kindBadge}
-                <DateTextInput
-                  value={d.due}
-                  onChange={(v) => setDraft(it, { due: v })}
-                  onPick={(v) => setDraft(it, { due: v })}
-                  grow={false}
-                  placeholder="20260930"
-                  className="w-24 rounded border border-slate-300 px-1.5 py-0.5 text-xs"
-                />
-                <input
-                  value={d.body}
-                  onChange={(e) => setDraft(it, { body: e.target.value })}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') void saveEdit(it)
-                    if (e.key === 'Escape') cancelEdit(it)
-                  }}
-                  disabled={it.kind === 'client'}
-                  placeholder={
-                    it.kind === 'client' ? '依頼者のリマインドは日付だけです' : 'やること'
-                  }
-                  className="min-w-0 flex-1 rounded border border-slate-300 px-1.5 py-0.5 text-xs disabled:bg-slate-100 disabled:text-slate-400"
-                />
-                <button
-                  type="button"
-                  onClick={() => void saveEdit(it)}
-                  disabled={busy}
-                  className="shrink-0 rounded bg-blue-500 px-2 py-0.5 text-[0.6875rem] text-white hover:bg-blue-600 disabled:bg-slate-300"
-                >
-                  保存
-                </button>
-                <button
-                  type="button"
-                  onClick={() => cancelEdit(it)}
-                  className="shrink-0 rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[0.6875rem] text-slate-600 hover:bg-slate-100"
-                >
-                  取消
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void removeItem(it)}
-                  className="shrink-0 rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[0.6875rem] text-slate-700 hover:border-red-400 hover:text-red-700"
-                  title="確認のうえで消します"
-                >
-                  削除
-                </button>
-              </li>
-            )
-          }
+          const inEdit = editing || editingKey === it.key
+          const d = draftOf(it)
           return (
-            <li key={it.key} className="flex items-start gap-2 text-xs">
-              {kindBadge}
-              <span
-                className={`w-24 shrink-0 tabular-nums ${
-                  isOverdue
-                    ? 'font-bold text-red-700'
-                    : isToday
-                      ? 'font-bold text-amber-700'
-                      : 'text-slate-500'
-                }`}
-              >
-                {it.dueDate ?? '期日なし'}
-              </span>
-              {it.creditorId != null ? (
-                <button
-                  type="button"
-                  onClick={() =>
-                    navigate(`/cases/${caseId}`, { state: { focusCreditorId: it.creditorId } })
-                  }
-                  className="min-w-0 flex-1 text-left text-slate-800 underline decoration-dotted underline-offset-2 hover:text-blue-700"
-                  title="この債権者のタブを開きます"
-                >
-                  {it.body}
-                </button>
-              ) : (
-                <span className="min-w-0 flex-1 whitespace-pre-wrap break-words text-slate-800">
-                  {it.body}
-                </span>
-              )}
-              {/*
-                以前は10pxのグレー文字で置いていたが、色の付いた帯の上では
-                ほとんど見えず「編集できない」と受け取られてしまった。
-                枠と白背景を付けて、押せる場所だと分かるようにする。
-              */}
-              <button
-                type="button"
-                onClick={() => startEdit(it)}
-                disabled={locked}
-                className="shrink-0 rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[0.6875rem] text-slate-700 hover:border-blue-400 hover:text-blue-700 disabled:border-slate-200 disabled:text-slate-300"
-                title="期日や内容を直します"
-              >
-                編集
-              </button>
+            <li
+              key={it.key}
+              className={`flex items-center gap-2 text-xs ${inEdit ? 'rounded bg-white/70 px-1 py-0.5' : ''}`}
+            >
+              {/* 削除は左端に置く（事務所のご要望）。押すと内容を出して確認する */}
               <button
                 type="button"
                 onClick={() => void removeItem(it)}
                 disabled={locked}
-                className="shrink-0 rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[0.6875rem] text-slate-700 hover:border-red-400 hover:text-red-700 disabled:border-slate-200 disabled:text-slate-300"
+                className="shrink-0 rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[0.6875rem] text-slate-700 hover:border-red-400 hover:bg-red-50 hover:text-red-700 disabled:border-slate-200 disabled:text-slate-300"
                 title="確認のうえで消します"
               >
                 削除
               </button>
+              <span
+                className={`shrink-0 rounded px-1 py-px text-[0.625rem] font-bold ${KIND_LABEL[it.kind].cls}`}
+              >
+                {KIND_LABEL[it.kind].label}
+              </span>
+              {inEdit ? (
+                <>
+                  <DateTextInput
+                    value={d.due}
+                    onChange={(v) => setDraft(it, { due: v })}
+                    onPick={(v) => setDraft(it, { due: v })}
+                    onBlur={() => void saveEdit(it)}
+                    grow={false}
+                    placeholder="20260930"
+                    className="w-24 rounded border border-slate-300 px-1.5 py-0.5 text-xs"
+                  />
+                  <input
+                    value={d.body}
+                    onChange={(e) => setDraft(it, { body: e.target.value })}
+                    onBlur={() => void saveEdit(it)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') e.currentTarget.blur()
+                      if (e.key === 'Escape') cancelEdit(it)
+                    }}
+                    disabled={it.kind === 'client'}
+                    placeholder={
+                      it.kind === 'client' ? '依頼者のリマインドは日付だけです' : 'やること'
+                    }
+                    className="min-w-0 flex-1 rounded border border-slate-300 px-1.5 py-0.5 text-xs disabled:bg-slate-100 disabled:text-slate-400"
+                  />
+                </>
+              ) : (
+                <>
+                  <span
+                    className={`w-24 shrink-0 tabular-nums ${
+                      isOverdue
+                        ? 'font-bold text-red-700'
+                        : isToday
+                          ? 'font-bold text-amber-700'
+                          : 'text-slate-500'
+                    }`}
+                  >
+                    {it.dueDate ?? '期日なし'}
+                  </span>
+                  {it.creditorId != null ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        navigate(`/cases/${caseId}`, { state: { focusCreditorId: it.creditorId } })
+                      }
+                      className="min-w-0 flex-1 text-left text-slate-800 underline decoration-dotted underline-offset-2 hover:text-blue-700"
+                      title="この債権者のタブを開きます"
+                    >
+                      {it.body}
+                    </button>
+                  ) : (
+                    <span className="min-w-0 flex-1 whitespace-pre-wrap break-words text-slate-800">
+                      {it.body}
+                    </span>
+                  )}
+                </>
+              )}
             </li>
           )
         })}
