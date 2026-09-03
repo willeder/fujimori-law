@@ -20,6 +20,7 @@
  */
 import { PrismaClient, ContactTarget } from '@prisma/client'
 import { readFileSync } from 'node:fs'
+import { pathToFileURL } from 'node:url'
 import { join } from 'node:path'
 
 const prisma = new PrismaClient()
@@ -40,7 +41,7 @@ function chunk<T>(arr: T[], size: number): T[][] {
   return out
 }
 
-interface CaseJson {
+export interface CaseJson {
   id: number
   clientBasicInfo: Record<string, unknown>
   appointmentInfo: Record<string, unknown>
@@ -52,7 +53,7 @@ interface CaseJson {
   metadata: Record<string, unknown>
 }
 
-function flattenCase(c: CaseJson) {
+export function flattenCase(c: CaseJson) {
   const b = c.clientBasicInfo as any
   const a = c.appointmentInfo as any
   const debt = c.debtInfo as any
@@ -371,11 +372,22 @@ async function main() {
   console.log('done.')
 }
 
-main()
-  .catch((e) => {
-    console.error(e)
-    process.exit(1)
-  })
-  .finally(async () => {
-    await prisma.$disconnect()
-  })
+/*
+  このファイルは kintone 差分反映（scripts/kintone_refresh.ts）から
+  flattenCase を借りるために import されることがある。
+  その際に seed 本体が走ってしまわないよう、直接実行されたときだけ動かす。
+*/
+const runDirectly = process.argv[1]
+  ? import.meta.url === pathToFileURL(process.argv[1]).href
+  : false
+
+if (runDirectly) {
+  main()
+    .catch((e) => {
+      console.error(e)
+      process.exit(1)
+    })
+    .finally(async () => {
+      await prisma.$disconnect()
+    })
+}

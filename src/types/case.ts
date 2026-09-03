@@ -245,7 +245,6 @@ export interface Creditor {
   accountHolder: string | null // 振込先口座名義
   designatedCode?: string | null // 指定コード
   repaymentTarget?: string | null // 弁済対象
-  memo?: string | null // メモ
   /** 原資UP対応（'要' | '完了' | null=空欄）。案件単位のまとめは各社の値から算出する */
   fundIncreaseAction?: string | null
 }

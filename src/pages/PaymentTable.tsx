@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { useCaseEdit } from '../context/CaseEditContext'
 import { useCaseDispatch, usePaymentsByCaseId } from '../store/useCaseStore'
 import { DataTable, type Column } from '../components'
+import { DueDateBulkEdit } from '../components/case/DueDateBulkEdit'
 import type { PaymentRecord } from '../types'
 import { nextPlannedDate } from '../lib/paymentRows'
 
@@ -1044,6 +1045,21 @@ export function PaymentTable({
       </div>
 
       <div className="mb-1 flex flex-wrap items-center gap-2">
+        {/*
+          入金期日の一括変更（事務所のご要望 2026-09-03）。
+          給料日が変わったときに、今日以降の入金予定日をまとめて直す。
+          1案件あたり未来分は平均57行・最大127行あり、手で直すのは現実的でない。
+        */}
+        <DueDateBulkEdit
+          caseId={caseId}
+          onDone={() => {
+            // 画面ごと再読込せず、この案件の入金明細だけ取り直して反映する
+            void fetch(`/api/payments?caseId=${caseId}`)
+              .then((r) => (r.ok ? (r.json() as Promise<PaymentRecord[]>) : []))
+              .then((rows) => dispatch({ type: 'MERGE_PAYMENTS', payload: { caseId, rows } }))
+              .catch(() => {})
+          }}
+        />
         <button
           type="button"
           onClick={() => setAllOpen(true)}

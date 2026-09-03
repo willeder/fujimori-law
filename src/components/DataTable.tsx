@@ -150,6 +150,31 @@ interface DataTableProps<T> {
    */
   csvExport?: string
   /**
+   * CSV出力の候補に、画面に出していない項目も加える。
+   *
+   * 既定の候補は「いま表示している列」だけ。案件一覧は既定18列なのに案件は
+   * 112項目あり、大半が出せなかった（事務所から「出力できるフィールドが
+   * 特定されてしまっている。全フィールドを出力できるようにして欲しい」との
+   * ご指摘。2026-09-03）。表示は増やさずに、出せる項目だけを増やすための口。
+   * 表示中の列と同じ key のものは、表示中の列の書式を優先する。
+   */
+  csvExtraColumns?: Column<T>[]
+  /**
+   * CSV出力でテーブル（サブテーブル）も選べるようにする。
+   *
+   * 事務所のご指定（2026-09-03）:
+   *   「テーブルがある場合は、そのテーブルを指定すると、テーブル内の全フィールドを
+   *     出力するなど（kintoneと同様）」
+   * 選ばれた項目は onCsvTableExport にそのまま渡す。中身の作りは画面側に任せる
+   *  （テーブルのデータは一覧に読み込んでいないため、サーバに取りに行く）。
+   */
+  csvTables?: { key: string; label: string; fields: { key: string; label: string }[] }[]
+  /** テーブルが1つでも選ばれているときの出力処理。画面側でサーバから受け取る */
+  onCsvTableExport?: (sel: {
+    caseFields: string[]
+    tables: Record<string, string[]>
+  }) => void | Promise<void>
+  /**
    * 並び順を親コンポーネントで制御する場合に指定する（保存した絞り込み条件で
    * 並び順まで復元したいときなど）。onSortChange を渡したときだけ制御モードになり、
    * sortKey / sortOrder は親の値がそのまま使われる（persistKey による保持は行わない）。
@@ -226,6 +251,9 @@ export function DataTable<T>({
   onGlobalFind,
   onFindNavigate,
   csvExport,
+  csvExtraColumns,
+  csvTables,
+  onCsvTableExport,
   sortKey: sortKeyProp,
   sortOrder: sortOrderProp,
   onSortChange,
@@ -544,10 +572,20 @@ export function DataTable<T>({
 
   // ── CSV出力（No.166: フィールドの追加・削除・並び替えに対応） ──
   const csvStorageKey = csvExport ? `csv.fields.${persistKey ?? csvExport}` : ''
-  // CSV候補列＝ヘッダー名を持つ列（操作列など header:'' は除外）
-  const csvCandidates = columns.filter((c) => (c.header ?? '') !== '')
+  // CSV候補列＝ヘッダー名を持つ列（操作列など header:'' は除外）。
+  // 表示していない項目も csvExtraColumns で足せる。key が重なるときは
+  // 表示中の列（書式つき）を優先し、残りを後ろに並べる。
+  const csvShown = columns.filter((c) => (c.header ?? '') !== '')
+  const shownCsvKeys = new Set(csvShown.map((c) => String(c.key)))
+  const csvCandidates = [
+    ...csvShown,
+    ...(csvExtraColumns ?? []).filter((c) => !shownCsvKeys.has(String(c.key))),
+  ]
   const defaultCsvFields = () => csvCandidates.map((c) => ({ key: String(c.key), on: true }))
   const [csvOpen, setCsvOpen] = useState(false)
+  /** CSV出力で選んだテーブルの項目（テーブルkey → 項目keyの配列） */
+  const [csvTableSel, setCsvTableSel] = useState<Record<string, string[]>>({})
+  const [csvBusy, setCsvBusy] = useState(false)
   const [csvFields, setCsvFields] = useState<{ key: string; on: boolean }[]>(defaultCsvFields)
   // モーダルを開くたびに保存済み設定を読み、現在の列構成と突き合わせる
   // （列が増えていれば末尾に追加・無くなった列は除去）
@@ -566,6 +604,7 @@ export function DataTable<T>({
       if (!seen.has(String(c.key))) base.push({ key: String(c.key), on: saved == null })
     }
     setCsvFields(base.length > 0 ? base : defaultCsvFields())
+    setCsvTableSel({})
     setCsvOpen(true)
   }
   const saveCsvFields = (fields: { key: string; on: boolean }[]) => {
@@ -596,7 +635,24 @@ export function DataTable<T>({
   }
   const csvEscape = (s: string): string =>
     /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
+  /** テーブルが1つでも選ばれているか */
+  const anyTableSelected = Object.values(csvTableSel).some((v) => v.length > 0)
+
   const downloadCsv = () => {
+    // テーブルを選んでいるときは、画面の表ではなくサーバから作る
+    // （テーブルのデータは一覧に読み込んでいないため）
+    if (anyTableSelected && onCsvTableExport) {
+      const caseFields = csvFields
+        .filter((f) => f.on)
+        .map((f) => f.key.startsWith('field:') ? f.key.slice(6) : f.key)
+      setCsvBusy(true)
+      void Promise.resolve(onCsvTableExport({ caseFields, tables: csvTableSel }))
+        .finally(() => {
+          setCsvBusy(false)
+          setCsvOpen(false)
+        })
+      return
+    }
     const cols = csvFields
       .filter((f) => f.on)
       .map((f) => csvCandidates.find((c) => String(c.key) === f.key))
@@ -655,6 +711,49 @@ export function DataTable<T>({
             出力するフィールドにチェックし、↑↓で並び順を変更できます（設定は保存されます）。
             出力対象: 現在の絞り込み・ソートを適用した {sortedData.length} 件
           </div>
+          {/*
+            テーブル（サブテーブル）の選択。
+            チェックしたテーブルは「テーブル内の1行＝CSVの1行」で出す。
+            複数選ぶと、1つ目のテーブルの行がすべて出たあと次のテーブルが始まり、
+            その行では他のテーブルの列は空欄になる（kintone と同じ形）。
+          */}
+          {csvTables && csvTables.length > 0 && (
+            <div className="mx-4 mb-2 rounded border border-slate-200 bg-slate-50 px-3 py-2">
+              <div className="mb-1 text-[0.6875rem] font-semibold text-slate-600">
+                テーブルも出力する（選ぶとその全項目を出します）
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {csvTables.map((t) => {
+                  const on = (csvTableSel[t.key] ?? []).length > 0
+                  return (
+                    <label key={t.key} className="flex cursor-pointer items-center gap-1 text-xs">
+                      <input
+                        type="checkbox"
+                        checked={on}
+                        onChange={(e) =>
+                          setCsvTableSel((prev) => ({
+                            ...prev,
+                            [t.key]: e.target.checked ? t.fields.map((f) => f.key) : [],
+                          }))
+                        }
+                      />
+                      <span>
+                        {t.label}
+                        <span className="ml-1 text-slate-400">（{t.fields.length}項目）</span>
+                      </span>
+                    </label>
+                  )
+                })}
+              </div>
+              {anyTableSelected && (
+                <p className="mt-1 text-[0.625rem] leading-relaxed text-slate-500">
+                  テーブルを選ぶと<b>全案件</b>を対象に、テーブルの1行を1行として出力します。
+                  複数選んだときは、1つ目のテーブルが終わったあと次のテーブルが始まり、
+                  その行では他のテーブルの列は空欄になります。件数が多いと少し時間がかかります。
+                </p>
+              )}
+            </div>
+          )}
           <div className="max-h-[50vh] overflow-y-auto px-4 pb-2">
             {csvFields.map((f, i) => {
               const col = csvCandidates.find((c) => String(c.key) === f.key)
@@ -727,10 +826,10 @@ export function DataTable<T>({
             <button
               type="button"
               onClick={downloadCsv}
-              disabled={csvFields.every((f) => !f.on)}
+              disabled={csvBusy || (csvFields.every((f) => !f.on) && !anyTableSelected)}
               className="rounded bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-40"
             >
-              出力する
+              {csvBusy ? '作成中…' : '出力する'}
             </button>
           </div>
         </div>

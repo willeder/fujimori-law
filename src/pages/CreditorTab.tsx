@@ -6,7 +6,6 @@ import { useCaseEdit } from '../context/CaseEditContext'
 import { settlementTotals } from '../lib/settlementTotals'
 import { fundIncreaseState } from '../lib/fundIncrease'
 import { EditableField, StatusBadge, DataTable, type Column } from '../components'
-import { CreditorFiles } from '../components/case/CreditorFiles'
 import { useBanks, useBranches } from '../hooks/useBankDictionary'
 import type { Creditor } from '../types'
 import {
@@ -532,7 +531,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
 
   return (
     <div className="grid w-full max-w-full grid-cols-5 content-start gap-x-0.5 gap-y-0.5 self-start">
-      {/* 1行目: ステータス(1), 次回処理日時(1), メモ(3) */}
+      {/* 1行目: ステータス(1), コメント(4) */}
       <div className="min-w-0 col-span-1">
         <EditableField
           label="ステータス"
@@ -556,28 +555,14 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           fillWidth
         />
       </div>
-      <div className="min-w-0 col-span-1">
+      <div className="min-w-0 col-span-4">
         <EditableField
-          label="次回処理日時"
-          value={creditor.nextProcessDate}
+          label="コメント"
+          value={creditor.settlementContentComment}
           onChange={(v) =>
-            updateCreditor(creditor, { nextProcessDate: v || null })
+            updateCreditor(creditor, { settlementContentComment: v || null })
           }
-          type="date"
-          compact
-          compactLayout="inline"
-          bordered
-          truncateValue
-          fillWidth
-        />
-      </div>
-      <div className="min-w-0 col-span-3">
-        <EditableField
-          label="メモ"
-          value={creditor.memo}
-          onChange={(v) =>
-            updateCreditor(creditor, { memo: v || null })
-          }
+          type="textarea"
           compact
           compactLayout="inline"
           bordered
@@ -651,6 +636,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           fillWidth
         />
       </div>
+      {/* 3行目: 受任通知送付日(1), 債権調査到着日(1), 調査票_契約日(1), 債務額(1), 顧客コード(1) */}
       <div className="min-w-0 col-span-1">
         <EditableField
           label="受任通知送付日"
@@ -667,7 +653,6 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         />
       </div>
 
-      {/* 3行目: 債権調査到着日(1), 調査票_契約日(1), 債務額(1), 差額(1), 原資UP対応(1) */}
       <div className="min-w-0 col-span-1">
         <EditableField
           label="債権調査到着日"
@@ -716,6 +701,22 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       </div>
       <div className="min-w-0 col-span-1">
         <EditableField
+          label="顧客コード"
+          value={creditor.customerCode}
+          onChange={(v) =>
+            updateCreditor(creditor, { customerCode: v || null })
+          }
+          compact
+          compactLayout="inline"
+          bordered
+          truncateValue
+          fillWidth
+        />
+      </div>
+
+      {/* 4行目: 差額(1), 原資UP対応(1), 和解提案日(1), 和解提案回数(1), 回答状況(1) */}
+      <div className="min-w-0 col-span-1">
+        <EditableField
           label="差額"
           value={debtDifference !== 0 ? debtDifference : null}
           onChange={() => {}}
@@ -733,8 +734,6 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         原資UP対応。差額のすぐ隣に置く（事務所のご要望 2026-09-02）。
         空欄が既定で、「要」「完了」を選ぶ。各社の値は「すべて合算」タブの
         一覧とサマリにそのまま出る。
-        ※この枠を差額の隣に入れるため、顧客コードは次の行へ移した
-          （その行に空き枠が1つあり、全体の行数は変わらない）。
       */}
       <div className="min-w-0 col-span-1">
         <EditableField
@@ -753,7 +752,6 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         />
       </div>
 
-      {/* 4行目(左寄せ): 和解提案日(1), 和解提案(1), 回答状況(1), 顧客コード(1), 空(1) */}
       <div className="min-w-0 col-span-1">
         <EditableField
           label="和解提案日"
@@ -801,28 +799,8 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           fillWidth
         />
       </div>
-      {/*
-        顧客コード。もとは3行目にあったが、差額の隣に原資UP対応を置くため
-        この行の空き枠へ移した。空白の枠数は以前と同じ1枠のまま
-        （回答状況と和解日の間が3枠空いていた件の修正は維持している）。
-      */}
-      <div className="min-w-0 col-span-1">
-        <EditableField
-          label="顧客コード"
-          value={creditor.customerCode}
-          onChange={(v) =>
-            updateCreditor(creditor, { customerCode: v || null })
-          }
-          compact
-          compactLayout="inline"
-          bordered
-          truncateValue
-          fillWidth
-        />
-      </div>
-      <div className="min-w-0 col-span-1" />
 
-      {/* 5行目: 和解日(1), 和解金額(1), 和解時債務金額(1), コメント(2) */}
+      {/* 5行目: 和解日(1), 和解金額(1), 和解時債務金額(1), 空(1), 次回処理日時(1) */}
       <div className="min-w-0 col-span-1">
         <EditableField
           label="和解日"
@@ -870,14 +848,15 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           fillWidth
         />
       </div>
-      <div className="min-w-0 col-span-2">
+      <div className="min-w-0 col-span-1" />
+      <div className="min-w-0 col-span-1">
         <EditableField
-          label="コメント"
-          value={creditor.settlementContentComment}
+          label="次回処理日時"
+          value={creditor.nextProcessDate}
           onChange={(v) =>
-            updateCreditor(creditor, { settlementContentComment: v || null })
+            updateCreditor(creditor, { nextProcessDate: v || null })
           }
-          type="textarea"
+          type="date"
           compact
           compactLayout="inline"
           bordered
@@ -1165,8 +1144,14 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       </div>
       <div className="min-w-0 col-span-1" />
 
-      {/* 債権者資料（ファイル格納フィールド）。No.8 */}
-      {creditor.id != null && <CreditorFiles creditorId={creditor.id} />}
+      {/*
+        債権者資料（ファイル添付）は事務所のご判断で一旦出さない（2026-09-02）。
+          「債権者の資料は添付は一旦いらない」
+        画面から外すだけで、部品（components/case/CreditorFiles.tsx）・API・
+        保存先のテーブルはそのまま残してある。実データも0件で、消えたものは無い。
+        戻すときは下の1行を復活させ、上の import を戻すだけでよい。
+        {creditor.id != null && <CreditorFiles creditorId={creditor.id} />}
+      */}
     </div>
   )
 }

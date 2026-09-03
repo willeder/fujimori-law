@@ -59,6 +59,14 @@ function dbApiPlugin(): Plugin {
               changeLogId: string,
               meta: { ip?: string | null; userAgent?: string | null }
             ) => Promise<{ status: number; body: unknown }>
+            previewRestoreChange: (
+              changeLogId: string
+            ) => Promise<{ status: number; body: unknown }>
+            restoreChange: (
+              actor: { id: string; email: string },
+              changeLogId: string,
+              meta: { ip?: string | null; userAgent?: string | null }
+            ) => Promise<{ status: number; body: unknown }>
             updateCreditorField: (
               actor: { id: string; email: string },
               id: number,
@@ -429,6 +437,8 @@ function dbApiPlugin(): Plugin {
             const changesMatch = url.match(/^\/api\/cases\/(\d+)\/changes$/)
             const editMatch = url.match(/^\/api\/cases\/(\d+)$/)
             const revertMatch = url.match(/^\/api\/changes\/(\d+)\/revert$/)
+            const restorePreview = url.match(/^\/api\/changes\/(\d+)\/restore-preview$/)
+            const restoreMatch = url.match(/^\/api\/changes\/(\d+)\/restore$/)
             if (changesMatch && req.method === 'GET') {
               const out = await mod.getCaseChanges(Number(changesMatch[1]))
               res.setHeader('Content-Type', 'application/json; charset=utf-8')
@@ -456,6 +466,92 @@ function dbApiPlugin(): Plugin {
             }
             if (revertMatch && req.method === 'POST') {
               const r = await mod.revertChange(editActor, revertMatch[1], meta)
+              res.statusCode = r.status
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify(r.body))
+              return
+            }
+            // このバージョンに戻す（確認用の下見 → 実行）
+            if (restorePreview && req.method === 'GET') {
+              const r = await mod.previewRestoreChange(restorePreview[1])
+              res.statusCode = r.status
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify(r.body))
+              return
+            }
+            // 案件＋サブテーブルのCSV出力（kintone と同じ形。全件）
+            if (url === '/api/cases/export-csv' && req.method === 'POST') {
+              const ex = (await server.ssrLoadModule(
+                '/src/server/caseCsvExport.ts'
+              )) as typeof import('./src/server/caseCsvExport')
+              const hm = (await server.ssrLoadModule(
+                '/src/server/handlers.ts'
+              )) as typeof import('./src/server/handlers')
+              const fl = (await server.ssrLoadModule(
+                '/src/constants/fieldLabels.ts'
+              )) as typeof import('./src/constants/fieldLabels')
+              let body: import('./src/server/caseCsvExport').ExportRequest
+              try {
+                body = JSON.parse((await readRawBody(req)) || '{}')
+              } catch {
+                res.statusCode = 400
+                res.end('{"error":"bad request"}')
+                return
+              }
+              const TABLE_NAME: Record<string, string> = {
+                creditor: '債権者',
+                payment: '入金',
+                contact: '接触履歴',
+              }
+              const labelOf = (kind: string, field: string) => {
+                const leaf = field.split('.').pop() ?? field
+                const name = fl.FIELD_LABEL[leaf] ?? leaf
+                return kind === 'case' ? name : `${TABLE_NAME[kind]}：${name}`
+              }
+              const now = new Date()
+              const ymd = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`
+              res.statusCode = 200
+              res.setHeader('Content-Type', 'text/csv; charset=utf-8')
+              res.setHeader(
+                'Content-Disposition',
+                `attachment; filename*=UTF-8''${encodeURIComponent(`案件一覧_${ymd}.csv`)}`
+              )
+              await ex.streamCaseCsv(body, hm.toCaseJson, labelOf as never, (chunk) => {
+                res.write(chunk)
+              })
+              res.end()
+              return
+            }
+
+            // 入金期日の一括変更（下見 → 実行）
+            const dueMatch = url.match(/^\/api\/cases\/(\d+)\/due-dates$/)
+            if (dueMatch && (req.method === 'POST' || req.method === 'PUT')) {
+              const dm = (await server.ssrLoadModule(
+                '/src/server/paymentDueDate.ts'
+              )) as typeof import('./src/server/paymentDueDate')
+              const raw = await readRawBody(req)
+              let body: { byMonth?: Record<string, number | null> } = {}
+              try {
+                body = JSON.parse(raw || '{}')
+              } catch {
+                res.statusCode = 400
+                res.end('{"error":"bad request"}')
+                return
+              }
+              const byMonth: Record<number, number | null> = {}
+              for (const [k, v] of Object.entries(body.byMonth ?? {})) byMonth[Number(k)] = v == null ? null : Number(v)
+              const caseId = Number(dueMatch[1])
+              const out =
+                req.method === 'POST'
+                  ? { status: 200, body: await dm.planDueDateChange(caseId, byMonth) }
+                  : await dm.applyDueDateChange(editActor, caseId, byMonth, meta)
+              res.statusCode = out.status
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify(out.body))
+              return
+            }
+            if (restoreMatch && req.method === 'POST') {
+              const r = await mod.restoreChange(editActor, restoreMatch[1], meta)
               res.statusCode = r.status
               res.setHeader('Content-Type', 'application/json; charset=utf-8')
               res.end(JSON.stringify(r.body))

@@ -4,6 +4,8 @@ import { useCaseState } from '../store/useCaseStore'
 import { DataTable, type Column, StatusBadge } from '../components'
 import { AppHeader } from '../components/AppHeader'
 import { SEARCH_FIELDS, type Condition } from './searchFields'
+import { buildCaseFields, csvText, valueAtPath } from '../lib/caseCsvFields'
+import { CSV_TABLES, downloadCaseCsvWithTables } from '../lib/caseCsvTables'
 import { useSessionState } from '../hooks/useSessionState'
 import { useCreditorNames } from '../hooks/useCreditorNames'
 import { loadFilterHistory, saveFilterHistory, filterHistoryLabel } from '../utils/findHistory'
@@ -313,6 +315,35 @@ export function CaseListPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.key])
 
+  /*
+    クイック検索「すべて」用の索引。
+    案件1件ぶんの値を全部つないだ文字列を作っておき、検索はこれに対して行う。
+    案件の中身が変わったときだけ作り直すので、1文字打つたびに全項目をなめ直す
+    ことにはならない。区切り文字を挟んであるので、隣り合う項目をまたいだ
+    偶然の一致は起きない。
+  */
+  const searchIndex = useMemo(() => {
+    const index = new Map<number, string>()
+    for (const c of cases) {
+      const parts: string[] = []
+      const walk = (v: unknown) => {
+        if (v == null) return
+        if (Array.isArray(v)) {
+          for (const x of v) walk(x)
+          return
+        }
+        if (typeof v === 'object') {
+          for (const x of Object.values(v as Record<string, unknown>)) walk(x)
+          return
+        }
+        parts.push(String(v).toLowerCase())
+      }
+      walk(c)
+      index.set(c.id, parts.join('\u0001'))
+    }
+    return index
+  }, [cases])
+
   const filteredCases = useMemo(() => {
     if (!searchValue.trim()) return cases
 
@@ -343,18 +374,23 @@ export function CaseListPage() {
             inc(c.appointmentInfo.judicialScrivener)
           )
         default:
+          /*
+            「すべて」は文字どおり案件の全項目を対象にする。
+            以前は ID・氏名・フリガナ・都道府県・ステータス・担当司法書士・電話番号の
+            7項目だけで、事務所から「V口座番号で検索したのに出てこない」との
+            ご指摘をいただいた（2026-09-03。例: 7323182 は 145971④ 飯干様のV口座番号）。
+            項目を足すたびに書き足す作りだと同じことが起き続けるので、
+            案件の中身を丸ごとなめる方式にした（索引は下の searchIndex で作る）。
+            氏名・フリガナだけは、続けて打っても当たるよう従来どおり別に見る。
+          */
           return (
-            inc(c.metadata?.externalId) ||
+            (searchIndex.get(c.id) ?? '').includes(query) ||
             incName(c.clientBasicInfo.name) ||
-            incName(c.clientBasicInfo.furigana) ||
-            inc(c.clientBasicInfo.prefecture) ||
-            inc(c.settlementInfo.status) ||
-            inc(c.appointmentInfo.judicialScrivener) ||
-            inc(c.clientBasicInfo.phone)
+            incName(c.clientBasicInfo.furigana)
           )
       }
     })
-  }, [cases, searchField, searchValue])
+  }, [cases, searchField, searchValue, searchIndex])
 
   // 並び順はサーバ側（src/server/handlers.ts の CASE_LIST_ORDER）が、kintone のビュー
   // 「全件一覧」と同じ 受任日の新しい順 → レコード番号の新しい順 → No の新しい順で返す。
@@ -1029,6 +1065,22 @@ export function CaseListPage() {
       return sortValue ? { ...col, sortValue } : col
     })
 
+  /*
+    CSV出力の候補（画面に出していない項目も含む）。
+    案件は112項目あるのに、既定で表示しているのは18列。事務所から
+    「出力できるフィールドが特定されてしまっている。全フィールドを出力できる
+    ようにして欲しい」とのご指摘（2026-09-03）を受け、案件の中身を丸ごと
+    候補に出す。表示は増やさない（列の選択メニューは従来どおり）。
+  */
+  const csvExtraColumns: Column<Case>[] = useMemo(() => {
+    const fields = buildCaseFields(cases[0])
+    return fields.map((f) => ({
+      key: `field:${f.path}`,
+      header: f.label,
+      csvValue: (item: Case) => csvText(valueAtPath(item, f.path)),
+    }))
+  }, [cases])
+
   /** 列の選択メニューに出す一覧（グループつき） */
   const columnGroups: { label: string; cols: Column<Case>[] }[] = [
     { label: '基本', cols: baseColumns },
@@ -1082,7 +1134,8 @@ export function CaseListPage() {
               disabled={results != null}
               className="text-xs border border-slate-300 rounded px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-40"
             >
-              <option value="all">すべて</option>
+              {/* 案件の全項目が対象（V口座番号・住所・勤務先なども含む） */}
+              <option value="all">すべての項目</option>
               <option value="name">依頼者名</option>
               <option value="phone">電話番号</option>
               <option value="prefecture">都道府県</option>
@@ -1326,6 +1379,9 @@ export function CaseListPage() {
             enableFind
             persistKey="caseList"
             csvExport="案件一覧"
+            csvExtraColumns={csvExtraColumns}
+            csvTables={CSV_TABLES}
+            onCsvTableExport={downloadCaseCsvWithTables}
           />
         </div>
       </div>
