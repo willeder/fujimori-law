@@ -478,12 +478,16 @@ def emit_creditors(id_to_case):
     # (ID, 突合コードA) -> 一覧行。事務所が振った突合コードで、債権者名が
     # 一致しない行（回数分割・求償分・債権回収会社など）を紐付けるための索引。
     bycode = {}
+    list_row_no = 1
     for r in read_csv("和解対象債権一覧.csv", "和解対象債権者一覧.csv"):
+        list_row_no += 1
         eid = r["ID"].strip()
         name = s(r.get("債権者"))
         if not name:
             continue
         r["__used"] = False
+        r["__row"] = list_row_no
+        r["__by"] = ""
         listrows.setdefault((eid, name), []).append(r)
         code = s(r.get("突合コードA"))
         if code:
@@ -527,6 +531,7 @@ def emit_creditors(id_to_case):
                 verdict = "②突合コードA=B 一致"
         if r is not None:
             r["__used"] = True
+            r["__by"] = f"{detail_row_no}|{verdict}"
         else:
             # ③ ①②のいずれでも紐付かない → 和解内容詳細の債権者名で新規タブ
             match_stats["new"] += 1
@@ -597,7 +602,21 @@ def emit_creditors(id_to_case):
                 names_before = sorted({n for (e, n) in listrows if e == eid and not n.startswith("★") and n != "債権者"})
                 gone = sorted(set(names_before) - set(after_names.get(eid, [])))
                 w.writerow([eid, b, a, a - b, " / ".join(gone)])
-        # 3) 一覧側の同名候補（③の参考列に使う）
+        # 3) 一覧側の行ごとの突合結果（元データと突き合わせるため CSV の行番号を持つ）
+        with open(rd / "list_rows.tsv", "w", encoding="utf-8", newline="") as f:
+            w = _csv.writer(f, delimiter="\t")
+            w.writerow(["row", "id", "name", "codeA", "result", "byDetailRow"])
+            for (eid, name), rows in listrows.items():
+                for r2 in rows:
+                    if name.startswith("★") or name == "債権者":
+                        res, by = "★リマインド行（債権者として扱わない）", ""
+                    elif r2.get("__by"):
+                        by_row, verdict = r2["__by"].split("|", 1)
+                        res, by = f"{verdict} で和解内容詳細と紐付き", by_row
+                    else:
+                        res, by = "未紐付（和解内容詳細に対応行なし＝スケジュール未確定）", ""
+                    w.writerow([r2.get("__row", ""), eid, name, s(r2.get("突合コードA")) or "", res, by])
+        # 4) 一覧側の同名候補（③の参考列に使う）
         with open(rd / "list_names.tsv", "w", encoding="utf-8", newline="") as f:
             w = _csv.writer(f, delimiter="\t")
             w.writerow(["id", "name", "codeA"])
