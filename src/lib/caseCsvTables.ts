@@ -54,11 +54,14 @@ export const CSV_TABLES = [
 export async function downloadCaseCsvWithTables(sel: {
   caseFields: string[]
   tables: Record<string, string[]>
+  ids: (string | number)[]
 }): Promise<void> {
+  // 画面の絞り込み結果（案件の内部ID）をそのまま渡し、その案件だけを出す
+  const caseIds = sel.ids.map((v) => Number(v)).filter((n) => Number.isFinite(n))
   const r = await fetch('/api/cases/export-csv', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ caseFields: sel.caseFields, tables: sel.tables }),
+    body: JSON.stringify({ caseFields: sel.caseFields, tables: sel.tables, caseIds }),
   })
   if (!r.ok) {
     window.alert('CSVを作成できませんでした')

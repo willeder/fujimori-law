@@ -591,10 +591,19 @@ export default async function handler(
         payment: '入金',
         contact: '接触履歴',
       }
+      /*
+        見出しの付け方（事務所と確認 2026-09-03）:
+          ・突合用の内部IDは【ID】で囲み、触ってはいけない列だと分かるようにする
+          ・差額や累計など、他の値から計算して出している項目は［計算］を付ける。
+            取込では読み飛ばすため、直しても反映されないことを見出しで示す。
+      */
+      const CALCULATED = new Set(['difference', 'cumulativePool', 'elapsedDays', 'age'])
       const labelOf = (kind: string, field: string) => {
         const leaf = field.split('.').pop() ?? field
         const name = FIELD_LABEL[leaf] ?? leaf
-        return kind === 'case' ? name : `${TABLE_NAME[kind]}：${name}`
+        const base = kind === 'case' ? name : `${TABLE_NAME[kind]}：${name}`
+        if (leaf === 'id') return `【${kind === 'case' ? '案件ID' : TABLE_NAME[kind] + 'ID'}】`
+        return CALCULATED.has(leaf) ? `${base}［計算］` : base
       }
       const now = new Date()
       const ymd = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`

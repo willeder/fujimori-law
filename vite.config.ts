@@ -503,10 +503,14 @@ function dbApiPlugin(): Plugin {
                 payment: '入金',
                 contact: '接触履歴',
               }
+              // 見出しの付け方は api/data.ts と同じ（内部IDは【】・計算項目は［計算］）
+              const CALCULATED = new Set(['difference', 'cumulativePool', 'elapsedDays', 'age'])
               const labelOf = (kind: string, field: string) => {
                 const leaf = field.split('.').pop() ?? field
                 const name = fl.FIELD_LABEL[leaf] ?? leaf
-                return kind === 'case' ? name : `${TABLE_NAME[kind]}：${name}`
+                const base = kind === 'case' ? name : `${TABLE_NAME[kind]}：${name}`
+                if (leaf === 'id') return `【${kind === 'case' ? '案件ID' : TABLE_NAME[kind] + 'ID'}】`
+                return CALCULATED.has(leaf) ? `${base}［計算］` : base
               }
               const now = new Date()
               const ymd = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`

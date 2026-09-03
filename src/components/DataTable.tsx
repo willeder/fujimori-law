@@ -173,6 +173,8 @@ interface DataTableProps<T> {
   onCsvTableExport?: (sel: {
     caseFields: string[]
     tables: Record<string, string[]>
+    /** いま画面に出ている行のキー（＝絞り込み・検索の結果）。出力をこれだけに絞る */
+    ids: (string | number)[]
   }) => void | Promise<void>
   /**
    * 並び順を親コンポーネントで制御する場合に指定する（保存した絞り込み条件で
@@ -645,8 +647,10 @@ export function DataTable<T>({
       const caseFields = csvFields
         .filter((f) => f.on)
         .map((f) => f.key.startsWith('field:') ? f.key.slice(6) : f.key)
+      // 絞り込み・検索を適用した「いま出ている行」だけを対象にする
+      const ids = sortedData.map((item) => getValue(item, String(keyField)) as string | number)
       setCsvBusy(true)
-      void Promise.resolve(onCsvTableExport({ caseFields, tables: csvTableSel }))
+      void Promise.resolve(onCsvTableExport({ caseFields, tables: csvTableSel, ids }))
         .finally(() => {
           setCsvBusy(false)
           setCsvOpen(false)
