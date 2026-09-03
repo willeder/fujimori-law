@@ -150,6 +150,16 @@ interface DataTableProps<T> {
    */
   csvExport?: string
   /**
+   * CSV出力の候補に、画面に出していない項目も加える。
+   *
+   * 既定の候補は「いま表示している列」だけ。案件一覧は既定18列なのに案件は
+   * 112項目あり、大半が出せなかった（事務所から「出力できるフィールドが
+   * 特定されてしまっている。全フィールドを出力できるようにして欲しい」との
+   * ご指摘。2026-09-03）。表示は増やさずに、出せる項目だけを増やすための口。
+   * 表示中の列と同じ key のものは、表示中の列の書式を優先する。
+   */
+  csvExtraColumns?: Column<T>[]
+  /**
    * 並び順を親コンポーネントで制御する場合に指定する（保存した絞り込み条件で
    * 並び順まで復元したいときなど）。onSortChange を渡したときだけ制御モードになり、
    * sortKey / sortOrder は親の値がそのまま使われる（persistKey による保持は行わない）。
@@ -226,6 +236,7 @@ export function DataTable<T>({
   onGlobalFind,
   onFindNavigate,
   csvExport,
+  csvExtraColumns,
   sortKey: sortKeyProp,
   sortOrder: sortOrderProp,
   onSortChange,
@@ -544,8 +555,15 @@ export function DataTable<T>({
 
   // ── CSV出力（No.166: フィールドの追加・削除・並び替えに対応） ──
   const csvStorageKey = csvExport ? `csv.fields.${persistKey ?? csvExport}` : ''
-  // CSV候補列＝ヘッダー名を持つ列（操作列など header:'' は除外）
-  const csvCandidates = columns.filter((c) => (c.header ?? '') !== '')
+  // CSV候補列＝ヘッダー名を持つ列（操作列など header:'' は除外）。
+  // 表示していない項目も csvExtraColumns で足せる。key が重なるときは
+  // 表示中の列（書式つき）を優先し、残りを後ろに並べる。
+  const csvShown = columns.filter((c) => (c.header ?? '') !== '')
+  const shownCsvKeys = new Set(csvShown.map((c) => String(c.key)))
+  const csvCandidates = [
+    ...csvShown,
+    ...(csvExtraColumns ?? []).filter((c) => !shownCsvKeys.has(String(c.key))),
+  ]
   const defaultCsvFields = () => csvCandidates.map((c) => ({ key: String(c.key), on: true }))
   const [csvOpen, setCsvOpen] = useState(false)
   const [csvFields, setCsvFields] = useState<{ key: string; on: boolean }[]>(defaultCsvFields)

@@ -4,6 +4,7 @@ import { useCaseState } from '../store/useCaseStore'
 import { DataTable, type Column, StatusBadge } from '../components'
 import { AppHeader } from '../components/AppHeader'
 import { SEARCH_FIELDS, type Condition } from './searchFields'
+import { buildCaseFields, csvText, valueAtPath } from '../lib/caseCsvFields'
 import { useSessionState } from '../hooks/useSessionState'
 import { useCreditorNames } from '../hooks/useCreditorNames'
 import { loadFilterHistory, saveFilterHistory, filterHistoryLabel } from '../utils/findHistory'
@@ -1063,6 +1064,22 @@ export function CaseListPage() {
       return sortValue ? { ...col, sortValue } : col
     })
 
+  /*
+    CSV出力の候補（画面に出していない項目も含む）。
+    案件は112項目あるのに、既定で表示しているのは18列。事務所から
+    「出力できるフィールドが特定されてしまっている。全フィールドを出力できる
+    ようにして欲しい」とのご指摘（2026-09-03）を受け、案件の中身を丸ごと
+    候補に出す。表示は増やさない（列の選択メニューは従来どおり）。
+  */
+  const csvExtraColumns: Column<Case>[] = useMemo(() => {
+    const fields = buildCaseFields(cases[0])
+    return fields.map((f) => ({
+      key: `field:${f.path}`,
+      header: f.label,
+      csvValue: (item: Case) => csvText(valueAtPath(item, f.path)),
+    }))
+  }, [cases])
+
   /** 列の選択メニューに出す一覧（グループつき） */
   const columnGroups: { label: string; cols: Column<Case>[] }[] = [
     { label: '基本', cols: baseColumns },
@@ -1361,6 +1378,7 @@ export function CaseListPage() {
             enableFind
             persistKey="caseList"
             csvExport="案件一覧"
+            csvExtraColumns={csvExtraColumns}
           />
         </div>
       </div>
