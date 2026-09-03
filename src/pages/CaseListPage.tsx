@@ -313,6 +313,35 @@ export function CaseListPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.key])
 
+  /*
+    クイック検索「すべて」用の索引。
+    案件1件ぶんの値を全部つないだ文字列を作っておき、検索はこれに対して行う。
+    案件の中身が変わったときだけ作り直すので、1文字打つたびに全項目をなめ直す
+    ことにはならない。区切り文字を挟んであるので、隣り合う項目をまたいだ
+    偶然の一致は起きない。
+  */
+  const searchIndex = useMemo(() => {
+    const index = new Map<number, string>()
+    for (const c of cases) {
+      const parts: string[] = []
+      const walk = (v: unknown) => {
+        if (v == null) return
+        if (Array.isArray(v)) {
+          for (const x of v) walk(x)
+          return
+        }
+        if (typeof v === 'object') {
+          for (const x of Object.values(v as Record<string, unknown>)) walk(x)
+          return
+        }
+        parts.push(String(v).toLowerCase())
+      }
+      walk(c)
+      index.set(c.id, parts.join('\u0001'))
+    }
+    return index
+  }, [cases])
+
   const filteredCases = useMemo(() => {
     if (!searchValue.trim()) return cases
 
@@ -343,18 +372,23 @@ export function CaseListPage() {
             inc(c.appointmentInfo.judicialScrivener)
           )
         default:
+          /*
+            「すべて」は文字どおり案件の全項目を対象にする。
+            以前は ID・氏名・フリガナ・都道府県・ステータス・担当司法書士・電話番号の
+            7項目だけで、事務所から「V口座番号で検索したのに出てこない」との
+            ご指摘をいただいた（2026-09-03。例: 7323182 は 145971④ 飯干様のV口座番号）。
+            項目を足すたびに書き足す作りだと同じことが起き続けるので、
+            案件の中身を丸ごとなめる方式にした（索引は下の searchIndex で作る）。
+            氏名・フリガナだけは、続けて打っても当たるよう従来どおり別に見る。
+          */
           return (
-            inc(c.metadata?.externalId) ||
+            (searchIndex.get(c.id) ?? '').includes(query) ||
             incName(c.clientBasicInfo.name) ||
-            incName(c.clientBasicInfo.furigana) ||
-            inc(c.clientBasicInfo.prefecture) ||
-            inc(c.settlementInfo.status) ||
-            inc(c.appointmentInfo.judicialScrivener) ||
-            inc(c.clientBasicInfo.phone)
+            incName(c.clientBasicInfo.furigana)
           )
       }
     })
-  }, [cases, searchField, searchValue])
+  }, [cases, searchField, searchValue, searchIndex])
 
   // 並び順はサーバ側（src/server/handlers.ts の CASE_LIST_ORDER）が、kintone のビュー
   // 「全件一覧」と同じ 受任日の新しい順 → レコード番号の新しい順 → No の新しい順で返す。
@@ -1082,7 +1116,8 @@ export function CaseListPage() {
               disabled={results != null}
               className="text-xs border border-slate-300 rounded px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-40"
             >
-              <option value="all">すべて</option>
+              {/* 案件の全項目が対象（V口座番号・住所・勤務先なども含む） */}
+              <option value="all">すべての項目</option>
               <option value="name">依頼者名</option>
               <option value="phone">電話番号</option>
               <option value="prefecture">都道府県</option>
