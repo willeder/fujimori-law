@@ -573,6 +573,43 @@ export default async function handler(
       json(r.body, r.status)
       return
     }
+    // 案件＋サブテーブルのCSV出力（kintone と同じ形。全件）
+    if (path === '/api/cases/export-csv' && method === 'POST') {
+      const ex = await import('../src/server/caseCsvExport.js')
+      const { toCaseJson } = await import('../src/server/handlers.js')
+      const { FIELD_LABEL } = await import('../src/constants/fieldLabels.js')
+      const raw = (await getRawBody(req)).toString('utf8')
+      let body: import('../src/server/caseCsvExport.js').ExportRequest
+      try {
+        body = JSON.parse(raw || '{}') as import('../src/server/caseCsvExport.js').ExportRequest
+      } catch {
+        json({ error: 'bad request' }, 400)
+        return
+      }
+      const TABLE_NAME: Record<string, string> = {
+        creditor: '債権者',
+        payment: '入金',
+        contact: '接触履歴',
+      }
+      const labelOf = (kind: string, field: string) => {
+        const leaf = field.split('.').pop() ?? field
+        const name = FIELD_LABEL[leaf] ?? leaf
+        return kind === 'case' ? name : `${TABLE_NAME[kind]}：${name}`
+      }
+      const now = new Date()
+      const ymd = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`
+      res.statusCode = 200
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8')
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename*=UTF-8''${encodeURIComponent(`案件一覧_${ymd}.csv`)}`
+      )
+      await ex.streamCaseCsv(body, toCaseJson, labelOf as never, (chunk) => {
+        res.write(chunk)
+      })
+      res.end()
+      return
+    }
     // 入金期日の一括変更（下見 → 実行）
     const dueMatch = path.match(/^\/api\/cases\/(\d+)\/due-dates$/)
     if (dueMatch && (method === 'POST' || method === 'PUT')) {

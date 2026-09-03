@@ -5,6 +5,7 @@ import { DataTable, type Column, StatusBadge } from '../components'
 import { AppHeader } from '../components/AppHeader'
 import { SEARCH_FIELDS, type Condition } from './searchFields'
 import { buildCaseFields, csvText, valueAtPath } from '../lib/caseCsvFields'
+import { CSV_TABLES, downloadCaseCsvWithTables } from '../lib/caseCsvTables'
 import { useSessionState } from '../hooks/useSessionState'
 import { useCreditorNames } from '../hooks/useCreditorNames'
 import { loadFilterHistory, saveFilterHistory, filterHistoryLabel } from '../utils/findHistory'
@@ -1379,6 +1380,8 @@ export function CaseListPage() {
             persistKey="caseList"
             csvExport="案件一覧"
             csvExtraColumns={csvExtraColumns}
+            csvTables={CSV_TABLES}
+            onCsvTableExport={downloadCaseCsvWithTables}
           />
         </div>
       </div>

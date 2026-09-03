@@ -479,6 +479,50 @@ function dbApiPlugin(): Plugin {
               res.end(JSON.stringify(r.body))
               return
             }
+            // 案件＋サブテーブルのCSV出力（kintone と同じ形。全件）
+            if (url === '/api/cases/export-csv' && req.method === 'POST') {
+              const ex = (await server.ssrLoadModule(
+                '/src/server/caseCsvExport.ts'
+              )) as typeof import('./src/server/caseCsvExport')
+              const hm = (await server.ssrLoadModule(
+                '/src/server/handlers.ts'
+              )) as typeof import('./src/server/handlers')
+              const fl = (await server.ssrLoadModule(
+                '/src/constants/fieldLabels.ts'
+              )) as typeof import('./src/constants/fieldLabels')
+              let body: import('./src/server/caseCsvExport').ExportRequest
+              try {
+                body = JSON.parse((await readRawBody(req)) || '{}')
+              } catch {
+                res.statusCode = 400
+                res.end('{"error":"bad request"}')
+                return
+              }
+              const TABLE_NAME: Record<string, string> = {
+                creditor: '債権者',
+                payment: '入金',
+                contact: '接触履歴',
+              }
+              const labelOf = (kind: string, field: string) => {
+                const leaf = field.split('.').pop() ?? field
+                const name = fl.FIELD_LABEL[leaf] ?? leaf
+                return kind === 'case' ? name : `${TABLE_NAME[kind]}：${name}`
+              }
+              const now = new Date()
+              const ymd = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`
+              res.statusCode = 200
+              res.setHeader('Content-Type', 'text/csv; charset=utf-8')
+              res.setHeader(
+                'Content-Disposition',
+                `attachment; filename*=UTF-8''${encodeURIComponent(`案件一覧_${ymd}.csv`)}`
+              )
+              await ex.streamCaseCsv(body, hm.toCaseJson, labelOf as never, (chunk) => {
+                res.write(chunk)
+              })
+              res.end()
+              return
+            }
+
             // 入金期日の一括変更（下見 → 実行）
             const dueMatch = url.match(/^\/api\/cases\/(\d+)\/due-dates$/)
             if (dueMatch && (req.method === 'POST' || req.method === 'PUT')) {

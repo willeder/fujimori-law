@@ -21,7 +21,7 @@ if (!g.__prisma) g.__prisma = prisma
 const ds = (v: Date | null): string | null =>
   v ? v.toISOString().slice(0, 10) : null
 
-function toCaseJson(c: Record<string, any>) {
+export function toCaseJson(c: Record<string, any>) {
   return {
     id: c.id,
     clientBasicInfo: {
