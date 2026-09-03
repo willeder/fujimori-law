@@ -470,34 +470,39 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
             <div className="text-xs font-medium leading-tight text-slate-500">
               差額合計（申告−債務）
             </div>
-            <div
-              className={`text-sm font-bold tabular-nums ${
-                totalDeclared - totalDebt < 0 ? 'text-red-600' : 'text-slate-800'
-              }`}
-            >
-              {(totalDeclared - totalDebt).toLocaleString()}円
+            {/*
+              原資UP対応（案件としての状態）を、差額合計の「右隣」に並べる。
+              事務所からのご指摘（2026-09-03）:
+                「対応が要のときに、すべて合算タブに表示する際、次の行になってますが
+                  『差額の右隣』に表示できれば嬉しいです。対応要（赤太字）だけなら、
+                  入らないかなと・・・」
+              以前は独立した枠だったため、枠の折り返しで次の行に落ちていた。
+              金額と同じ行に並べれば折り返さない。
+              1社でも「要」があれば赤太字で「原資UP対応要」、
+              「要」が無く「完了」があれば黒字で「原資UP対応済」。
+              どちらも無い（全社空欄）ときは出さない。まとめ方は lib/fundIncrease.ts。
+            */}
+            <div className="flex items-baseline gap-2 whitespace-nowrap">
+              <span
+                className={`text-sm font-bold tabular-nums ${
+                  totalDeclared - totalDebt < 0 ? 'text-red-600' : 'text-slate-800'
+                }`}
+              >
+                {(totalDeclared - totalDebt).toLocaleString()}円
+              </span>
+              {fundIncrease !== 'none' && (
+                <span
+                  className={
+                    fundIncrease === 'required'
+                      ? 'text-sm font-bold text-red-600'
+                      : 'text-sm font-bold text-slate-800'
+                  }
+                >
+                  {fundIncrease === 'required' ? '原資UP対応要' : '原資UP対応済'}
+                </span>
+              )}
             </div>
           </div>
-          {/*
-            原資UP対応（案件としての状態）。各社タブで入れた値からまとめる。
-            1社でも「要」があれば赤太字で「原資UP対応要」、
-            「要」が無く「完了」があれば黒字で「原資UP対応済」。
-            どちらも無い（全社空欄）ときは出さない。まとめ方は lib/fundIncrease.ts。
-          */}
-          {fundIncrease !== 'none' && (
-            <div>
-              <div className="text-xs font-medium leading-tight text-slate-500">原資UP対応</div>
-              <div
-                className={
-                  fundIncrease === 'required'
-                    ? 'text-sm font-bold text-red-600'
-                    : 'text-sm font-bold text-slate-800'
-                }
-              >
-                {fundIncrease === 'required' ? '原資UP対応要' : '原資UP対応済'}
-              </div>
-            </div>
-          )}
           {totals.missingPaymentCount > 0 && (
             <div className="col-span-full text-[0.6875rem] text-amber-700">
               ※ 弁済対象 {totals.missingPaymentCount} 社は支払回数が未入力のため、
