@@ -573,6 +573,30 @@ export default async function handler(
       json(r.body, r.status)
       return
     }
+    // 入金期日の一括変更（下見 → 実行）
+    const dueMatch = path.match(/^\/api\/cases\/(\d+)\/due-dates$/)
+    if (dueMatch && (method === 'POST' || method === 'PUT')) {
+      const m = await import('../src/server/paymentDueDate.js')
+      const raw = (await getRawBody(req)).toString('utf8')
+      let body: { byMonth?: Record<string, number | null> } = {}
+      try {
+        body = JSON.parse(raw || '{}')
+      } catch {
+        json({ error: 'bad request' }, 400)
+        return
+      }
+      const byMonth: Record<number, number | null> = {}
+      for (const [k, v] of Object.entries(body.byMonth ?? {})) byMonth[Number(k)] = v == null ? null : Number(v)
+      const caseId = Number(dueMatch[1])
+      if (method === 'POST') {
+        // 下見（DBは変えない）
+        json(await m.planDueDateChange(caseId, byMonth))
+        return
+      }
+      const r = await m.applyDueDateChange(editActor, caseId, byMonth, meta)
+      json(r.body, r.status)
+      return
+    }
 
     // ── 債権者・入金の行編集（永続化＋変更履歴） ──
     const creditorEdit = path.match(/^\/api\/creditors\/(\d+)$/)

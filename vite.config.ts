@@ -479,6 +479,33 @@ function dbApiPlugin(): Plugin {
               res.end(JSON.stringify(r.body))
               return
             }
+            // 入金期日の一括変更（下見 → 実行）
+            const dueMatch = url.match(/^\/api\/cases\/(\d+)\/due-dates$/)
+            if (dueMatch && (req.method === 'POST' || req.method === 'PUT')) {
+              const dm = (await server.ssrLoadModule(
+                '/src/server/paymentDueDate.ts'
+              )) as typeof import('./src/server/paymentDueDate')
+              const raw = await readRawBody(req)
+              let body: { byMonth?: Record<string, number | null> } = {}
+              try {
+                body = JSON.parse(raw || '{}')
+              } catch {
+                res.statusCode = 400
+                res.end('{"error":"bad request"}')
+                return
+              }
+              const byMonth: Record<number, number | null> = {}
+              for (const [k, v] of Object.entries(body.byMonth ?? {})) byMonth[Number(k)] = v == null ? null : Number(v)
+              const caseId = Number(dueMatch[1])
+              const out =
+                req.method === 'POST'
+                  ? { status: 200, body: await dm.planDueDateChange(caseId, byMonth) }
+                  : await dm.applyDueDateChange(editActor, caseId, byMonth, meta)
+              res.statusCode = out.status
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify(out.body))
+              return
+            }
             if (restoreMatch && req.method === 'POST') {
               const r = await mod.restoreChange(editActor, restoreMatch[1], meta)
               res.statusCode = r.status
