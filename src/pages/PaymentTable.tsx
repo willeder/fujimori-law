@@ -5,6 +5,8 @@ import { DataTable, type Column } from '../components'
 import { DueDateBulkEdit } from '../components/case/DueDateBulkEdit'
 import type { PaymentRecord } from '../types'
 import { nextPlannedDate } from '../lib/paymentRows'
+import { RowDateInput } from '../components/RowDateInput'
+import { checkYmdFields, numOrNull } from '../lib/rowEditValue'
 
 interface PaymentTableProps {
   caseId: number
@@ -275,13 +277,35 @@ export function PaymentTable({
   }
 
   const handleSave = (payment: PaymentRecord) => {
+    // 日付は打ち込みで受けるので、途中まで（「2026-0」など）のまま保存させない
+    const ng = checkYmdFields(editData, [
+      ['plannedDate', '入金予定日'],
+      ['actualDate', '実入金日'],
+    ])
+    if (ng) {
+      window.alert(ng)
+      return
+    }
+
     const finalData = { ...editData }
 
     // 予定側は kintone の計算式で手数料・ﾌﾟｰﾙ充当予定額を埋める
     applyPlannedAllocations(payment, finalData)
 
-    // 実入金日が入力されている場合、充当額を自動計算
-    if (finalData.actualDate) {
+    /*
+      実入金日を入れたときの自動計算。
+
+      ★ ここは「実入金をこれから記録する行」だけで動かす（2026-09-04 修正）。
+        以前は実入金日が入っていれば常に動いていたため、
+        **既に実入金が入っている行の実入金額を消して保存すると、
+        `finalData.actualAmount ?? payment.plannedAmount` で予定額が入り直し**、
+        消したはずの金額が戻っていた。入金取込で誤って入った実績を消せない、
+        というご指摘（事務所 2026-09-04）はこれ。
+        併せて、不足ぶんの補充行も同じ条件にする。既存の行を直すたびに
+        補充行が増えていくのを防ぐため。
+    */
+    const isNewActual = payment.actualDate == null
+    if (finalData.actualDate && isNewActual) {
       // 実入金額が未入力なら予定額をデフォルトで使用
       const actualAmount = finalData.actualAmount ?? payment.plannedAmount
       finalData.actualAmount = actualAmount
@@ -486,12 +510,9 @@ export function PaymentTable({
       render: (item) => {
         if (editingId === item.id) {
           return (
-            <input
-              type="date"
-              value={editData.plannedDate ?? ''}
-              onChange={(e) =>
-                setEditData({ ...editData, plannedDate: e.target.value || null })
-              }
+            <RowDateInput
+              value={editData.plannedDate}
+              onChange={(v) => setEditData({ ...editData, plannedDate: v })}
               className={inputCls}
             />
           )
@@ -519,7 +540,7 @@ export function PaymentTable({
               type="number"
               value={editData.plannedAmount ?? ''}
               onChange={(e) =>
-                setEditData({ ...editData, plannedAmount: Number(e.target.value) || null })
+                setEditData({ ...editData, plannedAmount: numOrNull(e.target.value) })
               }
               className={`${inputCls} text-right`}
             />
@@ -542,7 +563,7 @@ export function PaymentTable({
               type="number"
               value={editData.plannedFeeAllocation ?? ''}
               onChange={(e) =>
-                setEditData({ ...editData, plannedFeeAllocation: Number(e.target.value) || null })
+                setEditData({ ...editData, plannedFeeAllocation: numOrNull(e.target.value) })
               }
               className={`${inputCls} text-right`}
             />
@@ -565,7 +586,7 @@ export function PaymentTable({
               type="number"
               value={editData.plannedAgentFeeAllocation ?? ''}
               onChange={(e) =>
-                setEditData({ ...editData, plannedAgentFeeAllocation: Number(e.target.value) || null })
+                setEditData({ ...editData, plannedAgentFeeAllocation: numOrNull(e.target.value) })
               }
               className={`${inputCls} text-right`}
             />
@@ -588,7 +609,7 @@ export function PaymentTable({
               type="number"
               value={editData.plannedPoolAllocation ?? ''}
               onChange={(e) =>
-                setEditData({ ...editData, plannedPoolAllocation: Number(e.target.value) || null })
+                setEditData({ ...editData, plannedPoolAllocation: numOrNull(e.target.value) })
               }
               className={`${inputCls} text-right`}
             />
@@ -611,7 +632,7 @@ export function PaymentTable({
               type="number"
               value={editData.repaymentCount ?? ''}
               onChange={(e) =>
-                setEditData({ ...editData, repaymentCount: Number(e.target.value) || null })
+                setEditData({ ...editData, repaymentCount: numOrNull(e.target.value) })
               }
               className={`${inputCls} text-right`}
             />
@@ -634,7 +655,7 @@ export function PaymentTable({
               type="number"
               value={editData.handlingFee ?? ''}
               onChange={(e) =>
-                setEditData({ ...editData, handlingFee: Number(e.target.value) || null })
+                setEditData({ ...editData, handlingFee: numOrNull(e.target.value) })
               }
               className={`${inputCls} text-right`}
             />
@@ -657,7 +678,7 @@ export function PaymentTable({
               type="number"
               value={editData.plannedRepaymentAllocation ?? ''}
               onChange={(e) =>
-                setEditData({ ...editData, plannedRepaymentAllocation: Number(e.target.value) || null })
+                setEditData({ ...editData, plannedRepaymentAllocation: numOrNull(e.target.value) })
               }
               className={`${inputCls} text-right`}
             />
@@ -675,12 +696,9 @@ export function PaymentTable({
       render: (item) => {
         if (editingId === item.id) {
           return (
-            <input
-              type="date"
-              value={editData.actualDate ?? ''}
-              onChange={(e) =>
-                setEditData({ ...editData, actualDate: e.target.value || null })
-              }
+            <RowDateInput
+              value={editData.actualDate}
+              onChange={(v) => setEditData({ ...editData, actualDate: v })}
               className={inputCls}
             />
           )
@@ -708,7 +726,7 @@ export function PaymentTable({
               onChange={(e) =>
                 setEditData({
                   ...editData,
-                  actualAmount: Number(e.target.value) || null,
+                  actualAmount: numOrNull(e.target.value),
                 })
               }
               className={`${inputCls} text-right`}
@@ -760,7 +778,7 @@ export function PaymentTable({
               onChange={(e) =>
                 setEditData({
                   ...editData,
-                  actualFeeAllocation: Number(e.target.value) || null,
+                  actualFeeAllocation: numOrNull(e.target.value),
                 })
               }
               className={`${inputCls} text-right`}
@@ -786,7 +804,7 @@ export function PaymentTable({
               onChange={(e) =>
                 setEditData({
                   ...editData,
-                  actualAgentFeeAllocation: Number(e.target.value) || null,
+                  actualAgentFeeAllocation: numOrNull(e.target.value),
                 })
               }
               className={`${inputCls} text-right`}
@@ -812,7 +830,7 @@ export function PaymentTable({
               onChange={(e) =>
                 setEditData({
                   ...editData,
-                  actualPoolAllocation: Number(e.target.value) || null,
+                  actualPoolAllocation: numOrNull(e.target.value),
                 })
               }
               className={`${inputCls} text-right`}
@@ -839,7 +857,7 @@ export function PaymentTable({
               onChange={(e) =>
                 setEditData({
                   ...editData,
-                  actualRepaymentCount: Number(e.target.value) || null,
+                  actualRepaymentCount: numOrNull(e.target.value),
                 })
               }
               className={`${inputCls} text-right`}
@@ -865,7 +883,7 @@ export function PaymentTable({
               onChange={(e) =>
                 setEditData({
                   ...editData,
-                  actualHandlingFee: Number(e.target.value) || null,
+                  actualHandlingFee: numOrNull(e.target.value),
                 })
               }
               className={`${inputCls} text-right`}
@@ -891,7 +909,7 @@ export function PaymentTable({
               onChange={(e) =>
                 setEditData({
                   ...editData,
-                  actualRepaymentAllocation: Number(e.target.value) || null,
+                  actualRepaymentAllocation: numOrNull(e.target.value),
                 })
               }
               className={`${inputCls} text-right`}

@@ -4,6 +4,8 @@
 import { useState } from 'react'
 import { DataTable, type Column } from '../index'
 import type { PaymentRecord } from '../../types'
+import { RowDateInput } from '../RowDateInput'
+import { checkYmdFields, numOrNull } from '../../lib/rowEditValue'
 
 interface PaymentHistoryProps {
   payments: PaymentRecord[]
@@ -34,6 +36,11 @@ export function PaymentHistory({ payments, onUpdate, onAdd, readonly = false }: 
   }
 
   const handleSave = (payment: PaymentRecord) => {
+    const ng = checkYmdFields(editData, [['actualDate', '実入金日']])
+    if (ng) {
+      window.alert(ng)
+      return
+    }
     onUpdate({ ...payment, ...editData })
     setEditingId(null)
     setEditData({})
@@ -74,13 +81,10 @@ export function PaymentHistory({ payments, onUpdate, onAdd, readonly = false }: 
       render: (item) => {
         if (editingId === item.id) {
           return (
-            <input
-              type="date"
-              value={editData.actualDate ?? ''}
-              onChange={(e) =>
-                setEditData({ ...editData, actualDate: e.target.value || null })
-              }
-              className="w-full text-xs border border-blue-300 rounded px-1 py-0.5"
+            <RowDateInput
+              value={editData.actualDate}
+              onChange={(v) => setEditData({ ...editData, actualDate: v })}
+              className={"w-full text-xs border border-blue-300 rounded px-1 py-0.5"}
             />
           )
         }
@@ -103,7 +107,7 @@ export function PaymentHistory({ payments, onUpdate, onAdd, readonly = false }: 
               type="number"
               value={editData.actualAmount ?? ''}
               onChange={(e) =>
-                setEditData({ ...editData, actualAmount: Number(e.target.value) || null })
+                setEditData({ ...editData, actualAmount: numOrNull(e.target.value) })
               }
               className="w-full text-xs border border-blue-300 rounded px-1 py-0.5 text-right"
             />
@@ -131,7 +135,7 @@ export function PaymentHistory({ payments, onUpdate, onAdd, readonly = false }: 
               type="number"
               value={editData.actualFeeAllocation ?? ''}
               onChange={(e) =>
-                setEditData({ ...editData, actualFeeAllocation: Number(e.target.value) || null })
+                setEditData({ ...editData, actualFeeAllocation: numOrNull(e.target.value) })
               }
               className="w-full text-xs border border-blue-300 rounded px-1 py-0.5 text-right"
             />
@@ -156,7 +160,7 @@ export function PaymentHistory({ payments, onUpdate, onAdd, readonly = false }: 
               type="number"
               value={editData.actualPoolAllocation ?? ''}
               onChange={(e) =>
-                setEditData({ ...editData, actualPoolAllocation: Number(e.target.value) || null })
+                setEditData({ ...editData, actualPoolAllocation: numOrNull(e.target.value) })
               }
               className="w-full text-xs border border-blue-300 rounded px-1 py-0.5 text-right"
             />
@@ -183,7 +187,7 @@ export function PaymentHistory({ payments, onUpdate, onAdd, readonly = false }: 
               onChange={(e) =>
                 setEditData({
                   ...editData,
-                  actualRepaymentAllocation: Number(e.target.value) || null,
+                  actualRepaymentAllocation: numOrNull(e.target.value),
                 })
               }
               className="w-full text-xs border border-blue-300 rounded px-1 py-0.5 text-right"
