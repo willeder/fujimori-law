@@ -12,6 +12,7 @@ export const FIELD_LABEL: Record<string, string> = {
   // 案件の全項目をCSVに出せるようにした際、名前が付いていなかったもの（2026-09-03）
   id: '内部ID',
   dueDateBulk: '入金期日の一括変更',
+  csvImport: 'CSVの再取込',
   externalId: 'ID',
   proposalDate: '和解提案予定日',
   resignationDate: '辞任日',

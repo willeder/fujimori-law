@@ -1035,7 +1035,7 @@ export async function getCaseById(id: number) {
 // ── 案件編集の永続化・変更履歴・revert ──────────────────
 // Prisma の DMMF から「編集可能なスカラー列 → 型」を自動取得（手書きの列リストを避け安全に）
 const caseModel = Prisma.dmmf.datamodel.models.find((m) => m.name === 'Case')
-const CASE_FIELD_TYPE: Record<string, string> = {}
+export const CASE_FIELD_TYPE: Record<string, string> = {}
 if (caseModel) {
   for (const f of caseModel.fields) {
     if (
@@ -1070,9 +1070,9 @@ function buildFieldType(modelName: string, exclude: string[]): Record<string, st
   }
   return out
 }
-const CREDITOR_FIELD_TYPE = buildFieldType('Creditor', ['caseId'])
-const PAYMENT_FIELD_TYPE = buildFieldType('Payment', ['caseId', 'creditorId'])
-const CONTACT_FIELD_TYPE = buildFieldType('ContactHistory', ['caseId'])
+export const CREDITOR_FIELD_TYPE = buildFieldType('Creditor', ['caseId'])
+export const PAYMENT_FIELD_TYPE = buildFieldType('Payment', ['caseId', 'creditorId'])
+export const CONTACT_FIELD_TYPE = buildFieldType('ContactHistory', ['caseId'])
 
 /** 表示値（文字列等）→ DB 値に型変換 */
 function caseToDb(type: string, value: unknown): unknown {
@@ -1090,7 +1090,7 @@ function caseToDb(type: string, value: unknown): unknown {
 }
 
 /** DB 値 → 表示値（変更履歴スナップショット用） */
-function caseDisplay(type: string, value: unknown): unknown {
+export function caseDisplay(type: string, value: unknown): unknown {
   if (value === null || value === undefined) return null
   if (type === 'DateTime') return ds(value as Date)
   return value

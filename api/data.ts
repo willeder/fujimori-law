@@ -577,7 +577,7 @@ export default async function handler(
     if (path === '/api/cases/export-csv' && method === 'POST') {
       const ex = await import('../src/server/caseCsvExport.js')
       const { toCaseJson } = await import('../src/server/handlers.js')
-      const { FIELD_LABEL } = await import('../src/constants/fieldLabels.js')
+      const { csvHeaderLabel } = await import('../src/constants/csvColumns.js')
       const raw = (await getRawBody(req)).toString('utf8')
       let body: import('../src/server/caseCsvExport.js').ExportRequest
       try {
@@ -585,25 +585,6 @@ export default async function handler(
       } catch {
         json({ error: 'bad request' }, 400)
         return
-      }
-      const TABLE_NAME: Record<string, string> = {
-        creditor: '債権者',
-        payment: '入金',
-        contact: '接触履歴',
-      }
-      /*
-        見出しの付け方（事務所と確認 2026-09-03）:
-          ・突合用の内部IDは【ID】で囲み、触ってはいけない列だと分かるようにする
-          ・差額や累計など、他の値から計算して出している項目は［計算］を付ける。
-            取込では読み飛ばすため、直しても反映されないことを見出しで示す。
-      */
-      const CALCULATED = new Set(['difference', 'cumulativePool', 'elapsedDays', 'age'])
-      const labelOf = (kind: string, field: string) => {
-        const leaf = field.split('.').pop() ?? field
-        const name = FIELD_LABEL[leaf] ?? leaf
-        const base = kind === 'case' ? name : `${TABLE_NAME[kind]}：${name}`
-        if (leaf === 'id') return `【${kind === 'case' ? '案件ID' : TABLE_NAME[kind] + 'ID'}】`
-        return CALCULATED.has(leaf) ? `${base}［計算］` : base
       }
       const now = new Date()
       const ymd = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`
@@ -613,12 +594,37 @@ export default async function handler(
         'Content-Disposition',
         `attachment; filename*=UTF-8''${encodeURIComponent(`案件一覧_${ymd}.csv`)}`
       )
-      await ex.streamCaseCsv(body, toCaseJson, labelOf as never, (chunk) => {
+      await ex.streamCaseCsv(body, toCaseJson, csvHeaderLabel as never, (chunk) => {
         res.write(chunk)
       })
       res.end()
       return
     }
+    // CSVの再取込（下見 → 実行）。出力したCSVを直して戻し、まとめて更新する
+    if (
+      (path === '/api/cases/import-csv/preview' || path === '/api/cases/import-csv/commit') &&
+      method === 'POST'
+    ) {
+      const im = await import('../src/server/caseCsvImport.js')
+      // 空欄の扱いは URL の ?blankClears=1 で受ける（本文はファイルそのもの）
+      const blankClears = query.get('blankClears') === '1'
+      const buf = await getRawBody(req)
+      if (buf.length === 0) {
+        json({ error: 'ファイルが空です' }, 400)
+        return
+      }
+      try {
+        if (path.endsWith('/preview')) {
+          json(await im.planCaseCsvImport(buf, { blankClears }))
+        } else {
+          json(await im.commitCaseCsvImport(editActor, buf, { blankClears }, meta))
+        }
+      } catch (e) {
+        json({ error: `ファイルを読めませんでした: ${e instanceof Error ? e.message : String(e)}` }, 400)
+      }
+      return
+    }
+
     // 入金期日の一括変更（下見 → 実行）
     const dueMatch = path.match(/^\/api\/cases\/(\d+)\/due-dates$/)
     if (dueMatch && (method === 'POST' || method === 'PUT')) {
