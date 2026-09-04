@@ -30,6 +30,16 @@ export interface ExportRequest {
   caseFields: string[]
   /** テーブルごとに出す項目名（DBの列名）。空配列・未指定のテーブルは出さない */
   tables: Partial<Record<TableKey, string[]>>
+  /**
+   * 出力する案件を絞る（案件の内部ID）。省略・空なら全件。
+   *
+   * 事務所からのご要望（2026-09-03）:
+   *   「特定案件のみを絞込み、該当案件だけをCSV出力し、出力時に出力するフィールド
+   *     （もしくはテーブル）を選択できるようにしてほしい」
+   * これまでテーブルを選ぶと全件固定で、画面の絞り込みが効いていなかった。
+   * 画面がいま表示している案件のIDをそのまま受け取り、それだけを出す。
+   */
+  caseIds?: number[]
 }
 
 const esc = (s: string): string => (/[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s)
@@ -66,13 +76,22 @@ export async function streamCaseCsv(
   labelOf: (kind: 'case' | TableKey, field: string) => string,
   write: (chunk: string) => void | Promise<void>
 ): Promise<{ cases: number; rows: number }> {
-  const caseFields = req.caseFields ?? []
+  /*
+    突合用の内部IDは、選ばれていなくても必ず先頭に入れる（事務所と確認 2026-09-03）。
+    取り込むときに「どの行のことか」を決められるのはこの列だけ。
+    ID（118823E 等）や氏名は事務所側で直されることがあり、キーにできない。
+  */
+  const caseFields = ['id', ...(req.caseFields ?? []).filter((f) => f !== 'id')]
   const used = TABLE_ORDER.filter((t) => (req.tables?.[t]?.length ?? 0) > 0)
+  const tableFields: Partial<Record<TableKey, string[]>> = {}
+  for (const t of used) {
+    tableFields[t] = ['id', ...(req.tables[t] ?? []).filter((f) => f !== 'id')]
+  }
 
   // 見出し
   const header = [
     ...caseFields.map((f) => labelOf('case', f)),
-    ...used.flatMap((t) => (req.tables[t] ?? []).map((f) => labelOf(t, f))),
+    ...used.flatMap((t) => (tableFields[t] ?? []).map((f) => labelOf(t, f))),
   ]
   // Excel で文字化けしないよう UTF-8 BOM
   await write('﻿' + header.map(esc).join(',') + '\r\n')
@@ -82,7 +101,7 @@ export async function streamCaseCsv(
   let at = caseFields.length
   for (const t of used) {
     offset[t] = at
-    at += (req.tables[t] ?? []).length
+    at += (tableFields[t] ?? []).length
   }
   const width = at
 
@@ -90,10 +109,12 @@ export async function streamCaseCsv(
   let rowCount = 0
   const BATCH = 200
   let cursor = 0
+  // 絞り込みが指定されていればその案件だけ。指定が無ければ全件。
+  const only = req.caseIds && req.caseIds.length > 0 ? req.caseIds : null
 
   for (;;) {
     const cases = await prisma.case.findMany({
-      where: { id: { gt: cursor } },
+      where: only ? { id: { gt: cursor, in: only } } : { id: { gt: cursor } },
       orderBy: { id: 'asc' },
       take: BATCH,
     })
@@ -137,7 +158,7 @@ export async function streamCaseCsv(
       let wrote = false
       for (const t of used) {
         const rows = byCase[t].get(c.id) ?? []
-        const fields = req.tables[t] ?? []
+        const fields = tableFields[t] ?? []
         const start = offset[t]!
         for (const r of rows) {
           const line: string[] = new Array(width).fill('')

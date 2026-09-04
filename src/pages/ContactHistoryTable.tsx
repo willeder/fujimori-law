@@ -6,6 +6,8 @@ import { useCreditorNames } from '../hooks/useCreditorNames'
 import { useUserSettings } from '../context/UserSettingsContext'
 import { useCaseDispatch, useCaseState } from '../store/useCaseStore'
 import type { ContactHistory } from '../types'
+import { RowDateInput } from '../components/RowDateInput'
+import { checkYmdFields } from '../lib/rowEditValue'
 
 interface ContactHistoryTableProps {
   caseId: number
@@ -90,6 +92,11 @@ export function ContactHistoryTable({
   }
 
   const handleSave = (h: ContactHistory) => {
+    const ng = checkYmdFields(editData, [['contactDate', '日付']])
+    if (ng) {
+      window.alert(ng)
+      return
+    }
     const payload = {
       contactDate: editData.contactDate ?? null,
       contactTime: editData.contactTime ?? null,
@@ -213,12 +220,9 @@ export function ContactHistoryTable({
       sortable: false,
       render: (h) =>
         editingId === h.id ? (
-          <input
-            type="date"
-            value={editData.contactDate ?? ''}
-            onChange={(e) =>
-              setEditData({ ...editData, contactDate: e.target.value || null })
-            }
+          <RowDateInput
+            value={editData.contactDate}
+            onChange={(v) => setEditData({ ...editData, contactDate: v })}
             className={cellIn}
           />
         ) : (

@@ -487,9 +487,9 @@ function dbApiPlugin(): Plugin {
               const hm = (await server.ssrLoadModule(
                 '/src/server/handlers.ts'
               )) as typeof import('./src/server/handlers')
-              const fl = (await server.ssrLoadModule(
-                '/src/constants/fieldLabels.ts'
-              )) as typeof import('./src/constants/fieldLabels')
+              const cc = (await server.ssrLoadModule(
+                '/src/constants/csvColumns.ts'
+              )) as typeof import('./src/constants/csvColumns')
               let body: import('./src/server/caseCsvExport').ExportRequest
               try {
                 body = JSON.parse((await readRawBody(req)) || '{}')
@@ -497,16 +497,6 @@ function dbApiPlugin(): Plugin {
                 res.statusCode = 400
                 res.end('{"error":"bad request"}')
                 return
-              }
-              const TABLE_NAME: Record<string, string> = {
-                creditor: '債権者',
-                payment: '入金',
-                contact: '接触履歴',
-              }
-              const labelOf = (kind: string, field: string) => {
-                const leaf = field.split('.').pop() ?? field
-                const name = fl.FIELD_LABEL[leaf] ?? leaf
-                return kind === 'case' ? name : `${TABLE_NAME[kind]}：${name}`
               }
               const now = new Date()
               const ymd = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`
@@ -516,10 +506,45 @@ function dbApiPlugin(): Plugin {
                 'Content-Disposition',
                 `attachment; filename*=UTF-8''${encodeURIComponent(`案件一覧_${ymd}.csv`)}`
               )
-              await ex.streamCaseCsv(body, hm.toCaseJson, labelOf as never, (chunk) => {
+              await ex.streamCaseCsv(body, hm.toCaseJson, cc.csvHeaderLabel as never, (chunk) => {
                 res.write(chunk)
               })
               res.end()
+              return
+            }
+
+            // CSVの再取込（下見 → 実行）。出力したCSVを直して戻し、まとめて更新する
+            if (
+              (url === '/api/cases/import-csv/preview' ||
+                url === '/api/cases/import-csv/commit') &&
+              req.method === 'POST'
+            ) {
+              const im = (await server.ssrLoadModule(
+                '/src/server/caseCsvImport.ts'
+              )) as typeof import('./src/server/caseCsvImport')
+              // 空欄の扱いは URL の ?blankClears=1 で受ける（本文はファイルそのもの）
+              const blankClears =
+                new URLSearchParams(req.url?.split('?')[1] ?? '').get('blankClears') === '1'
+              const buf = await readRawBuffer(req)
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              if (buf.length === 0) {
+                res.statusCode = 400
+                res.end(JSON.stringify({ error: 'ファイルが空です' }))
+                return
+              }
+              try {
+                const out = url.endsWith('/preview')
+                  ? await im.planCaseCsvImport(buf, { blankClears })
+                  : await im.commitCaseCsvImport(editActor, buf, { blankClears }, meta)
+                res.end(JSON.stringify(out))
+              } catch (e) {
+                res.statusCode = 400
+                res.end(
+                  JSON.stringify({
+                    error: `ファイルを読めませんでした: ${e instanceof Error ? e.message : String(e)}`,
+                  })
+                )
+              }
               return
             }
 

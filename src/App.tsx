@@ -19,6 +19,7 @@ import { MembersPage } from './pages/MembersPage'
 import { GmoTransferPage } from './pages/GmoTransferPage'
 import { IntakeImportPage } from './pages/IntakeImportPage'
 import { DepositImportPage } from './pages/DepositImportPage'
+import { CaseCsvImportPage } from './pages/CaseCsvImportPage'
 import { PaymentDelayDashboard } from './pages/PaymentDelayDashboard'
 import { ReminderTaskPage } from './pages/ReminderTaskPage'
 import { ClientReminderPage } from './pages/ClientReminderPage'
@@ -85,6 +86,10 @@ const router = createBrowserRouter([
   {
     path: '/deposit-import',
     element: <DepositImportPage />,
+  },
+  {
+    path: '/csv-import',
+    element: <CaseCsvImportPage />,
   },
 ])
 

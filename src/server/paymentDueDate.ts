@@ -16,7 +16,7 @@
  *   ・触るのは入金予定日だけ。金額・充当・実績には一切手を付けない
  */
 import { prisma } from './db.js'
-import { writeAudit, type Actor } from './audit.js'
+import { writeAudit, writeChange, type Actor } from './audit.js'
 
 /** 月(1-12) → その月の入金日。指定の無い月は変更しない */
 export type DueDateByMonth = Record<number, number | null | undefined>
@@ -117,6 +117,40 @@ export async function applyDueDateChange(
   await prisma.$executeRawUnsafe(
     `UPDATE payments SET "plannedDate" = CASE id ${whens} END WHERE id IN (${ids.join(',')})`
   )
+  /*
+    変更履歴（案件詳細の「変更履歴」）にも1行ずつ残す。
+    事務所からのご指摘（2026-09-03）:
+      「変更したところ『変更履歴に反映されない』ということになっていたようです。
+        全ての更新は、変更履歴に残して欲しいです！」
+    こちらの実装漏れ。監査ログには残していたが、画面に出る変更履歴（change_logs）へ
+    書いていなかった。1行ずつ残すので、画面から1件だけ元に戻すこともできる。
+    件数が多いので、DBへの往復を増やさないようまとめて1回で作る。
+  */
+  await prisma.changeLog.createMany({
+    data: plan.changes.map((c) => ({
+      actorId: actor.id ?? null,
+      actorEmail: actor.email ?? null,
+      entity: 'Payment',
+      entityId: String(c.paymentId),
+      action: 'UPDATE' as const,
+      before: { plannedDate: c.from },
+      after: { plannedDate: c.to },
+    })),
+  })
+  // 「いつ・誰が・何件まとめて変えたか」も1件だけ案件に残す（個別の履歴に埋もれないように）
+  await writeChange({
+    actor,
+    entity: 'Case',
+    entityId: String(caseId),
+    action: 'UPDATE',
+    before: { dueDateBulk: `入金期日の一括変更（対象 ${plan.changes.length}件）` },
+    after: {
+      dueDateBulk: Object.entries(byMonth)
+        .filter(([, d]) => d != null)
+        .map(([m, d]) => `${m}月=${d}日`)
+        .join(' / '),
+    },
+  })
   await writeAudit({
     actor,
     action: 'UPDATE',

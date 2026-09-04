@@ -4,6 +4,8 @@ import { useCaseDispatch, usePaymentsByCaseId } from '../store/useCaseStore'
 import { DataTable, type Column } from '../components'
 import type { PaymentRecord, Creditor } from '../types'
 import { nextPlannedDate } from '../lib/paymentRows'
+import { RowDateInput } from '../components/RowDateInput'
+import { checkYmdFields, numOrNull } from '../lib/rowEditValue'
 
 interface CreditorPaymentTableProps {
   caseId: number
@@ -101,6 +103,14 @@ export function CreditorPaymentTable({
   }
 
   const handleSave = (payment: PaymentRecord) => {
+    const ng = checkYmdFields(editData, [
+      ['plannedDate', '弁済予定日'],
+      ['actualDate', '弁済日'],
+    ])
+    if (ng) {
+      window.alert(ng)
+      return
+    }
     dispatch({
       type: 'UPDATE_PAYMENT',
       payload: {
@@ -149,12 +159,9 @@ export function CreditorPaymentTable({
       render: (item) => {
         if (editingId === item.id) {
           return (
-            <input
-              type="date"
-              value={editData.plannedDate ?? ''}
-              onChange={(e) =>
-                setEditData({ ...editData, plannedDate: e.target.value || null })
-              }
+            <RowDateInput
+              value={editData.plannedDate}
+              onChange={(v) => setEditData({ ...editData, plannedDate: v })}
               className={inputCls}
             />
           )
@@ -180,7 +187,7 @@ export function CreditorPaymentTable({
               type="number"
               value={editData.plannedAmount ?? ''}
               onChange={(e) =>
-                setEditData({ ...editData, plannedAmount: Number(e.target.value) || null })
+                setEditData({ ...editData, plannedAmount: numOrNull(e.target.value) })
               }
               className={`${inputCls} text-right`}
             />
@@ -198,12 +205,9 @@ export function CreditorPaymentTable({
       render: (item) => {
         if (editingId === item.id) {
           return (
-            <input
-              type="date"
-              value={editData.actualDate ?? ''}
-              onChange={(e) =>
-                setEditData({ ...editData, actualDate: e.target.value || null })
-              }
+            <RowDateInput
+              value={editData.actualDate}
+              onChange={(v) => setEditData({ ...editData, actualDate: v })}
               className={inputCls}
             />
           )
@@ -231,7 +235,7 @@ export function CreditorPaymentTable({
               onChange={(e) =>
                 setEditData({
                   ...editData,
-                  actualAmount: Number(e.target.value) || null,
+                  actualAmount: numOrNull(e.target.value),
                 })
               }
               className={`${inputCls} text-right`}

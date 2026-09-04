@@ -13,33 +13,17 @@
  * サーバでCSVを組み立てて、そのまま受け取って保存する。
  */
 import { FIELD_LABEL } from '../constants/fieldLabels'
+import {
+  CONTACT_FIELDS,
+  CREDITOR_FIELDS,
+  PAYMENT_FIELDS,
+} from '../constants/csvColumns'
 
-/** テーブルごとに出せる項目（DBの列名）。並びはDBの定義順に合わせてある */
-const CREDITOR_FIELDS = [
-  'id', 'caseId', 'creditorName', 'negotiationPartner', 'declaredAmount', 'debtAmount',
-  'expectedSettlement', 'expectedSettlementAmount', 'expectedPaymentCount', 'expectedFutureInterest',
-  'status', 'check', 'nextProcessDate', 'acceptanceNoticeSentDate', 'debtInquiryArrivalDate',
-  'customerCode', 'contractDate', 'settlementProposalDate', 'settlementProposal', 'responseStatus',
-  'settlementDate', 'settlementAmount', 'settlementDebtAmount', 'settlementContentComment',
-  'reminder', 'paymentStartMonth', 'paymentDay', 'paymentCount', 'firstPaymentAmount',
-  'subsequentPaymentAmount', 'finalPaymentAmount', 'finalPaymentMonth', 'futureInterest',
-  'bankName', 'financialInstitutionCode', 'branchName', 'branchCode', 'accountType',
-  'accountNumber', 'accountHolder', 'designatedCode', 'repaymentTarget', 'fundIncreaseAction',
-  'displayOrder',
-]
-
-const PAYMENT_FIELDS = [
-  'id', 'caseId', 'creditorId', 'creditorInstallmentIndex', 'plannedDate', 'plannedAmount',
-  'plannedFeeAllocation', 'plannedAgentFeeAllocation', 'plannedPoolAllocation',
-  'plannedRepaymentAllocation', 'actualDate', 'actualAmount', 'actualFeeAllocation',
-  'actualAgentFeeAllocation', 'actualPoolAllocation', 'actualRepaymentAllocation',
-  'handlingFee', 'repaymentCount', 'repaymentDate', 'actualRepaymentCount', 'actualHandlingFee',
-  'cumulativePool',
-]
-
-const CONTACT_FIELDS = [
-  'id', 'caseId', 'contactDate', 'contactTime', 'staff', 'tool', 'targetType', 'creditorName', 'comment',
-]
+/*
+  出せる項目の一覧（CREDITOR_FIELDS / PAYMENT_FIELDS / CONTACT_FIELDS）は
+  constants/csvColumns.ts に置いてある。出力・取込・この画面の3か所で同じものを
+  使わないと「出したCSVが取り込めない」ことになるため、写経せず共有している。
+*/
 
 const label = (f: string) => FIELD_LABEL[f] ?? f
 const toFields = (keys: string[]) => keys.map((k) => ({ key: k, label: label(k) }))
@@ -54,11 +38,14 @@ export const CSV_TABLES = [
 export async function downloadCaseCsvWithTables(sel: {
   caseFields: string[]
   tables: Record<string, string[]>
+  ids: (string | number)[]
 }): Promise<void> {
+  // 画面の絞り込み結果（案件の内部ID）をそのまま渡し、その案件だけを出す
+  const caseIds = sel.ids.map((v) => Number(v)).filter((n) => Number.isFinite(n))
   const r = await fetch('/api/cases/export-csv', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ caseFields: sel.caseFields, tables: sel.tables }),
+    body: JSON.stringify({ caseFields: sel.caseFields, tables: sel.tables, caseIds }),
   })
   if (!r.ok) {
     window.alert('CSVを作成できませんでした')
