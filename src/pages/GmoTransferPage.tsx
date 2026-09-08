@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import { DataTable, type Column } from '../components'
 import { AppHeader } from '../components/AppHeader'
 import { PageLoading } from '../components/PageLoading'
+import { alertApiError } from '../lib/apiError'
 
 type IncompleteRow = {
   creditorId: number
@@ -115,7 +116,7 @@ export function GmoTransferPage() {
       const r = await fetch('/api/gmo/auth/url')
       const d = (await r.json()) as { url?: string; error?: string }
       if (!r.ok || !d.url) {
-        window.alert(d.error ?? '認可URLの取得に失敗しました')
+        await alertApiError(r, '認可URLの取得に失敗しました', d)
         return
       }
       // 銀行のログイン・認可画面を別タブで開く（認可完了でコールバックに戻る）

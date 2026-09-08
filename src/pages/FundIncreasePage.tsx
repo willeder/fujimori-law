@@ -35,10 +35,12 @@ type Row = {
   reason: 'amount' | 'ratio' | 'both'
   /** 原資UP対応が「要」の社数 */
   fundIncreaseRequired: number
+  /** 原資UP対応が「対応中」の社数 */
+  fundIncreaseInProgress: number
   /** 原資UP対応が「完了」の社数 */
   fundIncreaseDone: number
   /** 案件としての原資UP対応（各社タブの値から算出。lib/fundIncrease.ts と同じ規則） */
-  fundIncreaseState: 'required' | 'done' | 'none'
+  fundIncreaseState: 'required' | 'inProgress' | 'done' | 'none'
 }
 
 const REASON_LABEL: Record<Row['reason'], string> = {
@@ -49,11 +51,12 @@ const REASON_LABEL: Record<Row['reason'], string> = {
 
 const yen = (n: number | null) => (n != null ? `${n.toLocaleString()}円` : '-')
 
-/** 並び順: 対応要 → 未判断 → 対応済 */
-const FUND_ORDER: Record<'required' | 'none' | 'done', number> = {
+/** 並び順: 対応要 → 対応中 → 未判断 → 対応済（手を打つべき順） */
+const FUND_ORDER: Record<Row['fundIncreaseState'], number> = {
   required: 0,
-  none: 1,
-  done: 2,
+  inProgress: 1,
+  none: 2,
+  done: 3,
 }
 
 export function FundIncreasePage() {
@@ -61,15 +64,18 @@ export function FundIncreasePage() {
   const [rows, setRows] = useState<Row[] | null>(null)
   const [loading, setLoading] = useState(true)
   /*
-    表示する状態の切り替え（事務所のご要望 2026-09-02）。
+    表示する状態の切り替え（事務所のご要望 2026-09-02、対応中は Rei 2026-09-08）。
       ・対応要 … 各社タブで1社でも「要」を選んだ案件
+      ・対応中 … 「要」が無く「対応中」がある案件（依頼者と話している最中）
       ・未判断 … まだどの社にも印が付いていない案件（移行直後は全件ここ）
-      ・対応済 … 「要」が無く「完了」がある案件
-    「対応要のものだけ見たい」ときは未判断のチェックを外す。
+      ・対応済 … 上のどれでもなく「完了」がある案件
+    「対応要のものだけ見たい」ときは他のチェックを外す。
     未判断を既定で表示するのは、印を付ける前の案件がここにしか出てこないため
     （全部外すと、対応すべき案件を見つける入口が無くなる）。
+    対応中も既定で表示する。着手済みでも終わっていない案件を見失わないように。
   */
   const [showRequired, setShowRequired] = useState(true)
+  const [showInProgress, setShowInProgress] = useState(true)
   const [showNone, setShowNone] = useState(true)
   const [showDone, setShowDone] = useState(false)
 
@@ -96,11 +102,13 @@ export function FundIncreasePage() {
     .filter((r) =>
       r.fundIncreaseState === 'required'
         ? showRequired
-        : r.fundIncreaseState === 'done'
-          ? showDone
-          : showNone
+        : r.fundIncreaseState === 'inProgress'
+          ? showInProgress
+          : r.fundIncreaseState === 'done'
+            ? showDone
+            : showNone
     )
-    // 対応要 → 未判断 → 対応済 の順。同じ状態の中は差額の大きい順（サーバの並びのまま）。
+    // 対応要 → 対応中 → 未判断 → 対応済 の順。同じ状態の中は差額の大きい順（サーバの並びのまま）。
     .sort((a, b) => FUND_ORDER[a.fundIncreaseState] - FUND_ORDER[b.fundIncreaseState])
   const count = (s: Row['fundIncreaseState']) =>
     all.filter((r) => r.fundIncreaseState === s).length
@@ -127,10 +135,19 @@ export function FundIncreasePage() {
       header: '原資UP対応',
       width: '112px',
       align: 'center',
+      /*
+        一目で分かるように、状態ごとに色を変える（Rei 2026-09-08）。
+          要=赤の塗り / 対応中=オレンジの塗り / 済=灰の文字 / 未判断=薄い灰
+        「要」と「対応中」は見落とすと困るので、文字だけでなく背景も付ける。
+      */
       render: (r) =>
         r.fundIncreaseState === 'required' ? (
-          <span className="whitespace-nowrap font-bold text-red-600">
+          <span className="whitespace-nowrap rounded bg-red-100 px-1.5 py-0.5 font-bold text-red-700">
             要{r.fundIncreaseRequired > 1 ? `（${r.fundIncreaseRequired}社）` : ''}
+          </span>
+        ) : r.fundIncreaseState === 'inProgress' ? (
+          <span className="whitespace-nowrap rounded bg-amber-100 px-1.5 py-0.5 font-bold text-amber-700">
+            対応中{r.fundIncreaseInProgress > 1 ? `（${r.fundIncreaseInProgress}社）` : ''}
           </span>
         ) : r.fundIncreaseState === 'done' ? (
           <span className="whitespace-nowrap text-slate-700">済</span>
@@ -138,8 +155,14 @@ export function FundIncreasePage() {
           <span className="text-slate-300">未判断</span>
         ),
       filterValue: (r) =>
-        r.fundIncreaseState === 'required' ? '要' : r.fundIncreaseState === 'done' ? '済' : '未判断',
-      filterSuggestions: ['要', '済', '未判断'],
+        r.fundIncreaseState === 'required'
+          ? '要'
+          : r.fundIncreaseState === 'inProgress'
+            ? '対応中'
+            : r.fundIncreaseState === 'done'
+              ? '済'
+              : '未判断',
+      filterSuggestions: ['要', '対応中', '済', '未判断'],
     },
     {
       key: 'furigana',
@@ -254,7 +277,7 @@ export function FundIncreasePage() {
       <AppHeader title="原資UP対応一覧">
         <span className="text-xs text-slate-500">
           申告額より実債務額が20万円以上、または申告額の10％以上大きい依頼者。
-          対応要→未判断→対応済の順・{data.length} 件
+          対応要→対応中→未判断→対応済の順・{data.length} 件
         </span>
       </AppHeader>
       <div className="p-3">
@@ -265,6 +288,15 @@ export function FundIncreasePage() {
             <input type="checkbox" checked={showRequired} onChange={(e) => setShowRequired(e.target.checked)} />
             <span className="font-bold text-red-600">原資UP対応要</span>
             <span className="text-slate-400">{count('required')}件</span>
+          </label>
+          <label className="flex cursor-pointer items-center gap-1">
+            <input
+              type="checkbox"
+              checked={showInProgress}
+              onChange={(e) => setShowInProgress(e.target.checked)}
+            />
+            <span className="font-bold text-amber-600">原資UP対応中</span>
+            <span className="text-slate-400">{count('inProgress')}件</span>
           </label>
           <label className="flex cursor-pointer items-center gap-1">
             <input type="checkbox" checked={showNone} onChange={(e) => setShowNone(e.target.checked)} />

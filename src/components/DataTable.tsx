@@ -1041,11 +1041,18 @@ export function DataTable<T>({
   const pager =
     paginated && total > 0 ? (
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
-        <span>
-          {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, total)} / {total}件
-        </span>
+        {/*
+          CSV出力は左側（件数の隣）に置く。Rei 2026-09-08「CSV出力の場所を左側へ移動」
+          右端は表示件数・ページ送りで、押す頻度の高いCSV出力が右端まで
+          目線を動かさないと見つからなかった。
+        */}
         <div className="flex items-center gap-2">
+          <span>
+            {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, total)} / {total}件
+          </span>
           {csvButton}
+        </div>
+        <div className="flex items-center gap-2">
           <label className="flex items-center gap-1">
             表示件数
             <select
@@ -1178,7 +1185,7 @@ export function DataTable<T>({
       {findBar}
       {pager}
       {csvExport && !(paginated && total > 0) && (
-        <div className="flex shrink-0 items-center justify-end gap-2 border-b border-slate-200 bg-slate-50 px-3 py-1">
+        <div className="flex shrink-0 items-center justify-start gap-2 border-b border-slate-200 bg-slate-50 px-3 py-1">
           {csvButton}
         </div>
       )}

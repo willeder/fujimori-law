@@ -63,8 +63,17 @@ export const GMO_TRANSFER_TARGET_STATUSES = [
  *   その要否と完了を債権者ごとに残し、案件単位のまとめは各社の値から出す。
  *
  * 空欄（NULL）が既定。kintone からの移行分は全件空欄。
+ *
+ * 「対応中」を追加（Rei 2026-09-08）。
+ *   「原資UP対応に対応中を追加して、一覧の絞り込みにも追加してほしい。
+ *     一目でわかりやすいように」
+ *   要（未着手）→ 対応中（依頼者と話している最中）→ 完了 の3段階になる。
+ *   この項目は kintone に無い当システム独自の項目なので、kintone 側への
+ *   追加を待たずに増やしてよい（取込時に食い違う心配がない）。
+ *
+ * 並び順は対応の進み方どおり。画面の絞り込み候補もこの順で出る。
  */
-export const FUND_INCREASE_ACTION_OPTIONS = ['要', '完了'] as const
+export const FUND_INCREASE_ACTION_OPTIONS = ['要', '対応中', '完了'] as const
 
 export const CREDITOR_STATUS_OPTIONS = [
   '受任通知発送待ち',

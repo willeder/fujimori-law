@@ -4,7 +4,8 @@ import { useCaseDispatch, usePaymentsByCaseId } from '../store/useCaseStore'
 import { useFoundSet } from '../store/FoundSet'
 import { useCaseEdit } from '../context/CaseEditContext'
 import { settlementTotals } from '../lib/settlementTotals'
-import { fundIncreaseState } from '../lib/fundIncrease'
+import { FUND_INCREASE_SHORT_LABEL, fundIncreaseState } from '../lib/fundIncrease'
+import { alertApiError, alertThrown } from '../lib/apiError'
 import { EditableField, StatusBadge, DataTable, type Column } from '../components'
 import { useBanks, useBranches } from '../hooks/useBankDictionary'
 import type { Creditor } from '../types'
@@ -108,7 +109,13 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ conditions }),
       })
-      const rows = (r.ok ? ((await r.json()) as Creditor[]) : []) ?? []
+      // 失敗したまま「見つかりませんでした」と出すと、探し方が悪いのか
+      // 動いていないのか区別が付かないので、失敗は失敗として理由まで出す
+      if (!r.ok) {
+        await alertApiError(r, '債権者の検索に失敗しました')
+        return
+      }
+      const rows = ((await r.json()) as Creditor[]) ?? []
       if (rows.length === 0) {
         alert('該当する債権者が見つかりませんでした')
         return
@@ -123,8 +130,8 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       navigate(`/cases/${items[0].caseId}`, {
         state: { focusCreditorId: items[0].creditorId },
       })
-    } catch {
-      alert('検索に失敗しました')
+    } catch (e) {
+      alertThrown(e, '債権者の検索に失敗しました')
     }
   }
 
@@ -193,7 +200,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
     // 和解状況の4項目（旧・手入力）。債権者データから機械的に出せるので画面で計算する。
     // 定義は src/lib/settlementTotals.ts を参照。
     const totals = settlementTotals(creditors)
-    // 原資UP対応の案件としての状態（要 / 済 / なし）
+    // 原資UP対応の案件としての状態（要 / 対応中 / 済 / なし）
     const fundIncrease = fundIncreaseState(creditors)
 
     // 弁済の進捗（合算）。個別の債権者タブ（弁済予定履歴）と同じ定義で合計する。
@@ -337,6 +344,11 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         render: (item) =>
           item.fundIncreaseAction === '要' ? (
             <span className="rounded bg-red-100 px-1 text-[0.625rem] font-bold text-red-700">要</span>
+          ) : item.fundIncreaseAction === '対応中' ? (
+            // 着手済みだが終わっていない社。要と済のどちらとも見分けられるように橙
+            <span className="rounded bg-amber-100 px-1 text-[0.625rem] font-bold text-amber-700">
+              対応中
+            </span>
           ) : item.fundIncreaseAction === '完了' ? (
             <span className="rounded bg-slate-100 px-1 text-[0.625rem] text-slate-600">完了</span>
           ) : (
@@ -369,9 +381,18 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
       },
     ]
 
+    /*
+      すべて合算タブ（和解状況）は、表だけがスクロールするようにする。
+      Rei 2026-09-08「和解状況のスクロールがテーブル以外のところにも
+      反映されてるのでなくす」
+      以前は表に max-h を持たせていたため、上のサマリごと動いたり、
+      枠からはみ出た部分が切れたりしていた。
+      枠いっぱいに縦に並べ、サマリは動かさず（shrink-0）、
+      余った高さを表に渡す（flex-1 + fillHeight）。
+    */
     return (
-      <div className="min-h-0 space-y-3">
-        <div className="text-xs leading-snug text-slate-600">
+      <div className="flex min-h-0 flex-1 flex-col gap-3">
+        <div className="shrink-0 text-xs leading-snug text-slate-600">
           債権者数：{accepted.length}社
           {creditors.length !== accepted.length && (
             <span className="text-slate-400">（受任対象外{creditors.length - accepted.length}社を除く）</span>
@@ -379,7 +400,7 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           （うち和解済：{settledCount}社）・案件ID: {caseId}
         </div>
         {/* 合計サマリ（入金スケジュールのサマリ相当の読みやすさ） */}
-        <div className="grid grid-cols-2 gap-2 rounded bg-slate-50 p-2 sm:grid-cols-5">
+        <div className="grid shrink-0 grid-cols-2 gap-2 rounded bg-slate-50 p-2 sm:grid-cols-5">
           <div>
             <div className="text-xs font-medium leading-tight text-slate-500">債権者数</div>
             <div className="text-sm font-bold tabular-nums text-slate-800">
@@ -438,8 +459,11 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           </div>
         </div>
 
-        {/* 和解状況（自動計算）。kintone では手入力だった4項目を債権者から算出する */}
-        <div className="grid grid-cols-2 gap-2 rounded bg-blue-50/60 p-2 sm:grid-cols-5">
+        {/*
+          和解状況（自動計算）。kintone では手入力だった4項目を債権者から算出する。
+          原資UP対応を独立した枠にしたぶん、6列にしている（Rei 2026-09-08）。
+        */}
+        <div className="grid shrink-0 grid-cols-2 gap-2 rounded bg-blue-50/60 p-2 sm:grid-cols-6">
           <div>
             <div className="text-xs font-medium leading-tight text-slate-500">予定代弁社数</div>
             <div className="text-sm font-bold tabular-nums text-slate-800">
@@ -470,39 +494,46 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
             <div className="text-xs font-medium leading-tight text-slate-500">
               差額合計（申告−債務）
             </div>
-            {/*
-              原資UP対応（案件としての状態）を、差額合計の「右隣」に並べる。
-              事務所からのご指摘（2026-09-03）:
-                「対応が要のときに、すべて合算タブに表示する際、次の行になってますが
-                  『差額の右隣』に表示できれば嬉しいです。対応要（赤太字）だけなら、
-                  入らないかなと・・・」
-              以前は独立した枠だったため、枠の折り返しで次の行に落ちていた。
-              金額と同じ行に並べれば折り返さない。
-              1社でも「要」があれば赤太字で「原資UP対応要」、
-              「要」が無く「完了」があれば黒字で「原資UP対応済」。
-              どちらも無い（全社空欄）ときは出さない。まとめ方は lib/fundIncrease.ts。
-            */}
-            <div className="flex items-baseline gap-2 whitespace-nowrap">
-              <span
-                className={`text-sm font-bold tabular-nums ${
-                  totalDeclared - totalDebt < 0 ? 'text-red-600' : 'text-slate-800'
-                }`}
-              >
-                {(totalDeclared - totalDebt).toLocaleString()}円
-              </span>
-              {fundIncrease !== 'none' && (
-                <span
-                  className={
-                    fundIncrease === 'required'
-                      ? 'text-sm font-bold text-red-600'
-                      : 'text-sm font-bold text-slate-800'
-                  }
-                >
-                  {fundIncrease === 'required' ? '原資UP対応要' : '原資UP対応済'}
-                </span>
-              )}
+            <div
+              className={`text-sm font-bold tabular-nums ${
+                totalDeclared - totalDebt < 0 ? 'text-red-600' : 'text-slate-800'
+              }`}
+            >
+              {(totalDeclared - totalDebt).toLocaleString()}円
             </div>
           </div>
+          {/*
+            原資UP対応（案件としての状態）。差額合計の右隣に、独立した枠として置く。
+
+            経緯:
+              ・2026-09-03（田中様）「差額の右隣に表示できれば嬉しいです」
+                → 当初は独立枠が折り返して次の行に落ちていたため、差額の金額と
+                  同じ行に並べて対応した。
+              ・2026-09-08（Rei）「差額合計（申告−債務）と同じ値の場所に
+                表示されてるので右側に別枠で入れて欲しい」
+                → 金額と同居していて差額の一部に見えるため、枠を分けた。
+                  枠を6列にしたので、分けても折り返さず右隣に並ぶ。
+
+            1社でも「要」→ 赤 / 「要」が無く「対応中」→ 橙 / 上のどちらも無く
+            「完了」→ 黒。どれも無い（全社空欄）ときは見出しごと出さない。
+            まとめ方は lib/fundIncrease.ts。
+          */}
+          {fundIncrease !== 'none' && (
+            <div>
+              <div className="text-xs font-medium leading-tight text-slate-500">原資UP対応</div>
+              <div
+                className={`whitespace-nowrap text-sm font-bold ${
+                  fundIncrease === 'required'
+                    ? 'text-red-600'
+                    : fundIncrease === 'inProgress'
+                      ? 'text-amber-600'
+                      : 'text-slate-800'
+                }`}
+              >
+                {FUND_INCREASE_SHORT_LABEL[fundIncrease]}
+              </div>
+            </div>
+          )}
           {totals.missingPaymentCount > 0 && (
             <div className="col-span-full text-[0.6875rem] text-amber-700">
               ※ 弁済対象 {totals.missingPaymentCount} 社は支払回数が未入力のため、
@@ -511,18 +542,20 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           )}
         </div>
 
-        <DataTable
-          data={creditors}
-          columns={columns}
-          keyField="id"
-          emptyMessage="債権者データがありません"
-          density="dense"
-          bodyMaxHeightClassName="max-h-[min(72vh,40rem)]"
-          cellSingleLine
-          enableFind
-          onFindNavigate={runCreditorFind}
-        />
-
+        {/* 高さは親の残りぶん。表の中だけがスクロールする */}
+        <div className="min-h-0 flex-1">
+          <DataTable
+            data={creditors}
+            columns={columns}
+            keyField="id"
+            emptyMessage="債権者データがありません"
+            density="dense"
+            fillHeight
+            cellSingleLine
+            enableFind
+            onFindNavigate={runCreditorFind}
+          />
+        </div>
       </div>
     )
   }
