@@ -16,6 +16,12 @@
  *   （例: 3D/1D/0D_1 は午前、0D_2 は 16:00 JST）。
  *
  * 実処理は src/server/paymentReminder.ts に集約。
+ *
+ * ついでに「出力したCSVの後片付け」もここで行う（2026-09-08 追加）。
+ * CSV出力は本体を Supabase Storage の非公開バケットに置く方式にしたが、
+ * 依頼者・債権者の個人情報を含むため置きっぱなしにしない。
+ * 24時間より古いものをここで消す。cron を増やさずに済むので運用が軽い。
+ * 後片付けが失敗してもリマインド本体は止めない。
  */
 import {
   runPaymentReminder,
@@ -23,6 +29,7 @@ import {
   getTimingDef,
   DEFAULT_DAYS_BEFORE,
 } from '../../src/server/paymentReminder.js'
+import { purgeOldCsvExports } from '../../src/server/csvExportFile.js'
 
 export const config = { runtime: 'nodejs' }
 
@@ -46,7 +53,16 @@ async function run(req: Request): Promise<Response> {
       : await runPaymentReminder(
           params.get('days') !== null ? Number(params.get('days')) : DEFAULT_DAYS_BEFORE
         )
-  return new Response(JSON.stringify(summary), {
+
+  // 出力済みCSVの後片付け（失敗してもリマインドの結果は返す）
+  let csvExports: unknown
+  try {
+    csvExports = await purgeOldCsvExports()
+  } catch (e) {
+    csvExports = { error: e instanceof Error ? e.message : String(e) }
+  }
+
+  return new Response(JSON.stringify({ ...summary, csvExports }), {
     status: 200,
     headers: { 'Content-Type': 'application/json; charset=utf-8' },
   })

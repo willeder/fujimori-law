@@ -698,10 +698,10 @@ export function DataTable<T>({
         onClick={() => setCsvOpen(false)}
       >
         <div
-          className="max-h-[85vh] w-[26rem] overflow-hidden rounded-lg bg-white shadow-xl"
+          className="flex max-h-[85vh] w-[26rem] flex-col overflow-hidden rounded-lg bg-white shadow-xl"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2">
+          <div className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2">
             <span className="text-sm font-semibold text-slate-700">CSV出力（{csvExport}）</span>
             <button
               type="button"
@@ -711,7 +711,7 @@ export function DataTable<T>({
               ✕
             </button>
           </div>
-          <div className="px-4 py-2 text-[0.6875rem] text-slate-500">
+          <div className="shrink-0 px-4 py-2 text-[0.6875rem] text-slate-500">
             出力するフィールドにチェックし、↑↓で並び順を変更できます（設定は保存されます）。
             出力対象: 現在の絞り込み・ソートを適用した {sortedData.length} 件
           </div>
@@ -722,7 +722,7 @@ export function DataTable<T>({
             その行では他のテーブルの列は空欄になる（kintone と同じ形）。
           */}
           {csvTables && csvTables.length > 0 && (
-            <div className="mx-4 mb-2 rounded border border-slate-200 bg-slate-50 px-3 py-2">
+            <div className="mx-4 mb-2 shrink-0 rounded border border-slate-200 bg-slate-50 px-3 py-2">
               <div className="mb-1 text-[0.6875rem] font-semibold text-slate-600">
                 テーブルも出力する（選ぶとその全項目を出します）
               </div>
@@ -751,14 +751,15 @@ export function DataTable<T>({
               </div>
               {anyTableSelected && (
                 <p className="mt-1 text-[0.625rem] leading-relaxed text-slate-500">
-                  テーブルを選ぶと<b>全案件</b>を対象に、テーブルの1行を1行として出力します。
+                  テーブルを選ぶと、いま絞り込んでいる<b>{sortedData.length} 件</b>を対象に、
+                  テーブルの1行を1行として出力します。
                   複数選んだときは、1つ目のテーブルが終わったあと次のテーブルが始まり、
                   その行では他のテーブルの列は空欄になります。件数が多いと少し時間がかかります。
                 </p>
               )}
             </div>
           )}
-          <div className="max-h-[50vh] overflow-y-auto px-4 pb-2">
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-2">
             {csvFields.map((f, i) => {
               const col = csvCandidates.find((c) => String(c.key) === f.key)
               if (!col) return null
@@ -803,7 +804,7 @@ export function DataTable<T>({
               )
             })}
           </div>
-          <div className="flex items-center justify-between gap-2 border-t border-slate-200 bg-slate-50 px-4 py-2">
+          <div className="flex shrink-0 items-center justify-between gap-2 border-t border-slate-200 bg-slate-50 px-4 py-2">
             <div className="flex items-center gap-2">
               <button
                 type="button"
