@@ -34,7 +34,25 @@ export const CSV_TABLES = [
   { key: 'contact', label: '接触履歴', fields: toFields(CONTACT_FIELDS) },
 ]
 
-/** サーバでCSVを作ってもらい、そのまま保存する */
+/**
+ * サーバでCSVを作ってもらい、保存する。
+ *
+ * サーバはCSV本体ではなく「期限付きのダウンロードURL」を返す（2026-09-08 に変更）。
+ * 実データでのCSVは 債権者5.7MB / 入金18.3MB / 接触履歴23.1MB あり、
+ * 本体をそのまま返すやり方では Vercel の応答上限 4.5MB を超えて
+ * 「CSVを作成できませんでした」になっていた。
+ * いまはCSV本体を非公開の保管場所に置き、そこから直接ダウンロードする。
+ * URLは期限付き（10分）で、期限が切れれば誰も開けない。
+ */
+type ExportResponse = {
+  url: string
+  fileName: string
+  bytes: number
+  cases: number
+  rows: number
+  expiresAt: string
+}
+
 export async function downloadCaseCsvWithTables(sel: {
   caseFields: string[]
   tables: Record<string, string[]>
@@ -42,24 +60,40 @@ export async function downloadCaseCsvWithTables(sel: {
 }): Promise<void> {
   // 画面の絞り込み結果（案件の内部ID）をそのまま渡し、その案件だけを出す
   const caseIds = sel.ids.map((v) => Number(v)).filter((n) => Number.isFinite(n))
-  const r = await fetch('/api/cases/export-csv', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ caseFields: sel.caseFields, tables: sel.tables, caseIds }),
-  })
-  if (!r.ok) {
-    window.alert('CSVを作成できませんでした')
+  let r: Response
+  try {
+    r = await fetch('/api/cases/export-csv', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ caseFields: sel.caseFields, tables: sel.tables, caseIds }),
+    })
+  } catch {
+    window.alert('CSVを作成できませんでした（通信に失敗しました）')
     return
   }
-  const blob = await r.blob()
-  const now = new Date()
-  const ymd = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`
-  const url = URL.createObjectURL(blob)
+  // 何が起きたか分かるように、サーバからの理由をそのまま見せる
+  if (!r.ok) {
+    let reason = `HTTP ${r.status}`
+    try {
+      const e = (await r.json()) as { error?: string }
+      if (e?.error) reason = e.error
+    } catch {
+      /* JSON でなければステータスだけ出す */
+    }
+    window.alert(`CSVを作成できませんでした\n${reason}`)
+    return
+  }
+  const data = (await r.json()) as ExportResponse
+  if (!data?.url) {
+    window.alert('CSVを作成できませんでした（ダウンロード先が返りませんでした）')
+    return
+  }
+  // 保管場所から直接ダウンロードする（アプリのサーバを通さない）
   const a = document.createElement('a')
-  a.href = url
-  a.download = `案件一覧_${ymd}.csv`
+  a.href = data.url
+  a.download = data.fileName
+  a.rel = 'noopener'
   document.body.appendChild(a)
   a.click()
   document.body.removeChild(a)
-  URL.revokeObjectURL(url)
 }

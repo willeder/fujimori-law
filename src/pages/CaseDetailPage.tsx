@@ -48,6 +48,7 @@ import {
   CAUTION_RANK_OPTIONS,
   toSelectOptions,
 } from '../constants/fieldOptions'
+import { alertApiError, apiErrorMessage, errorText } from "../lib/apiError";
 
 /** nested な案件編集を DB 列（フラット）へ。列名はほぼ同名、settlementInfo のみ別名 */
 const CASE_FIELD_RENAME: Record<string, string> = {
@@ -977,7 +978,10 @@ function CaseDetailBody({
         }
         if (!r.ok) {
           // 通信・サーバエラー。下書きは残したままにして、やり直せるようにする
-          alert(`案件の保存に失敗しました（${r.status}）。もう一度お試しください。`);
+          await alertApiError(
+            r,
+            "案件の保存に失敗しました。入力内容は残してあるので、もう一度お試しください。",
+          );
           return;
         }
         const d = (await r.json().catch(() => null)) as {
@@ -989,6 +993,8 @@ function CaseDetailBody({
 
       // ② 債権者（変更のあった債権者ごとに PATCH）
       const failed: number[] = [];
+      // 何が起きたのかを出せるよう、最初の失敗の理由を覚えておく
+      let firstReason = "";
       for (const [creditorId, updates] of creditorDraftRef.current) {
         try {
           const r = await fetch(`/api/creditors/${creditorId}`, {
@@ -996,14 +1002,19 @@ function CaseDetailBody({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(updates),
           });
-          if (!r.ok) failed.push(creditorId);
-        } catch {
+          if (!r.ok) {
+            failed.push(creditorId);
+            if (!firstReason) firstReason = await apiErrorMessage(r, "");
+          }
+        } catch (e) {
           failed.push(creditorId);
+          if (!firstReason) firstReason = errorText(e);
         }
       }
       if (failed.length > 0) {
         alert(
-          `債権者 ${failed.length} 件の保存に失敗しました。通信状況を確認してもう一度お試しください。`,
+          `債権者 ${failed.length} 件の保存に失敗しました。入力内容は残してあるので、もう一度お試しください。` +
+            (firstReason ? `\n${firstReason.trim()}` : ""),
         );
         return;
       }

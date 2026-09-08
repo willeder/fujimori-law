@@ -479,7 +479,12 @@ function dbApiPlugin(): Plugin {
               res.end(JSON.stringify(r.body))
               return
             }
-            // 案件＋サブテーブルのCSV出力（kintone と同じ形。全件）
+            /*
+              案件＋サブテーブルのCSV出力（kintone と同じ形）。
+              本番（api/data.ts）と同じく、CSV本体ではなく期限付きの
+              ダウンロードURLを返す。画面のコードが本番とローカルで
+              分岐しないよう、応答の形をそろえている。
+            */
             if (url === '/api/cases/export-csv' && req.method === 'POST') {
               const ex = (await server.ssrLoadModule(
                 '/src/server/caseCsvExport.ts'
@@ -490,6 +495,9 @@ function dbApiPlugin(): Plugin {
               const cc = (await server.ssrLoadModule(
                 '/src/constants/csvColumns.ts'
               )) as typeof import('./src/constants/csvColumns')
+              const st = (await server.ssrLoadModule(
+                '/src/server/csvExportFile.ts'
+              )) as typeof import('./src/server/csvExportFile')
               let body: import('./src/server/caseCsvExport').ExportRequest
               try {
                 body = JSON.parse((await readRawBody(req)) || '{}')
@@ -498,18 +506,45 @@ function dbApiPlugin(): Plugin {
                 res.end('{"error":"bad request"}')
                 return
               }
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              if (!st.exportStorageConfigured()) {
+                res.statusCode = 503
+                res.end(
+                  JSON.stringify({ error: 'CSVの保存先（Supabase Storage）が未設定です' })
+                )
+                return
+              }
               const now = new Date()
               const ymd = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`
-              res.statusCode = 200
-              res.setHeader('Content-Type', 'text/csv; charset=utf-8')
-              res.setHeader(
-                'Content-Disposition',
-                `attachment; filename*=UTF-8''${encodeURIComponent(`案件一覧_${ymd}.csv`)}`
-              )
-              await ex.streamCaseCsv(body, hm.toCaseJson, cc.csvHeaderLabel as never, (chunk) => {
-                res.write(chunk)
-              })
-              res.end()
+              const fileName = `案件一覧_${ymd}.csv`
+              const parts: Buffer[] = []
+              try {
+                const stat = await ex.streamCaseCsv(
+                  body,
+                  hm.toCaseJson,
+                  cc.csvHeaderLabel as never,
+                  (chunk) => {
+                    parts.push(Buffer.from(chunk, 'utf8'))
+                  }
+                )
+                const put = await st.putCsvExport('dev', fileName, Buffer.concat(parts))
+                res.statusCode = 200
+                res.end(
+                  JSON.stringify({
+                    url: put.url,
+                    fileName: put.fileName,
+                    bytes: put.bytes,
+                    cases: stat.cases,
+                    rows: stat.rows,
+                    expiresAt: put.expiresAt,
+                  })
+                )
+              } catch (e) {
+                res.statusCode = 500
+                res.end(
+                  JSON.stringify({ error: e instanceof Error ? e.message : String(e) })
+                )
+              }
               return
             }
 

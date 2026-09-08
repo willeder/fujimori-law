@@ -573,11 +573,25 @@ export default async function handler(
       json(r.body, r.status)
       return
     }
-    // 案件＋サブテーブルのCSV出力（kintone と同じ形。全件）
+    /*
+      案件＋サブテーブルのCSV出力（kintone と同じ形）。
+
+      応答はCSV本体ではなく「期限付き署名URL」を返す（2026-09-08 に変更）。
+
+      事務所からのご報告:
+        「CSV出力→テーブル選択→出力する→『CSVを作成できませんでした』」
+      原因は Vercel Function の応答本文上限 4.5MB。実データでの出力サイズは
+      債権者 5.7MB / 入金 18.3MB / 接触履歴 23.1MB あり、3テーブルとも
+      超えていて 500 になっていた（テーブルを選ばない出力はブラウザ内で
+      作っているため通っていた）。
+      CSV本体は非公開バケットに置き、ブラウザ → Storage で直接落とす。
+      これで応答は1KB未満になり、上限に当たらなくなる。
+    */
     if (path === '/api/cases/export-csv' && method === 'POST') {
       const ex = await import('../src/server/caseCsvExport.js')
       const { toCaseJson } = await import('../src/server/handlers.js')
       const { csvHeaderLabel } = await import('../src/constants/csvColumns.js')
+      const store = await import('../src/server/csvExportFile.js')
       const raw = (await getRawBody(req)).toString('utf8')
       let body: import('../src/server/caseCsvExport.js').ExportRequest
       try {
@@ -586,18 +600,69 @@ export default async function handler(
         json({ error: 'bad request' }, 400)
         return
       }
+      if (!store.exportStorageConfigured()) {
+        json({ error: 'CSVの保存先（Supabase Storage）が未設定です' }, 503)
+        return
+      }
       const now = new Date()
       const ymd = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`
-      res.statusCode = 200
-      res.setHeader('Content-Type', 'text/csv; charset=utf-8')
-      res.setHeader(
-        'Content-Disposition',
-        `attachment; filename*=UTF-8''${encodeURIComponent(`案件一覧_${ymd}.csv`)}`
-      )
-      await ex.streamCaseCsv(body, toCaseJson, csvHeaderLabel as never, (chunk) => {
-        res.write(chunk)
+      const fileName = `案件一覧_${ymd}.csv`
+
+      const parts: Buffer[] = []
+      let stat: { cases: number; rows: number }
+      try {
+        stat = await ex.streamCaseCsv(body, toCaseJson, csvHeaderLabel as never, (chunk) => {
+          parts.push(Buffer.from(chunk, 'utf8'))
+        })
+      } catch (e) {
+        json({ error: `CSVの作成に失敗しました: ${e instanceof Error ? e.message : String(e)}` }, 500)
+        return
+      }
+
+      let put: Awaited<ReturnType<typeof store.putCsvExport>>
+      try {
+        put = await store.putCsvExport(
+          sessionUser.id ?? sessionUser.email ?? 'unknown',
+          fileName,
+          Buffer.concat(parts)
+        )
+      } catch (e) {
+        json({ error: e instanceof Error ? e.message : String(e) }, 502)
+        return
+      }
+
+      // 依頼者・債権者の個人情報を含む一覧の持ち出しなので、誰が何をいつ出したか残す
+      const usedTables = Object.entries(body.tables ?? {})
+        .filter(([, v]) => (v?.length ?? 0) > 0)
+        .map(([k]) => k)
+      await writeAudit({
+        actor: editActor,
+        action: 'EXPORT',
+        entity: 'Case',
+        summary:
+          `案件一覧CSVを出力: ${stat.cases}件 / ${stat.rows}行` +
+          ` (${(put.bytes / 1048576).toFixed(1)}MB)` +
+          (usedTables.length > 0 ? ` テーブル: ${usedTables.join(',')}` : ''),
+        metadata: {
+          cases: stat.cases,
+          rows: stat.rows,
+          bytes: put.bytes,
+          tables: usedTables,
+          caseFields: body.caseFields ?? [],
+          path: put.path,
+        },
+        ip: meta.ip,
+        userAgent: meta.userAgent,
       })
-      res.end()
+
+      json({
+        url: put.url,
+        fileName: put.fileName,
+        bytes: put.bytes,
+        cases: stat.cases,
+        rows: stat.rows,
+        expiresAt: put.expiresAt,
+      })
       return
     }
     // CSVの再取込（下見 → 実行）。出力したCSVを直して戻し、まとめて更新する

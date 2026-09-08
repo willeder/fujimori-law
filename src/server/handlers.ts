@@ -1929,6 +1929,8 @@ export async function getFundIncreaseCandidates() {
     debtUnknownCount: number
     /** 原資UP対応が「要」の社数 */
     fundIncreaseRequired: number
+    /** 原資UP対応が「対応中」の社数 */
+    fundIncreaseInProgress: number
     /** 原資UP対応が「完了」の社数 */
     fundIncreaseDone: number
   }
@@ -1941,6 +1943,7 @@ export async function getFundIncreaseCandidates() {
       creditorCount: 0,
       debtUnknownCount: 0,
       fundIncreaseRequired: 0,
+      fundIncreaseInProgress: 0,
       fundIncreaseDone: 0,
     }
     acc.declared += r.declaredAmount ?? 0
@@ -1948,6 +1951,7 @@ export async function getFundIncreaseCandidates() {
     acc.creditorCount += 1
     if (r.debtAmount == null) acc.debtUnknownCount += 1
     if (r.fundIncreaseAction === '要') acc.fundIncreaseRequired += 1
+    else if (r.fundIncreaseAction === '対応中') acc.fundIncreaseInProgress += 1
     else if (r.fundIncreaseAction === '完了') acc.fundIncreaseDone += 1
     byCase.set(r.caseId, acc)
   }
@@ -1972,13 +1976,23 @@ export async function getFundIncreaseCandidates() {
       creditorCount: acc.creditorCount,
       debtUnknownCount: acc.debtUnknownCount,
       fundIncreaseRequired: acc.fundIncreaseRequired,
+      fundIncreaseInProgress: acc.fundIncreaseInProgress,
       fundIncreaseDone: acc.fundIncreaseDone,
       /*
         案件としての原資UP対応。各社タブの値からまとめる（lib/fundIncrease.ts と同じ規則）:
-          1社でも「要」→ required / 「要」が無く「完了」あり → done / どちらも無い → none
+          1社でも「要」→ required
+          「要」が無く「対応中」あり → inProgress
+          上のどちらも無く「完了」あり → done
+          どれも無い → none
       */
       fundIncreaseState:
-        acc.fundIncreaseRequired > 0 ? 'required' : acc.fundIncreaseDone > 0 ? 'done' : 'none',
+        acc.fundIncreaseRequired > 0
+          ? 'required'
+          : acc.fundIncreaseInProgress > 0
+            ? 'inProgress'
+            : acc.fundIncreaseDone > 0
+              ? 'done'
+              : 'none',
       declaredAmount: acc.declared,
       debtAmount: acc.debt,
       gap,

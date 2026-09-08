@@ -4,6 +4,7 @@
  */
 import { useCallback, useEffect, useState } from 'react'
 import { FIELD_LABEL } from '../../constants/fieldLabels'
+import { alertApiError } from '../../lib/apiError'
 
 type ChangeEntry = {
   id: string
@@ -108,7 +109,7 @@ export function CaseChangeHistory({
         onReverted()
       } else {
         const d = (await r.json().catch(() => ({}))) as { error?: string }
-        window.alert(d.error ?? '元に戻せませんでした')
+        await alertApiError(r, '元に戻せませんでした', d)
       }
     } finally {
       setBusy(null)
@@ -122,7 +123,7 @@ export function CaseChangeHistory({
       const r = await fetch(`/api/changes/${id}/restore-preview`)
       const d = (await r.json().catch(() => ({}))) as RestorePreview & { error?: string }
       if (!r.ok) {
-        window.alert(d.error ?? 'この履歴には戻せません')
+        await alertApiError(r, 'この履歴には戻せません', d)
         return
       }
       if (!d.items || d.items.length === 0) {
@@ -146,7 +147,7 @@ export function CaseChangeHistory({
         onReverted()
       } else {
         const d = (await r.json().catch(() => ({}))) as { error?: string }
-        window.alert(d.error ?? '戻せませんでした')
+        await alertApiError(r, '戻せませんでした', d)
       }
     } finally {
       setBusy(null)

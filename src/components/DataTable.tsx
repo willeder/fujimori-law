@@ -698,10 +698,10 @@ export function DataTable<T>({
         onClick={() => setCsvOpen(false)}
       >
         <div
-          className="max-h-[85vh] w-[26rem] overflow-hidden rounded-lg bg-white shadow-xl"
+          className="flex max-h-[85vh] w-[26rem] flex-col overflow-hidden rounded-lg bg-white shadow-xl"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2">
+          <div className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2">
             <span className="text-sm font-semibold text-slate-700">CSV出力（{csvExport}）</span>
             <button
               type="button"
@@ -711,7 +711,7 @@ export function DataTable<T>({
               ✕
             </button>
           </div>
-          <div className="px-4 py-2 text-[0.6875rem] text-slate-500">
+          <div className="shrink-0 px-4 py-2 text-[0.6875rem] text-slate-500">
             出力するフィールドにチェックし、↑↓で並び順を変更できます（設定は保存されます）。
             出力対象: 現在の絞り込み・ソートを適用した {sortedData.length} 件
           </div>
@@ -722,7 +722,7 @@ export function DataTable<T>({
             その行では他のテーブルの列は空欄になる（kintone と同じ形）。
           */}
           {csvTables && csvTables.length > 0 && (
-            <div className="mx-4 mb-2 rounded border border-slate-200 bg-slate-50 px-3 py-2">
+            <div className="mx-4 mb-2 shrink-0 rounded border border-slate-200 bg-slate-50 px-3 py-2">
               <div className="mb-1 text-[0.6875rem] font-semibold text-slate-600">
                 テーブルも出力する（選ぶとその全項目を出します）
               </div>
@@ -751,14 +751,15 @@ export function DataTable<T>({
               </div>
               {anyTableSelected && (
                 <p className="mt-1 text-[0.625rem] leading-relaxed text-slate-500">
-                  テーブルを選ぶと<b>全案件</b>を対象に、テーブルの1行を1行として出力します。
+                  テーブルを選ぶと、いま絞り込んでいる<b>{sortedData.length} 件</b>を対象に、
+                  テーブルの1行を1行として出力します。
                   複数選んだときは、1つ目のテーブルが終わったあと次のテーブルが始まり、
                   その行では他のテーブルの列は空欄になります。件数が多いと少し時間がかかります。
                 </p>
               )}
             </div>
           )}
-          <div className="max-h-[50vh] overflow-y-auto px-4 pb-2">
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-2">
             {csvFields.map((f, i) => {
               const col = csvCandidates.find((c) => String(c.key) === f.key)
               if (!col) return null
@@ -803,7 +804,7 @@ export function DataTable<T>({
               )
             })}
           </div>
-          <div className="flex items-center justify-between gap-2 border-t border-slate-200 bg-slate-50 px-4 py-2">
+          <div className="flex shrink-0 items-center justify-between gap-2 border-t border-slate-200 bg-slate-50 px-4 py-2">
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -1040,11 +1041,18 @@ export function DataTable<T>({
   const pager =
     paginated && total > 0 ? (
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
-        <span>
-          {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, total)} / {total}件
-        </span>
+        {/*
+          CSV出力は左側（件数の隣）に置く。Rei 2026-09-08「CSV出力の場所を左側へ移動」
+          右端は表示件数・ページ送りで、押す頻度の高いCSV出力が右端まで
+          目線を動かさないと見つからなかった。
+        */}
         <div className="flex items-center gap-2">
+          <span>
+            {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, total)} / {total}件
+          </span>
           {csvButton}
+        </div>
+        <div className="flex items-center gap-2">
           <label className="flex items-center gap-1">
             表示件数
             <select
@@ -1177,7 +1185,7 @@ export function DataTable<T>({
       {findBar}
       {pager}
       {csvExport && !(paginated && total > 0) && (
-        <div className="flex shrink-0 items-center justify-end gap-2 border-b border-slate-200 bg-slate-50 px-3 py-1">
+        <div className="flex shrink-0 items-center justify-start gap-2 border-b border-slate-200 bg-slate-50 px-3 py-1">
           {csvButton}
         </div>
       )}
