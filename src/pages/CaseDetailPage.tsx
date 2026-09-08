@@ -2812,6 +2812,25 @@ function CaseDetailBody({
                           density="dense"
                           tabBodyScroll="guest"
                           guestExpandToParent={(id) => id === "all"}
+                          /*
+                            すべて合算タブは、表の中だけがスクロールするようにする。
+                            Rei 2026-09-08「タブのところがまだスクロールが反応してる。
+                            検索モードより下のテーブル以外はスクロール機能を
+                            もたせないで」
+
+                            既定（auto）だと、このパネルが縦スクロール専用の箱に
+                            なるだけで縦フレックスにならない。すると中の表が高さを
+                            受け取れず、表ではなくパネルごと動いていた（債権者数の
+                            行・合計サマリ・検索モードのバーまで一緒に流れる）。
+                            hidden にするとパネルが縦フレックス＋スクロールなしに
+                            なり、余った高さが表に渡って表の中だけが動く。
+
+                            各社（個別債権者）タブは縦長の入力欄が並ぶので、
+                            従来どおりスクロールできるままにする。
+                          */
+                          activePanelOverflow={
+                            displayCreditorScopeTabId === "all" ? "hidden" : "auto"
+                          }
                           reorderable={locked == null}
                           onReorder={handleReorderCreditors}
                           /* 追加するとタブが1つ増えるので、タブの隣に置く */
