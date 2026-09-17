@@ -45,7 +45,7 @@ export const CREDITOR_FIELDS = [
   'reminder', 'paymentStartMonth', 'paymentDay', 'paymentCount', 'firstPaymentAmount',
   'subsequentPaymentAmount', 'finalPaymentAmount', 'finalPaymentMonth', 'futureInterest',
   'bankName', 'financialInstitutionCode', 'branchName', 'branchCode', 'accountType',
-  'accountNumber', 'accountHolder', 'designatedCode', 'repaymentTarget', 'fundIncreaseAction',
+  'accountNumber', 'accountHolder', 'designatedCode', 'repaymentTarget',
   'displayOrder',
 ]
 

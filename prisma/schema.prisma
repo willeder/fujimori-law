@@ -101,6 +101,9 @@ model Case {
   allSettlementDocSentDate   DateTime? @db.Date
   /// 辞任日（kintone 基本情報.csv の「辞任日」。411件で入力あり）
   resignationDate            DateTime? @db.Date
+  // 原資UP対応（'要' | '対応中' | '完了' | NULL=空欄）。案件単位で1つ持つ。
+  // 2026-09-17 までは債権者ごとに持っていたが、事務所のご要望で案件単位に移した。
+  fundIncreaseAction         String?
 
   // --- 報酬情報 ---
   normalFee              Int?
@@ -218,8 +221,6 @@ model Creditor {
   accountHolder            String?
   designatedCode           String?
   repaymentTarget          String?
-  // 原資UP対応（'要' | '完了' | NULL=空欄）。債権者の進捗ステータスとは別の軸。
-  fundIncreaseAction       String?
 
   payments Payment[]
   files    CreditorFile[]
