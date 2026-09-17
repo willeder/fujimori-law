@@ -15,6 +15,11 @@
 import { createContext, useContext } from 'react'
 import type { Case, Creditor } from '../types'
 
+/** 案件の区分（clientBasicInfo / settlementInfo …）ごとに、変える項目だけを渡す形 */
+export type CasePartialUpdate = {
+  [K in Exclude<keyof Case, 'id'>]?: Partial<Case[K]>
+}
+
 export type CaseEditContextValue = {
   /** 編集モード中かどうか。false の間、項目は読み取り専用 */
   editing: boolean
@@ -23,6 +28,13 @@ export type CaseEditContextValue = {
    * 未定義なら「下書きを使わない＝その場で保存する」従来動作。
    */
   stageCase?: (updates: Partial<Case>) => void
+  /**
+   * 案件の項目を変える（編集モード中は下書きへ積み、「編集完了」で保存される）。
+   * 債権者タブの中から案件の項目を触るときに使う（すべて合算タブの原資UP対応）。
+   * 区分ごとの部分更新で、渡さなかった項目は今の値のまま残る。
+   * 未定義（案件詳細の外）なら案件の項目は変更できない。
+   */
+  updateCase?: (updates: CasePartialUpdate) => void
   /** 債権者の変更を下書きへ積む。未定義なら従来どおりその場で保存する */
   stageCreditor?: (creditor: Creditor, updates: Partial<Creditor>) => void
   /** 未保存の変更があるか（離脱時の警告に使う） */

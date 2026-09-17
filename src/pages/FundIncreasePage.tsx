@@ -33,13 +33,7 @@ type Row = {
   /** 差額 ÷ 申告額。申告額が0のときは null */
   ratio: number | null
   reason: 'amount' | 'ratio' | 'both'
-  /** 原資UP対応が「要」の社数 */
-  fundIncreaseRequired: number
-  /** 原資UP対応が「対応中」の社数 */
-  fundIncreaseInProgress: number
-  /** 原資UP対応が「完了」の社数 */
-  fundIncreaseDone: number
-  /** 案件としての原資UP対応（各社タブの値から算出。lib/fundIncrease.ts と同じ規則） */
+  /** 案件の原資UP対応（すべて合算タブで選んだ値。2026-09-17 に債権者ごとから案件単位へ変更） */
   fundIncreaseState: 'required' | 'inProgress' | 'done' | 'none'
 }
 
@@ -65,10 +59,11 @@ export function FundIncreasePage() {
   const [loading, setLoading] = useState(true)
   /*
     表示する状態の切り替え（事務所のご要望 2026-09-02、対応中は Rei 2026-09-08）。
-      ・対応要 … 各社タブで1社でも「要」を選んだ案件
-      ・対応中 … 「要」が無く「対応中」がある案件（依頼者と話している最中）
-      ・未判断 … まだどの社にも印が付いていない案件（移行直後は全件ここ）
-      ・対応済 … 上のどれでもなく「完了」がある案件
+      ・対応要 … すべて合算タブの原資UP対応が「要」の案件
+      ・対応中 … 「対応中」の案件（依頼者と話している最中）
+      ・未判断 … 空欄の案件（移行直後は全件ここ）
+      ・対応済 … 「完了」の案件
+      ※2026-09-17 までは各社タブの値からまとめていた。案件単位の1項目に変更。
     「対応要のものだけ見たい」ときは他のチェックを外す。
     未判断を既定で表示するのは、印を付ける前の案件がここにしか出てこないため
     （全部外すと、対応すべき案件を見つける入口が無くなる）。
@@ -130,7 +125,7 @@ export function FundIncreasePage() {
       filterValue: (r) => r.name ?? '',
     },
     {
-      // 案件としての原資UP対応。各社タブで入れた値のまとめ。
+      // 案件の原資UP対応（すべて合算タブで選んだ値）。
       key: 'fundIncreaseState',
       header: '原資UP対応',
       width: '112px',
@@ -143,11 +138,11 @@ export function FundIncreasePage() {
       render: (r) =>
         r.fundIncreaseState === 'required' ? (
           <span className="whitespace-nowrap rounded bg-red-100 px-1.5 py-0.5 font-bold text-red-700">
-            要{r.fundIncreaseRequired > 1 ? `（${r.fundIncreaseRequired}社）` : ''}
+            要
           </span>
         ) : r.fundIncreaseState === 'inProgress' ? (
           <span className="whitespace-nowrap rounded bg-amber-100 px-1.5 py-0.5 font-bold text-amber-700">
-            対応中{r.fundIncreaseInProgress > 1 ? `（${r.fundIncreaseInProgress}社）` : ''}
+            対応中
           </span>
         ) : r.fundIncreaseState === 'done' ? (
           <span className="whitespace-nowrap text-slate-700">済</span>

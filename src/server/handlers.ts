@@ -13,6 +13,7 @@ import {
 import { SETTLED_CREDITOR_STATUSES } from '../constants/fieldOptions.js'
 import { writeAudit, writeChange } from './audit.js'
 import { parseFindCriterion, toIsoDate } from '../utils/findCriterion.js'
+import { fundIncreaseStateOf } from '../lib/fundIncrease.js'
 
 const g = globalThis as unknown as { __prisma?: PrismaClient }
 const prisma = g.__prisma ?? new PrismaClient()
@@ -95,6 +96,7 @@ export function toCaseJson(c: Record<string, any>) {
       plannedAgentCount: c.plannedAgentCount,
       allSettlementDocSentDate: ds(c.allSettlementDocSentDate),
       resignationDate: ds(c.resignationDate),
+      fundIncreaseAction: c.fundIncreaseAction,
     },
     feeInfo: {
       normalFee: c.normalFee,
@@ -223,6 +225,7 @@ function toCaseSummaryJson(c: Record<string, any>) {
       proposalDate: ds(c.settlementProposalDate),
       postSettlementPaymentCount: c.postSettlementPaymentCount,
       resignationDate: ds(c.resignationDate),
+      fundIncreaseAction: c.fundIncreaseAction,
     },
     feeInfo: {
       officeFee: c.officeFee,
@@ -281,6 +284,8 @@ const CASE_SUMMARY_SELECT = {
   creditorCount: true,
   declaredDebtAmount: true,
   settlementStatus: true,
+  // 原資UP対応（案件単位）。一覧の列・CSV出力に出せるように
+  fundIncreaseAction: true,
   officeFee: true,
   uncollectedFee: true,
   // 「報酬・弁代・プールチェック」用の金額列（一覧の追加表示に使う）
@@ -736,17 +741,14 @@ export function buildConditionWhere(
   // 案件の「受任後ステータス」とは別で、債権者1社ごとの進捗。
   // 「受任通知発送待ちの債権者を1社でも持つ案件」のような絞り込みに使う。
   // 債権者の「回答状況」「弁済対象」で案件を絞る（1社でも該当すればヒット）
-  if (
-    field === 'creditorResponseStatus' ||
-    field === 'creditorRepaymentTarget' ||
-    field === 'creditorFundIncreaseAction'
-  ) {
-    const col =
-      field === 'creditorResponseStatus'
-        ? 'responseStatus'
-        : field === 'creditorRepaymentTarget'
-          ? 'repaymentTarget'
-          : 'fundIncreaseAction'
+  // 旧「原資UP対応（債権者）」の条件。2026-09-17 に原資UP対応を案件単位へ移したため、
+  // 保存済みの絞り込みに残っていても落ちないよう、案件の列の条件として読み替える。
+  if (field === 'creditorFundIncreaseAction') {
+    return buildConditionWhere({ ...cond, field: 'fundIncreaseAction' }, params)
+  }
+
+  if (field === 'creditorResponseStatus' || field === 'creditorRepaymentTarget') {
+    const col = field === 'creditorResponseStatus' ? 'responseStatus' : 'repaymentTarget'
     const anyVal = `EXISTS (SELECT 1 FROM creditors cr WHERE cr."caseId" = c.id AND COALESCE(cr."${col}", '') <> '')`
     if (op === 'empty') return `NOT ${anyVal}`
     if (op === 'notEmpty') return anyVal
@@ -1904,8 +1906,6 @@ export async function getFundIncreaseCandidates() {
       caseId: true,
       declaredAmount: true,
       debtAmount: true,
-      // 原資UP対応（各社タブで入れた '要' / '完了'）。案件の状態はここからまとめる。
-      fundIncreaseAction: true,
       case: {
         select: {
           id: true,
@@ -1915,6 +1915,8 @@ export async function getFundIncreaseCandidates() {
           settlementStatus: true,
           judicialScrivener: true,
           basePaymentAmount: true,
+          // 原資UP対応（案件単位。すべて合算タブで入れた '要' / '対応中' / '完了'）
+          fundIncreaseAction: true,
         },
       },
     },
@@ -1927,12 +1929,6 @@ export async function getFundIncreaseCandidates() {
     creditorCount: number
     /** 債権額が未入力の債権者数。合計が過小になるので画面で注記する */
     debtUnknownCount: number
-    /** 原資UP対応が「要」の社数 */
-    fundIncreaseRequired: number
-    /** 原資UP対応が「対応中」の社数 */
-    fundIncreaseInProgress: number
-    /** 原資UP対応が「完了」の社数 */
-    fundIncreaseDone: number
   }
   const byCase = new Map<number, Acc>()
   for (const r of rows) {
@@ -1942,17 +1938,11 @@ export async function getFundIncreaseCandidates() {
       debt: 0,
       creditorCount: 0,
       debtUnknownCount: 0,
-      fundIncreaseRequired: 0,
-      fundIncreaseInProgress: 0,
-      fundIncreaseDone: 0,
     }
     acc.declared += r.declaredAmount ?? 0
     acc.debt += r.debtAmount ?? 0
     acc.creditorCount += 1
     if (r.debtAmount == null) acc.debtUnknownCount += 1
-    if (r.fundIncreaseAction === '要') acc.fundIncreaseRequired += 1
-    else if (r.fundIncreaseAction === '対応中') acc.fundIncreaseInProgress += 1
-    else if (r.fundIncreaseAction === '完了') acc.fundIncreaseDone += 1
     byCase.set(r.caseId, acc)
   }
 
@@ -1975,24 +1965,8 @@ export async function getFundIncreaseCandidates() {
       basePaymentAmount: acc.case.basePaymentAmount,
       creditorCount: acc.creditorCount,
       debtUnknownCount: acc.debtUnknownCount,
-      fundIncreaseRequired: acc.fundIncreaseRequired,
-      fundIncreaseInProgress: acc.fundIncreaseInProgress,
-      fundIncreaseDone: acc.fundIncreaseDone,
-      /*
-        案件としての原資UP対応。各社タブの値からまとめる（lib/fundIncrease.ts と同じ規則）:
-          1社でも「要」→ required
-          「要」が無く「対応中」あり → inProgress
-          上のどちらも無く「完了」あり → done
-          どれも無い → none
-      */
-      fundIncreaseState:
-        acc.fundIncreaseRequired > 0
-          ? 'required'
-          : acc.fundIncreaseInProgress > 0
-            ? 'inProgress'
-            : acc.fundIncreaseDone > 0
-              ? 'done'
-              : 'none',
+      // 案件としての原資UP対応。案件の値をそのまま状態にする（lib/fundIncrease.ts と同じ対応）
+      fundIncreaseState: fundIncreaseStateOf(acc.case.fundIncreaseAction),
       declaredAmount: acc.declared,
       debtAmount: acc.debt,
       gap,

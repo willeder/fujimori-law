@@ -711,6 +711,9 @@ function CaseDetailBody({
             caseId={caseData.id}
             creditors={creditors}
             view="summary"
+            // 原資UP対応（案件単位）。2026-09-17 に各社タブからすべて合算タブへ移した
+            // 変更は編集モードの文脈（editCtx.updateCase）経由で案件へ保存する
+            fundIncreaseAction={caseData.settlementInfo.fundIncreaseAction ?? null}
           />
         ),
       },
@@ -1247,6 +1250,17 @@ function CaseDetailBody({
   const readOnly = locked != null;
   const editCtx: CaseEditContextValue = {
     editing: editing && !readOnly,
+    // 区分内の他の項目を消さないよう、今の値に重ねてから渡す
+    updateCase: (updates) => {
+      const merged: Record<string, unknown> = {};
+      for (const [group, val] of Object.entries(updates)) {
+        merged[group] = {
+          ...((caseData as unknown as Record<string, object>)[group] ?? {}),
+          ...(val as object),
+        };
+      }
+      updateCase(merged as Partial<Case>);
+    },
     stageCreditor,
     dirty,
     locked: readOnly,

@@ -4,7 +4,7 @@ import { useCaseDispatch, usePaymentsByCaseId } from '../store/useCaseStore'
 import { useFoundSet } from '../store/FoundSet'
 import { useCaseEdit } from '../context/CaseEditContext'
 import { settlementTotals } from '../lib/settlementTotals'
-import { FUND_INCREASE_SHORT_LABEL, fundIncreaseState } from '../lib/fundIncrease'
+import { fundIncreaseStateOf } from '../lib/fundIncrease'
 import { alertApiError, alertThrown } from '../lib/apiError'
 import { EditableField, StatusBadge, DataTable, type Column } from '../components'
 import { useBanks, useBranches } from '../hooks/useBankDictionary'
@@ -23,6 +23,11 @@ interface CreditorTabProps {
   caseId: number
   creditors: Creditor[]
   view: 'summary' | 'detail'
+  /**
+   * 原資UP対応（案件単位）。すべて合算タブ（view='summary'）でだけ使う。
+   * 2026-09-17 に各社タブから移した（lib/fundIncrease.ts の経緯を参照）。
+   */
+  fundIncreaseAction?: string | null
 }
 
 // 債権者名の入力候補（DB全体の既存債権者名）。表記ゆれ防止のため
@@ -50,12 +55,17 @@ function renderYen(v: number | null | undefined) {
   )
 }
 
-export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
+export function CreditorTab({
+  caseId,
+  creditors,
+  view,
+  fundIncreaseAction,
+}: CreditorTabProps) {
   const dispatch = useCaseDispatch()
   const navigate = useNavigate()
   const { setFoundSet } = useFoundSet()
   // 編集モード中は下書きに貯めるだけ（「編集完了」でまとめて保存される）
-  const { stageCreditor } = useCaseEdit()
+  const { stageCreditor, updateCase } = useCaseEdit()
   // 弁済の進捗（合算）用。債権者別の弁済予定は表示時に生成される（creditorSchedule.ts）
   const casePayments = usePaymentsByCaseId(caseId)
 
@@ -200,8 +210,8 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
     // 和解状況の4項目（旧・手入力）。債権者データから機械的に出せるので画面で計算する。
     // 定義は src/lib/settlementTotals.ts を参照。
     const totals = settlementTotals(creditors)
-    // 原資UP対応の案件としての状態（要 / 対応中 / 済 / なし）
-    const fundIncrease = fundIncreaseState(creditors)
+    // 原資UP対応（案件単位）の状態。値の色分けに使う
+    const fundIncrease = fundIncreaseStateOf(fundIncreaseAction)
 
     // 弁済の進捗（合算）。個別の債権者タブ（弁済予定履歴）と同じ定義で合計する。
     //   ・和解済（和解日あり）は和解内容の金額・回数、未和解は見込み値を使う
@@ -334,28 +344,6 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
             </span>
           )
         },
-      },
-      {
-        // 原資UP対応（各社タブで入れた値をそのまま出す）。
-        key: 'fundIncreaseAction',
-        header: '原資UP対応',
-        width: '92px',
-        align: 'center',
-        render: (item) =>
-          item.fundIncreaseAction === '要' ? (
-            <span className="rounded bg-red-100 px-1 text-[0.625rem] font-bold text-red-700">要</span>
-          ) : item.fundIncreaseAction === '対応中' ? (
-            // 着手済みだが終わっていない社。要と済のどちらとも見分けられるように橙
-            <span className="rounded bg-amber-100 px-1 text-[0.625rem] font-bold text-amber-700">
-              対応中
-            </span>
-          ) : item.fundIncreaseAction === '完了' ? (
-            <span className="rounded bg-slate-100 px-1 text-[0.625rem] text-slate-600">完了</span>
-          ) : (
-            <span className="text-slate-300">-</span>
-          ),
-        filterValue: (item) => item.fundIncreaseAction ?? '',
-        filterSuggestions: [...FUND_INCREASE_ACTION_OPTIONS],
       },
       {
         key: 'settlementDebtAmount',
@@ -503,37 +491,52 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
             </div>
           </div>
           {/*
-            原資UP対応（案件としての状態）。差額合計の右隣に、独立した枠として置く。
+            原資UP対応（案件単位）。差額合計の右隣に、独立した枠として置く。
 
             経緯:
               ・2026-09-03（田中様）「差額の右隣に表示できれば嬉しいです」
-                → 当初は独立枠が折り返して次の行に落ちていたため、差額の金額と
-                  同じ行に並べて対応した。
-              ・2026-09-08（Rei）「差額合計（申告−債務）と同じ値の場所に
-                表示されてるので右側に別枠で入れて欲しい」
-                → 金額と同居していて差額の一部に見えるため、枠を分けた。
-                  枠を6列にしたので、分けても折り返さず右隣に並ぶ。
+              ・2026-09-08（Rei）「右側に別枠で入れて欲しい」→ 独立した枠に分けた
+              ・2026-09-17（Rei）「各社タブにある『原資UP対応：』は削除」
+                「すべて合算タブにある『原資UP対応』を編集できるようにしてほしい
+                  （選択肢は、削除したフィールドと同一）」
+                → 案件の値をここで直接選ぶ形にした。
+                  以前は全社空欄のとき枠ごと隠していたため、どこにあるか分からない
+                  状態だった。入力欄になったので常に出す。
 
-            1社でも「要」→ 赤 / 「要」が無く「対応中」→ 橙 / 上のどちらも無く
-            「完了」→ 黒。どれも無い（全社空欄）ときは見出しごと出さない。
-            まとめ方は lib/fundIncrease.ts。
+            色は 要=赤 / 対応中=橙 / 完了=黒 / 空欄=薄い灰の「-」。
+            編集モード（上部の「編集」）のときだけ選べるのは他の項目と同じ。
           */}
-          {fundIncrease !== 'none' && (
-            <div>
-              <div className="text-xs font-medium leading-tight text-slate-500">原資UP対応</div>
-              <div
-                className={`whitespace-nowrap text-sm font-bold ${
-                  fundIncrease === 'required'
-                    ? 'text-red-600'
-                    : fundIncrease === 'inProgress'
-                      ? 'text-amber-600'
-                      : 'text-slate-800'
-                }`}
-              >
-                {FUND_INCREASE_SHORT_LABEL[fundIncrease]}
-              </div>
-            </div>
-          )}
+          <div className="min-w-0">
+            <EditableField
+              label="原資UP対応"
+              type="select"
+              options={toSelectOptions(FUND_INCREASE_ACTION_OPTIONS)}
+              value={fundIncreaseAction}
+              onChange={(v) =>
+                updateCase?.({ settlementInfo: { fundIncreaseAction: v || null } })
+              }
+              disabled={!updateCase}
+              compact
+              compactLayout="stacked"
+              renderValue={(v) =>
+                v ? (
+                  <span
+                    className={`whitespace-nowrap text-sm font-bold ${
+                      fundIncrease === 'required'
+                        ? 'text-red-600'
+                        : fundIncrease === 'inProgress'
+                          ? 'text-amber-600'
+                          : 'text-slate-800'
+                    }`}
+                  >
+                    {v}
+                  </span>
+                ) : (
+                  <span className="text-sm text-slate-300">-</span>
+                )
+              }
+            />
+          </div>
           {totals.missingPaymentCount > 0 && (
             <div className="col-span-full text-[0.6875rem] text-amber-700">
               ※ 弁済対象 {totals.missingPaymentCount} 社は支払回数が未入力のため、
@@ -752,7 +755,8 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
         />
       </div>
 
-      {/* 4行目: 差額(1), 原資UP対応(1), 和解提案日(1), 和解提案回数(1), 回答状況(1) */}
+      {/* 4行目: 差額(1), 和解提案日(1), 和解提案回数(1), 回答状況(1), 空(1)
+          ※原資UP対応は 2026-09-17 にすべて合算タブ（案件単位）へ移した */}
       <div className="min-w-0 col-span-1">
         <EditableField
           label="差額"
@@ -768,28 +772,6 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           disabled
         />
       </div>
-      {/*
-        原資UP対応。差額のすぐ隣に置く（事務所のご要望 2026-09-02）。
-        空欄が既定で、「要」「完了」を選ぶ。各社の値は「すべて合算」タブの
-        一覧とサマリにそのまま出る。
-      */}
-      <div className="min-w-0 col-span-1">
-        <EditableField
-          label="原資UP対応"
-          type="select"
-          options={toSelectOptions(FUND_INCREASE_ACTION_OPTIONS)}
-          value={creditor.fundIncreaseAction}
-          onChange={(v) =>
-            updateCreditor(creditor, { fundIncreaseAction: v || null })
-          }
-          compact
-          compactLayout="inline"
-          bordered
-          truncateValue
-          fillWidth
-        />
-      </div>
-
       <div className="min-w-0 col-span-1">
         <EditableField
           label="和解提案日"
@@ -837,6 +819,9 @@ export function CreditorTab({ caseId, creditors, view }: CreditorTabProps) {
           fillWidth
         />
       </div>
+
+      {/* 4行目の空き1枠（原資UP対応を外した跡）。詰めると5行目の和解日が行末に回るので置いておく */}
+      <div className="min-w-0 col-span-1" />
 
       {/* 5行目: 和解日(1), 和解金額(1), 和解時債務金額(1), 空(1), 次回処理日時(1) */}
       <div className="min-w-0 col-span-1">
