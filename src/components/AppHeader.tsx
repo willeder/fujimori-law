@@ -46,7 +46,7 @@ export function AppHeader({
         </h1>
 
         <div className="flex shrink-0 items-center gap-2">
-          {/* 全体検索（検索モード）: どのページからでも Ctrl+F またはボタンで起動（No.150） */}
+          {/* 全体検索（検索モード）: どのページからでも Ctrl+Shift+F またはボタンで起動（No.150。Ctrl+F はブラウザのページ内検索に戻した） */}
           <FindModeLauncher />
           <UiFontScaleControl variant="select" />
           {user && (
