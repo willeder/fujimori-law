@@ -14,7 +14,7 @@
  *   ・テーブルの項目は「債権者：和解金額」のように、テーブル名を前に付ける。
  *     案件側と同じ名前の項目（ステータス等）があるため。
  */
-import { FIELD_LABEL } from './fieldLabels'
+import { FIELD_LABEL } from './fieldLabels.js'
 
 export type CsvTableKey = 'creditor' | 'payment' | 'contact'
 
