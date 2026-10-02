@@ -26,12 +26,14 @@ type EntityName = 'Case' | 'Creditor' | 'Payment' | 'ContactHistory'
 type CellChange = { label: string; field: string; before: unknown; after: unknown }
 type RowPlan = {
   line: number
+  action: 'update' | 'create'
   entity: EntityName
   entityId: number
   caseId: number
   externalId: string | null
   clientName: string | null
   hint: string | null
+  note?: string | null
   changes: CellChange[]
 }
 type HeaderInfo = {
@@ -49,12 +51,14 @@ type ImportPlan = {
   unchanged: number
   problems: ImportProblem[]
   counts: Record<EntityName, number>
+  created: Record<EntityName, number>
   cells: number
   blankClears: boolean
 }
 type CommitResult = {
   ok: boolean
   updated: Record<EntityName, number>
+  created: Record<EntityName, number>
   cells: number
   problems: ImportProblem[]
   error?: string
@@ -234,10 +238,15 @@ export function CaseCsvImportPage() {
           <div className="rounded-lg border border-emerald-200 bg-white p-4 text-sm shadow-sm">
             <p className="mb-2 font-semibold text-emerald-700">取り込みました。</p>
             <ul className="list-inside list-disc space-y-0.5 text-slate-700">
-              <li>案件: {done.updated.Case} 件</li>
-              <li>債権者: {done.updated.Creditor} 件</li>
-              <li>入金: {done.updated.Payment} 件</li>
-              <li>接触履歴: {done.updated.ContactHistory} 件</li>
+              <li>案件: 更新 {done.updated.Case} 件</li>
+              <li>
+                債権者: 更新 {done.updated.Creditor} 件・追加 {done.created?.Creditor ?? 0} 件
+              </li>
+              <li>入金: 更新 {done.updated.Payment} 件・追加 {done.created?.Payment ?? 0} 件</li>
+              <li>
+                接触履歴: 更新 {done.updated.ContactHistory} 件・追加{' '}
+                {done.created?.ContactHistory ?? 0} 件
+              </li>
               <li>変更した項目: {done.cells} 個</li>
             </ul>
             {done.problems.length > 0 && (
@@ -268,7 +277,16 @@ export function CaseCsvImportPage() {
             <div className="rounded-lg border border-slate-200 bg-white p-3 text-sm shadow-sm">
               <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
                 <Stat label="読み取った行" value={`${plan.dataRows} 行`} />
-                <Stat label="更新される行" value={`${plan.rows.length} 行`} strong />
+                <Stat
+                  label="更新される行"
+                  value={`${plan.rows.filter((r) => r.action !== 'create').length} 行`}
+                  strong
+                />
+                <Stat
+                  label="追加される行"
+                  value={`${plan.rows.filter((r) => r.action === 'create').length} 行`}
+                  strong
+                />
                 <Stat label="更新される項目" value={`${plan.cells} 個`} strong />
                 <Stat label="変更なし" value={`${plan.unchanged} 行`} />
                 <Stat
@@ -283,7 +301,14 @@ export function CaseCsvImportPage() {
                   .filter((e) => plan.counts[e] > 0)
                   .map((e) => (
                     <span key={e} className={`rounded px-1.5 py-0.5 ${ENTITY_LABEL[e].cls}`}>
-                      {ENTITY_LABEL[e].label} {plan.counts[e]} 行
+                      {ENTITY_LABEL[e].label} 更新 {plan.counts[e]} 行
+                    </span>
+                  ))}
+                {(Object.keys(ENTITY_LABEL) as EntityName[])
+                  .filter((e) => (plan.created?.[e] ?? 0) > 0)
+                  .map((e) => (
+                    <span key={`new-${e}`} className={`rounded px-1.5 py-0.5 ${ENTITY_LABEL[e].cls}`}>
+                      {ENTITY_LABEL[e].label} 追加 {plan.created[e]} 行
                     </span>
                   ))}
               </div>
@@ -385,6 +410,11 @@ export function CaseCsvImportPage() {
                             <span className={`rounded px-1.5 py-0.5 ${ENTITY_LABEL[r.entity].cls}`}>
                               {ENTITY_LABEL[r.entity].label}
                             </span>
+                            {r.action === 'create' && (
+                              <span className="ml-1 rounded bg-sky-100 px-1.5 py-0.5 font-semibold text-sky-800">
+                                追加
+                              </span>
+                            )}
                           </td>
                           <td className="px-2 py-1.5 text-slate-700">
                             <div className="font-semibold">{r.externalId ?? `案件${r.caseId}`}</div>
@@ -394,12 +424,17 @@ export function CaseCsvImportPage() {
                             </div>
                           </td>
                           <td className="px-2 py-1.5">
+                            {r.note && <p className="mb-0.5 text-sky-700">{r.note}</p>}
                             <ul className="space-y-0.5">
                               {r.changes.map((c) => (
                                 <li key={c.field}>
                                   <span className="text-slate-500">{c.label}：</span>
-                                  <span className="text-slate-400 line-through">{show(c.before)}</span>
-                                  <span className="mx-1 text-slate-400">→</span>
+                                  {r.action !== 'create' && (
+                                    <>
+                                      <span className="text-slate-400 line-through">{show(c.before)}</span>
+                                      <span className="mx-1 text-slate-400">→</span>
+                                    </>
+                                  )}
                                   <span className="font-semibold text-slate-900">{show(c.after)}</span>
                                 </li>
                               ))}
@@ -459,7 +494,9 @@ function Guide() {
           案件一覧で対象を絞り込み、<b>CSV出力</b>から出したい項目・テーブルを選んで出します
           （絞り込んだ案件だけが出ます）。
         </li>
-        <li>Excel などで値を直します。行の追加・削除はしないでください。</li>
+        <li>
+          Excel などで値を直します。行を足すこともできます（行の削除は取り込みに反映されません）。
+        </li>
         <li>この画面にファイルを置くと、<b>何がどう変わるか</b>の一覧が出ます。</li>
         <li>内容を確認して「取り込む」を押すと反映されます。</li>
       </ol>
@@ -471,13 +508,19 @@ function Guide() {
             … どの行のことかを決める列です。ここを直すと別の行を書き換えてしまいます。
           </li>
           <li>
+            <b>行を追加するとき</b>は、【案件ID】に追加先の案件のIDを入れてください。
+            【債権者ID】【入金ID】【接触履歴ID】は空欄にしておくのが確実です
+            （オートフィルで別の案件のIDが入ってしまった場合も、追加として扱います）。
+            同じ行をコピーして【入金ID】等が重複している場合は取り込めません。
+          </li>
+          <li>
             <b>［計算］</b>が付いた列（差額・累計プール・経過日数・年齢）
             … 他の値から計算して出しているので、直しても反映されません。
           </li>
         </ul>
       </div>
       <ul className="mt-3 space-y-1 text-xs text-slate-600">
-        <li>・行を足しても取り込みません（新規の追加は案件詳細から行ってください）。</li>
+        <li>・内部ID（【入金ID】等）が空欄の行は、新しい行として追加されます（債権者の追加には債権者名が必要です）。</li>
         <li>・空欄は既定で「変更しない」です。消したいときは上の「空欄の項目は空にする」を入れてください。</li>
         <li>・Excel で保存すると文字コードが変わることがありますが、そのまま取り込めます。</li>
         <li>・変更は1件ずつ変更履歴に残るので、あとから「このバージョンに戻す」で戻せます。</li>
