@@ -7,13 +7,29 @@
  *     また、CSVファイルを修正後、再度取り込みを実施し、
  *     読み込んだファイルの値に一括で更新したい」
  *   併せて確認したこと:
- *     ・既存データを出力するので、内部IDが空の行は存在しない
- *       → **新規作成はしない。行を足しても取り込まない**
  *     ・実行できるのは全員 / 件数の上限は設けない
+ *
+ * 行の追加（2026-10-01 田中様からのご要望で仕様変更）:
+ *   「CSV出力 → 修正、追加 → CSV取込 の工程は頻度が多く、増やした行も取り込みたい。
+ *     kintone では案件IDを軸に取込をしていた」
+ *   当初（2026-09-03）は「新規作成はしない。行を足しても取り込まない」としていたが、
+ *   入金予定を足す等で行の追加が日常的に発生するため、追加も取り込めるようにした。
+ *     ・テーブルの内部ID（【入金ID】等）が **空欄** の行 → 【案件ID】の案件に **新規追加**
+ *     ・内部IDが入っている行 → これまでどおりその行を更新
+ *   既存の行を「案件IDだけ」で決めることはできない（1案件に入金が数十〜百行ある）ため、
+ *   更新の突合は内部IDのまま。ただし【案件ID】を軸にして、次のように扱う。
+ *     ・内部IDがその【案件ID】の案件の行 → 更新
+ *     ・内部IDが別の案件の行／存在しない → **追加**（別の案件の行は書き換えない）
+ *       実例（2026-10-02 受領CSV）: 案件237の入金60行の下に Excel のオートフィルで
+ *       6行足したところ、【入金ID】が 588001〜588006 と連番で埋まり、それが
+ *       隣の案件238の入金IDだったため「組み合わせが合いません」で弾かれていた。
+ *       オートフィルは日常的に使われるので、案件IDを優先して追加として扱う。
+ *     ・同じ内部IDがファイル内に2回以上出てくる → 取り込まずに知らせる
+ *       （コピーした行のどちらを更新とすべきか決められないため）
  *
  * 突合のしかた:
  *   出力CSVは【案件ID】【債権者ID】【入金ID】【接触履歴ID】を必ず先頭に出す。
- *   取込はこの内部IDだけで行を決める。ID（118823E 等）や氏名・債権者名は
+ *   既存の行の更新はこの内部IDだけで行を決める。ID（118823E 等）や氏名・債権者名は
  *   事務所側で直されることがあるためキーにできない。
  *
  * 1行の読み方（出力の形と対になっている）:
@@ -22,7 +38,8 @@
  *     ・債権者IDが入っている  → その債権者の行
  *     ・入金IDが入っている    → その入金の行
  *     ・接触履歴IDが入っている→ その接触履歴の行
- *     ・どれも空              → 案件の項目だけの行
+ *     ・どれも空で、あるテーブルの項目に値がある → そのテーブルに新規追加する行
+ *     ・どれも空で、テーブルの項目も空          → 案件の項目だけの行
  *   案件の列は全部の行に繰り返し出ているので、同じ案件で値が食い違っていたら
  *   どちらが正しいか決められない。勝手に片方を採らず、その項目はエラーにする。
  *
@@ -93,15 +110,20 @@ export interface CellChange {
   after: unknown
 }
 
-/** 更新される1行 */
+/** 更新（または追加）される1行 */
 export interface RowPlan {
   /** CSVの行番号（見出しを1行目とする） */
   line: number
+  /** update: 既存の行を更新 / create: 新しい行を追加 */
+  action: 'update' | 'create'
   entity: EntityName
+  /** 追加の行は 0（取り込み実行後に決まる） */
   entityId: number
   caseId: number
   /** 画面表示用（118823E 等） */
   externalId: string | null
+  /** 補足（内部IDを読み替えて追加にした理由など） */
+  note?: string | null
   clientName: string | null
   /** 債権者名・入金予定日など、どの行かが分かる手がかり */
   hint: string | null
@@ -130,12 +152,15 @@ export interface ImportPlan {
   /** 見出しを除いたデータ行数 */
   dataRows: number
   header: HeaderInfo[]
-  /** 更新のある行だけ */
+  /** 更新・追加のある行だけ */
   rows: RowPlan[]
   /** 読めたが変更が無かった行 */
   unchanged: number
   problems: ImportProblem[]
+  /** 更新される行数 */
   counts: Record<EntityName, number>
+  /** 追加される行数 */
+  created: Record<EntityName, number>
   /** 変更される項目の総数 */
   cells: number
   blankClears: boolean
@@ -200,6 +225,12 @@ function parseCell(field: string, type: string, raw: string): Parsed {
     const ymd = toYmd(v)
     if (!ymd) return { ok: false, message: `日付は 2026-05-31 の形で入れてください（「${v}」）` }
     return { ok: true, value: new Date(`${ymd}T00:00:00.000Z`) }
+  }
+  // 接触履歴の「対象」は enum。出力は CLIENT / CREDITOR だが、日本語で直されても受ける
+  if (field === 'targetType') {
+    if (v === 'CREDITOR' || v === '債権者') return { ok: true, value: 'CREDITOR' }
+    if (v === 'CLIENT' || v === '依頼者') return { ok: true, value: 'CLIENT' }
+    return { ok: false, message: `「依頼者」か「債権者」で入れてください（「${v}」）` }
   }
   // 文字列。中身が年月日の列だけは形をそろえる
   if (TEXT_DATE_COLUMNS.has(field)) {
@@ -315,6 +346,7 @@ export async function planCaseCsvImport(
     unchanged: 0,
     problems,
     counts: emptyCounts(),
+    created: emptyCounts(),
     cells: 0,
     blankClears,
   }
@@ -349,14 +381,32 @@ export async function planCaseCsvImport(
     const i = rows[0].findIndex((h) => normLabel(h) === label)
     if (i >= 0) tableIdCol[t] = i
   }
+  // 入金の「債権者」の紐づけ（任意）。通常の更新では触らない列だが、追加の行では使う
+  const paymentCreditorCol = rows[0].findIndex(
+    (h) => normLabel(h) === normLabel(csvHeaderLabel('payment', 'creditorId'))
+  )
   if (header.every((h) => h.target == null)) {
     problems.push({ line: 1, message: '更新できる項目の列がありません' })
     return empty
   }
 
   // ── 行を「どのテーブルの何番か」に振り分ける ──
-  type Pending = { line: number; entity: EntityName; id: number; caseId: number; values: Map<string, string> }
+  type Pending = {
+    line: number
+    entity: EntityName
+    /** 追加の行は 0 */
+    id: number
+    caseId: number
+    values: Map<string, string>
+    isNew: boolean
+    /** 入金のみ：債権者の内部ID（文字列のまま。追加のときだけ使う） */
+    creditorIdRaw?: string
+    /** 内部IDを読み替えて追加にしたときの説明 */
+    note?: string
+  }
   const pending: Pending[] = []
+  // 同じ内部IDが2回出てきたら、コピーで足した行の消し忘れとみなして止める
+  const firstLineOf = new Map<string, number>()
   // 案件は複数行に同じ値が繰り返し出るので、行ごとに集めてから突き合わせる
   const caseRows = new Map<number, { line: number; values: Map<string, string> }[]>()
   const data = rows.slice(1)
@@ -368,7 +418,10 @@ export async function planCaseCsvImport(
 
     const caseIdRaw = (row[caseIdCol] ?? '').trim()
     if (caseIdRaw === '') {
-      problems.push({ line, message: '案件IDが空です（行の追加は取り込みません）' })
+      problems.push({
+        line,
+        message: `${csvHeaderLabel('case', 'id')}が空です。行を追加するときも、追加先の案件の${csvHeaderLabel('case', 'id')}を入れてください`,
+      })
       continue
     }
     const caseId = Number(caseIdRaw)
@@ -391,6 +444,26 @@ export async function planCaseCsvImport(
       continue
     }
 
+    // 内部IDがどれも空 → テーブルの項目に値があれば「追加の行」
+    let newTable: CsvTableKey | null = null
+    if (filled.length === 0) {
+      const withValues = CSV_TABLE_ORDER.filter(
+        (t) =>
+          tableIdCol[t] != null &&
+          header.some(
+            (h) => h.target?.entity === ENTITY_OF[t] && (row[h.index] ?? '').trim() !== ''
+          )
+      )
+      if (withValues.length > 1) {
+        problems.push({
+          line,
+          message: `${withValues.map((t) => CSV_TABLE_NAME[t]).join('と')}の項目が同じ行に入っています。追加する行は1行につき1つのテーブルにしてください`,
+        })
+        continue
+      }
+      newTable = withValues[0] ?? null
+    }
+
     // 案件の列（どの行にも入っている）
     const caseValues = new Map<string, string>()
     for (const h of header) {
@@ -411,40 +484,96 @@ export async function planCaseCsvImport(
         problems.push({ line, message: `${CSV_TABLE_NAME[t]}IDが数字ではありません（「${idRaw}」）` })
         continue
       }
+      const key = `${t}:${id}`
+      const firstLine = firstLineOf.get(key)
+      if (firstLine != null) {
+        problems.push({
+          line,
+          message: `${csvHeaderLabel(t, 'id')} ${id} が ${firstLine}行目と同じです。行を追加する場合は${csvHeaderLabel(t, 'id')}を空欄にしてください`,
+        })
+        continue
+      }
+      firstLineOf.set(key, line)
       const values = new Map<string, string>()
       for (const h of header) {
         if (h.target == null || h.target.entity !== ENTITY_OF[t]) continue
         values.set(h.target.field, row[h.index] ?? '')
       }
       if (values.size > 0) {
-        pending.push({ line, entity: ENTITY_OF[t], id, caseId, values })
+        pending.push({
+          line,
+          entity: ENTITY_OF[t],
+          id,
+          caseId,
+          values,
+          isNew: false,
+          creditorIdRaw:
+            t === 'payment' && paymentCreditorCol >= 0
+              ? (row[paymentCreditorCol] ?? '').trim()
+              : undefined,
+        })
       }
+    } else if (newTable) {
+      const values = new Map<string, string>()
+      for (const h of header) {
+        if (h.target == null || h.target.entity !== ENTITY_OF[newTable]) continue
+        values.set(h.target.field, row[h.index] ?? '')
+      }
+      pending.push({
+        line,
+        entity: ENTITY_OF[newTable],
+        id: 0,
+        caseId,
+        values,
+        isNew: true,
+        creditorIdRaw:
+          newTable === 'payment' && paymentCreditorCol >= 0
+            ? (row[paymentCreditorCol] ?? '').trim()
+            : undefined,
+      })
     }
   }
 
   // ── 案件の値が行ごとに食い違っていないか ──
+  // 空欄は既定で「変更しない」なので、食い違いの判定にも入れない。
+  // （追加した行で案件の列を空のままにしても、既存の行の値と食い違い扱いにしない）
   const caseFinal = new Map<number, { line: number; values: Map<string, string> }>()
   for (const [caseId, list] of caseRows) {
-    const first = list[0]
+    const merged = new Map<string, string>()
+    const blankSeen = new Set<string>()
     const bad = new Set<string>()
-    for (const other of list.slice(1)) {
-      for (const [f, v] of other.values) {
-        if ((first.values.get(f) ?? '') !== v) bad.add(f)
+    for (const r of list) {
+      for (const [f, v] of r.values) {
+        if (v.trim() === '') {
+          blankSeen.add(f)
+          continue
+        }
+        const prev = merged.get(f)
+        if (prev === undefined) merged.set(f, v)
+        else if (prev !== v) bad.add(f)
+      }
+    }
+    if (blankClears) {
+      // 「空欄は空にする」のときは、空欄と値が混ざっていたらどちらか決められない
+      for (const f of blankSeen) {
+        if (merged.has(f)) bad.add(f)
+        else merged.set(f, '')
       }
     }
     for (const f of bad) {
-      first.values.delete(f)
+      merged.delete(f)
       problems.push({
-        line: first.line,
+        line: list[0].line,
         message: `案件${caseId} の「${csvHeaderLabel('case', f)}」が行によって違う値になっています（取り込みません）`,
       })
     }
-    if (first.values.size > 0) caseFinal.set(caseId, first)
+    if (merged.size > 0) caseFinal.set(caseId, { line: list[0].line, values: merged })
   }
 
   // ── 現在の値を読み、差分を作る ──
   const plan: RowPlan[] = []
   const counts = emptyCounts()
+  const created = emptyCounts()
   let unchanged = 0
   let cells = 0
 
@@ -463,7 +592,9 @@ export async function planCaseCsvImport(
   }
   for (const t of CSV_TABLE_ORDER) {
     const entity = ENTITY_OF[t]
-    const ids = [...new Set(pending.filter((p) => p.entity === entity).map((p) => p.id))]
+    const ids = [
+      ...new Set(pending.filter((p) => p.entity === entity && !p.isNew).map((p) => p.id)),
+    ]
     for (let i = 0; i < ids.length; i += 500) {
       const slice = ids.slice(i, i + 500)
       const found =
@@ -474,6 +605,23 @@ export async function planCaseCsvImport(
             : await prisma.contactHistory.findMany({ where: { id: { in: slice } } })
       for (const r of found) rowById[entity].set(r.id, r as unknown as Record<string, unknown>)
     }
+  }
+
+  // 内部IDが別の案件の行・存在しない行は、【案件ID】の案件への追加として扱う
+  // （オートフィル等で内部IDが埋まってしまった追加行。先頭コメント参照）
+  for (const p of pending) {
+    if (p.isNew || p.entity === 'Case') continue
+    const current = rowById[p.entity].get(p.id)
+    const idLabel = csvHeaderLabel(entityKind(p.entity), 'id')
+    if (!current) {
+      p.note = `${idLabel} ${p.id} は見つからないため、新しい行として追加します`
+    } else if (Number(current.caseId) !== p.caseId) {
+      p.note = `${idLabel} ${p.id} は別の案件の行のため、新しい行として追加します（その行は変更しません）`
+    } else {
+      continue
+    }
+    p.isNew = true
+    p.id = 0
   }
 
   const describe = (caseId: number) => {
@@ -505,9 +653,10 @@ export async function planCaseCsvImport(
       return null
     }
     if (entity !== 'Case' && Number(current.caseId) !== caseId) {
+      const idLabel = csvHeaderLabel(entityKind(entity), 'id')
       problems.push({
         line,
-        message: `内部IDと案件IDの組み合わせが合いません（案件${caseId} の行ではありません）`,
+        message: `${idLabel} ${id} は${csvHeaderLabel('case', 'id')} ${caseId} の行ではありません。行を追加する場合は${idLabel}を空欄にしてください`,
       })
       return null
     }
@@ -533,7 +682,120 @@ export async function planCaseCsvImport(
     const d = describe(caseId)
     counts[entity] += 1
     cells += changes.length
-    return { line, entity, entityId: id, caseId, externalId: d.externalId, clientName: d.clientName, hint, changes }
+    return {
+      line,
+      action: 'update',
+      entity,
+      entityId: id,
+      caseId,
+      externalId: d.externalId,
+      clientName: d.clientName,
+      hint,
+      changes,
+    }
+  }
+
+  // 入金の追加で債権者を指定されたとき、その債権者が同じ案件のものか確かめる
+  const creditorCaseOf = new Map<number, number>()
+  {
+    const ids = [
+      ...new Set(
+        pending
+          .filter((p) => p.isNew && p.creditorIdRaw)
+          .map((p) => Number(p.creditorIdRaw))
+          .filter((n) => Number.isInteger(n) && n > 0)
+      ),
+    ]
+    for (let i = 0; i < ids.length; i += 500) {
+      const found = await prisma.creditor.findMany({
+        where: { id: { in: ids.slice(i, i + 500) } },
+        select: { id: true, caseId: true },
+      })
+      for (const r of found) creditorCaseOf.set(r.id, r.caseId)
+    }
+  }
+
+  /** 追加の1行を作る（取り込めなければ null） */
+  const newRow = (p: Pending): RowPlan | null => {
+    if (!caseById.has(p.caseId)) {
+      problems.push({ line: p.line, message: `${csvHeaderLabel('case', 'id')} ${p.caseId} が見つかりません` })
+      return null
+    }
+    const kind = entityKind(p.entity)
+    const changes: CellChange[] = []
+    let bad = false
+    for (const [field, raw] of p.values) {
+      const type = FIELD_TYPE[p.entity][field]
+      if (!type) continue
+      if (raw.trim() === '') continue
+      const parsed = parseCell(field, type, raw)
+      if (!parsed.ok) {
+        problems.push({ line: p.line, message: `「${csvHeaderLabel(kind, field)}」${parsed.message}` })
+        bad = true
+        continue
+      }
+      changes.push({
+        label: csvHeaderLabel(kind, field),
+        field,
+        before: null,
+        after: caseDisplay(type, parsed.value),
+      })
+    }
+    // 一部の項目が欠けたまま行だけ増えるのを避けるため、読めない項目があれば行ごと取り込まない
+    if (bad) return null
+    const has = (f: string) => changes.some((c) => c.field === f)
+
+    if (p.entity === 'Creditor') {
+      if (!has('creditorName')) {
+        problems.push({
+          line: p.line,
+          message: `債権者を追加するには「${csvHeaderLabel('creditor', 'creditorName')}」が必要です`,
+        })
+        return null
+      }
+      // 画面からの追加（createCreditor）と同じ既定値
+      if (!has('status')) {
+        changes.push({ label: csvHeaderLabel('creditor', 'status'), field: 'status', before: null, after: '受任通知発送待ち' })
+      }
+    }
+    if (p.entity === 'ContactHistory' && !has('targetType')) {
+      changes.push({ label: csvHeaderLabel('contact', 'targetType'), field: 'targetType', before: null, after: 'CLIENT' })
+    }
+    if (p.entity === 'Payment' && p.creditorIdRaw) {
+      const cid = Number(p.creditorIdRaw)
+      if (!Number.isInteger(cid) || cid <= 0 || creditorCaseOf.get(cid) !== p.caseId) {
+        problems.push({
+          line: p.line,
+          message: `「${csvHeaderLabel('payment', 'creditorId')}」${p.creditorIdRaw} はこの案件の債権者ではありません`,
+        })
+        return null
+      }
+      changes.push({ label: csvHeaderLabel('payment', 'creditorId'), field: 'creditorId', before: null, after: cid })
+    }
+    if (changes.length === 0) return null
+
+    const d = describe(p.caseId)
+    created[p.entity] += 1
+    cells += changes.length
+    const v = (f: string) => changes.find((c) => c.field === f)?.after
+    const hint =
+      p.entity === 'Creditor'
+        ? ((v('creditorName') as string | undefined) ?? null)
+        : p.entity === 'Payment'
+          ? ((v('plannedDate') ?? v('actualDate')) as string | undefined) ?? null
+          : ((v('contactDate') as string | undefined) ?? null)
+    return {
+      line: p.line,
+      action: 'create',
+      entity: p.entity,
+      entityId: 0,
+      caseId: p.caseId,
+      externalId: d.externalId,
+      clientName: d.clientName,
+      hint,
+      changes,
+      note: p.note ?? null,
+    }
   }
 
   for (const [caseId, r] of caseFinal) {
@@ -541,6 +803,11 @@ export async function planCaseCsvImport(
     if (p) plan.push(p)
   }
   for (const p of pending) {
+    if (p.isNew) {
+      const r = newRow(p)
+      if (r) plan.push(r)
+      continue
+    }
     const current = rowById[p.entity].get(p.id)
     const hint =
       p.entity === 'Creditor'
@@ -561,6 +828,7 @@ export async function planCaseCsvImport(
     unchanged,
     problems,
     counts,
+    created,
     cells,
     blankClears,
   }
@@ -582,6 +850,8 @@ export interface CommitResult {
   ok: boolean
   /** 更新した行数 */
   updated: Record<EntityName, number>
+  /** 追加した行数 */
+  created: Record<EntityName, number>
   /** 更新した項目数 */
   cells: number
   problems: ImportProblem[]
@@ -601,6 +871,7 @@ export async function commitCaseCsvImport(
 ): Promise<CommitResult> {
   const plan = await planCaseCsvImport(buf, opt)
   const updated = emptyCounts()
+  const created = emptyCounts()
   let cells = 0
 
   const CHUNK = 25
@@ -616,6 +887,38 @@ export async function commitCaseCsvImport(
           data[c.field] = toDbValue(type[c.field], c.after)
           before[c.field] = c.before
           after[c.field] = c.after
+        }
+        if (r.action === 'create') {
+          data.caseId = r.caseId
+          let row: { id: number }
+          if (r.entity === 'Creditor') {
+            // 表示順は末尾（画面からの追加と同じ）
+            const max = await tx.creditor.aggregate({
+              where: { caseId: r.caseId },
+              _max: { displayOrder: true },
+            })
+            if (data.displayOrder == null) data.displayOrder = (max._max.displayOrder ?? 0) + 1
+            row = await tx.creditor.create({ data: data as never })
+          } else if (r.entity === 'Payment') {
+            row = await tx.payment.create({ data: data as never })
+          } else {
+            row = await tx.contactHistory.create({ data: data as never })
+          }
+          r.entityId = row.id
+          await tx.changeLog.create({
+            data: {
+              actorId: actor.id ?? null,
+              actorEmail: actor.email ?? null,
+              entity: r.entity,
+              entityId: String(row.id),
+              action: 'CREATE',
+              // 画面からの追加（createRow）と同じ形：before は持たない
+              after: after as never,
+            },
+          })
+          created[r.entity] += 1
+          cells += r.changes.length
+          continue
         }
         if (r.entity === 'Case') {
           data.updatedBy = actor.email ?? null
@@ -679,7 +982,7 @@ export async function commitCaseCsvImport(
         csvImport: rows
           .map(
             (r) =>
-              `${labelOfEntity(r.entity)}${r.entityId}：${r.changes
+              `${labelOfEntity(r.entity)}${r.entityId}${r.action === 'create' ? '（追加）' : ''}：${r.changes
                 .map((c) => FIELD_LABEL[c.field] ?? c.field)
                 .join('・')}`
           )
@@ -695,14 +998,16 @@ export async function commitCaseCsvImport(
     actor,
     action: 'UPDATE',
     entity: 'Case',
-    summary: `CSV再取込（${plan.rows.length}行・${cells}項目を更新）`,
-    metadata: { updated, cells, problems: plan.problems.length, blankClears: plan.blankClears },
+    summary: `CSV再取込（更新${sum(updated)}行・追加${sum(created)}行・${cells}項目）`,
+    metadata: { updated, created, cells, problems: plan.problems.length, blankClears: plan.blankClears },
     ip: meta.ip,
     userAgent: meta.userAgent,
   })
 
-  return { ok: true, updated, cells, problems: plan.problems }
+  return { ok: true, updated, created, cells, problems: plan.problems }
 }
+
+const sum = (c: Record<EntityName, number>) => Object.values(c).reduce((a, b) => a + b, 0)
 
 function labelOfEntity(e: EntityName): string {
   return e === 'Case' ? '案件' : CSV_TABLE_NAME[entityKind(e) as CsvTableKey]
