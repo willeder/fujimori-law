@@ -20,6 +20,8 @@ import { FileDropOverlay } from '../components/FileDropOverlay'
 import { useFileDrop } from '../hooks/useFileDrop'
 import { PageLoading } from '../components/PageLoading'
 import { useRefreshCases } from '../store/CaseStore'
+import { useNavigate } from 'react-router-dom'
+import { showCopiedToast } from '../lib/copyText'
 
 type EntityName = 'Case' | 'Creditor' | 'Payment' | 'ContactHistory'
 
@@ -59,6 +61,7 @@ type CommitResult = {
   ok: boolean
   updated: Record<EntityName, number>
   created: Record<EntityName, number>
+  cases?: { caseId: number; externalId: string | null; clientName: string | null }[]
   cells: number
   problems: ImportProblem[]
   error?: string
@@ -72,6 +75,13 @@ const ENTITY_LABEL: Record<EntityName, { label: string; cls: string }> = {
 }
 
 const ACCEPT_RE = /\.(csv|xlsx|xls)$/i
+
+/**
+ * ログインの有効期限切れ（API が 401 / unauthenticated を返す）。
+ * セッションは7日で切れ、Cookie も同時に消える。画面は開いたままなので
+ * 「unauthenticated」とだけ出ても事務所の方には意味が分からない（2026-10-02 実際に発生）。
+ */
+const SESSION_EXPIRED = 'ログインの有効期限が切れています。ページを再読み込みして、ログインし直してください'
 
 const show = (v: unknown) =>
   v == null || v === '' ? <span className="text-slate-300">（空）</span> : String(v)
@@ -88,6 +98,7 @@ export function CaseCsvImportPage() {
   const [blankClears, setBlankClears] = useState(false)
   const [showSkipped, setShowSkipped] = useState(false)
   const refreshCases = useRefreshCases()
+  const navigate = useNavigate()
 
   const runPreview = async (buf: ArrayBuffer, clears: boolean) => {
     setLoading(true)
@@ -97,6 +108,11 @@ export function CaseCsvImportPage() {
         method: 'POST',
         body: buf,
       })
+      if (r.status === 401) {
+        setPlan(null)
+        setError(SESSION_EXPIRED)
+        return
+      }
       const body = (await r.json()) as ImportPlan & { error?: string }
       if (!r.ok || body.error) {
         setPlan(null)
@@ -149,6 +165,10 @@ export function CaseCsvImportPage() {
         method: 'POST',
         body: bytes,
       })
+      if (r.status === 401) {
+        setError(SESSION_EXPIRED)
+        return
+      }
       const body = (await r.json()) as CommitResult
       if (!r.ok || !body.ok) {
         setError(body.error ?? `取り込みに失敗しました（HTTP ${r.status}）`)
@@ -157,6 +177,18 @@ export function CaseCsvImportPage() {
       setDone(body)
       setPlan(null)
       void refreshCases()
+      /*
+        取り込んだ内容をすぐ確認できるよう、案件ページへ移る（田中様 2026-10-02 のご要望）。
+        1案件だけのときは自動で移る。複数案件のとき・取り込めなかった行があるときは
+        この画面に残し、案件ごとの「開く」ボタンから移ってもらう（エラーを見落とさないため）。
+      */
+      const cases = body.cases ?? []
+      if (cases.length === 1 && body.problems.length === 0) {
+        const c = cases[0]
+        const n = sumCounts(body.updated) + sumCounts(body.created)
+        showCopiedToast(`CSVを取り込みました（${n}行）`)
+        navigate(`/cases/${c.caseId}`)
+      }
     } catch (e) {
       setError(`取り込みに失敗しました: ${e instanceof Error ? e.message : String(e)}`)
     } finally {
@@ -253,6 +285,26 @@ export function CaseCsvImportPage() {
               <p className="mt-2 text-xs text-amber-700">
                 取り込めなかった行が {done.problems.length} 件あります（上の一覧でご確認ください）。
               </p>
+            )}
+            {(done.cases ?? []).length > 0 && (
+              <div className="mt-3">
+                <div className="mb-1 text-xs font-semibold text-slate-600">
+                  取り込んだ案件（押すと案件ページを開きます）
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {(done.cases ?? []).map((c) => (
+                    <button
+                      key={c.caseId}
+                      type="button"
+                      onClick={() => navigate(`/cases/${c.caseId}`)}
+                      className="rounded border border-emerald-600 bg-white px-2 py-0.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"
+                    >
+                      {c.externalId ?? `案件${c.caseId}`}
+                      {c.clientName ? ` ${c.clientName}` : ''} を開く
+                    </button>
+                  ))}
+                </div>
+              </div>
             )}
             <p className="mt-3 text-xs text-slate-500">
               変更内容は各案件の「変更履歴」に残っています。戻したいときはそちらから。
@@ -528,3 +580,6 @@ function Guide() {
     </div>
   )
 }
+
+const sumCounts = (c: Record<string, number> | undefined) =>
+  Object.values(c ?? {}).reduce((a, b) => a + b, 0)

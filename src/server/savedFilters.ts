@@ -16,6 +16,13 @@
  */
 import type { Prisma, SavedFilter as SavedFilterRow, User } from '@prisma/client'
 import { prisma } from './db.js'
+import {
+  CSV_LAYOUT_TARGET,
+  CSV_TABLE_FIELDS,
+  CSV_TABLE_ORDER,
+  type CsvLayoutPayload,
+  type CsvTableKey,
+} from '../constants/csvColumns.js'
 import type {
   CaseListFilterPayload,
   SavedFilter as SavedFilterDto,
@@ -180,6 +187,52 @@ function canEdit(row: Pick<SavedFilterRow, 'ownerId'>, actor: Actor): boolean {
   return row.ownerId === actor.id || actor.role === 'ADMIN'
 }
 
+/**
+ * CSV出力設定（target = csvExport）の payload を検証して正規化する。
+ * テーブルの項目は出力・取込と同じ一覧（CSV_TABLE_FIELDS）にあるものだけ通す。
+ * 案件の項目は画面のCSV候補キー（実在するかは画面側で突き合わせる）なので型と件数だけ見る。
+ */
+function normalizeCsvLayout(input: unknown): CsvLayoutPayload | null {
+  if (!input || typeof input !== 'object') return null
+  const src = input as Record<string, unknown>
+  if (src.version !== 'csv1') return null
+
+  let caseFields: string[] | null = null
+  if (Array.isArray(src.caseFields)) {
+    if (src.caseFields.length > 300) return null
+    const list: string[] = []
+    for (const c of src.caseFields) {
+      if (typeof c !== 'string' || c.length > 128) return null
+      if (c !== '' && !list.includes(c)) list.push(c)
+    }
+    caseFields = list
+  }
+
+  const tables: Partial<Record<CsvTableKey, string[]>> = {}
+  const rawTables = (src.tables ?? {}) as Record<string, unknown>
+  if (typeof rawTables !== 'object') return null
+  for (const t of CSV_TABLE_ORDER) {
+    const raw = rawTables[t]
+    if (raw == null) continue
+    if (!Array.isArray(raw)) return null
+    const allowed = new Set(CSV_TABLE_FIELDS[t].filter((f) => f !== 'id'))
+    const list: string[] = []
+    for (const f of raw) {
+      if (typeof f !== 'string') return null
+      if (allowed.has(f) && !list.includes(f)) list.push(f)
+    }
+    if (list.length > 0) tables[t] = list
+  }
+  const payload: CsvLayoutPayload = { version: 'csv1', caseFields, tables }
+  if (Buffer.byteLength(JSON.stringify(payload), 'utf8') > MAX_PAYLOAD_BYTES) return null
+  return payload
+}
+
+/** 保存先の画面（target）に応じて payload を検証する */
+function normalizeFor(target: string, input: unknown): unknown {
+  return target === CSV_LAYOUT_TARGET ? normalizeCsvLayout(input) : normalizePayload(input)
+}
+
 // ── 一覧 ─────────────────────────────────────────────────
 export async function listSavedFilters(
   actor: Actor,
@@ -210,7 +263,8 @@ export async function createSavedFilter(actor: Actor, raw: string): Promise<ApiR
   const scope = normalizeScope(body.scope)
   if (!scope) return bad('公開範囲が不正です')
 
-  const payload = normalizePayload(body.payload)
+  const target = asString(body.target) || 'caseList'
+  const payload = normalizeFor(target, body.payload)
   if (!payload) return bad('保存する条件の形式が不正です')
 
   const count = await prisma.savedFilter.count({ where: { ownerId: actor.id } })
@@ -220,7 +274,7 @@ export async function createSavedFilter(actor: Actor, raw: string): Promise<ApiR
 
   const row = await prisma.savedFilter.create({
     data: {
-      target: asString(body.target) || 'caseList',
+      target,
       name,
       description: description || null,
       scope,
@@ -264,7 +318,7 @@ export async function updateSavedFilter(
     data.scope = scope
   }
   if (body.payload !== undefined) {
-    const payload = normalizePayload(body.payload)
+    const payload = normalizeFor(current.target, body.payload)
     if (!payload) return bad('保存する条件の形式が不正です')
     data.payload = payload as unknown as Prisma.InputJsonValue
   }
