@@ -8,6 +8,8 @@ import {
   extractIsoDate,
 } from '../utils/findCriterion'
 import { SuggestInput } from './SuggestInput'
+import { CsvLayoutBar } from './CsvLayoutBar'
+import type { CsvLayoutPayload } from '../constants/csvColumns'
 import { copyTextToClipboard, findTruncatedInside, showCopiedToast } from '../lib/copyText'
 
 // 1画面に複数のテーブルがある場合（案件詳細など）に Shift+F が全テーブルを
@@ -169,6 +171,13 @@ interface DataTableProps<T> {
    *  （テーブルのデータは一覧に読み込んでいないため、サーバに取りに行く）。
    */
   csvTables?: { key: string; label: string; fields: { key: string; label: string }[] }[]
+  /**
+   * CSV出力の「出力設定」（項目の選択と並び）を名前を付けて保存・呼び出す。
+   * 保存先の target（/api/saved-filters）。指定したときだけ保存バーを出す。
+   */
+  csvLayoutTarget?: string
+  /** 最初から用意しておく出力設定（消せない） */
+  csvLayoutPresets?: { id: string; name: string; payload: CsvLayoutPayload }[]
   /** テーブルが1つでも選ばれているときの出力処理。画面側でサーバから受け取る */
   onCsvTableExport?: (sel: {
     caseFields: string[]
@@ -256,6 +265,8 @@ export function DataTable<T>({
   csvExtraColumns,
   csvTables,
   onCsvTableExport,
+  csvLayoutTarget,
+  csvLayoutPresets,
   sortKey: sortKeyProp,
   sortOrder: sortOrderProp,
   onSortChange,
@@ -585,8 +596,81 @@ export function DataTable<T>({
   ]
   const defaultCsvFields = () => csvCandidates.map((c) => ({ key: String(c.key), on: true }))
   const [csvOpen, setCsvOpen] = useState(false)
-  /** CSV出力で選んだテーブルの項目（テーブルkey → 項目keyの配列） */
-  const [csvTableSel, setCsvTableSel] = useState<Record<string, string[]>>({})
+  /**
+   * CSV出力のテーブル。出すかどうか（on）と、項目ごとの選択・並び（cols）。
+   * 以前は「テーブルを選ぶと全項目を定義順で出す」だけだったが、
+   * kintone と同じく項目を選び・並べ替えられるようにした（田中様 2026-10-02）。
+   */
+  type CsvTableState = { on: boolean; cols: { key: string; on: boolean }[] }
+  const defaultCsvTables = (): Record<string, CsvTableState> =>
+    Object.fromEntries(
+      (csvTables ?? []).map((t) => [
+        t.key,
+        { on: false, cols: t.fields.map((f) => ({ key: f.key, on: true })) },
+      ]),
+    )
+  const [csvTableState, setCsvTableState] = useState<Record<string, CsvTableState>>(defaultCsvTables)
+  /** 項目の一覧を開いているテーブル */
+  const [csvTableOpen, setCsvTableOpen] = useState<Record<string, boolean>>({})
+  /** 出力に渡す形（テーブルkey → 出す項目keyの配列・左から順） */
+  const csvTableSel: Record<string, string[]> = Object.fromEntries(
+    Object.entries(csvTableState).map(([k, v]) => [
+      k,
+      v.on ? v.cols.filter((c) => c.on).map((c) => c.key) : [],
+    ]),
+  )
+  const setTableCols = (t: string, cols: { key: string; on: boolean }[]) =>
+    setCsvTableState((prev) => ({ ...prev, [t]: { ...prev[t], cols } }))
+  const moveTableCol = (t: string, i: number, dir: -1 | 1) => {
+    const cols = csvTableState[t]?.cols ?? []
+    const j = i + dir
+    if (j < 0 || j >= cols.length) return
+    const next = [...cols]
+    ;[next[i], next[j]] = [next[j], next[i]]
+    setTableCols(t, next)
+  }
+  /** いまの選択を出力設定の形にする（保存用） */
+  const currentCsvLayout = (): CsvLayoutPayload => ({
+    version: 'csv1',
+    caseFields: csvFields.filter((f) => f.on).map((f) => f.key),
+    tables: Object.fromEntries(
+      Object.entries(csvTableSel).filter(([, v]) => v.length > 0),
+    ) as CsvLayoutPayload['tables'],
+  })
+  /** 保存した出力設定を画面に読み込む。選ばれた項目を先頭に指定の順で並べ、残りは外す */
+  const applyCsvLayout = (p: CsvLayoutPayload) => {
+    if (p.caseFields) {
+      const known = new Set(csvCandidates.map((c) => String(c.key)))
+      const picked = p.caseFields.filter((k) => known.has(k))
+      const rest = csvCandidates
+        .map((c) => String(c.key))
+        .filter((k) => !picked.includes(k))
+      saveCsvFields([
+        ...picked.map((key) => ({ key, on: true })),
+        ...rest.map((key) => ({ key, on: false })),
+      ])
+    }
+    const tables = (p.tables ?? {}) as Record<string, string[] | undefined>
+    setCsvTableState(
+      Object.fromEntries(
+        (csvTables ?? []).map((t) => {
+          const want = (tables[t.key] ?? []).filter((k) => t.fields.some((f) => f.key === k))
+          if (want.length === 0) {
+            return [t.key, { on: false, cols: t.fields.map((f) => ({ key: f.key, on: true })) }]
+          }
+          const rest = t.fields.map((f) => f.key).filter((k) => !want.includes(k))
+          return [
+            t.key,
+            {
+              on: true,
+              cols: [...want.map((key) => ({ key, on: true })), ...rest.map((key) => ({ key, on: false }))],
+            },
+          ]
+        }),
+      ),
+    )
+    setCsvTableOpen(Object.fromEntries(Object.keys(tables).map((k) => [k, true])))
+  }
   const [csvBusy, setCsvBusy] = useState(false)
   const [csvFields, setCsvFields] = useState<{ key: string; on: boolean }[]>(defaultCsvFields)
   // モーダルを開くたびに保存済み設定を読み、現在の列構成と突き合わせる
@@ -606,7 +690,8 @@ export function DataTable<T>({
       if (!seen.has(String(c.key))) base.push({ key: String(c.key), on: saved == null })
     }
     setCsvFields(base.length > 0 ? base : defaultCsvFields())
-    setCsvTableSel({})
+    setCsvTableState(defaultCsvTables())
+    setCsvTableOpen({})
     setCsvOpen(true)
   }
   const saveCsvFields = (fields: { key: string; on: boolean }[]) => {
@@ -698,7 +783,7 @@ export function DataTable<T>({
         onClick={() => setCsvOpen(false)}
       >
         <div
-          className="flex max-h-[85vh] w-[26rem] flex-col overflow-hidden rounded-lg bg-white shadow-xl"
+          className="flex max-h-[90vh] w-[30rem] max-w-[95vw] flex-col overflow-hidden rounded-lg bg-white shadow-xl"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2">
@@ -721,38 +806,132 @@ export function DataTable<T>({
             複数選ぶと、1つ目のテーブルの行がすべて出たあと次のテーブルが始まり、
             その行では他のテーブルの列は空欄になる（kintone と同じ形）。
           */}
+          {csvLayoutTarget && (
+            <CsvLayoutBar
+              target={csvLayoutTarget}
+              presets={csvLayoutPresets ?? []}
+              current={currentCsvLayout}
+              onApply={applyCsvLayout}
+            />
+          )}
           {csvTables && csvTables.length > 0 && (
             <div className="mx-4 mb-2 shrink-0 rounded border border-slate-200 bg-slate-50 px-3 py-2">
               <div className="mb-1 text-[0.6875rem] font-semibold text-slate-600">
-                テーブルも出力する（選ぶとその全項目を出します）
+                テーブルも出力する（項目の選択と並び替えができます）
               </div>
-              <div className="flex flex-wrap gap-3">
+              <div className="space-y-1">
                 {csvTables.map((t) => {
-                  const on = (csvTableSel[t.key] ?? []).length > 0
+                  const st = csvTableState[t.key] ?? { on: false, cols: [] }
+                  const onCount = st.cols.filter((c) => c.on).length
+                  const open = csvTableOpen[t.key] === true
                   return (
-                    <label key={t.key} className="flex cursor-pointer items-center gap-1 text-xs">
-                      <input
-                        type="checkbox"
-                        checked={on}
-                        onChange={(e) =>
-                          setCsvTableSel((prev) => ({
-                            ...prev,
-                            [t.key]: e.target.checked ? t.fields.map((f) => f.key) : [],
-                          }))
-                        }
-                      />
-                      <span>
-                        {t.label}
-                        <span className="ml-1 text-slate-400">（{t.fields.length}項目）</span>
-                      </span>
-                    </label>
+                    <div key={t.key}>
+                      <div className="flex items-center justify-between gap-2">
+                        <label className="flex cursor-pointer items-center gap-1 text-xs">
+                          <input
+                            type="checkbox"
+                            checked={st.on}
+                            onChange={(e) =>
+                              setCsvTableState((prev) => ({
+                                ...prev,
+                                [t.key]: { ...st, on: e.target.checked },
+                              }))
+                            }
+                          />
+                          <span>
+                            {t.label}
+                            <span className="ml-1 text-slate-400">
+                              （{onCount}/{t.fields.length}項目）
+                            </span>
+                          </span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setCsvTableOpen((prev) => ({ ...prev, [t.key]: !open }))}
+                          className="rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[0.625rem] text-slate-600 hover:bg-slate-100"
+                        >
+                          {open ? '項目を閉じる' : '項目を選ぶ・並べる'}
+                        </button>
+                      </div>
+                      {open && (
+                        <div className="mt-1 max-h-48 overflow-y-auto rounded border border-slate-200 bg-white px-2">
+                          {st.cols.map((c, i) => {
+                            const f = t.fields.find((x) => x.key === c.key)
+                            // 内部IDは常に先頭に付くので、選択肢には出さない
+                            if (!f || c.key === 'id') return null
+                            return (
+                              <div
+                                key={c.key}
+                                className="flex items-center justify-between gap-2 border-b border-slate-100 py-0.5"
+                              >
+                                <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-[0.6875rem] text-slate-700">
+                                  <input
+                                    type="checkbox"
+                                    checked={c.on}
+                                    onChange={(e) =>
+                                      setTableCols(
+                                        t.key,
+                                        st.cols.map((x, xi) => (xi === i ? { ...x, on: e.target.checked } : x)),
+                                      )
+                                    }
+                                  />
+                                  <span className="truncate">{f.label}</span>
+                                </label>
+                                <div className="flex shrink-0 items-center gap-1">
+                                  <button
+                                    type="button"
+                                    disabled={i === 0}
+                                    onClick={() => moveTableCol(t.key, i, -1)}
+                                    className="rounded border border-slate-300 px-1 py-0 text-[0.625rem] text-slate-600 hover:bg-slate-50 disabled:opacity-30"
+                                  >
+                                    ↑
+                                  </button>
+                                  <button
+                                    type="button"
+                                    disabled={i === st.cols.length - 1}
+                                    onClick={() => moveTableCol(t.key, i, 1)}
+                                    className="rounded border border-slate-300 px-1 py-0 text-[0.625rem] text-slate-600 hover:bg-slate-50 disabled:opacity-30"
+                                  >
+                                    ↓
+                                  </button>
+                                </div>
+                              </div>
+                            )
+                          })}
+                          <div className="flex gap-1 py-1">
+                            <button
+                              type="button"
+                              onClick={() => setTableCols(t.key, st.cols.map((x) => ({ ...x, on: true })))}
+                              className="rounded border border-slate-300 bg-white px-1.5 py-0 text-[0.625rem] text-slate-600 hover:bg-slate-100"
+                            >
+                              全選択
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setTableCols(t.key, st.cols.map((x) => ({ ...x, on: false })))}
+                              className="rounded border border-slate-300 bg-white px-1.5 py-0 text-[0.625rem] text-slate-600 hover:bg-slate-100"
+                            >
+                              全解除
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setTableCols(t.key, t.fields.map((f) => ({ key: f.key, on: true })))}
+                              className="rounded border border-slate-300 bg-white px-1.5 py-0 text-[0.625rem] text-slate-600 hover:bg-slate-100"
+                            >
+                              初期の並びに戻す
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   )
                 })}
               </div>
               {anyTableSelected && (
                 <p className="mt-1 text-[0.625rem] leading-relaxed text-slate-500">
                   テーブルを選ぶと、いま絞り込んでいる<b>{sortedData.length} 件</b>を対象に、
-                  テーブルの1行を1行として出力します。
+                  テーブルの1行を1行として出力します。【案件ID】と各テーブルのIDは、
+                  CSV再取込で使うため常に先頭に付きます。
                   複数選んだときは、1つ目のテーブルが終わったあと次のテーブルが始まり、
                   その行では他のテーブルの列は空欄になります。件数が多いと少し時間がかかります。
                 </p>

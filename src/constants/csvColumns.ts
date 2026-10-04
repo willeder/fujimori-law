@@ -81,3 +81,74 @@ export function csvHeaderLabel(kind: string, field: string): string {
   const base = kind === 'case' ? name : `${tableName}：${name}`
   return CSV_CALCULATED.has(leaf) ? `${base}［計算］` : base
 }
+
+// ── 出力設定（項目の選択と並び）の保存 ──────────────────────
+/**
+ * CSV出力の「どの項目を・どの順で出すか」に名前を付けて保存する。
+ *
+ * 事務所からのご要望（田中様 2026-10-02）:
+ *   「引き抜いた入金スケジュールのCSVの並び（予定日・予定額・予定弁代報酬充当 等）を
+ *     kintone で取り出したCSVと同じ並びにしたい。kintone は出力順を変動・指定できる
+ *     形なので同じように出力でき、その出力順などを保存できれば嬉しい」
+ * 保存先は「保存した絞り込み条件」と同じ saved_filters テーブル（target で区別）。
+ * 事務所の全員が、どのPCからでも同じ設定を使えるようにするため。
+ */
+export const CSV_LAYOUT_TARGET = 'csvExport'
+
+export type CsvLayoutPayload = {
+  version: 'csv1'
+  /** 案件の項目（DataTable のCSV候補のキー。左から順）。null なら案件側は変えない */
+  caseFields: string[] | null
+  /** テーブルごとに出す項目（DBの列名。左から順）。含まれないテーブルは出さない */
+  tables: Partial<Record<CsvTableKey, string[]>>
+}
+
+/**
+ * 最初から用意しておく出力設定。
+ *
+ * 入金スケジュール（kintoneと同じ並び）:
+ *   事務所が入金スケジュールの調整に使っている kintone のCSV（109540E 様の例、2026-10-02 受領）の
+ *   列の並びに合わせた。kintone の列 → このシステムの項目:
+ *     ID→ID / 入金予定日→予定日 / 入金予定額→予定額 / 報酬充当予定額→予定報酬充当 /
+ *     弁代報酬充当予定額→予定弁代報酬充当 / ﾌﾟｰﾙ充当予定額→予定プール充当 / 社数→社数（予定） /
+ *     手数料→手数料 / 弁済充当予定額→予定弁済充当 / 実入金日→実入金日 / 実入金額→実入金額 /
+ *     報酬充当額→報酬充当 / 弁代報酬充当額→弁代報酬充当 / ﾌﾟｰﾙ充当額→プール充当 / 弁済日→弁済日 /
+ *     数→社数（実績） / 振)手数料→振)手数料 / 弁済充当額→弁済充当 / check[check]→チェック /
+ *     累積ﾌﾟｰﾙ→累計プール
+ *   このシステムに無い kintone の列（レコードの開始行・--・累積[check]・相違・確認・額・
+ *   入金check・実ﾌﾟｰﾙ）は出さない（2026-10-03 Rei 判断。要否は事務所に確認中）。
+ *   【案件ID】【入金ID】は取込の突合に要るため、いつも先頭に付く。
+ */
+export const CSV_LAYOUT_PRESETS: { id: string; name: string; payload: CsvLayoutPayload }[] = [
+  {
+    id: 'preset:payment-kintone',
+    name: '入金スケジュール（kintoneと同じ並び）',
+    payload: {
+      version: 'csv1',
+      caseFields: ['field:metadata.externalId'],
+      tables: {
+        payment: [
+          'plannedDate',
+          'plannedAmount',
+          'plannedFeeAllocation',
+          'plannedAgentFeeAllocation',
+          'plannedPoolAllocation',
+          'repaymentCount',
+          'handlingFee',
+          'plannedRepaymentAllocation',
+          'actualDate',
+          'actualAmount',
+          'actualFeeAllocation',
+          'actualAgentFeeAllocation',
+          'actualPoolAllocation',
+          'repaymentDate',
+          'actualRepaymentCount',
+          'actualHandlingFee',
+          'actualRepaymentAllocation',
+          'check',
+          'cumulativePool',
+        ],
+      },
+    },
+  },
+]

@@ -852,6 +852,12 @@ export interface CommitResult {
   updated: Record<EntityName, number>
   /** 追加した行数 */
   created: Record<EntityName, number>
+  /**
+   * 更新・追加のあった案件。取込後に案件ページへすぐ移れるようにするため
+   * （田中様 2026-10-02「取り込んだ内容をすぐ確認できるよう、ワンクリックで依頼者の
+   *   情報ページに移動したい」）
+   */
+  cases: { caseId: number; externalId: string | null; clientName: string | null }[]
   /** 更新した項目数 */
   cells: number
   problems: ImportProblem[]
@@ -1004,7 +1010,12 @@ export async function commitCaseCsvImport(
     userAgent: meta.userAgent,
   })
 
-  return { ok: true, updated, created, cells, problems: plan.problems }
+  const cases = [...byCase.entries()].map(([caseId, rows]) => ({
+    caseId,
+    externalId: rows[0].externalId,
+    clientName: rows[0].clientName,
+  }))
+  return { ok: true, updated, created, cases, cells, problems: plan.problems }
 }
 
 const sum = (c: Record<EntityName, number>) => Object.values(c).reduce((a, b) => a + b, 0)
