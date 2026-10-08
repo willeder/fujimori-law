@@ -11,13 +11,20 @@
  */
 
 /**
- * 案内文。{CODE} が登録コード（英数字8桁）に置き換わる。
+ * 案内文。{NAME} が依頼者名、{CODE} が登録コード（英数字8桁）に置き換わる。
+ *
+ * 冒頭の「{NAME} 様」は 2026-10-08 事務所のご要望（LINE連携時のメッセージ文の冒頭に
+ * 名前＋様を挿入してほしい）。案内文は事務所が案件画面からコピーして送るため、
+ * 作る時点で宛先の依頼者は分かっている。照合では名前の部分は何が入っていても受け付ける
+ * （依頼者が名前の行を消したり、表記が変わったりしても連携できるように）。
  *
  * 末尾は期限を約束しない言い回しにしている。登録コードの実際の有効期限は
  * 発行から90日（src/server/handlers.ts の issueLineCode）で、翌日以降の返信でも
  * 問題なく連携できるため、「当日中に」と書くと実態と食い違うため。
  */
-export const GUIDANCE_TEMPLATE = `【ご案内】
+export const GUIDANCE_TEMPLATE = `{NAME} 様
+
+【ご案内】
 社内システムの刷新により、今後は入金のお知らせを自動で送信するにあたり、依頼者様のLINEアカウントと連携させていただいております。
 
 こちらのメッセージ全文をコピーしていただき、そのままご返信をお願いします。
@@ -33,6 +40,8 @@ export const GUIDANCE_TEMPLATE = `【ご案内】
  */
 export const ACCEPTED_GUIDANCE_TEMPLATES: string[] = [
   GUIDANCE_TEMPLATE,
+  // 〜2026-10-08 の文面（冒頭のお名前なし）。名前の行を消して返信された場合もこれで受ける
+  GUIDANCE_TEMPLATE.replace('{NAME} 様\n\n', ''),
   // 〜2026-08-06 の文面（末尾が「当日中に、ご返信をお待ちしております。」）
   `【ご案内】
 社内システムの刷新により、今後は入金のお知らせを自動で送信するにあたり、依頼者様のLINEアカウントと連携させていただいております。
@@ -45,8 +54,10 @@ export const ACCEPTED_GUIDANCE_TEMPLATES: string[] = [
 ]
 
 /** 登録コードを差し込んだ案内文を作る（送信は常に最新の文面） */
-export function buildGuidance(code: string): string {
-  return GUIDANCE_TEMPLATE.replace('{CODE}', code)
+export function buildGuidance(code: string, name?: string | null): string {
+  const n = (name ?? '').trim()
+  const tpl = n ? GUIDANCE_TEMPLATE.replace('{NAME}', n) : GUIDANCE_TEMPLATE.replace('{NAME} 様\n\n', '')
+  return tpl.replace('{CODE}', code)
 }
 
 /**
@@ -71,10 +82,10 @@ export function extractCodeFromGuidance(raw: string): string | null {
   for (const tpl of ACCEPTED_GUIDANCE_TEMPLATES) {
     const pattern =
       '^' +
-      escapeRe(normalizeGuidance(tpl)).replace(
-        escapeRe('{CODE}'),
-        '([0-9A-Za-z]{8})'
-      ) +
+      escapeRe(normalizeGuidance(tpl))
+        .replace(escapeRe('{CODE}'), '([0-9A-Za-z]{8})')
+        // 名前の部分は何でも受ける（照合の目的は登録コードの取り出しのため）
+        .replace(escapeRe('{NAME}'), '.{1,60}?') +
       '$'
     const m = body.match(new RegExp(pattern))
     if (m) return m[1].toUpperCase()
