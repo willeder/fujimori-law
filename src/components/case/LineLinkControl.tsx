@@ -83,7 +83,7 @@ export function LineLinkControl({ caseId, clientName }: Props) {
    * Webhook 側も同じ定義で全文一致を判定する。
    */
   const guidanceText = () =>
-    link?.registrationCode ? buildGuidance(link.registrationCode) : ''
+    link?.registrationCode ? buildGuidance(link.registrationCode, clientName) : ''
 
   const copyGuidance = async () => {
     await navigator.clipboard.writeText(guidanceText())
