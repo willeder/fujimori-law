@@ -121,6 +121,7 @@ export const FIELD_LABEL: Record<string, string> = {
   notificationExcluded: '催促通知除外',
   vAccountBranch: 'V口座支店',
   vAccountNumber: 'V口座番号',
+  repaymentPayerName: '弁済時振込名義',
   // 債権者（Creditor）
   creditorName: '債権者名',
   negotiationPartner: '交渉相手',

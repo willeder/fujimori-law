@@ -27,6 +27,17 @@
  *     ・同じ内部IDがファイル内に2回以上出てくる → 取り込まずに知らせる
  *       （コピーした行のどちらを更新とすべきか決められないため）
  *
+ * 行の削除（入金スケジュールのみ。2026-10-08 田中様のご要望・Rei 確認済み）:
+ *   「取込時に行数が少ない場合は、それ以降は行削除をお願いしたい」
+ *   CSVに入金の列があり、その案件の行がCSVに1行でもあるとき、
+ *   その案件の入金のうち **CSVに【入金ID】が出てこない行は削除** する（＝CSVの内容で置き換える）。
+ *     ・削除とみなすのは「行そのものを消した」場合だけ。値を空欄にした行は削除しない
+ *     ・実入金日／実入金額が入っている行（入金済み）は削除せず、取り込めない行として知らせる
+ *     ・【案件ID】や【入金ID】が読めない行があるときは、取りこぼしで誤って消さないよう
+ *       その案件（案件IDが読めない場合はファイル全体）の削除を行わない
+ *     ・削除される行は確認画面に一覧で出し、確認のうえ実行してもらう
+ *   債権者・接触履歴は削除しない（「とりあえず入金スケジュールのみ」）。
+ *
  * 突合のしかた:
  *   出力CSVは【案件ID】【債権者ID】【入金ID】【接触履歴ID】を必ず先頭に出す。
  *   既存の行の更新はこの内部IDだけで行を決める。ID（118823E 等）や氏名・債権者名は
@@ -114,8 +125,8 @@ export interface CellChange {
 export interface RowPlan {
   /** CSVの行番号（見出しを1行目とする） */
   line: number
-  /** update: 既存の行を更新 / create: 新しい行を追加 */
-  action: 'update' | 'create'
+  /** update: 既存の行を更新 / create: 新しい行を追加 / delete: CSVに無い行を削除（入金のみ） */
+  action: 'update' | 'create' | 'delete'
   entity: EntityName
   /** 追加の行は 0（取り込み実行後に決まる） */
   entityId: number
@@ -161,6 +172,8 @@ export interface ImportPlan {
   counts: Record<EntityName, number>
   /** 追加される行数 */
   created: Record<EntityName, number>
+  /** 削除される行数（入金のみ） */
+  deleted: Record<EntityName, number>
   /** 変更される項目の総数 */
   cells: number
   blankClears: boolean
@@ -347,6 +360,7 @@ export async function planCaseCsvImport(
     problems,
     counts: emptyCounts(),
     created: emptyCounts(),
+    deleted: emptyCounts(),
     cells: 0,
     blankClears,
   }
@@ -407,6 +421,12 @@ export async function planCaseCsvImport(
   const pending: Pending[] = []
   // 同じ内部IDが2回出てきたら、コピーで足した行の消し忘れとみなして止める
   const firstLineOf = new Map<string, number>()
+  // 行削除（入金）のための記録。CSVに出てきた【入金ID】と、対象の案件
+  const paymentRefs = new Map<number, Set<number>>()
+  const paymentCaseLines = new Map<number, number>()
+  const noDeleteCases = new Set<number>()
+  let noDeleteAll = false
+  const paymentInCsv = tableIdCol.payment != null
   // 案件は複数行に同じ値が繰り返し出るので、行ごとに集めてから突き合わせる
   const caseRows = new Map<number, { line: number; values: Map<string, string> }[]>()
   const data = rows.slice(1)
@@ -422,12 +442,29 @@ export async function planCaseCsvImport(
         line,
         message: `${csvHeaderLabel('case', 'id')}が空です。行を追加するときも、追加先の案件の${csvHeaderLabel('case', 'id')}を入れてください`,
       })
+      noDeleteAll = true
       continue
     }
     const caseId = Number(caseIdRaw)
     if (!Number.isInteger(caseId) || caseId <= 0) {
       problems.push({ line, message: `案件IDが数字ではありません（「${caseIdRaw}」）` })
+      noDeleteAll = true
       continue
+    }
+    if (paymentInCsv) {
+      // この案件の入金はCSVの内容で置き換える対象（最後の行番号を覚えて削除行の表示位置にする）
+      paymentCaseLines.set(caseId, line)
+      const pidRaw = (row[tableIdCol.payment!] ?? '').trim()
+      if (pidRaw !== '') {
+        const pid = Number(pidRaw)
+        if (Number.isInteger(pid) && pid > 0) {
+          const set = paymentRefs.get(caseId)
+          if (set) set.add(pid)
+          else paymentRefs.set(caseId, new Set([pid]))
+        } else {
+          noDeleteCases.add(caseId)
+        }
+      }
     }
 
     // どのテーブルの行か
@@ -802,6 +839,72 @@ export async function planCaseCsvImport(
     const p = diffRow(r.line, 'Case', caseId, caseId, r.values, null)
     if (p) plan.push(p)
   }
+  // ── CSVから消された入金の行を削除する（先頭コメント参照） ──
+  const deleted = emptyCounts()
+  if (paymentInCsv && paymentCaseLines.size > 0) {
+    if (noDeleteAll) {
+      problems.push({
+        line: 1,
+        message: `${csvHeaderLabel('case', 'id')}が読めない行があるため、入金の行の削除は行いません（その行を直してから取り込み直してください）`,
+      })
+    } else {
+      const targetCases = [...paymentCaseLines.keys()].filter((c) => caseById.has(c))
+      for (const c of noDeleteCases) {
+        if (!paymentCaseLines.has(c)) continue
+        problems.push({
+          line: paymentCaseLines.get(c)!,
+          message: `案件${caseById.get(c)?.externalId ?? c} は${csvHeaderLabel('payment', 'id')}が読めない行があるため、入金の行の削除は行いません`,
+        })
+      }
+      const existing: Record<string, unknown>[] = []
+      for (let i = 0; i < targetCases.length; i += 500) {
+        const chunk = targetCases.slice(i, i + 500).filter((c) => !noDeleteCases.has(c))
+        if (chunk.length === 0) continue
+        const found = await prisma.payment.findMany({
+          where: { caseId: { in: chunk } },
+          orderBy: { id: 'asc' },
+        })
+        existing.push(...(found as unknown as Record<string, unknown>[]))
+      }
+      for (const row of existing) {
+        const caseId = Number(row.caseId)
+        const id = Number(row.id)
+        if (paymentRefs.get(caseId)?.has(id)) continue
+        const line = paymentCaseLines.get(caseId)!
+        const planned = dateHint(row.plannedDate)
+        if (row.actualDate != null || row.actualAmount != null) {
+          problems.push({
+            line,
+            message: `案件${caseById.get(caseId)?.externalId ?? caseId} の入金（予定日 ${planned ?? '-'}）はCSVにありませんが、入金済みのため削除しません`,
+          })
+          continue
+        }
+        const d = describe(caseId)
+        const changes: CellChange[] = [
+          { label: csvHeaderLabel('payment', 'plannedDate'), field: 'plannedDate', before: planned, after: null },
+          {
+            label: csvHeaderLabel('payment', 'plannedAmount'),
+            field: 'plannedAmount',
+            before: row.plannedAmount ?? null,
+            after: null,
+          },
+        ]
+        deleted.Payment += 1
+        plan.push({
+          line,
+          action: 'delete',
+          entity: 'Payment',
+          entityId: id,
+          caseId,
+          externalId: d.externalId,
+          clientName: d.clientName,
+          hint: planned,
+          changes,
+        })
+      }
+    }
+  }
+
   for (const p of pending) {
     if (p.isNew) {
       const r = newRow(p)
@@ -818,7 +921,8 @@ export async function planCaseCsvImport(
     const r = diffRow(p.line, p.entity, p.id, p.caseId, p.values, hint)
     if (r) plan.push(r)
   }
-  plan.sort((a, b) => a.line - b.line)
+  // 行番号順。同じ行番号なら 更新/追加 → 削除 の順（削除はその案件の最後の行の位置に並べる）
+  plan.sort((a, b) => a.line - b.line || Number(a.action === 'delete') - Number(b.action === 'delete'))
 
   return {
     encoding,
@@ -829,6 +933,7 @@ export async function planCaseCsvImport(
     problems,
     counts,
     created,
+    deleted,
     cells,
     blankClears,
   }
@@ -852,6 +957,8 @@ export interface CommitResult {
   updated: Record<EntityName, number>
   /** 追加した行数 */
   created: Record<EntityName, number>
+  /** 削除した行数（入金のみ） */
+  deleted: Record<EntityName, number>
   /**
    * 更新・追加のあった案件。取込後に案件ページへすぐ移れるようにするため
    * （田中様 2026-10-02「取り込んだ内容をすぐ確認できるよう、ワンクリックで依頼者の
@@ -878,6 +985,7 @@ export async function commitCaseCsvImport(
   const plan = await planCaseCsvImport(buf, opt)
   const updated = emptyCounts()
   const created = emptyCounts()
+  const deleted = emptyCounts()
   let cells = 0
 
   const CHUNK = 25
@@ -893,6 +1001,31 @@ export async function commitCaseCsvImport(
           data[c.field] = toDbValue(type[c.field], c.after)
           before[c.field] = c.before
           after[c.field] = c.after
+        }
+        if (r.action === 'delete') {
+          // 入金のみ。下見から実行までの間に入金されていたら消さない
+          const cur = await tx.payment.findUnique({ where: { id: r.entityId } })
+          if (!cur || cur.caseId !== r.caseId || cur.actualDate != null || cur.actualAmount != null) continue
+          const snapshot: Record<string, unknown> = {}
+          for (const col of Object.keys(PAYMENT_FIELD_TYPE)) {
+            const v = caseDisplay(PAYMENT_FIELD_TYPE[col], (cur as unknown as Record<string, unknown>)[col])
+            if (v != null && v !== '') snapshot[col] = v
+          }
+          // 画面からの削除（deleteRow）と同じく案件IDを残す。行が消えたあとも案件の変更履歴に出すため
+          snapshot.caseId = cur.caseId
+          await tx.payment.delete({ where: { id: r.entityId } })
+          await tx.changeLog.create({
+            data: {
+              actorId: actor.id ?? null,
+              actorEmail: actor.email ?? null,
+              entity: 'Payment',
+              entityId: String(r.entityId),
+              action: 'DELETE',
+              before: snapshot as never,
+            },
+          })
+          deleted.Payment += 1
+          continue
         }
         if (r.action === 'create') {
           data.caseId = r.caseId
@@ -988,7 +1121,7 @@ export async function commitCaseCsvImport(
         csvImport: rows
           .map(
             (r) =>
-              `${labelOfEntity(r.entity)}${r.entityId}${r.action === 'create' ? '（追加）' : ''}：${r.changes
+              `${labelOfEntity(r.entity)}${r.entityId}${r.action === 'create' ? '（追加）' : r.action === 'delete' ? '（削除）' : ''}：${r.changes
                 .map((c) => FIELD_LABEL[c.field] ?? c.field)
                 .join('・')}`
           )
@@ -1004,8 +1137,8 @@ export async function commitCaseCsvImport(
     actor,
     action: 'UPDATE',
     entity: 'Case',
-    summary: `CSV再取込（更新${sum(updated)}行・追加${sum(created)}行・${cells}項目）`,
-    metadata: { updated, created, cells, problems: plan.problems.length, blankClears: plan.blankClears },
+    summary: `CSV再取込（更新${sum(updated)}行・追加${sum(created)}行・削除${sum(deleted)}行・${cells}項目）`,
+    metadata: { updated, created, deleted, cells, problems: plan.problems.length, blankClears: plan.blankClears },
     ip: meta.ip,
     userAgent: meta.userAgent,
   })
@@ -1015,7 +1148,7 @@ export async function commitCaseCsvImport(
     externalId: rows[0].externalId,
     clientName: rows[0].clientName,
   }))
-  return { ok: true, updated, created, cases, cells, problems: plan.problems }
+  return { ok: true, updated, created, deleted, cases, cells, problems: plan.problems }
 }
 
 const sum = (c: Record<EntityName, number>) => Object.values(c).reduce((a, b) => a + b, 0)

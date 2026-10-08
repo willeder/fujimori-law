@@ -599,6 +599,9 @@ export async function commitIntake(actor: Actor, buf: Buffer): Promise<CommitRes
     const c = await prisma.case.create({
       data: {
         ...(rec.case as Record<string, unknown>),
+        // 弁済時振込名義は登録時のフリガナを写す。以後フリガナを直しても連動しない（2026-10-08）
+        repaymentPayerName:
+          ((rec.case as Record<string, unknown>).furigana as string | null | undefined)?.trim() || null,
         createdBy: actor.email ?? null,
         updatedBy: actor.email ?? null,
         creditors: rec.creditors.length

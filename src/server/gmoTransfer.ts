@@ -215,7 +215,7 @@ export async function buildGmoTransfers(
       accountHolder: true,
       designatedCode: true,
       case: {
-        select: { externalId: true, name: true, furigana: true, birthDate: true },
+        select: { externalId: true, name: true, furigana: true, repaymentPayerName: true, birthDate: true },
       },
     },
   })
@@ -239,7 +239,13 @@ export async function buildGmoTransfers(
     const dType = depositType(c.accountType)
     const accountNumber = c.accountNumber ? padLeft(String(c.accountNumber), 7) : ''
     const payeeName = asc(c.accountHolder)
-    const payerName = buildPayerName(c.case.furigana, c.case.birthDate, c.designatedCode)
+    // 振込依頼人名は「弁済時振込名義」から作る（改姓等でフリガナを直しても弁済の名義が変わらないように。
+    // 2026-10-08 事務所のご要望）。空の案件だけフリガナで代用する。
+    const payerName = buildPayerName(
+      c.case.repaymentPayerName?.trim() || c.case.furigana,
+      c.case.birthDate,
+      c.designatedCode
+    )
 
     const incomplete =
       bankCode === '' ||

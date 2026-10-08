@@ -89,6 +89,82 @@ type VAccountFieldsProps = {
   disabled?: boolean;
 };
 
+/**
+ * 弁済時振込名義（2026-10-08 事務所のご要望）。
+ * 弁済の振込依頼人名と、入金の名義照合に使う。登録時のフリガナが入り、
+ * 以後フリガナを直しても連動しない（改姓などで名義がずれないように）。
+ * 編集モードのときだけ、クリックして直せる。空にするとフリガナで代用される。
+ */
+function RepaymentPayerNameField({
+  value,
+  furigana,
+  onSave,
+  disabled = false,
+}: {
+  value: string | null | undefined;
+  furigana: string | null | undefined;
+  onSave: (v: string | null) => void;
+  disabled?: boolean;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value ?? "");
+  const shown = (value ?? "").trim();
+  const commit = () => {
+    const t = draft.replace(/\n/g, "").trim();
+    const next = t.length > 0 && t !== "-" ? t : null;
+    if (next !== (value ?? null)) onSave(next);
+    setEditing(false);
+  };
+  if (editing) {
+    return (
+      <span className="inline-flex shrink-0 items-center gap-1 text-xs">
+        <span className="font-semibold text-blue-700">弁済時振込名義</span>
+        <input
+          autoFocus
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onBlur={commit}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") commit();
+            if (e.key === "Escape") {
+              setDraft(value ?? "");
+              setEditing(false);
+            }
+          }}
+          className="w-44 rounded border border-blue-300 bg-white px-1 py-0.5 text-xs text-slate-900 outline-none focus:ring-1 focus:ring-blue-400"
+        />
+      </span>
+    );
+  }
+  return (
+    <span
+      className={
+        disabled
+          ? "inline-flex shrink-0 items-center gap-1 rounded px-1 py-0.5 -mx-1 text-xs"
+          : "group inline-flex shrink-0 cursor-pointer items-center gap-1 rounded px-1 py-0.5 -mx-1 text-xs hover:bg-blue-50/70"
+      }
+      onClick={() => {
+        if (disabled) return;
+        setDraft(value ?? "");
+        setEditing(true);
+      }}
+      role={disabled ? undefined : "button"}
+      tabIndex={disabled ? undefined : 0}
+      title="弁済の振込依頼人名と入金の名義照合に使います。フリガナを直しても変わりません"
+    >
+      <span className="font-semibold text-blue-700">弁済時振込名義：</span>
+      <span className={`font-medium ${shown ? "text-slate-800" : "text-slate-400"}`}>
+        {shown || (furigana ? `（未設定：フリガナ「${furigana}」を使用）` : "-")}
+      </span>
+      {!disabled && (
+        <span className="shrink-0 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100">
+          編集
+        </span>
+      )}
+    </span>
+  );
+}
+
 /** バーチャル口座：未入力は「-」表示、クリックで編集（空は null で保持） */
 function VAccountFields({
   branch,
@@ -2741,6 +2817,23 @@ function CaseDetailBody({
                                         ...caseData.paymentInfo,
                                         vAccountBranch: b,
                                         vAccountNumber: n,
+                                      },
+                                    })
+                                  }
+                                />
+                                <span
+                                  className="mx-0.5 h-3 w-px shrink-0 self-center bg-slate-300"
+                                  aria-hidden
+                                />
+                                <RepaymentPayerNameField
+                                  value={caseData.paymentInfo.repaymentPayerName}
+                                  furigana={caseData.clientBasicInfo.furigana}
+                                  disabled={!editing}
+                                  onSave={(v) =>
+                                    updateCase({
+                                      paymentInfo: {
+                                        ...caseData.paymentInfo,
+                                        repaymentPayerName: v,
                                       },
                                     })
                                   }
