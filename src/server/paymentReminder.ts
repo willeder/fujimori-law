@@ -32,7 +32,8 @@ function ymd(d: Date): string {
 function reminderText(name: string | null, dateStr: string): string {
   const m = Number(dateStr.slice(5, 7))
   const day = Number(dateStr.slice(8, 10))
-  return `${name ? name + '様 ' : ''}いつもお世話になっております。\n${m}月${day}日がご入金の予定日です。お忘れのないようお願いいたします。\nご不明点は事務所までご連絡ください。`
+  // 冒頭の1行目に「お名前 様」（2026-10-08 事務所のご要望。手動送信の文面と揃える）
+  return `${name ? name + ' 様\n\n' : ''}いつもお世話になっております。\n${m}月${day}日がご入金の予定日です。お忘れのないようお願いいたします。\nご不明点は事務所までご連絡ください。`
 }
 
 export type ReminderSummary = {
@@ -172,7 +173,10 @@ export function getTimingDef(t: string): TimingDef | undefined {
  *   {名前} {フリガナ} {ID} {期日} {支店名} {口座番号} {入金額}
  * 銀行名・口座名義・預金種目は預り金口座で固定。
  */
-export const DEFAULT_REMINDER_TEMPLATE = `お世話になります。
+// 冒頭の「{名前} 様」は 2026-10-08 事務所のご要望で追加（LINEのメッセージは冒頭にお名前を入れる）
+export const DEFAULT_REMINDER_TEMPLATE = `{名前} 様
+
+お世話になります。
 司法書士法人 第一法務事務所でございます。
 
 次回のお支払期日が近づいて参りましたのでご案内申し上げます。

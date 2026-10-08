@@ -128,6 +128,7 @@ export function toCaseJson(c: Record<string, any>) {
       notificationExcluded: c.notificationExcluded,
       vAccountBranch: c.vAccountBranch,
       vAccountNumber: c.vAccountNumber,
+      repaymentPayerName: c.repaymentPayerName,
     },
     reminderInfo: {
       reminderDate: ds(c.reminderDate),
@@ -240,6 +241,7 @@ function toCaseSummaryJson(c: Record<string, any>) {
       basePaymentAmount: c.basePaymentAmount,
       vAccountBranch: c.vAccountBranch,
       vAccountNumber: c.vAccountNumber,
+      repaymentPayerName: c.repaymentPayerName,
       cumulativePlannedPayment: c.cumulativePlannedPayment,
       cumulativePaymentAmount: c.cumulativePaymentAmount,
       cumulativePlannedFeeAllocation: c.cumulativePlannedFeeAllocation,
@@ -319,6 +321,7 @@ const CASE_SUMMARY_SELECT = {
   basePaymentAmount: true,
   vAccountBranch: true,
   vAccountNumber: true,
+  repaymentPayerName: true,
   cumulativePlannedPayment: true,
   cumulativePaymentAmount: true,
   cumulativeFeeAllocation: true,

@@ -28,7 +28,7 @@ type EntityName = 'Case' | 'Creditor' | 'Payment' | 'ContactHistory'
 type CellChange = { label: string; field: string; before: unknown; after: unknown }
 type RowPlan = {
   line: number
-  action: 'update' | 'create'
+  action: 'update' | 'create' | 'delete'
   entity: EntityName
   entityId: number
   caseId: number
@@ -54,6 +54,7 @@ type ImportPlan = {
   problems: ImportProblem[]
   counts: Record<EntityName, number>
   created: Record<EntityName, number>
+  deleted?: Record<EntityName, number>
   cells: number
   blankClears: boolean
 }
@@ -61,6 +62,7 @@ type CommitResult = {
   ok: boolean
   updated: Record<EntityName, number>
   created: Record<EntityName, number>
+  deleted?: Record<EntityName, number>
   cases?: { caseId: number; externalId: string | null; clientName: string | null }[]
   cells: number
   problems: ImportProblem[]
@@ -156,6 +158,9 @@ export function CaseCsvImportPage() {
       (plan.blankClears
         ? '※「空欄の項目は空にする」が入っています。CSVで空欄の項目は消えます。\n'
         : '') +
+      (plan.rows.some((r) => r.action === 'delete')
+        ? `※CSVから消された入金の行 ${plan.rows.filter((r) => r.action === 'delete').length} 件を削除します。\n`
+        : '') +
       '変更は1件ずつ変更履歴に残るので、あとから戻せます。'
     if (!window.confirm(msg)) return
     setCommitting(true)
@@ -185,7 +190,7 @@ export function CaseCsvImportPage() {
       const cases = body.cases ?? []
       if (cases.length === 1 && body.problems.length === 0) {
         const c = cases[0]
-        const n = sumCounts(body.updated) + sumCounts(body.created)
+        const n = sumCounts(body.updated) + sumCounts(body.created) + sumCounts(body.deleted)
         showCopiedToast(`CSVを取り込みました（${n}行）`)
         navigate(`/cases/${c.caseId}`)
       }
@@ -274,7 +279,10 @@ export function CaseCsvImportPage() {
               <li>
                 債権者: 更新 {done.updated.Creditor} 件・追加 {done.created?.Creditor ?? 0} 件
               </li>
-              <li>入金: 更新 {done.updated.Payment} 件・追加 {done.created?.Payment ?? 0} 件</li>
+              <li>
+                入金: 更新 {done.updated.Payment} 件・追加 {done.created?.Payment ?? 0} 件・削除{' '}
+                {done.deleted?.Payment ?? 0} 件
+              </li>
               <li>
                 接触履歴: 更新 {done.updated.ContactHistory} 件・追加{' '}
                 {done.created?.ContactHistory ?? 0} 件
@@ -339,6 +347,11 @@ export function CaseCsvImportPage() {
                   value={`${plan.rows.filter((r) => r.action === 'create').length} 行`}
                   strong
                 />
+                <Stat
+                  label="削除される行"
+                  value={`${plan.rows.filter((r) => r.action === 'delete').length} 行`}
+                  warn={plan.rows.some((r) => r.action === 'delete')}
+                />
                 <Stat label="更新される項目" value={`${plan.cells} 個`} strong />
                 <Stat label="変更なし" value={`${plan.unchanged} 行`} />
                 <Stat
@@ -361,6 +374,13 @@ export function CaseCsvImportPage() {
                   .map((e) => (
                     <span key={`new-${e}`} className={`rounded px-1.5 py-0.5 ${ENTITY_LABEL[e].cls}`}>
                       {ENTITY_LABEL[e].label} 追加 {plan.created[e]} 行
+                    </span>
+                  ))}
+                {(Object.keys(ENTITY_LABEL) as EntityName[])
+                  .filter((e) => (plan.deleted?.[e] ?? 0) > 0)
+                  .map((e) => (
+                    <span key={`del-${e}`} className="rounded bg-red-100 px-1.5 py-0.5 text-red-800">
+                      {ENTITY_LABEL[e].label} 削除 {plan.deleted?.[e]} 行
                     </span>
                   ))}
               </div>
@@ -467,6 +487,11 @@ export function CaseCsvImportPage() {
                                 追加
                               </span>
                             )}
+                            {r.action === 'delete' && (
+                              <span className="ml-1 rounded bg-red-100 px-1.5 py-0.5 font-semibold text-red-800">
+                                削除
+                              </span>
+                            )}
                           </td>
                           <td className="px-2 py-1.5 text-slate-700">
                             <div className="font-semibold">{r.externalId ?? `案件${r.caseId}`}</div>
@@ -481,13 +506,19 @@ export function CaseCsvImportPage() {
                               {r.changes.map((c) => (
                                 <li key={c.field}>
                                   <span className="text-slate-500">{c.label}：</span>
-                                  {r.action !== 'create' && (
+                                  {r.action === 'delete' ? (
+                                    <span className="text-red-700 line-through">{show(c.before)}</span>
+                                  ) : (
                                     <>
-                                      <span className="text-slate-400 line-through">{show(c.before)}</span>
-                                      <span className="mx-1 text-slate-400">→</span>
+                                      {r.action !== 'create' && (
+                                        <>
+                                          <span className="text-slate-400 line-through">{show(c.before)}</span>
+                                          <span className="mx-1 text-slate-400">→</span>
+                                        </>
+                                      )}
+                                      <span className="font-semibold text-slate-900">{show(c.after)}</span>
                                     </>
                                   )}
-                                  <span className="font-semibold text-slate-900">{show(c.after)}</span>
                                 </li>
                               ))}
                             </ul>
@@ -547,7 +578,8 @@ function Guide() {
           （絞り込んだ案件だけが出ます）。
         </li>
         <li>
-          Excel などで値を直します。行を足すこともできます（行の削除は取り込みに反映されません）。
+          Excel などで値を直します。行を足すこともできます。
+          入金スケジュールは、行を消すとその入金予定が削除されます（入金済みの行は削除されません）。
         </li>
         <li>この画面にファイルを置くと、<b>何がどう変わるか</b>の一覧が出ます。</li>
         <li>内容を確認して「取り込む」を押すと反映されます。</li>

@@ -233,9 +233,10 @@ async function applyCode(
   })
   await endSession(userId)
 
+  // 冒頭に「お名前＋様」を置く（2026-10-08 事務所のご要望）
   await replyText(
     replyToken,
-    `連携が完了しました（${link.case.name} 様）。\n今後、入金予定日のお知らせ等をこちらからご連絡します。`
+    `${link.case.name} 様\n連携が完了しました。\n今後、入金予定日のお知らせ等をこちらからご連絡します。`
   )
 }
 

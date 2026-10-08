@@ -137,6 +137,10 @@ model Case {
   notificationExcluded                 String? // 除外 / null
   vAccountBranch                       String?
   vAccountNumber                       String?
+  // 弁済時振込名義（2026-10-08 事務所のご要望）。弁済の振込依頼人名と、入金の名義照合に使う。
+  // 登録時のフリガナを入れ、以後フリガナを直しても連動しない（改姓などで名義がずれないように）。
+  // 空のときだけフリガナで代用する。
+  repaymentPayerName                   String?
 
   // --- リマインド ---
   reminderDate     DateTime? @db.Date

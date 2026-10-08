@@ -473,6 +473,7 @@ export async function planDepositRows(
           externalId: true,
           name: true,
           furigana: true,
+          repaymentPayerName: true,
           vAccountBranch: true,
           vAccountNumber: true,
         },
@@ -522,7 +523,10 @@ export async function planDepositRows(
     const { date, accountNumber, branch, payerName } = rows[0]
     const depositSum = rows.reduce((s, r) => s + r.amount, 0)
     const { kase, ambiguous } = resolveCase(branch, accountNumber)
-    const nameCheck: NameCheck = kase ? checkPayerName(payerName, kase.furigana) : 'unknown'
+    // 名義の照合は「弁済時振込名義」で行う（契約後に改姓してフリガナを直しても、
+    // 振込名義は変わらないことがあるため。2026-10-08 Rei 指示）。空の案件だけフリガナで代用する。
+    const expectedName = kase ? kase.repaymentPayerName?.trim() || kase.furigana : null
+    const nameCheck: NameCheck = kase ? checkPayerName(payerName, expectedName) : 'unknown'
     const base: Omit<DepositGroupPlan, 'action' | 'note'> = {
       date,
       accountNumber,
@@ -533,7 +537,8 @@ export async function planDepositRows(
       caseId: kase?.id ?? null,
       externalId: kase?.externalId ?? null,
       clientName: kase?.name ?? null,
-      clientFurigana: kase?.furigana ?? null,
+      // 照合に使った名義（弁済時振込名義。空ならフリガナ）
+      clientFurigana: expectedName ?? null,
       nameCheck,
       reflectAmount: null,
       targetPaymentId: null,
@@ -561,7 +566,7 @@ export async function planDepositRows(
       groups.push({
         ...base,
         action: 'error',
-        note: `振込依頼人名「${payerName ?? ''}」が依頼者「${kase.furigana ?? kase.name}」と一致しません（誤振込の疑い・要確認）`,
+        note: `振込依頼人名「${payerName ?? ''}」が弁済時振込名義「${expectedName ?? kase.name}」と一致しません（誤振込の疑い・要確認）`,
       })
       continue
     }

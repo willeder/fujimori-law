@@ -146,6 +146,8 @@ export interface PaymentInfo {
   /** バーチャル口座（略称V口座。登録後は原則ロック。変更時は確認ダイアログ） */
   vAccountBranch: string | null // 支店
   vAccountNumber: string | null // 口座番号
+  /** 弁済時振込名義（登録時のフリガナ。以後フリガナを直しても連動しない） */
+  repaymentPayerName?: string | null
 }
 
 /** リマインド情報 */
