@@ -9,7 +9,7 @@
  *      したときだけ、その中の登録コードで連携する（セッション不要）。
  *   ② 2ステップ        … 「連携開始」を受け取ってからの一定時間だけ、8桁コード
  *      単体も受け付ける（全文コピーがうまくできない依頼者向けの保険）。
- *   follow   … 歓迎メッセージで案内文の返信を依頼
+ *   follow   … 何も返さない（2026-10-09 変更。下記）
  *   unfollow … ブロック扱いで連携を無効化（BLOCKED）
  *
  * ★重要（この公式アカウントはスタッフが手動チャットにも使う）:
@@ -17,24 +17,29 @@
  *   以前は受信テキストを無条件にコード照合していたため、通常の会話にまで
  *   「登録コードを送信してください。」「コードが確認できませんでした。」が
  *   毎回返っていた。目印つきコードか、トリガー語を受けたときだけ応答する。
+ *
+ * ★友だち追加時は何も返さない（2026-10-09 事務所からのご指摘）:
+ *   以前は follow で「【ご案内】を全文コピーして返信してください」と送っていたが、
+ *   公式アカウントは受任前の相談者（面談前に友だち追加する方）も追加するため、
+ *   相談者にまで連携の案内が届いてしまった。案内文は事務所が案件画面から個別に送る運用なので、
+ *   友だち追加の時点でシステムからは何も送らない（あいさつは公式アカウント側の設定のみ）。
+ *
+ * ★合言葉は「連携開始」だけ（同日変更）:
+ *   「連携」「登録」などの短い語も合言葉にしていたが、相談者が普段のチャットで「登録」と
+ *   送っただけで「登録コードを送信してください」と返してしまうため絞った。
  */
 import { prisma } from './db.js'
 import { replyText, verifyLineSignature } from './line.js'
 import { extractCodeFromGuidance } from '../constants/lineGuidance.js'
 
 /** 連携セッションを開始するトリガー語（メッセージ全体がこれと完全一致した場合のみ） */
-const TRIGGER_WORDS = ['連携開始', '連携', '登録', '連携する', '登録する', 'れんけい']
+const TRIGGER_WORDS = ['連携開始']
 
 /** セッションの有効時間（分）。この間だけ、次の発言をコードとして扱う */
 const SESSION_MINUTES = 10
 
 /** セッション中に許容する入力ミスの回数。超えたらセッションを終了し、以後は無言に戻る */
 const MAX_ATTEMPTS = 5
-
-const WELCOME =
-  '友だち追加ありがとうございます。\n' +
-  '事務所からお送りした【ご案内】のメッセージを全文コピーして、\n' +
-  'そのままこのトークにご返信ください。'
 
 const PROMPT_CODE =
   '事務所からお渡しした「登録コード」（英数字8桁）をこのトークに送信してください。\n' +
@@ -65,11 +70,6 @@ type LineEvent = {
 export type WebhookResult = {
   status: number
   body: unknown
-}
-
-/** follow: 歓迎メッセージでトリガー語の送信を依頼 */
-async function handleFollow(ev: LineEvent): Promise<void> {
-  if (ev.replyToken) await replyText(ev.replyToken, WELCOME)
 }
 
 /** unfollow（ブロック）: 連携を無効化 */
@@ -261,8 +261,8 @@ export async function handleLineWebhook(
 
   for (const ev of events) {
     try {
-      if (ev.type === 'follow') await handleFollow(ev)
-      else if (ev.type === 'unfollow') await handleUnfollow(ev)
+      // follow（友だち追加）には何も返さない（先頭コメント参照）
+      if (ev.type === 'unfollow') await handleUnfollow(ev)
       else if (ev.type === 'message' && ev.message?.type === 'text')
         await handleText(ev)
     } catch (e) {
